@@ -932,7 +932,7 @@ export default function App() {
           <div className="w-1 self-stretch" style={{ background:"#26B5AE", margin:"8px 0" }} />
           <div>
             <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Soevereiniteitsassessment</h1>
-            <p style={{ fontSize:11, color:"#7DD3D0" }}>Transitieteam Digitalisering · Kwartiermaker Digitale Samenhang</p>
+            <p style={{ fontSize:11, color:"#7DD3D0" }}>Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit</p>
           </div>
         </div>
         <button onClick={exportXlsx} disabled={apps.length === 0}
