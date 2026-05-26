@@ -30,6 +30,11 @@ export class ErrorBoundary extends React.Component {
 }
 
 // ──────────────────────────────────────────────────────────────
+// VERSIE — verhoog met 0.1 bij elke release
+// ──────────────────────────────────────────────────────────────
+const VERSION = "v0.6";
+
+// ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
 // ──────────────────────────────────────────────────────────────
 
@@ -583,6 +588,14 @@ export default function App() {
                 <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Soevereiniteitsassessment</p>
                 <p style={{ fontSize:10, color:"#7DD3D0" }}>Project Digitale Soevereiniteit</p>
               </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <p style={{ fontSize:10, color:"rgba(255,255,255,0.5)" }}>
+                Ambassadeurslijn Digitale Soevereiniteit
+              </p>
+              <span className="font-bold px-2 py-0.5" style={{ fontSize:10, color:"#0C2340", background:"#26B5AE", borderRadius:3 }}>
+                {VERSION}
+              </span>
             </div>
           </div>
           {/* Form */}
@@ -1861,7 +1874,7 @@ export default function App() {
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit
-              <br/>Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · v0.5
+              <br/>Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · {VERSION}
             </p>
           </div>
 
@@ -1899,7 +1912,7 @@ export default function App() {
               Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit
             </p>
             <p style={{ fontSize:10, color:"rgba(125,211,208,0.7)", marginTop:1 }}>
-              Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · <span style={{ color:"#26B5AE", fontWeight:600 }}>v0.5</span>
+              Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum
             </p>
           </div>
         </div>
