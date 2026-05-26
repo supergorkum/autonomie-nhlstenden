@@ -314,6 +314,14 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [form,      setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", notes:"" });
 
+  // Beheer (admin) state
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [adminPin,      setAdminPin]      = useState("");
+  const [adminPinError, setAdminPinError] = useState(false);
+  const [editAppId,     setEditAppId]     = useState(null);
+  const [editForm,      setEditForm]      = useState({});
+  const ADMIN_PIN = "nhl2026";
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem("nhl_sov_v2");
@@ -907,6 +915,284 @@ export default function App() {
     );
   }
 
+  // ── ADMIN ─────────────────────────────────────────────────
+
+  function Admin() {
+    // PIN lock screen
+    if (!adminUnlocked) {
+      return (
+        <div className="h-full flex items-center justify-center" style={{ background:"#EBF3FF" }}>
+          <div className="bg-white p-8 w-full max-w-sm" style={{ borderRadius:4, boxShadow:"0 4px 24px rgba(12,35,64,0.15)", border:"1px solid #D0E4F7" }}>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 flex items-center justify-center" style={{ background:"#0C2340", borderRadius:4 }}>
+                <span style={{ fontSize:20 }}>🔐</span>
+              </div>
+              <div>
+                <h2 className="font-bold" style={{ color:"#0C2340" }}>Beheeromgeving</h2>
+                <p className="text-xs text-gray-400">Voer de beheerpincode in</p>
+              </div>
+            </div>
+            <input
+              type="password"
+              value={adminPin}
+              onChange={e => { setAdminPin(e.target.value); setAdminPinError(false); }}
+              onKeyDown={e => {
+                if (e.key === "Enter") {
+                  if (adminPin === ADMIN_PIN) { setAdminUnlocked(true); setAdminPin(""); }
+                  else { setAdminPinError(true); setAdminPin(""); }
+                }
+              }}
+              placeholder="Pincode"
+              className="w-full border px-3 py-2.5 text-sm focus:outline-none mb-2"
+              style={{ borderColor: adminPinError ? "#dc2626" : "#D0E4F7", borderRadius:4, letterSpacing:4 }}
+              autoFocus
+            />
+            {adminPinError && (
+              <p className="text-xs mb-3" style={{ color:"#dc2626" }}>Pincode onjuist. Probeer opnieuw.</p>
+            )}
+            <button
+              onClick={() => {
+                if (adminPin === ADMIN_PIN) { setAdminUnlocked(true); setAdminPin(""); }
+                else { setAdminPinError(true); setAdminPin(""); }
+              }}
+              className="w-full text-white py-2.5 text-sm font-semibold"
+              style={{ background:"#1A56A0", borderRadius:4 }}>
+              Toegang
+            </button>
+            <button onClick={() => setView("dashboard")}
+              className="w-full py-2 text-sm mt-2"
+              style={{ color:"#9ca3af" }}>
+              Terug naar dashboard
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Edit modal
+    const editApp = editAppId ? apps.find(a => a.id === editAppId) : null;
+
+    return (
+      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+        <div className="p-5 max-w-5xl mx-auto">
+
+          {/* Header strip */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 flex items-center justify-center" style={{ background:"#0C2340", borderRadius:4 }}>
+                <span style={{ fontSize:16 }}>🔐</span>
+              </div>
+              <div>
+                <h2 className="font-bold" style={{ color:"#0C2340" }}>Beheeromgeving</h2>
+                <p className="text-xs text-gray-400">{apps.length} applicatie{apps.length !== 1 ? "s" : ""} in het systeem</p>
+              </div>
+            </div>
+            <button onClick={() => { setAdminUnlocked(false); setView("dashboard"); }}
+              className="text-xs px-3 py-1.5 font-medium"
+              style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280", background:"#fff" }}>
+              🔒 Vergrendelen
+            </button>
+          </div>
+
+          {apps.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded" style={{ border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
+              Nog geen applicaties in het systeem.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {apps.map(a => {
+                const sc  = calcScores(a.scores);
+                const lbl = scoreLabel(sc.autonomyScore);
+                const allQ = [...DAAF, ...DICTU];
+                const filled = allQ.filter(q => (a.scores[q.key] || 0) > 0);
+
+                return (
+                  <div key={a.id} className="bg-white rounded" style={{ border:"1px solid #D0E4F7", borderLeft:`4px solid ${scoreColor(sc.autonomyScore)}` }}>
+                    {/* App header row */}
+                    <div className="flex items-center gap-4 p-4">
+                      <Gauge score={sc.autonomyScore} size={60} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-bold" style={{ color:"#0C2340" }}>{a.name}</h3>
+                          {a.supplier && <span className="text-xs text-gray-400">· {a.supplier}</span>}
+                          {a.cat && <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#EBF3FF", color:"#1A56A0" }}>{a.cat}</span>}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                          {a.owner && <span className="text-xs text-gray-400">👤 {a.owner}</span>}
+                          <span className="text-xs px-2 py-0.5 font-medium" style={{ borderRadius:3, background:lbl.bg, color:lbl.fg }}>{lbl.text}</span>
+                          <span className="text-xs text-gray-400">{sc.completeness}% ingevuld · {filled.length}/{allQ.length} vragen</span>
+                          <span className="text-xs text-gray-400">Aangemaakt: {new Date(a.createdAt).toLocaleDateString("nl-NL")}</span>
+                        </div>
+                        {a.notes && <p className="text-xs text-gray-400 mt-1 italic">"{a.notes}"</p>}
+                      </div>
+                      {/* Action buttons */}
+                      <div className="flex gap-2 flex-shrink-0">
+                        <button
+                          onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
+                          className="text-white text-xs px-3 py-1.5 font-medium"
+                          style={{ background:"#1A56A0", borderRadius:4 }}>
+                          ✏️ Invullen
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditAppId(a.id);
+                            setEditForm({ name:a.name, cat:a.cat, supplier:a.supplier, owner:a.owner, notes:a.notes });
+                          }}
+                          className="text-xs px-3 py-1.5 font-medium"
+                          style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#fff" }}>
+                          ⚙️ Gegevens
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (confirm(`"${a.name}" definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`)) {
+                              setApps(p => p.filter(x => x.id !== a.id));
+                              if (selId === a.id) setSelId(null);
+                            }
+                          }}
+                          className="text-xs px-3 py-1.5 font-medium"
+                          style={{ border:"1px solid #fecaca", borderRadius:4, color:"#dc2626", background:"#fff" }}>
+                          🗑 Verwijder
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Score detail strip */}
+                    <div className="grid grid-cols-6 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
+                      {[
+                        { label:"Risico",    val:sc.risico,    color:"#dc2626", hint:"↓ beter" },
+                        { label:"Mitigatie", val:sc.mitigatie, color:"#26B5AE", hint:"↑ beter" },
+                        { label:"Belang",    val:sc.belang,    color:"#E87722", hint:"↓ beter" },
+                        { label:"DICTU",     val:sc.dictuAvg,  color:"#1A56A0", hint:"/5" },
+                        { label:"Autonomie", val:sc.autonomyScore, color:scoreColor(sc.autonomyScore), hint:"/10" },
+                        { label:"Volledig",  val:sc.completeness, color:"#6b7280", hint:"%" },
+                      ].map(({ label, val, color, hint }) => (
+                        <div key={label} className="py-2 px-3 text-center" style={{ borderRight:"1px solid #EBF3FF" }}>
+                          <div style={{ fontSize:15, fontWeight:700, color: val ? color : "#d1d5db" }}>
+                            {val ? (label === "Volledig" ? val : val.toFixed(1)) : "–"}
+                            <span style={{ fontSize:9, color:"#9ca3af", marginLeft:1 }}>{hint}</span>
+                          </div>
+                          <div style={{ fontSize:10, color:"#9ca3af" }}>{label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Ingevulde scores per vraag */}
+                    <div className="px-4 py-3" style={{ borderTop:"1px solid #EBF3FF" }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color:"#0C2340" }}>Scores per vraag</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {allQ.map(q => {
+                          const s = a.scores[q.key] || 0;
+                          return (
+                            <div key={q.key} title={`${q.key}: ${q.name}\nScore: ${s || "niet ingevuld"}`}
+                              className="flex items-center gap-1 px-2 py-1 text-xs"
+                              style={{ borderRadius:3, background: s ? "#EBF3FF" : "#f9fafb", border:"1px solid #D0E4F7", color:"#0C2340" }}>
+                              <span style={{ color:"#1A56A0", fontWeight:600 }}>{q.key}</span>
+                              <span style={{ fontWeight:700, color: s ? scoreColor(s, 5) : "#d1d5db" }}>{s || "–"}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Danger zone */}
+          {apps.length > 0 && (
+            <div className="mt-6 p-4 rounded" style={{ border:"1px solid #fecaca", background:"#fff5f5" }}>
+              <p className="text-xs font-semibold mb-1" style={{ color:"#dc2626" }}>⚠️ Gevaarlijke zone</p>
+              <p className="text-xs text-gray-500 mb-3">Hiermee worden ALLE applicaties en scores definitief gewist. Niet terug te draaien.</p>
+              <button
+                onClick={() => {
+                  if (confirm("ALLE applicaties verwijderen? Dit wist alle assessmentdata permanent.")) {
+                    if (confirm("Weet u het zeker? Dit kan NIET ongedaan worden gemaakt.")) {
+                      setApps([]);
+                      setSelId(null);
+                    }
+                  }
+                }}
+                className="text-xs px-4 py-2 font-semibold text-white"
+                style={{ background:"#dc2626", borderRadius:4 }}>
+                🗑 Alles wissen
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Edit metadata modal */}
+        {editApp && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            style={{ background:"rgba(12,35,64,0.6)" }}>
+            <div className="bg-white w-full max-w-md" style={{ borderRadius:4, boxShadow:"0 8px 32px rgba(12,35,64,0.3)" }}>
+              <div className="px-6 py-4" style={{ borderBottom:"3px solid #1A56A0" }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-1 h-5" style={{ background:"#26B5AE", borderRadius:2 }}/>
+                    <h2 className="text-base font-semibold" style={{ color:"#0C2340" }}>Applicatiegegevens aanpassen</h2>
+                  </div>
+                  <button onClick={() => setEditAppId(null)} style={{ color:"#9ca3af", fontSize:18 }}>✕</button>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="space-y-3">
+                  {[
+                    { k:"name",     l:"Applicatienaam *" },
+                    { k:"supplier", l:"Leverancier" },
+                    { k:"cat",      l:"Categorie" },
+                    { k:"owner",    l:"Applicatie-eigenaar" },
+                  ].map(f => (
+                    <div key={f.k}>
+                      <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>{f.l}</label>
+                      <input
+                        value={editForm[f.k] || ""}
+                        onChange={e => setEditForm(p => ({ ...p, [f.k]: e.target.value }))}
+                        className="w-full border px-3 py-2 text-sm focus:outline-none"
+                        style={{ borderColor:"#D0E4F7", borderRadius:4 }}
+                        onFocus={e => e.target.style.borderColor="#1A56A0"}
+                        onBlur={e => e.target.style.borderColor="#D0E4F7"}
+                      />
+                    </div>
+                  ))}
+                  <div>
+                    <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>Toelichting</label>
+                    <textarea
+                      value={editForm.notes || ""}
+                      onChange={e => setEditForm(p => ({ ...p, notes: e.target.value }))}
+                      rows={2}
+                      className="w-full border px-3 py-2 text-sm focus:outline-none"
+                      style={{ borderColor:"#D0E4F7", borderRadius:4 }}/>
+                  </div>
+                </div>
+                <div className="flex gap-3 mt-5">
+                  <button onClick={() => setEditAppId(null)}
+                    className="flex-1 py-2 text-sm"
+                    style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280" }}>
+                    Annuleren
+                  </button>
+                  <button
+                    disabled={!editForm.name?.trim()}
+                    onClick={() => {
+                      setApps(p => p.map(a => a.id === editAppId
+                        ? { ...a, name:editForm.name, cat:editForm.cat, supplier:editForm.supplier, owner:editForm.owner, notes:editForm.notes }
+                        : a
+                      ));
+                      setEditAppId(null);
+                    }}
+                    className="flex-1 text-white py-2 text-sm font-semibold"
+                    style={{ background: editForm.name?.trim() ? "#1A56A0" : "#d1d5db", borderRadius:4 }}>
+                    Opslaan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── SHELL ──────────────────────────────────────────────────
 
   if (!ready) return (
@@ -932,7 +1218,12 @@ export default function App() {
           <div className="w-1 self-stretch" style={{ background:"#26B5AE", margin:"8px 0" }} />
           <div>
             <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Soevereiniteitsassessment</h1>
-            <p style={{ fontSize:11, color:"#7DD3D0" }}>Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit</p>
+            <p style={{ fontSize:11, color:"#7DD3D0" }}>
+              Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit
+            </p>
+            <p style={{ fontSize:10, color:"rgba(125,211,208,0.7)", marginTop:1 }}>
+              Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum
+            </p>
           </div>
         </div>
         <button onClick={exportXlsx} disabled={apps.length === 0}
@@ -954,6 +1245,7 @@ export default function App() {
             { k:"apps",      label:"Applicaties" },
             ...(selApp ? [{ k:"assess", label:selApp.name.substring(0,20) }] : []),
             { k:"compare",   label:"Vergelijking" },
+            { k:"admin",     label:"🔐 Beheer" },
           ].map(t => (
             <button key={t.k} onClick={() => setView(t.k)}
               className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
@@ -972,6 +1264,7 @@ export default function App() {
         {view === "apps"      && <AppsList />}
         {view === "assess"    && <Assess />}
         {view === "compare"   && <Compare />}
+        {view === "admin"     && <Admin />}
       </main>
 
       {/* Add modal */}
