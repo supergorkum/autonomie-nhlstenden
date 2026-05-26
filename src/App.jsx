@@ -602,6 +602,56 @@ export default function App() {
             </div>
           ) : (<>
 
+            {/* ── Leeswijzer ── */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              {/* Gauge uitleg */}
+              <div className="rounded p-3 flex gap-3 items-start" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                <div className="flex-shrink-0 mt-0.5">
+                  <Gauge score={6.5} size={52} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                    <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>Autonomiescore (1–10)</span>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                    De meter toont hoe autonoom NHL Stenden is ten opzichte van deze leverancier.
+                    Berekend via het <strong>Utrecht DAAF-framework</strong>: hoe sterker de mitigatie (weerbaarheid) ten opzichte van het risico én het strategisch belang, hoe hoger de score.
+                  </p>
+                  <div className="flex gap-2 mt-1.5 flex-wrap">
+                    {[{t:"≥ 7 Goed",bg:"#dcfce7",fg:"#15803d"},{t:"5–7 Acceptabel",bg:"#fef9c3",fg:"#a16207"},{t:"3–5 Zorgwekkend",bg:"#ffedd5",fg:"#c2410c"},{t:"< 3 Kritiek",bg:"#fee2e2",fg:"#b91c1c"}].map(s=>(
+                      <span key={s.t} className="text-xs px-1.5 py-0.5 font-medium" style={{ background:s.bg, color:s.fg, borderRadius:3 }}>{s.t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* SovBar uitleg */}
+              <div className="rounded p-3 flex gap-3 items-start" style={{ background:"#E6F7F7", border:"1px solid #26B5AE" }}>
+                <div className="flex-shrink-0 w-16 mt-3">
+                  <SovBar score5={3.5} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
+                    <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>Soevereiniteitsscore (1–5)</span>
+                  </div>
+                  <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                    De kleurenbalk toont hoe soeverein de applicatie is op het gebied van data en infrastructuur.
+                    Gebaseerd op het <strong>DICTU-framework</strong>: gemiddelde van vier vragen over datalocatie, sleutelbeheer, juridische bescherming en EU-infrastructuur.
+                  </p>
+                  <div className="flex items-center gap-2 mt-1.5 text-xs" style={{ color:"#374151" }}>
+                    <span style={{ color:"#dc2626", fontWeight:600 }}>1 = volledig afhankelijk</span>
+                    <span style={{ color:"#9ca3af" }}>→</span>
+                    <span style={{ color:"#16a34a", fontWeight:600 }}>5 = maximaal soeverein</span>
+                  </div>
+                  <p className="text-xs mt-1" style={{ color:"#6b7280" }}>
+                    Vragen: 2.1 Dataresidency · 2.2 Technische beveiliging · 2.3 Juridische bescherming · 4.1 EU-infrastructuur
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* App cards + charts row */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               {/* App cards */}
@@ -640,8 +690,24 @@ export default function App() {
               <div className="space-y-4">
                 {apps.length >= 2 ? (
                   <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                    <p className="text-sm font-semibold text-gray-700 mb-2">DAAF Radar — alle applicaties</p>
-                    <ResponsiveContainer width="100%" height={200}>
+                    {/* Radar header + leeswijzer */}
+                    <div className="flex items-start justify-between gap-3 mb-1">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                          <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Spindiagram — dimensies per applicatie</p>
+                        </div>
+                        <p className="text-xs mt-1 leading-relaxed" style={{ color:"#6b7280" }}>
+                          Elke as toont één DAAF-dimensie (score 1–5). Een grotere oppervlakte betekent een sterkere positie op die dimensie.
+                          <br/>
+                          <span style={{ color:"#dc2626", fontWeight:600 }}>Risico-assen</span>: lager is beter (minder risico).{" "}
+                          <span style={{ color:"#26B5AE", fontWeight:600 }}>Mitigatie-assen</span>: hoger is beter (meer weerbaarheid).{" "}
+                          <span style={{ color:"#E87722", fontWeight:600 }}>Belang-assen</span>: lager = minder urgentie.
+                          Vergelijk vormen om te zien waar applicaties van elkaar verschillen.
+                        </p>
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={220}>
                       <RadarChart data={radarData}>
                         <PolarGrid stroke="#f3f4f6" />
                         <PolarAngleAxis dataKey="dim" tick={{ fontSize: 9 }} />
@@ -657,7 +723,7 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="rounded p-4 text-center py-12" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                    <p className="text-sm text-gray-400">Voeg meer applicaties toe om radarvergelijking te zien.</p>
+                    <p className="text-sm text-gray-400">Voeg minimaal 2 applicaties toe om het spindiagram te zien.</p>
                   </div>
                 )}
               </div>
@@ -665,39 +731,49 @@ export default function App() {
 
             {/* ── Autonomie-kwadrant ── */}
             <div className="rounded p-5 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="font-bold" style={{ color:"#0C2340", fontSize:15 }}>Autonomie-kwadrant</h3>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    Klik op een applicatie in het kwadrant om naar het assessment te gaan
-                  </p>
+              <div className="mb-4">
+                {/* Title row */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                    <h3 className="font-bold" style={{ color:"#0C2340", fontSize:15 }}>Autonomie-kwadrant</h3>
+                  </div>
+                  {/* Quadrant legend */}
+                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
+                    {[
+                      { label:"OPTIMAAL",      color:"#2e7d5e", bg:"#e8f5e9" },
+                      { label:"BEHEERSBAAR",   color:"#e07b20", bg:"#fff8e1" },
+                      { label:"AANDACHTSPUNT", color:"#e07b20", bg:"#fff3e0" },
+                      { label:"KRITIEK",       color:"#c0392b", bg:"#fce4ec" },
+                    ].map(l => (
+                      <span key={l.label} className="text-xs px-2 py-1 font-semibold"
+                        style={{ background:l.bg, color:l.color, borderRadius:3 }}>
+                        {l.label}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                {/* Legend */}
-                <div className="flex gap-3 flex-shrink-0">
-                  {[
-                    { label:"OPTIMAAL",      color:"#2e7d5e", bg:"#e8f5e9" },
-                    { label:"BEHEERSBAAR",   color:"#e07b20", bg:"#fff8e1" },
-                    { label:"AANDACHTSPUNT", color:"#e07b20", bg:"#fff3e0" },
-                    { label:"KRITIEK",       color:"#c0392b", bg:"#fce4ec" },
-                  ].map(l => (
-                    <span key={l.label} className="text-xs px-2 py-1 font-semibold"
-                      style={{ background:l.bg, color:l.color, borderRadius:3 }}>
-                      {l.label}
-                    </span>
-                  ))}
+                {/* Reading guide */}
+                <div className="rounded p-3 text-xs leading-relaxed" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7", color:"#374151" }}>
+                  <strong style={{ color:"#0C2340" }}>Hoe te lezen:</strong> Het kwadrant plaatst elke applicatie op twee assen die beide uit het DAAF-framework komen.
+                  De <strong>horizontale as</strong> (Risico × Belang) combineert hoe groot het risico is én hoe strategisch belangrijk de applicatie is — verder naar rechts betekent meer urgentie.
+                  De <strong>verticale as</strong> (Mitigatie) toont hoe goed NHL Stenden beschermd is via alternatieven, interne kennis en contracten — hoger is beter.
+                  {" "}<span style={{ color:"#2e7d5e", fontWeight:600 }}>Linksboven (OPTIMAAL)</span> is de ideaalpositie.{" "}
+                  <span style={{ color:"#c0392b", fontWeight:600 }}>Rechtsboven (KRITIEK)</span> vraagt om directe actie.
+                  Klik op een punt om naar het assessment van die applicatie te gaan.
                 </div>
               </div>
 
               <KwadrantSVG />
 
-              {/* Calculation explanation */}
+              {/* Calculation */}
               <div className="mt-3 px-3 py-2 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#6b7280" }}>
-                <strong style={{ color:"#374151" }}>Berekening:</strong> Per indicator score (1-5). Per niveau gemiddelde van dimensies.{" "}
+                <strong style={{ color:"#374151" }}>Berekening (DAAF):</strong> Risico = gem. A1+B1 · Mitigatie = gem. C1+D1+E1 · Belang = gem. F1+G1+H1 (elk 1–5).{" "}
+                Positie in kwadrant = Risico×Belang (X-as) vs. Mitigatie (Y-as). Kwadrantgrens: X = 13 · Y = 3.{" "}
                 <code style={{ background:"#e5e7eb", padding:"1px 5px", borderRadius:3, color:"#374151" }}>
-                  Ruwe score = Mitigatie / (Risico × Belang)
+                  Autonomiescore = Mitigatie ÷ (Risico × Belang)
                 </code>
-                {" "}— Genormaliseerd naar 1-10 via logaritmische schaal.
-                Kwadrantgrens: Risico×Belang = 13 · Mitigatie = 3.
+                {" "}→ genormaliseerd naar 1–10 via logaritmische schaal.
               </div>
             </div>
 
