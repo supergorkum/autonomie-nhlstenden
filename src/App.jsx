@@ -418,6 +418,152 @@ function KwadrantSVG({ kwData, onAppClick }) {
   );
 }
 
+// ── RadarSVG — eigen SVG implementatie, vervangt Recharts RadarChart ──
+// Gebouwd als pure SVG zodat rendering gegarandeerd werkt
+function RadarSVG({ apps, W = 680, H = 400 }) {
+  const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
+
+  // Bereken dimensiescore direct vanuit ruwe scores
+  const dimScore = (app, letter) => {
+    if (letter === "A") {
+      const a1 = app.scores["A1"] || 0, a3 = app.scores["A3"] || 0;
+      const pairs = [[a1, 3], [a3, 2]].filter(([v]) => v > 0);
+      if (!pairs.length) return 0;
+      const tw = pairs.reduce((s, [, w]) => s + w, 0);
+      return pairs.reduce((s, [v, w]) => s + v * w, 0) / tw;
+    }
+    const qs = DAAF.filter(d => d.dim === letter);
+    const vals = qs.map(q => app.scores[q.key] || 0).filter(v => v > 0);
+    return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+  };
+
+  // Dimensies: unieke dim-letters met bijbehorende naam
+  const dims = [...new Set(DAAF.map(d => d.dim))].map(letter => {
+    const f = DAAF.find(d => d.dim === letter);
+    return { letter, label: f ? f.dimName : letter };
+  });
+
+  const N    = dims.length;
+  const cx   = W / 2;
+  const cy   = (H - 40) / 2 + 10; // laat ruimte voor legenda onderaan
+  const maxR = Math.min(W, H - 60) / 2 - 56;
+  const maxV = 5;
+  const LEVELS = [1, 2, 3, 4, 5];
+
+  // Hoek voor elke as (start aan de bovenkant, met klok mee)
+  const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
+
+  // Coördinaten voor een punt op as i op waarde v
+  const pt = (i, v) => {
+    const r = (v / maxV) * maxR;
+    const a = axisAngle(i);
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  };
+
+  // Polygon-punten voor een app
+  const appPolygon = app => dims.map((d, i) => pt(i, dimScore(app, d.letter)).join(",")).join(" ");
+
+  // Label-positie (iets verder dan maxR)
+  const labelPt = i => {
+    const r = maxR + 22;
+    const a = axisAngle(i);
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  };
+
+  // Tekst-anker op basis van positie
+  const anchor = i => {
+    const a = axisAngle(i);
+    const x = Math.cos(a);
+    if (x > 0.3)  return "start";
+    if (x < -0.3) return "end";
+    return "middle";
+  };
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display:"block", overflow:"visible" }}>
+
+      {/* Grid — concentrische veelhoeken */}
+      {LEVELS.map(level => (
+        <polygon key={level}
+          points={dims.map((_, i) => pt(i, level).join(",")).join(" ")}
+          fill="none" stroke="#e5e7eb" strokeWidth={level === maxV ? 1.5 : 1} />
+      ))}
+
+      {/* As-lijnen van centrum naar buitenste ring */}
+      {dims.map((_, i) => {
+        const [x, y] = pt(i, maxV);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#d1d5db" strokeWidth={1} />;
+      })}
+
+      {/* Gridwaarde-labels (1–5) op één as */}
+      {LEVELS.map(level => {
+        const [x, y] = pt(0, level); // op de eerste as
+        return (
+          <text key={level} x={x + 5} y={y + 3}
+            fill="#9ca3af" fontSize={8} fontFamily="system-ui">
+            {level}
+          </text>
+        );
+      })}
+
+      {/* Applicatie-polygonen */}
+      {apps.slice(0, 5).map((app, ai) => {
+        const color = COLORS[ai % COLORS.length];
+        const pts   = appPolygon(app);
+        const hasData = dims.some(d => dimScore(app, d.letter) > 0);
+        if (!hasData) return null;
+        return (
+          <g key={app.id || ai}>
+            <polygon points={pts}
+              fill={color} fillOpacity={0.18}
+              stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
+            {/* Punten op elke as */}
+            {dims.map((d, i) => {
+              const v = dimScore(app, d.letter);
+              if (v === 0) return null;
+              const [px, py] = pt(i, v);
+              return <circle key={i} cx={px} cy={py} r={4} fill={color} stroke="white" strokeWidth={1.5} />;
+            })}
+          </g>
+        );
+      })}
+
+      {/* As-labels */}
+      {dims.map((d, i) => {
+        const [lx, ly] = labelPt(i);
+        const words = d.label.split(" ");
+        // Splits lange labels over twee regels
+        const line1 = words.slice(0, Math.ceil(words.length / 2)).join(" ");
+        const line2 = words.slice(Math.ceil(words.length / 2)).join(" ");
+        return (
+          <text key={i} x={lx} y={ly - (line2 ? 6 : 0)}
+            textAnchor={anchor(i)} fill="#374151"
+            fontSize={11} fontWeight={600} fontFamily="system-ui">
+            {line1}
+            {line2 && <tspan x={lx} dy={13}>{line2}</tspan>}
+          </text>
+        );
+      })}
+
+      {/* Legenda onderaan */}
+      {apps.slice(0, 5).map((app, ai) => {
+        const color  = COLORS[ai % COLORS.length];
+        const lx     = cx - ((Math.min(apps.length, 5) - 1) * 110) / 2 + ai * 110;
+        const ly     = H - 10;
+        return (
+          <g key={app.id || ai}>
+            <rect x={lx - 30} y={ly - 10} width={12} height={12}
+              fill={color} fillOpacity={0.5} rx={2} />
+            <text x={lx - 14} y={ly} fontSize={10} fill="#374151" fontFamily="system-ui">
+              {app.name.substring(0, 14)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function Gauge({ score, size = 88 }) {
   const cx = 50, cy = 46, r = 36, sw = 5.5;
   const rad = d => d * Math.PI / 180;
@@ -1235,36 +1381,22 @@ export default function App() {
             </div>
           </div>
 
-          {/* ── Rij 2: Radar full-width ── */}
+          {/* ── Rij 2: Spindiagram full-width (eigen SVG) ── */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
               <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Spindiagram — dimensies per applicatie</h3>
             </div>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#6b7280" }}>
-              Elke as toont één DAAF-dimensie (gemiddelde score 1–5).{" "}
-              <span style={{ color:"#26B5AE", fontWeight:600 }}>Mitigatie-assen</span>: groter is beter.{" "}
-              <span style={{ color:"#dc2626", fontWeight:600 }}>Risico-assen</span> en{" "}
-              <span style={{ color:"#E87722", fontWeight:600 }}>Belang-assen</span>: kleiner is beter.
-              Vergelijk de vormen van applicaties om te zien waar de grootste verschillen zitten.
+              Elke as toont één DAAF-dimensie (gewogen score 1–5).{" "}
+              <span style={{ color:"#26B5AE", fontWeight:600 }}>Mitigatie-assen (C, D, E)</span>: groter is beter.{" "}
+              <span style={{ color:"#dc2626", fontWeight:600 }}>Risico-assen (A, B)</span> en{" "}
+              <span style={{ color:"#E87722", fontWeight:600 }}>Belang-assen (F, G, H)</span>: kleiner is beter.
             </p>
-            {apps.length >= 1 ? (
-              <ResponsiveContainer width="100%" height={360}>
-                <RadarChart data={radarData} margin={{ top:15, right:90, bottom:15, left:90 }}>
-                  <PolarGrid stroke="#e5e7eb" />
-                  <PolarAngleAxis dataKey="dim" tick={{ fontSize: 12, fill:"#374151" }} />
-                  <PolarRadiusAxis domain={[0, 5]} tick={{ fontSize:9, fill:"#9ca3af" }} tickCount={6} />
-                  {scored.slice(0, 5).map((a, i) => (
-                    <Radar key={a.id} name={a.name} dataKey={radarKey(a.name)}
-                      stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.15} strokeWidth={2} />
-                  ))}
-                  <Tooltip wrapperStyle={{ fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                </RadarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-10 text-sm text-gray-400">Voeg een applicatie toe om het spindiagram te zien.</div>
-            )}
+            {scored.length >= 1
+              ? <RadarSVG apps={scored} W={800} H={440} />
+              : <div className="text-center py-10 text-sm text-gray-400">Voeg een applicatie toe om het spindiagram te zien.</div>
+            }
           </div>
 
           </>)}
@@ -1655,19 +1787,7 @@ export default function App() {
                 <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Spindiagram — dimensies</p>
               </div>
               <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen dimensiescores 1-5. Groter = sterker voor mitigatie. Kleiner = beter voor risico en belang.</p>
-              <ResponsiveContainer width="100%" height={240}>
-                <RadarChart data={radarData}>
-                  <PolarGrid stroke="#f3f4f6" />
-                  <PolarAngleAxis dataKey="dim" tick={{ fontSize:9 }} />
-                  <PolarRadiusAxis domain={[0,5]} tick={false} axisLine={false} />
-                  {apps.slice(0,5).map((a,i) => (
-                    <Radar key={a.id} name={name14(a.name)} dataKey={name14(a.name)}
-                      stroke={COLORS[i%COLORS.length]} fill={COLORS[i%COLORS.length]} fillOpacity={0.12} strokeWidth={2} />
-                  ))}
-                  <Tooltip wrapperStyle={{ fontSize:11 }} />
-                  <Legend wrapperStyle={{ fontSize:10 }} />
-                </RadarChart>
-              </ResponsiveContainer>
+              <RadarSVG apps={apps} W={500} H={340} />
             </div>
           </div>
 
