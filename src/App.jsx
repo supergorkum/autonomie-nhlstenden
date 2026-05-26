@@ -796,6 +796,143 @@ function OpdrachtKaart({ apps }) {
   );
 }
 
+// ── DictuRadarSVG — spindiagram voor DICTU soevereiniteitscheck ──
+// Alle 4 assen hebben dezelfde richting: hoger = meer soeverein (goed)
+function DictuRadarSVG({ apps, W = 480, H = 380 }) {
+  const [tip, setTip] = React.useState(null);
+  const APP_COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
+
+  const dims = [
+    { key:"2.1", label:"Data residency" },
+    { key:"2.2", label:"Technische beveiliging" },
+    { key:"2.3", label:"Juridische bescherming" },
+    { key:"4.1", label:"EU-infrastructuur" },
+  ];
+
+  const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
+  const cx = W / 2;
+  const cy = (H - 44) / 2 + 10;
+  const maxR = Math.min(W, H - 64) / 2 - 52;
+
+  const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
+  const pt = (i, v) => {
+    const r = (v / maxV) * maxR, a = axisAngle(i);
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+  };
+  const anchor = i => { const x = Math.cos(axisAngle(i)); return x > 0.3 ? "start" : x < -0.3 ? "end" : "middle"; };
+  const labelPt = i => { const r = maxR + 26, a = axisAngle(i); return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+
+  const TW = 190, TH = 56;
+  const tipX = tip ? Math.min(Math.max(tip.svgX - TW / 2, 4), W - TW - 4) : 0;
+  const tipY = tip ? Math.max(tip.svgY - TH - 14, 4) : 0;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%"
+      style={{ display:"block", overflow:"visible" }}
+      onMouseLeave={() => setTip(null)}>
+
+      {/* Grid */}
+      {LEVELS.map(lv => (
+        <polygon key={lv}
+          points={dims.map((_,i) => pt(i,lv).join(",")).join(" ")}
+          fill={lv === 5 ? "rgba(38,181,174,0.04)" : "none"}
+          stroke={lv === 5 ? "#26B5AE" : "#e5e7eb"}
+          strokeWidth={lv === 5 ? 1.5 : 0.8} />
+      ))}
+      {dims.map((_,i) => {
+        const [x,y] = pt(i,5);
+        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#d1d5db" strokeWidth={1} />;
+      })}
+      {/* Gridwaarden op as 0 */}
+      {LEVELS.map(lv => {
+        const [x,y] = pt(0, lv);
+        return <text key={lv} x={x+5} y={y+3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>;
+      })}
+
+      {/* Polygonen */}
+      {apps.slice(0,5).map((app, ai) => {
+        const color = APP_COLORS[ai % APP_COLORS.length];
+        const scores = dims.map(d => app.scores[d.key] || 0);
+        if (scores.every(v => v === 0)) return null;
+        const poly = dims.map((d,i) => pt(i, scores[i]).join(",")).join(" ");
+        return (
+          <g key={app.id || ai}>
+            <polygon points={poly} fill={color} fillOpacity={0.14} stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
+            {dims.map((d,i) => {
+              const v = scores[i];
+              if (v === 0) return null;
+              const [px,py] = pt(i, v);
+              return (
+                <circle key={i} cx={px} cy={py} r={6}
+                  fill={color} stroke="white" strokeWidth={2}
+                  style={{ cursor:"crosshair" }}
+                  onMouseEnter={e => {
+                    const svgEl = e.currentTarget.closest("svg");
+                    const rect  = svgEl.getBoundingClientRect();
+                    const scale = W / rect.width;
+                    setTip({
+                      svgX: (e.clientX - rect.left) * scale,
+                      svgY: (e.clientY - rect.top)  * scale,
+                      appName: app.name, dimLabel: d.label, value: v, color
+                    });
+                  }}
+                  onMouseLeave={() => setTip(null)}
+                />
+              );
+            })}
+          </g>
+        );
+      })}
+
+      {/* As-labels */}
+      {dims.map((d,i) => {
+        const [lx,ly] = labelPt(i);
+        const words = d.label.split(" ");
+        const l1 = words.slice(0, Math.ceil(words.length/2)).join(" ");
+        const l2 = words.slice(Math.ceil(words.length/2)).join(" ");
+        return (
+          <text key={i} x={lx} y={ly-(l2?6:0)} textAnchor={anchor(i)}
+            fill="#374151" fontSize={11} fontWeight={600} fontFamily="system-ui">
+            {l1}{l2 && <tspan x={lx} dy={13}>{l2}</tspan>}
+          </text>
+        );
+      })}
+
+      {/* Legenda */}
+      {apps.slice(0,5).map((app, ai) => {
+        const color = APP_COLORS[ai % APP_COLORS.length];
+        const lx = cx - ((Math.min(apps.length,5)-1)*115)/2 + ai*115;
+        return (
+          <g key={app.id || ai}>
+            <rect x={lx-32} y={H-12} width={11} height={11} fill={color} fillOpacity={0.6} rx={2}/>
+            <text x={lx-17} y={H-3} fontSize={10} fill="#374151" fontFamily="system-ui">{app.name.substring(0,14)}</text>
+          </g>
+        );
+      })}
+
+      {/* Tooltip */}
+      {tip && (
+        <g style={{ pointerEvents:"none" }}>
+          <rect x={tipX} y={tipY} width={TW} height={TH} rx={5}
+            fill="white" stroke={tip.color} strokeWidth={1.5}
+            style={{ filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.18))" }}/>
+          <rect x={tipX} y={tipY} width={TW} height={18} rx={5} fill={tip.color}/>
+          <rect x={tipX} y={tipY+14} width={TW} height={4} fill={tip.color}/>
+          <text x={tipX+8} y={tipY+13} fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui">
+            {tip.appName.substring(0,24)}
+          </text>
+          <text x={tipX+8} y={tipY+32} fill="#374151" fontSize={9} fontFamily="system-ui">
+            {tip.dimLabel}
+          </text>
+          <text x={tipX+8} y={tipY+48} fill={tip.color} fontSize={12} fontWeight={700} fontFamily="system-ui">
+            {tip.value} / 5 — {tip.value >= 4 ? "soeverein" : tip.value >= 3 ? "acceptabel" : "aandacht vereist"}
+          </text>
+        </g>
+      )}
+    </svg>
+  );
+}
+
 function Gauge({ score, size = 88 }) {
   const cx = 50, cy = 46, r = 36, sw = 5.5;
   const rad = d => d * Math.PI / 180;
@@ -1923,6 +2060,39 @@ export default function App() {
               ))}
             </div>
           </div>
+
+          {/* ── Rij 3: DICTU spindiagram ── */}
+          {scored.some(a => a.sc.dictuAvg) && (
+            <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
+                <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Soevereiniteitscheck — spindiagram per applicatie</h3>
+              </div>
+              <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
+                Het spindiagram toont de vier DICTU-dimensies per applicatie op een schaal van 1 tot 5.
+                Alle assen hebben dezelfde richting: <span style={{ color:"#26B5AE", fontWeight:600 }}>hoe groter de vorm, hoe soeverein</span> de applicatie scoort op dat onderdeel.
+                Score 5 = maximaal soeverein, score 1 = volledig afhankelijk.
+                Hover over een punt voor de applicatienaam, dimensie en exacte score.
+              </p>
+              <div style={{ maxWidth:520, margin:"0 auto" }}>
+                <DictuRadarSVG apps={scored} W={480} H={360} />
+              </div>
+              {/* Legenda dimensies */}
+              <div className="grid grid-cols-4 gap-2 mt-3">
+                {[
+                  { key:"2.1", label:"Data residency", uitleg:"Worden data en back-ups uitsluitend binnen de EU opgeslagen?" },
+                  { key:"2.2", label:"Technische beveiliging", uitleg:"Zijn er technische maatregelen die ongeoorloofde toegang uitsluiten?" },
+                  { key:"2.3", label:"Juridische bescherming", uitleg:"Is de aanbieder verplicht niet-EU datavorderingen te bestrijden?" },
+                  { key:"4.1", label:"EU-infrastructuur", uitleg:"Bevinden infrastructuur en control plane zich volledig in de EU?" },
+                ].map(d => (
+                  <div key={d.key} className="rounded p-2" style={{ background:"#E6F7F7", border:"1px solid #26B5AE44" }}>
+                    <p style={{ fontSize:9, fontWeight:700, color:"#0C6B68", marginBottom:2 }}>{d.key} — {d.label}</p>
+                    <p style={{ fontSize:9, color:"#374151", lineHeight:1.4 }}>{d.uitleg}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           </>)}
         </div>
