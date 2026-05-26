@@ -424,25 +424,162 @@ export default function App() {
       ...Object.fromEntries(apps.slice(0, 5).map(a => [radarKey(a.name), a.scores[d.key] || 0]))
     }));
 
+    // Kwadrant data: X = risico × belang (1–25), Y = mitigatie (1–5)
     const kwData = scored
       .filter(a => a.sc.risico && a.sc.mitigatie && a.sc.belang)
       .map(a => ({
         name: a.name,
         x: +((a.sc.risico * a.sc.belang).toFixed(2)),
-        y: a.sc.mitigatie,
-        score: a.sc.autonomyScore
+        y: +a.sc.mitigatie.toFixed(2),
+        score: a.sc.autonomyScore,
+        id: a.id
       }));
+
+    // SVG Autonomie-kwadrant
+    const KwadrantSVG = () => {
+      const W = 700, H = 420;
+      const pad = { top:32, right:24, bottom:52, left:52 };
+      const iW  = W - pad.left - pad.right;
+      const iH  = H - pad.top  - pad.bottom;
+
+      // Scales: X = 1..25, Y = 1..5
+      const xMin=1, xMax=25, yMin=1, yMax=5;
+      const mx = 13; // midpoint X
+      const my = 3;  // midpoint Y
+
+      const toX = v => pad.left + (v - xMin) / (xMax - xMin) * iW;
+      const toY = v => pad.top  + (yMax - v) / (yMax - yMin) * iH;
+      const midX = toX(mx);
+      const midY = toY(my);
+
+      // Quadrant bg colors (matching the image)
+      const quads = [
+        { x1:pad.left, y1:pad.top,  x2:midX,      y2:midY,         fill:"#e8f5e9", label:"OPTIMAAL",      sub:"Behoud huidige situatie,\nmonitor periodiek",        color:"#2e7d5e" },
+        { x1:midX,     y1:pad.top,  x2:pad.left+iW,y2:midY,         fill:"#fff8e1", label:"BEHEERSBAAR",   sub:"Risico's geaccepteerd\nmet goede fallback",           color:"#e07b20" },
+        { x1:pad.left, y1:midY,     x2:midX,       y2:pad.top+iH,   fill:"#fff3e0", label:"AANDACHTSPUNT", sub:"Bouw mitigatie op of\naccep­teer risico bewust",       color:"#e07b20" },
+        { x1:midX,     y1:midY,     x2:pad.left+iW,y2:pad.top+iH,   fill:"#fce4ec", label:"KRITIEK",       sub:"Urgente actie vereist:\nmigreer of mitigeer",         color:"#c0392b" },
+      ];
+
+      // Axis ticks
+      const xTicks = [1,5,10,15,20,25];
+      const yTicks = [1,2,3,4,5];
+
+      return (
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ fontFamily:"system-ui,sans-serif", display:"block" }}>
+          {/* Quadrant backgrounds */}
+          {quads.map((q,i) => (
+            <rect key={i} x={q.x1} y={q.y1} width={q.x2-q.x1} height={q.y2-q.y1} fill={q.fill} />
+          ))}
+
+          {/* Quadrant labels */}
+          {quads.map((q,i) => {
+            const cx = (q.x1 + q.x2) / 2;
+            const cy = (q.y1 + q.y2) / 2;
+            const lines = q.sub.split("\n");
+            return (
+              <g key={i}>
+                <text x={cx} y={cy - 14} textAnchor="middle" fill={q.color}
+                  style={{ fontSize:15, fontWeight:700, fontStyle:"italic", letterSpacing:1 }}>
+                  {q.label}
+                </text>
+                {lines.map((l,j) => (
+                  <text key={j} x={cx} y={cy + 8 + j*16} textAnchor="middle" fill="#555"
+                    style={{ fontSize:11 }}>{l}</text>
+                ))}
+              </g>
+            );
+          })}
+
+          {/* Grid lines */}
+          {xTicks.map(v => (
+            <line key={v} x1={toX(v)} y1={pad.top} x2={toX(v)} y2={pad.top+iH}
+              stroke="#fff" strokeWidth={v===mx?0:1} strokeDasharray="3 3" />
+          ))}
+          {yTicks.map(v => (
+            <line key={v} x1={pad.left} y1={toY(v)} x2={pad.left+iW} y2={toY(v)}
+              stroke="#fff" strokeWidth={v===my?0:1} strokeDasharray="3 3" />
+          ))}
+
+          {/* Midpoint divider lines */}
+          <line x1={midX} y1={pad.top} x2={midX} y2={pad.top+iH} stroke="#aaa" strokeWidth={1.5} />
+          <line x1={pad.left} y1={midY} x2={pad.left+iW} y2={midY} stroke="#aaa" strokeWidth={1.5} />
+
+          {/* Border */}
+          <rect x={pad.left} y={pad.top} width={iW} height={iH}
+            fill="none" stroke="#ccc" strokeWidth={1} />
+
+          {/* X axis ticks & labels */}
+          {xTicks.map(v => (
+            <g key={v}>
+              <line x1={toX(v)} y1={pad.top+iH} x2={toX(v)} y2={pad.top+iH+5} stroke="#999" strokeWidth={1}/>
+              <text x={toX(v)} y={pad.top+iH+17} textAnchor="middle" fill="#888" style={{ fontSize:10 }}>{v}</text>
+            </g>
+          ))}
+
+          {/* Y axis ticks & labels */}
+          {yTicks.map(v => (
+            <g key={v}>
+              <line x1={pad.left-5} y1={toY(v)} x2={pad.left} y2={toY(v)} stroke="#999" strokeWidth={1}/>
+              <text x={pad.left-10} y={toY(v)+4} textAnchor="end" fill="#888" style={{ fontSize:10 }}>{v}</text>
+            </g>
+          ))}
+
+          {/* Axis labels */}
+          <text x={pad.left + iW/2} y={H-4} textAnchor="middle" fill="#444"
+            style={{ fontSize:12, fontWeight:600 }}>
+            Risico-exposure × Strategisch belang
+          </text>
+          <text x={14} y={pad.top + iH/2} textAnchor="middle" fill="#444"
+            transform={`rotate(-90, 14, ${pad.top + iH/2})`}
+            style={{ fontSize:12, fontWeight:600 }}>
+            Mitigatie
+          </text>
+
+          {/* Axis direction hints */}
+          <text x={pad.left+6}  y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
+          <text x={pad.left+iW-24} y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
+          <text x={pad.left-46} y={pad.top+iH-4} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
+          <text x={pad.left-46} y={pad.top+10}   fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
+
+          {/* App dots */}
+          {kwData.length === 0 && (
+            <text x={W/2} y={H/2+10} textAnchor="middle" fill="#bbb" style={{ fontSize:13 }}>
+              Vul minimaal alle dimensies in om applicaties in het kwadrant te plotten
+            </text>
+          )}
+          {kwData.map((d, i) => {
+            const cx = toX(d.x);
+            const cy = toY(d.y);
+            const col = scoreColor(d.score);
+            return (
+              <g key={d.id} style={{ cursor:"pointer" }}
+                onClick={() => { setSelId(d.id); setStep(0); setView("assess"); }}>
+                <circle cx={cx} cy={cy} r={13} fill={col} fillOpacity={0.2} stroke={col} strokeWidth={2} />
+                <circle cx={cx} cy={cy} r={5}  fill={col} />
+                {/* Label — shift to avoid overlap */}
+                <rect x={cx+10} y={cy-10} width={Math.min(d.name.length*6.5+8,120)} height={16} rx={3}
+                  fill="white" fillOpacity={0.88} />
+                <text x={cx+14} y={cy+2} fill={col} style={{ fontSize:10, fontWeight:600 }}>
+                  {d.name.substring(0,18)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+    };
 
     return (
       <div className="h-full overflow-y-auto">
         <div className="p-5 max-w-5xl mx-auto">
-            {/* Stat row */}
+
+          {/* Stat row */}
           <div className="grid grid-cols-4 gap-3 mb-5">
             {[
-              { label:"Applicaties",       val: apps.length,     color: "#1A56A0" },
-              { label:"Gem. autonomiescore",val: avgA ? avgA.toFixed(1) : "–", color: scoreColor(avgA) },
-              { label:"Status: Goed (≥7)", val: withSc.filter(a=>a.sc.autonomyScore>=7).length, color:"#26B5AE" },
-              { label:"Aandacht nodig (<5)",val:withSc.filter(a=>a.sc.autonomyScore<5).length,  color:"#E87722" },
+              { label:"Applicaties",        val: apps.length,     color: "#1A56A0" },
+              { label:"Gem. autonomiescore", val: avgA ? avgA.toFixed(1) : "–", color: scoreColor(avgA) },
+              { label:"Status: Goed (≥7)",  val: withSc.filter(a=>a.sc.autonomyScore>=7).length, color:"#26B5AE" },
+              { label:"Aandacht nodig (<5)", val: withSc.filter(a=>a.sc.autonomyScore<5).length,  color:"#E87722" },
             ].map(({ label, val, color }) => (
               <div key={label} className="rounded text-center px-3 py-4"
                 style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
@@ -453,7 +590,7 @@ export default function App() {
           </div>
 
           {apps.length === 0 ? (
-            <div className="bg-white rounded-2xl border-2 border-dashed border-gray-200 p-16 text-center">
+            <div className="bg-white rounded border-2 border-dashed border-gray-200 p-16 text-center">
               <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
               <h3 className="text-xl font-semibold text-gray-700 mb-2">Start met uw assessment</h3>
               <p className="text-gray-400 text-sm mb-5">Voeg een applicatie toe om te beginnen met het soevereiniteitsassessment.</p>
@@ -463,8 +600,10 @@ export default function App() {
                 + Applicatie toevoegen
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-4">
+          ) : (<>
+
+            {/* App cards + charts row */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
               {/* App cards */}
               <div className="space-y-3">
                 {scored.map(a => {
@@ -497,9 +636,9 @@ export default function App() {
                 })}
               </div>
 
-              {/* Charts */}
+              {/* Radar chart */}
               <div className="space-y-4">
-                {apps.length >= 2 && (
+                {apps.length >= 2 ? (
                   <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                     <p className="text-sm font-semibold text-gray-700 mb-2">DAAF Radar — alle applicaties</p>
                     <ResponsiveContainer width="100%" height={200}>
@@ -516,44 +655,53 @@ export default function App() {
                       </RadarChart>
                     </ResponsiveContainer>
                   </div>
-                )}
-
-                {kwData.length >= 2 && (
-                  <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                    <p className="text-sm font-semibold text-gray-700 mb-1">Kwadrant: Risico × Belang vs. Mitigatie</p>
-                    <p className="text-xs text-gray-400 mb-2">Rechtsboven = hoog risico/belang. Verticaal = mitigatiekracht.</p>
-                    <ResponsiveContainer width="100%" height={180}>
-                      <ScatterChart margin={{ top:5, right:15, bottom:25, left:5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                        <XAxis dataKey="x" name="Risico×Belang" domain={[0,25]} tick={{ fontSize:9 }}
-                          label={{ value:"Risico × Belang →", position:"insideBottom", offset:-12, fontSize:10 }} />
-                        <YAxis dataKey="y" name="Mitigatie" domain={[1,5]} tick={{ fontSize:9 }}
-                          label={{ value:"Mitigatie ↑", angle:-90, position:"insideLeft", fontSize:10 }} />
-                        <Tooltip content={({ payload }) => {
-                          if (!payload?.[0]) return null;
-                          const d = payload[0].payload;
-                          return (
-                            <div className="bg-white border border-gray-200 rounded shadow p-2 text-xs">
-                              <strong>{d.name}</strong><br/>Score: {d.score?.toFixed(1)}
-                            </div>
-                          );
-                        }} />
-                        <Scatter data={kwData}>
-                          {kwData.map((d, i) => <Cell key={i} fill={scoreColor(d.score)} />)}
-                        </Scatter>
-                      </ScatterChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-
-                {apps.length === 1 && (
-                  <div className="rounded p-4 text-center py-16" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                    <p className="text-sm text-gray-400">Voeg meer applicaties toe om vergelijkingen te zien.</p>
+                ) : (
+                  <div className="rounded p-4 text-center py-12" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                    <p className="text-sm text-gray-400">Voeg meer applicaties toe om radarvergelijking te zien.</p>
                   </div>
                 )}
               </div>
             </div>
-          )}
+
+            {/* ── Autonomie-kwadrant ── */}
+            <div className="rounded p-5 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-bold" style={{ color:"#0C2340", fontSize:15 }}>Autonomie-kwadrant</h3>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Klik op een applicatie in het kwadrant om naar het assessment te gaan
+                  </p>
+                </div>
+                {/* Legend */}
+                <div className="flex gap-3 flex-shrink-0">
+                  {[
+                    { label:"OPTIMAAL",      color:"#2e7d5e", bg:"#e8f5e9" },
+                    { label:"BEHEERSBAAR",   color:"#e07b20", bg:"#fff8e1" },
+                    { label:"AANDACHTSPUNT", color:"#e07b20", bg:"#fff3e0" },
+                    { label:"KRITIEK",       color:"#c0392b", bg:"#fce4ec" },
+                  ].map(l => (
+                    <span key={l.label} className="text-xs px-2 py-1 font-semibold"
+                      style={{ background:l.bg, color:l.color, borderRadius:3 }}>
+                      {l.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <KwadrantSVG />
+
+              {/* Calculation explanation */}
+              <div className="mt-3 px-3 py-2 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#6b7280" }}>
+                <strong style={{ color:"#374151" }}>Berekening:</strong> Per indicator score (1-5). Per niveau gemiddelde van dimensies.{" "}
+                <code style={{ background:"#e5e7eb", padding:"1px 5px", borderRadius:3, color:"#374151" }}>
+                  Ruwe score = Mitigatie / (Risico × Belang)
+                </code>
+                {" "}— Genormaliseerd naar 1-10 via logaritmische schaal.
+                Kwadrantgrens: Risico×Belang = 13 · Mitigatie = 3.
+              </div>
+            </div>
+
+          </>)}
         </div>
       </div>
     );
