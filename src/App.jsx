@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.1";
+const VERSION = "v1.2";
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
@@ -828,10 +828,10 @@ function DictuRadarSVG({ apps, W = 480, H = 380 }) {
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   };
 
-  // Tooltip afmetingen en positie (in SVG-coördinaten)
-  const TW = 188, TH = 58;
-  const tipX = tip ? Math.min(Math.max(tip.sx - TW / 2, 4), W - TW - 4) : 0;
-  const tipY = tip ? Math.max(tip.sy - TH - 16, 4) : 0;
+  // Tooltip positie — altijd binnen SVG-grenzen
+  const TW = 192, TH = 60;
+  const tipX = tip ? Math.min(Math.max(tip.sx - TW / 2, 6), W - TW - 6) : 0;
+  const tipY = tip ? Math.max(tip.sy - TH - 18, 6) : 0;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%"
@@ -853,42 +853,65 @@ function DictuRadarSVG({ apps, W = 480, H = 380 }) {
       {/* Gridwaarden op eerste as */}
       {LEVELS.map(lv => {
         const [x, y] = pt(0, lv);
-        return <text key={lv} x={x + 5} y={y + 3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>;
+        return (
+          <text key={lv} x={x + 5} y={y + 3}
+            fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>
+        );
       })}
 
-      {/* Polygonen per app */}
+      {/* Polygonen per app — ONDER de hitgebieden */}
       {apps.slice(0, 5).map((app, ai) => {
         const color  = APP_COLORS[ai % APP_COLORS.length];
         const scores = dims.map(d => app.scores[d.key] || 0);
         if (scores.every(v => v === 0)) return null;
         const poly   = dims.map((d, i) => pt(i, scores[i]).join(",")).join(" ");
         return (
-          <g key={app.id || ai}>
-            <polygon points={poly}
-              fill={color} fillOpacity={0.14}
-              stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
-            {dims.map((d, i) => {
-              const v = scores[i];
-              if (v === 0) return null;
-              const [px, py] = pt(i, v);
-              return (
-                <circle key={i} cx={px} cy={py} r={7}
-                  fill={color} stroke="white" strokeWidth={2}
-                  style={{ cursor:"crosshair" }}
-                  onMouseEnter={() => setTip({
-                    sx: px, sy: py,
-                    appName: app.name,
-                    dimLabel: d.label,
-                    dimKey: d.key,
-                    value: v,
-                    color
-                  })}
-                  onMouseLeave={() => setTip(null)}
-                />
-              );
-            })}
-          </g>
+          <polygon key={app.id || ai} points={poly}
+            fill={color} fillOpacity={0.14}
+            stroke={color} strokeWidth={2.5} strokeLinejoin="round"
+            style={{ pointerEvents:"none" }} />
         );
+      })}
+
+      {/* Zichtbare punten — pointerEvents none zodat het hitgebied eronder werkt */}
+      {apps.slice(0, 5).map((app, ai) => {
+        const color  = APP_COLORS[ai % APP_COLORS.length];
+        const scores = dims.map(d => app.scores[d.key] || 0);
+        return dims.map((d, i) => {
+          const v = scores[i];
+          if (v === 0) return null;
+          const [px, py] = pt(i, v);
+          return (
+            <circle key={`vis-${ai}-${i}`} cx={px} cy={py} r={7}
+              fill={color} stroke="white" strokeWidth={2}
+              style={{ pointerEvents:"none" }} />
+          );
+        });
+      })}
+
+      {/* Onzichtbare hitgebieden — groot, transparant, BOVENOP alles */}
+      {apps.slice(0, 5).map((app, ai) => {
+        const color  = APP_COLORS[ai % APP_COLORS.length];
+        const scores = dims.map(d => app.scores[d.key] || 0);
+        return dims.map((d, i) => {
+          const v = scores[i];
+          if (v === 0) return null;
+          const [px, py] = pt(i, v);
+          return (
+            <circle key={`hit-${ai}-${i}`} cx={px} cy={py} r={16}
+              fill="transparent"
+              style={{ cursor:"crosshair" }}
+              onMouseEnter={() => setTip({
+                sx: px, sy: py,
+                appName:  app.name,
+                dimLabel: d.label,
+                dimKey:   d.key,
+                value:    v,
+                color
+              })}
+            />
+          );
+        });
       })}
 
       {/* As-labels */}
@@ -912,7 +935,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380 }) {
         const color = APP_COLORS[ai % APP_COLORS.length];
         const lx    = cx - ((Math.min(apps.length, 5) - 1) * 115) / 2 + ai * 115;
         return (
-          <g key={app.id || ai}>
+          <g key={app.id || ai} style={{ pointerEvents:"none" }}>
             <rect x={lx - 32} y={H - 12} width={11} height={11}
               fill={color} fillOpacity={0.6} rx={2} />
             <text x={lx - 17} y={H - 3} fontSize={10} fill="#374151" fontFamily="system-ui">
@@ -922,33 +945,36 @@ function DictuRadarSVG({ apps, W = 480, H = 380 }) {
         );
       })}
 
-      {/* Tooltip — puur SVG, werkt ongeacht scroll-positie */}
+      {/* Tooltip — volledig SVG, altijd bovenop, geen pointer-events */}
       {tip && (
-        <g style={{ pointerEvents: "none" }}>
-          {/* Schaduw-rechthoek */}
+        <g style={{ pointerEvents:"none" }}>
+          {/* Schaduw */}
           <rect x={tipX + 2} y={tipY + 2} width={TW} height={TH} rx={5}
-            fill="rgba(0,0,0,0.1)" />
+            fill="rgba(0,0,0,0.12)" />
           {/* Achtergrond */}
           <rect x={tipX} y={tipY} width={TW} height={TH} rx={5}
             fill="white" stroke={tip.color} strokeWidth={1.5} />
           {/* Gekleurde header */}
-          <rect x={tipX} y={tipY} width={TW} height={19} rx={5} fill={tip.color} />
-          <rect x={tipX} y={tipY + 14} width={TW} height={5} fill={tip.color} />
-          {/* Tekst */}
-          <text x={tipX + 9} y={tipY + 13}
+          <rect x={tipX} y={tipY} width={TW} height={20} rx={5} fill={tip.color} />
+          <rect x={tipX} y={tipY + 15} width={TW} height={5} fill={tip.color} />
+          {/* App naam */}
+          <text x={tipX + 10} y={tipY + 14}
             fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui">
             {tip.appName.substring(0, 22)}
           </text>
-          <text x={tipX + 9} y={tipY + 33}
+          {/* Dimensie */}
+          <text x={tipX + 10} y={tipY + 35}
             fill="#374151" fontSize={9} fontFamily="system-ui">
             {tip.dimKey} — {tip.dimLabel}
           </text>
-          <text x={tipX + 9} y={tipY + 49}
-            fill={tip.color} fontSize={13} fontWeight={700} fontFamily="system-ui">
+          {/* Score + kwalificatie */}
+          <text x={tipX + 10} y={tipY + 52}
+            fill={tip.color} fontSize={14} fontWeight={700} fontFamily="system-ui">
             {tip.value} / 5
-            <tspan fontSize={9} fontWeight={400} fill="#6b7280">
-              {tip.value >= 4 ? "  soeverein" : tip.value >= 3 ? "  acceptabel" : "  aandacht vereist"}
-            </tspan>
+          </text>
+          <text x={tipX + 46} y={tipY + 52}
+            fill="#6b7280" fontSize={9} fontFamily="system-ui">
+            {tip.value >= 4 ? "soeverein" : tip.value >= 3 ? "acceptabel" : "aandacht vereist"}
           </text>
         </g>
       )}
