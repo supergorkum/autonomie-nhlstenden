@@ -2092,10 +2092,10 @@ export default function App() {
                 <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Soevereiniteitscheck — spindiagram per applicatie</h3>
               </div>
               <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
-                Het spindiagram toont de vier DICTU-dimensies per applicatie op een schaal van 1 tot 5.
-                Alle assen hebben dezelfde richting: <span style={{ color:"#26B5AE", fontWeight:600 }}>hoe groter de vorm, hoe soeverein</span> de applicatie scoort op dat onderdeel.
-                Score 5 = maximaal soeverein, score 1 = volledig afhankelijk.
-                Hover over een punt voor de applicatienaam, dimensie en exacte score.
+                Het spindiagram toont de vier DICTU-dimensies per applicatie op een schaal van 1 tot 5. Alle assen hebben dezelfde richting: hoe groter de gekleurde vorm, hoe soeverein de applicatie scoort.
+                Een kleine vorm dicht bij het centrum betekent <span style={{ color:"#dc2626", fontWeight:600 }}>volledig afhankelijk</span> van de leverancier.
+                Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
+                Dit is precies waarom een spindiagram hier wél klopt: elke as heeft dezelfde richting — buiten is altijd beter.
               </p>
               <div style={{ maxWidth:520, margin:"0 auto" }}>
                 <DictuRadarSVG apps={scored} W={480} H={360} />
