@@ -476,148 +476,146 @@ function KwadrantSVG({ kwData, onAppClick }) {
   );
 }
 
-// ── RadarSVG — eigen SVG implementatie, vervangt Recharts RadarChart ──
-// Gebouwd als pure SVG zodat rendering gegarandeerd werkt
+// ── RadarSVG — eigen SVG implementatie met hover tooltip ──────
 function RadarSVG({ apps, W = 680, H = 400 }) {
+  const [tooltip, setTooltip] = React.useState(null);
   const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
 
-  // Bereken dimensiescore direct vanuit ruwe scores
   const dimScore = (app, letter) => {
     if (letter === "A") {
       const a1 = app.scores["A1"] || 0, a3 = app.scores["A3"] || 0;
-      const pairs = [[a1, 3], [a3, 2]].filter(([v]) => v > 0);
+      const pairs = [[a1,3],[a3,2]].filter(([v]) => v > 0);
       if (!pairs.length) return 0;
-      const tw = pairs.reduce((s, [, w]) => s + w, 0);
-      return pairs.reduce((s, [v, w]) => s + v * w, 0) / tw;
+      const tw = pairs.reduce((s,[,w]) => s+w, 0);
+      return pairs.reduce((s,[v,w]) => s+v*w, 0) / tw;
     }
     const qs = DAAF.filter(d => d.dim === letter);
     const vals = qs.map(q => app.scores[q.key] || 0).filter(v => v > 0);
-    return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+    return vals.length ? vals.reduce((s,v) => s+v, 0) / vals.length : 0;
   };
 
-  // Dimensies: unieke dim-letters met bijbehorende naam
   const dims = [...new Set(DAAF.map(d => d.dim))].map(letter => {
     const f = DAAF.find(d => d.dim === letter);
     return { letter, label: f ? f.dimName : letter };
   });
 
-  const N    = dims.length;
-  const cx   = W / 2;
-  const cy   = (H - 40) / 2 + 10; // laat ruimte voor legenda onderaan
-  const maxR = Math.min(W, H - 60) / 2 - 56;
-  const maxV = 5;
-  const LEVELS = [1, 2, 3, 4, 5];
-
-  // Hoek voor elke as (start aan de bovenkant, met klok mee)
+  const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
+  const cx = W / 2;
+  const cy = (H - 44) / 2 + 10;
+  const maxR = Math.min(W, H - 64) / 2 - 58;
   const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
-
-  // Coördinaten voor een punt op as i op waarde v
   const pt = (i, v) => {
-    const r = (v / maxV) * maxR;
-    const a = axisAngle(i);
+    const r = (v / maxV) * maxR, a = axisAngle(i);
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   };
+  const anchor = i => { const x = Math.cos(axisAngle(i)); return x>0.3?"start":x<-0.3?"end":"middle"; };
+  const labelPt = i => { const r=maxR+24, a=axisAngle(i); return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
 
-  // Polygon-punten voor een app
-  const appPolygon = app => dims.map((d, i) => pt(i, dimScore(app, d.letter)).join(",")).join(" ");
-
-  // Label-positie (iets verder dan maxR)
-  const labelPt = i => {
-    const r = maxR + 22;
-    const a = axisAngle(i);
-    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-  };
-
-  // Tekst-anker op basis van positie
-  const anchor = i => {
-    const a = axisAngle(i);
-    const x = Math.cos(a);
-    if (x > 0.3)  return "start";
-    if (x < -0.3) return "end";
-    return "middle";
-  };
+  // Tooltip box: clip to SVG bounds
+  const TW=190, TH=58;
+  const tipX = tooltip ? Math.min(Math.max(tooltip.svgX - TW/2, 4), W - TW - 4) : 0;
+  const tipY = tooltip ? Math.max(tooltip.svgY - TH - 14, 4) : 0;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display:"block", overflow:"visible" }}>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%"
+      style={{ display:"block", overflow:"visible" }}
+      onMouseLeave={() => setTooltip(null)}>
 
-      {/* Grid — concentrische veelhoeken */}
-      {LEVELS.map(level => (
-        <polygon key={level}
-          points={dims.map((_, i) => pt(i, level).join(",")).join(" ")}
-          fill="none" stroke="#e5e7eb" strokeWidth={level === maxV ? 1.5 : 1} />
+      {/* Grid veelhoeken */}
+      {LEVELS.map(lv => (
+        <polygon key={lv}
+          points={dims.map((_,i) => pt(i,lv).join(",")).join(" ")}
+          fill="none" stroke="#e5e7eb" strokeWidth={lv===5?1.5:0.8} />
       ))}
+      {/* As-lijnen */}
+      {dims.map((_,i) => { const [x,y]=pt(i,5); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#d1d5db" strokeWidth={1}/>; })}
+      {/* Gridwaarden op eerste as */}
+      {LEVELS.map(lv => { const [x,y]=pt(0,lv); return <text key={lv} x={x+5} y={y+3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>; })}
 
-      {/* As-lijnen van centrum naar buitenste ring */}
-      {dims.map((_, i) => {
-        const [x, y] = pt(i, maxV);
-        return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#d1d5db" strokeWidth={1} />;
-      })}
-
-      {/* Gridwaarde-labels (1–5) op één as */}
-      {LEVELS.map(level => {
-        const [x, y] = pt(0, level); // op de eerste as
-        return (
-          <text key={level} x={x + 5} y={y + 3}
-            fill="#9ca3af" fontSize={8} fontFamily="system-ui">
-            {level}
-          </text>
-        );
-      })}
-
-      {/* Applicatie-polygonen */}
-      {apps.slice(0, 5).map((app, ai) => {
+      {/* Polygonen per app */}
+      {apps.slice(0,5).map((app, ai) => {
         const color = COLORS[ai % COLORS.length];
-        const pts   = appPolygon(app);
-        const hasData = dims.some(d => dimScore(app, d.letter) > 0);
-        if (!hasData) return null;
+        const scores = dims.map(d => dimScore(app, d.letter));
+        if (scores.every(v => v === 0)) return null;
+        const poly = dims.map((d,i) => pt(i, scores[i]).join(",")).join(" ");
         return (
           <g key={app.id || ai}>
-            <polygon points={pts}
-              fill={color} fillOpacity={0.18}
-              stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
-            {/* Punten op elke as */}
-            {dims.map((d, i) => {
-              const v = dimScore(app, d.letter);
+            <polygon points={poly} fill={color} fillOpacity={0.16} stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
+            {dims.map((d,i) => {
+              const v = scores[i];
               if (v === 0) return null;
-              const [px, py] = pt(i, v);
-              return <circle key={i} cx={px} cy={py} r={4} fill={color} stroke="white" strokeWidth={1.5} />;
+              const [px,py] = pt(i, v);
+              return (
+                <circle key={i} cx={px} cy={py} r={6}
+                  fill={color} stroke="white" strokeWidth={2}
+                  style={{ cursor:"crosshair" }}
+                  onMouseEnter={e => {
+                    const svgEl = e.currentTarget.closest("svg");
+                    const rect  = svgEl.getBoundingClientRect();
+                    const scale = W / rect.width;
+                    setTooltip({
+                      svgX: (e.clientX - rect.left) * scale,
+                      svgY: (e.clientY - rect.top)  * scale,
+                      appName:  app.name,
+                      dimLabel: d.label,
+                      dimLetter: d.letter,
+                      value: v,
+                      color
+                    });
+                  }}
+                  onMouseLeave={() => setTooltip(null)}
+                />
+              );
             })}
           </g>
         );
       })}
 
       {/* As-labels */}
-      {dims.map((d, i) => {
-        const [lx, ly] = labelPt(i);
+      {dims.map((d,i) => {
+        const [lx,ly] = labelPt(i);
         const words = d.label.split(" ");
-        // Splits lange labels over twee regels
-        const line1 = words.slice(0, Math.ceil(words.length / 2)).join(" ");
-        const line2 = words.slice(Math.ceil(words.length / 2)).join(" ");
+        const l1 = words.slice(0, Math.ceil(words.length/2)).join(" ");
+        const l2 = words.slice(Math.ceil(words.length/2)).join(" ");
         return (
-          <text key={i} x={lx} y={ly - (line2 ? 6 : 0)}
-            textAnchor={anchor(i)} fill="#374151"
-            fontSize={11} fontWeight={600} fontFamily="system-ui">
-            {line1}
-            {line2 && <tspan x={lx} dy={13}>{line2}</tspan>}
+          <text key={i} x={lx} y={ly-(l2?6:0)} textAnchor={anchor(i)}
+            fill="#374151" fontSize={11} fontWeight={600} fontFamily="system-ui">
+            {l1}{l2 && <tspan x={lx} dy={13}>{l2}</tspan>}
           </text>
         );
       })}
 
-      {/* Legenda onderaan */}
-      {apps.slice(0, 5).map((app, ai) => {
-        const color  = COLORS[ai % COLORS.length];
-        const lx     = cx - ((Math.min(apps.length, 5) - 1) * 110) / 2 + ai * 110;
-        const ly     = H - 10;
+      {/* Legenda */}
+      {apps.slice(0,5).map((app, ai) => {
+        const color = COLORS[ai%COLORS.length];
+        const lx = cx - ((Math.min(apps.length,5)-1)*115)/2 + ai*115;
         return (
           <g key={app.id || ai}>
-            <rect x={lx - 30} y={ly - 10} width={12} height={12}
-              fill={color} fillOpacity={0.5} rx={2} />
-            <text x={lx - 14} y={ly} fontSize={10} fill="#374151" fontFamily="system-ui">
-              {app.name.substring(0, 14)}
-            </text>
+            <rect x={lx-32} y={H-12} width={11} height={11} fill={color} fillOpacity={0.6} rx={2}/>
+            <text x={lx-17} y={H-3} fontSize={10} fill="#374151" fontFamily="system-ui">{app.name.substring(0,14)}</text>
           </g>
         );
       })}
+
+      {/* Tooltip */}
+      {tooltip && (
+        <g style={{ pointerEvents:"none" }}>
+          <rect x={tipX} y={tipY} width={TW} height={TH} rx={5}
+            fill="white" stroke={tooltip.color} strokeWidth={1.5}
+            style={{ filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.18))" }} />
+          <rect x={tipX} y={tipY} width={TW} height={18} rx={5} fill={tooltip.color} />
+          <rect x={tipX} y={tipY+14} width={TW} height={4} fill={tooltip.color} />
+          <text x={tipX+8} y={tipY+13} fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui">
+            {tooltip.appName.substring(0,24)}
+          </text>
+          <text x={tipX+8} y={tipY+32} fill="#374151" fontSize={9} fontFamily="system-ui">
+            {tooltip.dimLetter}: {tooltip.dimLabel.substring(0,26)}
+          </text>
+          <text x={tipX+8} y={tipY+48} fill={tooltip.color} fontSize={12} fontWeight={700} fontFamily="system-ui">
+            {tooltip.value.toFixed(2)} / 5
+          </text>
+        </g>
+      )}
     </svg>
   );
 }
@@ -1145,7 +1143,101 @@ export default function App() {
       return `<table class="dim-table"><tr><th>Dim</th><th>Naam</th><th>Richting</th>${headers}</tr>${dimRows}</table>`;
     }
 
-    // ── Tabelrijen ────────────────────────────────────────────
+    // ── Algemeen risico-conclusie ─────────────────────────────
+    function generateRisicoConclusion(appsArr) {
+      const scored = appsArr.map(a => ({ ...a, sc: calcScores(a.scores) })).filter(a => a.sc.autonomyScore);
+      if (scored.length < 1) return "";
+
+      // Patronen analyseren
+      const n = scored.length;
+      const kritiek     = scored.filter(a => (a.sc.risico||0) > 3.5);
+      const nonEU       = appsArr.filter(a => (a.scores["A1"]||0) >= 4);
+      const laagContr   = appsArr.filter(a => (a.scores["E1"]||0) <= 2);
+      const laagKennis  = appsArr.filter(a => (a.scores["D1"]||0) <= 2);
+      const geenAlt     = appsArr.filter(a => (a.scores["C1"]||0) <= 2);
+      const hoogBelang  = scored.filter(a => (a.sc.belang||0) > 3.5);
+      const laagDictu   = scored.filter(a => a.sc.dictuAvg && a.sc.dictuAvg < 3);
+      const critApp     = scored.filter(a => a.sc.autonomyScore < 3);
+      const avgAuto     = scored.reduce((s,a) => s+(a.sc.autonomyScore||0), 0) / n;
+      const avgRisico   = scored.reduce((s,a) => s+(a.sc.risico||0), 0) / n;
+      const avgMit      = scored.reduce((s,a) => s+(a.sc.mitigatie||0), 0) / n;
+
+      let html = `<p><strong>Algemeen beeld:</strong> Uit de beoordeling van ${n} applicatie${n!==1?"s":""} komt een gemiddelde autonomiescore 
+        van <strong>${avgAuto.toFixed(1)}/10</strong> naar voren, met een gemiddelde risico-exposure van ${avgRisico.toFixed(2)}/5 
+        en een gemiddelde mitigatie-capaciteit van ${avgMit.toFixed(2)}/5.`;
+
+      if (critApp.length > 0) {
+        html += ` <strong style="color:#b91c1c">${critApp.length} applicatie${critApp.length!==1?"s vereisen":"vereist"} directe 
+        bestuurlijke aandacht</strong> vanwege een kritieke autonomiescore: ${critApp.map(a=>a.name).join(", ")}.`;
+      }
+      html += `</p>`;
+
+      // Strategische risico's benoemen
+      html += `<p style="margin-top:8px"><strong>Geopolitieke en juridische risico's:</strong> `;
+      if (nonEU.length > 0) {
+        html += `Bij ${nonEU.length} van de ${n} applicaties (${nonEU.map(a=>a.name).join(", ")}) is de leverancier 
+          gevestigd buiten de EU of valt de leverancier onder wetgeving zoals de CLOUD Act of FISA 702 (VS) of vergelijkbare 
+          wetgeving in andere jurisdicties. Dit betekent dat een buitenlandse overheid in theorie toegang kan vorderen tot 
+          data die NHL Stenden verwerkt via deze applicaties, ook als de data fysiek in Europa staat. `;
+      } else {
+        html += `De leveranciers in deze selectie zijn allen gevestigd binnen de EU of vallen onder adequaatheidsbesluiten. 
+          Het geopolitieke risico is daarmee beheersbaar, mits contractuele bescherming op orde is. `;
+      }
+      html += `</p>`;
+
+      // Vendor lock-in
+      html += `<p style="margin-top:8px"><strong>Vendor lock-in en exitrisico:</strong> `;
+      if (geenAlt.length > 0 || laagKennis.length > 0 || laagContr.length > 0) {
+        const risks = [];
+        if (geenAlt.length > 0)    risks.push(`${geenAlt.length} applicatie${geenAlt.length!==1?"s hebben":"heeft"} geen of nauwelijks reëele alternatieven (${geenAlt.map(a=>a.name).join(", ")})`);
+        if (laagKennis.length > 0) risks.push(`voor ${laagKennis.length} applicatie${laagKennis.length!==1?"s is de":"is de"} interne kennis onvoldoende geborgd (${laagKennis.map(a=>a.name).join(", ")})`);
+        if (laagContr.length > 0)  risks.push(`${laagContr.length} applicatie${laagContr.length!==1?"s missen":"mist"} adequate exit-clausules in het contract (${laagContr.map(a=>a.name).join(", ")})`);
+        html += `Er is sprake van significante lock-in risico's: ${risks.join("; ")}. Dit maakt een ongewenste situatie moeilijk omkeerbaar. `;
+      } else {
+        html += `De mitigatie-capaciteit voor vendor lock-in is over het algemeen op orde: er zijn alternatieven beschikbaar, de interne kennis is geborgd en contracten bevatten exitbepalingen. `;
+      }
+      html += `</p>`;
+
+      // Data en DICTU
+      if (laagDictu.length > 0) {
+        html += `<p style="margin-top:8px"><strong>Technische soevereiniteit (DICTU):</strong> 
+          ${laagDictu.length} applicatie${laagDictu.length!==1?"s scoren":"scoort"} laag op de DICTU-soevereiniteitsmaatstaf 
+          (${laagDictu.map(a=>a.name+" "+a.sc.dictuAvg?.toFixed(1)+"/5").join(", ")}). 
+          Dit duidt op onvoldoende waarborgen voor dataresidency, sleutelbeheer of juridische bescherming. 
+          Technische soevereiniteit is een noodzakelijke randvoorwaarde: juridische bescherming alleen is onvoldoende 
+          als de technische infrastructuur toegang voor derden niet uitsluit.</p>`;
+      }
+
+      // Strategisch belang
+      if (hoogBelang.length > 0) {
+        html += `<p style="margin-top:8px"><strong>Strategisch belang en continuïteit:</strong> 
+          ${hoogBelang.length} applicatie${hoogBelang.length!==1?"s zijn":"is"} van hoog strategisch belang voor 
+          de organisatie (${hoogBelang.map(a=>a.name).join(", ")}). 
+          Uitval of ongewenste toegang bij deze applicaties raakt direct aan de continuïteit van onderwijs, 
+          onderzoek of bedrijfsvoering van NHL Stenden. De afhankelijkheid van externe partijen bij deze 
+          applicaties vraagt om de sterkste contractuele en technische waarborgen.</p>`;
+      }
+
+      // Aanbeveling
+      html += `<p style="margin-top:10px;padding:10px 14px;background:#fff3cd;border-left:3px solid #f59e0b;border-radius:2px">
+        <strong>Bestuurlijke aanbeveling:</strong> `;
+      if (critApp.length > 0) {
+        html += `Stel voor ${critApp.map(a=>a.name).join(" en ")} op korte termijn een actieplan op met concrete 
+          maatregelen, een verantwoordelijke en een deadline. `;
+      }
+      if (nonEU.length > 0 && laagContr.length > 0) {
+        html += `Versterk bij niet-EU leveranciers de contractuele bescherming: zorg voor juridisch afdwingbare 
+          exit-clausules, transitieregelingen en meldplichten bij datavorderingen. `;
+      }
+      if (laagKennis.length > 0) {
+        html += `Start een kennisborgingsprogramma voor applicaties waar de afhankelijkheid van individuele personen 
+          hoog is — dit is een quick win met direct effect op de weerbaarheid. `;
+      }
+      html += `Bespreek de uitkomsten van dit assessment in het Transitieteam Digitalisering en leg de 
+        prioritering bestuurlijk vast.</p>`;
+
+      return html;
+    }
     const rows = visible.map(a => {
       const s=calcScores(a.scores), lbl=scoreLabel(s.autonomyScore);
       return `<tr>
@@ -1249,6 +1341,9 @@ export default function App() {
   <!-- PAGINA 1: Samenvatting + scoreoverzicht -->
   <h2>Samenvatting en duiding</h2>
   <div class="samenvatting">${generateSummary(visible)}</div>
+
+  <h2>Algemeen risico-conclusie en bestuurlijke aanbeveling</h2>
+  <div class="samenvatting" style="background:#fff8f0;border-left-color:#f59e0b">${generateRisicoConclusion(visible)}</div>
 
   <h2>Scoreoverzicht — alle applicaties</h2>
   <table>
@@ -1603,6 +1698,19 @@ export default function App() {
               ? <RadarSVG apps={scored} W={800} H={440} />
               : <div className="text-center py-10 text-sm text-gray-400">Voeg een applicatie toe om het spindiagram te zien.</div>
             }
+            {/* Compacte leeswijzer */}
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              {[
+                { label:"Assen & dimensies", text:"Elke as = 1 DAAF-dimensie (A t/m H). De naam staat bij de punt van de as. Hover over een punt voor de exacte waarde en applicatienaam." },
+                { label:"Waarden (1–5)", text:"Hoe verder van het centrum, hoe hoger de score. Risico-assen (A, B): dichter bij centrum is beter. Mitigatie-assen (C, D, E): verder van centrum is beter. Belang-assen (F, G, H): dichter bij centrum = minder urgent." },
+                { label:"Vorm vergelijken", text:"Elke applicatie krijgt een eigen gekleurde vorm. Grote overlappende vormen = vergelijkbaar profiel. Grote verschillen tonen precies op welke dimensies applicaties van elkaar afwijken." },
+              ].map(t => (
+                <div key={t.label} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                  <p style={{ fontSize:9, fontWeight:700, color:"#0C2340", marginBottom:2 }}>{t.label}</p>
+                  <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.4 }}>{t.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           </>)}
@@ -2048,6 +2156,12 @@ export default function App() {
               </div>
               <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen dimensiescores 1-5. Groter = sterker voor mitigatie. Kleiner = beter voor risico en belang.</p>
               <RadarSVG apps={visibleCompare} W={500} H={340} />
+              <div className="grid grid-cols-1 gap-1 mt-2">
+                {[
+                  "Elke as = 1 DAAF-dimensie (A–H). Hover over punt voor applicatienaam en exacte waarde.",
+                  "Risico-assen (A, B): kleiner is beter. Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.",
+                ].map((t,i) => <p key={i} style={{ fontSize:9, color:"#9ca3af" }}>• {t}</p>)}
+              </div>
             </div>
           </div>
 
@@ -2456,6 +2570,70 @@ export default function App() {
           </Section>
 
           {/* Wat zegt de score */}
+          <Section title="Hoe lees je het spindiagram?" accent="#1A56A0">
+            <div className="rounded p-4 mb-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+              <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                Het spindiagram (ook wel radardiagram of spinnenwebdiagram) toont alle 8 DAAF-dimensies tegelijk voor één of meerdere applicaties.
+                Elke as stelt één dimensie voor. De afstand van het middelpunt tot een punt op de as geeft de score op die dimensie (schaal 1–5).
+                Hover met de muis over een punt om de applicatienaam, dimensie en exacte waarde te zien.
+              </p>
+              {/* Visuele uitleg assen */}
+              <div className="grid grid-cols-3 gap-3 mb-3">
+                {[
+                  { letter:"A, B", naam:"Risico-assen", kleur:"#dc2626", bg:"#fee2e2",
+                    uitleg:"Geopolitiek risico (A) en Leveranciersafhankelijkheid (B). Een hogere score betekent meer risico. Dichter bij het centrum is dus beter — dat betekent minder blootstelling." },
+                  { letter:"C, D, E", naam:"Mitigatie-assen", kleur:"#16a34a", bg:"#dcfce7",
+                    uitleg:"Technische weerbaarheid (C), Organisatorische weerbaarheid (D) en Contractuele weerbaarheid (E). Een hogere score betekent betere weerbaarheid. Verder van het centrum is beter." },
+                  { letter:"F, G, H", naam:"Belang-assen", kleur:"#E87722", bg:"#ffedd5",
+                    uitleg:"Organisatorisch belang (F), Data-gevoeligheid (G) en Academische impact (H). Een hogere score betekent meer strategisch belang. Dichter bij het centrum betekent minder urgentie." },
+                ].map(g => (
+                  <div key={g.letter} className="rounded p-3" style={{ background:g.bg, border:`1px solid ${g.kleur}44` }}>
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background:g.kleur, color:"#fff", fontSize:9 }}>{g.letter}</span>
+                      <span className="text-xs font-bold" style={{ color:g.kleur }}>{g.naam}</span>
+                    </div>
+                    <p style={{ fontSize:9.5, color:"#374151", lineHeight:1.5 }}>{g.uitleg}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Schaaluitleg */}
+              <div className="rounded p-3 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Wat betekenen de waarden 1–5?</p>
+                <div className="grid grid-cols-5 gap-1">
+                  {[
+                    { v:"1", uitleg:"Minst gunstig / laagste risico voor risico-assen" },
+                    { v:"2", uitleg:"Beperkt" },
+                    { v:"3", uitleg:"Gemiddeld / neutraal" },
+                    { v:"4", uitleg:"Significant" },
+                    { v:"5", uitleg:"Maximum / hoogste risico voor risico-assen" },
+                  ].map(s => (
+                    <div key={s.v} className="text-center rounded p-1.5" style={{ background:"#EBF3FF" }}>
+                      <div style={{ fontSize:16, fontWeight:700, color:"#1A56A0" }}>{s.v}</div>
+                      <div style={{ fontSize:8, color:"#6b7280", lineHeight:1.3 }}>{s.uitleg}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              {/* Vormen vergelijken */}
+              <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Vormen vergelijken</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { titel:"Grote, volle vorm", tekst:"Een applicatie met een grote vorm (ver van het centrum op alle assen) heeft hoge scores op alle dimensies. Of dat goed of slecht is, hangt af van de as: groot op mitigatie-assen is goed, groot op risico-assen is slecht." },
+                    { titel:"Asymmetrische vorm", tekst:"Een asymmetrische of puntige vorm wijst op grote verschillen tussen dimensies. Dat is waardevol: het laat precies zien waar de sterke en zwakke punten zitten, en geeft richting aan verbeteracties." },
+                    { titel:"Overlappende vormen", tekst:"Als twee applicaties sterk overlappen, hebben ze een vergelijkbaar risico- en weerbaarheidsprofiel. Grote afwijkingen tonen juist aan waar applicaties fundamenteel van elkaar verschillen." },
+                    { titel:"Klein centrum-cluster", tekst:"Als de punt van een applicatie dicht bij het centrum zit op een mitigatie-as (C, D of E), betekent dat weinig weerbaarheid op die dimensie — een kwetsbaarheid die aandacht verdient." },
+                  ].map(t => (
+                    <div key={t.titel} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                      <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:3 }}>📌 {t.titel}</p>
+                      <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.5 }}>{t.tekst}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Section>
+
           <Section title="Wat zegt de score? — De urgentie van het autonomieprobleem" accent="#E87722">
             <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"2px solid #E87722" }}>
               <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>
