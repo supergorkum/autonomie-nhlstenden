@@ -240,15 +240,57 @@ function scoreLabel(s) {
 }
 
 function calcScores(scores) {
-  const avg = keys => {
-    const vals = keys.filter(k => (scores[k] || 0) > 0).map(k => scores[k]);
-    return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-  };
-  const risico    = avg(["A1","A3","B1"]);
-  const mitigatie = avg(["C1","D1","E1"]);
-  const belang    = avg(["F1","G1","H1"]);
-  const dictuAvg  = avg(["2.1","2.2","2.3","4.1"]);
+  const sc = k => scores[k] || 0;  // score voor één indicator, 0 = niet ingevuld
 
+  // ── Gewogen gemiddelde binnen een dimensie ──────────────────
+  // Alleen meerekenen als de indicator ook daadwerkelijk is ingevuld (>0)
+  const weightedDim = (indicators) => {
+    const filled = indicators.filter(([k]) => sc(k) > 0);
+    if (filled.length === 0) return null;
+    const totalWeight = filled.reduce((s, [, w]) => s + w, 0);
+    const weightedSum = filled.reduce((s, [k, w]) => s + sc(k) * w, 0);
+    return weightedSum / totalWeight;
+  };
+
+  // ── Niveau = gemiddelde van dimensiescores ──────────────────
+  const levelAvg = dimScores => {
+    const filled = dimScores.filter(d => d !== null);
+    return filled.length ? filled.reduce((a, b) => a + b, 0) / filled.length : null;
+  };
+
+  // ── Niveau 1: Risico-exposure ───────────────────────────────
+  // Dimensie A: Geopolitiek risico  (A1 gewicht=3, A3 gewicht=2)
+  const dimA = weightedDim([["A1", 3], ["A3", 2]]);
+  // Dimensie B: Leveranciersafhankelijkheid  (B1 gewicht=3 — enige indicator)
+  const dimB = weightedDim([["B1", 3]]);
+  const risico = levelAvg([dimA, dimB]);
+
+  // ── Niveau 2: Mitigatie-capaciteit ─────────────────────────
+  // Dimensie C: Technische weerbaarheid  (C1 gewicht=2)
+  const dimC = weightedDim([["C1", 2]]);
+  // Dimensie D: Organisatorische weerbaarheid  (D1 gewicht=2)
+  const dimD = weightedDim([["D1", 2]]);
+  // Dimensie E: Contractuele weerbaarheid  (E1 gewicht=3)
+  const dimE = weightedDim([["E1", 3]]);
+  const mitigatie = levelAvg([dimC, dimD, dimE]);
+
+  // ── Niveau 3: Strategisch belang ────────────────────────────
+  // Dimensie F: Organisatorisch belang  (F1 gewicht=3)
+  const dimF = weightedDim([["F1", 3]]);
+  // Dimensie G: Data-gevoeligheid  (G1 gewicht=2)
+  const dimG = weightedDim([["G1", 2]]);
+  // Dimensie H: Academische impact  (H1 gewicht=2)
+  const dimH = weightedDim([["H1", 2]]);
+  const belang = levelAvg([dimF, dimG, dimH]);
+
+  // ── DICTU soevereiniteitsgemiddelde ─────────────────────────
+  const dictuKeys = ["2.1","2.2","2.3","4.1"];
+  const filledDictu = dictuKeys.filter(k => sc(k) > 0);
+  const dictuAvg = filledDictu.length
+    ? filledDictu.reduce((s, k) => s + sc(k), 0) / filledDictu.length
+    : null;
+
+  // ── Autonomiescore (1–10, logaritmische schaal) ─────────────
   let autonomyScore = null;
   if (risico && mitigatie && belang) {
     const raw  = mitigatie / (risico * belang);
@@ -258,10 +300,16 @@ function calcScores(scores) {
       1 + 9 * (Math.log(Math.max(raw, 0.04)) - lMin) / (lMax - lMin)
     ));
   }
+
   const allKeys = [...DAAF.map(d => d.key), ...DICTU.map(q => q.key)];
-  const filled  = allKeys.filter(k => (scores[k] || 0) > 0).length;
-  return { risico, mitigatie, belang, autonomyScore, dictuAvg,
-           completeness: Math.round(100 * filled / allKeys.length) };
+  const filled  = allKeys.filter(k => sc(k) > 0).length;
+
+  return {
+    risico, mitigatie, belang, autonomyScore, dictuAvg,
+    // Dimensiescores beschikbaar voor spindiagram
+    dims: { A:dimA, B:dimB, C:dimC, D:dimD, E:dimE, F:dimF, G:dimG, H:dimH },
+    completeness: Math.round(100 * filled / allKeys.length)
+  };
 }
 
 // ──────────────────────────────────────────────────────────────
@@ -736,18 +784,17 @@ export default function App() {
 
     const radarKey = n => n.substring(0, 13);
 
-    // Dedupleer per dim-letter: gemiddeld van alle vragen in die dimensie
+    // Dedupleer per dim-letter — gebruik dimensiescores uit calcScores
     const dimLetters = [...new Set(DAAF.map(d => d.dim))];
     const dimLabel = letter => {
       const first = DAAF.find(d => d.dim === letter);
       return first ? first.dimName.substring(0, 14) : letter;
     };
     const radarData = dimLetters.map(letter => {
-      const qs = DAAF.filter(d => d.dim === letter);
       const entry = { dim: dimLabel(letter) };
       visibleApps.slice(0, 5).forEach(a => {
-        const vals = qs.map(q => a.scores[q.key] || 0).filter(v => v > 0);
-        entry[radarKey(a.name)] = vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : 0;
+        const sc = calcScores(a.scores);
+        entry[radarKey(a.name)] = sc.dims[letter] || 0;
       });
       return entry;
     });
