@@ -354,6 +354,9 @@ export default function App() {
   const [editForm,      setEditForm]      = useState({});
   const ADMIN_PIN = "nhl2026";
 
+  // Ref voor scroll-naar-boven bij stapwissel in Assess
+  const assessScrollRef = React.useRef(null);
+
   // ── Laden van gedeelde data via Netlify Blobs API ───────────
   useEffect(() => {
     if (!loggedIn) return;
@@ -551,10 +554,22 @@ export default function App() {
     const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
 
     const radarKey = n => n.substring(0, 13);
-    const radarData = DAAF.map(d => ({
-      dim: d.dimName.substring(0, 12),
-      ...Object.fromEntries(apps.slice(0, 5).map(a => [radarKey(a.name), a.scores[d.key] || 0]))
-    }));
+
+    // Dedupleer per dim-letter: gemiddeld van alle vragen in die dimensie
+    const dimLetters = [...new Set(DAAF.map(d => d.dim))]; // A,B,C,D,E,F,G,H
+    const dimLabel = letter => {
+      const first = DAAF.find(d => d.dim === letter);
+      return first ? first.dimName.substring(0, 14) : letter;
+    };
+    const radarData = dimLetters.map(letter => {
+      const qs = DAAF.filter(d => d.dim === letter);
+      const entry = { dim: dimLabel(letter) };
+      apps.slice(0, 5).forEach(a => {
+        const vals = qs.map(q => a.scores[q.key] || 0).filter(v => v > 0);
+        entry[radarKey(a.name)] = vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : 0;
+      });
+      return entry;
+    });
 
     // Kwadrant data: X = risico × belang (1–25), Y = mitigatie (1–5)
     const kwData = scored
@@ -703,7 +718,191 @@ export default function App() {
 
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
-        <div className="p-5 max-w-6xl mx-auto">
+        <div className="p-5" style={{ maxWidth:"100%", margin:"0 auto" }}>
+
+          {/* ── Stat row ── */}
+          <div className="grid grid-cols-4 gap-3 mb-4">
+            {[
+              { label:"Applicaties",        val: apps.length,     color: "#1A56A0" },
+              { label:"Gem. autonomiescore", val: avgA ? avgA.toFixed(1) : "–", color: scoreColor(avgA) },
+              { label:"Goed (≥7)",           val: withSc.filter(a=>a.sc.autonomyScore>=7).length, color:"#26B5AE" },
+              { label:"Aandacht nodig (<5)", val: withSc.filter(a=>a.sc.autonomyScore<5).length,  color:"#E87722" },
+            ].map(({ label, val, color }) => (
+              <div key={label} className="rounded text-center px-3 py-3"
+                style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <div style={{ fontSize: 26, fontWeight: 700, color }}>{val}</div>
+                <div className="text-xs mt-0.5" style={{ color:"#6b7280" }}>{label}</div>
+              </div>
+            ))}
+          </div>
+
+          {apps.length === 0 ? (
+            <div className="bg-white rounded border-2 border-dashed border-gray-200 p-16 text-center">
+              <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Start met uw assessment</h3>
+              <p className="text-gray-400 text-sm mb-5">Voeg een applicatie toe om te beginnen.</p>
+              <button onClick={() => setShowModal(true)}
+                className="text-white text-sm px-5 py-2.5 font-medium"
+                style={{ background:"#1A56A0", borderRadius:4 }}>
+                + Applicatie toevoegen
+              </button>
+            </div>
+          ) : (<>
+
+          {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
+          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
+
+            {/* Autonomie-kwadrant */}
+            <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                  <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Autonomie-kwadrant</h3>
+                </div>
+                <div className="flex gap-1.5 flex-wrap">
+                  {[
+                    { label:"OPTIMAAL",      color:"#2e7d5e", bg:"#e8f5e9" },
+                    { label:"BEHEERSBAAR",   color:"#e07b20", bg:"#fff8e1" },
+                    { label:"AANDACHTSPUNT", color:"#e07b20", bg:"#fff3e0" },
+                    { label:"KRITIEK",       color:"#c0392b", bg:"#fce4ec" },
+                  ].map(l => (
+                    <span key={l.label} style={{ background:l.bg, color:l.color, borderRadius:3, fontSize:10, padding:"2px 6px", fontWeight:600 }}>{l.label}</span>
+                  ))}
+                </div>
+              </div>
+              <div className="rounded p-2 mb-3 text-xs" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7", color:"#374151" }}>
+                <strong>Horizontale as</strong> = Risico × Belang (rechts = meer urgentie) ·{" "}
+                <strong>Verticale as</strong> = Mitigatie (hoger = beter) ·{" "}
+                <span style={{ color:"#2e7d5e", fontWeight:600 }}>Linksboven</span> = ideaal ·{" "}
+                <span style={{ color:"#c0392b", fontWeight:600 }}>Rechtsboven</span> = actie vereist.
+                Klik op een punt om naar het assessment te gaan.
+              </div>
+              <KwadrantSVG />
+              <div className="mt-2 px-2 py-1 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#9ca3af" }}>
+                Risico = gem. A1+A3+B1 · Mitigatie = gem. C1+D1+E1 · Belang = gem. F1+G1+H1 · Grens: X=13, Y=3
+              </div>
+            </div>
+
+            {/* App-kaarten rechts — 2 kolommen */}
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({apps.length})</h3>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowModal(true)}
+                    className="text-white text-xs px-3 py-1.5 font-medium"
+                    style={{ background:"#1A56A0", borderRadius:4 }}>
+                    + Toevoegen
+                  </button>
+                  <button onClick={exportXlsx} disabled={apps.length===0}
+                    className="text-xs px-3 py-1.5 font-medium"
+                    style={{ background:"#E6F7F7", color:"#26B5AE", borderRadius:4, border:"1px solid #26B5AE55", opacity:apps.length===0?0.5:1 }}>
+                    📥 Excel
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {scored.map(a => {
+                  const lbl = scoreLabel(a.sc.autonomyScore);
+                  return (
+                    <div key={a.id}
+                      onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
+                      className="cursor-pointer transition-all"
+                      style={{ background:"#fff", borderRadius:4, padding:14, border:"1px solid #D0E4F7", borderLeft:`4px solid ${scoreColor(a.sc.autonomyScore)}` }}
+                      onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(26,86,160,0.15)"}
+                      onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
+                      <div className="flex items-start gap-2 mb-2">
+                        <Gauge score={a.sc.autonomyScore} size={58} />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-bold text-xs truncate" style={{ color:"#0C2340" }}>{a.name}</h3>
+                          {a.supplier && <p style={{ fontSize:10, color:"#9ca3af" }}>{a.supplier}</p>}
+                          <span className="text-xs px-1.5 py-0.5 font-medium mt-1 inline-block"
+                            style={{ borderRadius:3, background: lbl.bg, color: lbl.fg, fontSize:10 }}>{lbl.text}</span>
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <div className="flex justify-between" style={{ fontSize:9, color:"#9ca3af", marginBottom:2 }}>
+                          <span>DICTU</span><span>{a.sc.dictuAvg ? a.sc.dictuAvg.toFixed(1)+"/5" : "–"}</span>
+                        </div>
+                        <SovBar score5={a.sc.dictuAvg} />
+                      </div>
+                      <div className="grid grid-cols-3 gap-1">
+                        {[
+                          { lbl:"Risico",    val:a.sc.risico,    color:"#dc2626" },
+                          { lbl:"Mitigatie", val:a.sc.mitigatie, color:"#26B5AE" },
+                          { lbl:"Belang",    val:a.sc.belang,    color:"#E87722" },
+                        ].map(s => (
+                          <div key={s.lbl} className="text-center rounded py-1" style={{ background:"#f8fafc" }}>
+                            <div style={{ fontSize:12, fontWeight:700, color:s.val ? s.color : "#d1d5db" }}>{s.val ? s.val.toFixed(1) : "–"}</div>
+                            <div style={{ fontSize:9, color:"#9ca3af" }}>{s.lbl}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Leeswijzer compact onderaan */}
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                <div className="rounded p-2.5" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-xs font-bold px-1.5 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3, fontSize:9 }}>DAAF</span>
+                    <span className="font-semibold" style={{ fontSize:10, color:"#0C2340" }}>Snelheidsmeter (1–10)</span>
+                  </div>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {[{t:"≥7 Goed",bg:"#dcfce7",fg:"#15803d"},{t:"5-7 OK",bg:"#fef9c3",fg:"#a16207"},{t:"3-5 ⚠️",bg:"#ffedd5",fg:"#c2410c"},{t:"<3 🔴",bg:"#fee2e2",fg:"#b91c1c"}].map(s=>(
+                      <span key={s.t} style={{ fontSize:9, background:s.bg, color:s.fg, borderRadius:2, padding:"1px 4px", fontWeight:600 }}>{s.t}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded p-2.5" style={{ background:"#E6F7F7", border:"1px solid #26B5AE44" }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-xs font-bold px-1.5 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3, fontSize:9 }}>DICTU</span>
+                    <span className="font-semibold" style={{ fontSize:10, color:"#0C2340" }}>Kleurenbalk (1–5)</span>
+                  </div>
+                  <p style={{ fontSize:9, color:"#6b7280" }}>Rood = afhankelijk → groen = soeverein. Gem. van 2.1, 2.2, 2.3 en 4.1.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Rij 2: Radar full-width ── */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Spindiagram — dimensies per applicatie</h3>
+            </div>
+            <p className="text-xs leading-relaxed mb-3" style={{ color:"#6b7280" }}>
+              Elke as toont één DAAF-dimensie (gemiddelde score 1–5).{" "}
+              <span style={{ color:"#26B5AE", fontWeight:600 }}>Mitigatie-assen</span>: groter is beter.{" "}
+              <span style={{ color:"#dc2626", fontWeight:600 }}>Risico-assen</span> en{" "}
+              <span style={{ color:"#E87722", fontWeight:600 }}>Belang-assen</span>: kleiner is beter.
+              Vergelijk de vormen van applicaties om te zien waar de grootste verschillen zitten.
+            </p>
+            {apps.length >= 1 ? (
+              <ResponsiveContainer width="100%" height={360}>
+                <RadarChart data={radarData} margin={{ top:15, right:90, bottom:15, left:90 }}>
+                  <PolarGrid stroke="#e5e7eb" />
+                  <PolarAngleAxis dataKey="dim" tick={{ fontSize: 12, fill:"#374151" }} />
+                  <PolarRadiusAxis domain={[0, 5]} tick={{ fontSize:9, fill:"#9ca3af" }} tickCount={6} />
+                  {apps.slice(0, 5).map((a, i) => (
+                    <Radar key={a.id} name={a.name} dataKey={radarKey(a.name)}
+                      stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.15} strokeWidth={2} />
+                  ))}
+                  <Tooltip wrapperStyle={{ fontSize: 11 }} />
+                  <Legend wrapperStyle={{ fontSize: 11 }} />
+                </RadarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="text-center py-10 text-sm text-gray-400">Voeg een applicatie toe om het spindiagram te zien.</div>
+            )}
+          </div>
+
+          </>)}
+        </div>
+      </div>
+    );
+  }
 
           {/* ── Stat row ── */}
           <div className="grid grid-cols-4 gap-3 mb-4">
@@ -721,189 +920,6 @@ export default function App() {
             ))}
           </div>
 
-          {apps.length === 0 ? (
-            <div className="bg-white rounded border-2 border-dashed border-gray-200 p-16 text-center">
-              <div style={{ fontSize: 48, marginBottom: 12 }}>\ud83d\udcca</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Start met uw assessment</h3>
-              <p className="text-gray-400 text-sm mb-5">Voeg een applicatie toe om te beginnen.</p>
-              <button onClick={() => setShowModal(true)}
-                className="text-white text-sm px-5 py-2.5 font-medium"
-                style={{ background:"#1A56A0", borderRadius:4 }}>
-                + Applicatie toevoegen
-              </button>
-            </div>
-          ) : (<>
-
-          {/* ── Rij 1: Kwadrant (breed) + Leeswijzer (smal) ── */}
-          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 300px" }}>
-            <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                  <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Autonomie-kwadrant</h3>
-                </div>
-                <div className="flex gap-1.5 flex-wrap">
-                  {[
-                    { label:"OPTIMAAL", color:"#2e7d5e", bg:"#e8f5e9" },
-                    { label:"BEHEERSBAAR", color:"#e07b20", bg:"#fff8e1" },
-                    { label:"AANDACHTSPUNT", color:"#e07b20", bg:"#fff3e0" },
-                    { label:"KRITIEK", color:"#c0392b", bg:"#fce4ec" },
-                  ].map(l => (
-                    <span key={l.label} style={{ background:l.bg, color:l.color, borderRadius:3, fontSize:10, padding:"2px 6px", fontWeight:600 }}>{l.label}</span>
-                  ))}
-                </div>
-              </div>
-              <div className="rounded p-2 mb-3 text-xs" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7", color:"#374151" }}>
-                <strong style={{ color:"#0C2340" }}>Hoe te lezen:</strong>{" "}
-                <strong>Horizontale as</strong> = Risico \u00d7 Belang (verder rechts = meer urgentie).{" "}
-                <strong>Verticale as</strong> = Mitigatie (hoger = beter beschermd).{" "}
-                <span style={{ color:"#2e7d5e", fontWeight:600 }}>Linksboven</span> = ideaal.{" "}
-                <span style={{ color:"#c0392b", fontWeight:600 }}>Rechtsboven</span> = directe actie.
-                Klik op een punt om naar het assessment te gaan.
-              </div>
-              <KwadrantSVG />
-              <div className="mt-2 px-2 py-1.5 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#9ca3af" }}>
-                Berekening: Risico = gem. A1+A3+B1 \u00b7 Mitigatie = gem. C1+D1+E1 \u00b7 Belang = gem. F1+G1+H1 \u00b7 Kwadrantgrens: X=13, Y=3
-              </div>
-            </div>
-
-            {/* Leeswijzer smal */}
-            <div className="flex flex-col gap-3">
-              <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                  <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>Snelheidsmeter (1\u201310)</span>
-                </div>
-                <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>Urgentie autonomieprobleem. Hoe hoger, hoe minder actie nodig.</p>
-                <div className="space-y-1 mb-2">
-                  {[
-                    { dot:"#dc2626", txt:"Risico (A1,A3,B1) \u2014 laag is beter" },
-                    { dot:"#26B5AE", txt:"Mitigatie (C,D,E) \u2014 hoog is beter" },
-                    { dot:"#E87722", txt:"Belang (F,G,H) \u2014 laag = minder urgent" },
-                  ].map(r => (
-                    <div key={r.txt} className="flex gap-1.5 text-xs items-center">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:r.dot }}/>
-                      <span style={{ color:"#6b7280" }}>{r.txt}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-1 flex-wrap">
-                  {[{t:"\u22677 Goed",bg:"#dcfce7",fg:"#15803d"},{t:"5-7 OK",bg:"#fef9c3",fg:"#a16207"},{t:"3-5 \u26a0\ufe0f",bg:"#ffedd5",fg:"#c2410c"},{t:"<3 \ud83d\udd34",bg:"#fee2e2",fg:"#b91c1c"}].map(s=>(
-                    <span key={s.t} className="text-xs px-1.5 py-0.5 font-medium" style={{ background:s.bg, color:s.fg, borderRadius:3 }}>{s.t}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded p-3" style={{ background:"#E6F7F7", border:"1px solid #26B5AE55" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                  <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>Kleurenbalk (1\u20135)</span>
-                </div>
-                <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>Technische en juridische soevereiniteit. Rood = afhankelijk, groen = soeverein.</p>
-                <div className="space-y-0.5 text-xs" style={{ color:"#6b7280" }}>
-                  {["2.1 Dataresidency","2.2 Technische beveiliging","2.3 Juridische bescherming","4.1 EU-infrastructuur"].map(v=>(
-                    <div key={v} className="flex gap-1 items-center">
-                      <span style={{ color:"#26B5AE", fontWeight:600 }}>\u00b7</span>{v}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-xs font-semibold mb-2" style={{ color:"#0C2340" }}>Snel naar</p>
-                <div className="space-y-1.5">
-                  <button onClick={() => setShowModal(true)} className="w-full text-left text-xs px-3 py-1.5 font-medium text-white" style={{ background:"#1A56A0", borderRadius:4 }}>+ Applicatie toevoegen</button>
-                  <button onClick={() => setView("compare")} className="w-full text-left text-xs px-3 py-1.5 font-medium" style={{ background:"#EBF3FF", color:"#1A56A0", borderRadius:4, border:"1px solid #D0E4F7" }}>\u2192 Vergelijking</button>
-                  <button onClick={exportXlsx} disabled={apps.length===0} className="w-full text-left text-xs px-3 py-1.5 font-medium" style={{ background:"#E6F7F7", color:"#26B5AE", borderRadius:4, border:"1px solid #26B5AE55" }}>\ud83d\udce5 Exporteer Excel</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Rij 2: Radar full-width ── */}
-          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Spindiagram \u2014 dimensies per applicatie</h3>
-            </div>
-            <p className="text-xs leading-relaxed mb-3" style={{ color:"#6b7280" }}>
-              Elke as = \u00e9\u00e9n DAAF-dimensie (1\u20135).
-              <span style={{ color:"#26B5AE", fontWeight:600 }}> Mitigatie-assen</span>: groter is beter.
-              <span style={{ color:"#dc2626", fontWeight:600 }}> Risico-assen</span> en
-              <span style={{ color:"#E87722", fontWeight:600 }}> Belang-assen</span>: kleiner is beter. Vergelijk vormen om verschillen te zien.
-            </p>
-            {apps.length >= 2 ? (
-              <ResponsiveContainer width="100%" height={340}>
-                <RadarChart data={radarData} margin={{ top:10, right:70, bottom:10, left:70 }}>
-                  <PolarGrid stroke="#e5e7eb" />
-                  <PolarAngleAxis dataKey="dim" tick={{ fontSize: 11, fill:"#374151" }} />
-                  <PolarRadiusAxis domain={[0, 5]} tick={false} axisLine={false} />
-                  {apps.slice(0, 5).map((a, i) => (
-                    <Radar key={a.id} name={radarKey(a.name)} dataKey={radarKey(a.name)}
-                      stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.12} strokeWidth={2} />
-                  ))}
-                  <Tooltip wrapperStyle={{ fontSize: 11 }} />
-                  <Legend wrapperStyle={{ fontSize: 11 }} />
-                </RadarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="text-center py-10 text-sm text-gray-400">Voeg minimaal 2 applicaties toe om het spindiagram te zien.</div>
-            )}
-          </div>
-
-          {/* ── Rij 3: App-kaarten grid ── */}
-          <div className="mb-4">
-            <h3 className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>Applicaties ({apps.length}) \u2014 klik om te openen</h3>
-            <div className="grid gap-3" style={{ gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))" }}>
-              {scored.map(a => {
-                const lbl = scoreLabel(a.sc.autonomyScore);
-                return (
-                  <div key={a.id} onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
-                    className="cursor-pointer transition-all"
-                    style={{ background:"#fff", borderRadius:4, padding:16, border:"1px solid #D0E4F7", borderLeft:`4px solid ${scoreColor(a.sc.autonomyScore)}` }}
-                    onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(26,86,160,0.15)"}
-                    onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
-                    <div className="flex items-start gap-3 mb-3">
-                      <Gauge score={a.sc.autonomyScore} size={64} />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-sm truncate" style={{ color:"#0C2340" }}>{a.name}</h3>
-                        {a.supplier && <p className="text-xs text-gray-400">{a.supplier}</p>}
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span className="text-xs px-2 py-0.5 font-medium" style={{ borderRadius:3, background: lbl.bg, color: lbl.fg }}>{lbl.text}</span>
-                          <span className="text-xs text-gray-400">{a.sc.completeness}% ingevuld</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mb-2">
-                      <div className="flex justify-between mb-1" style={{ fontSize:10, color:"#9ca3af" }}>
-                        <span>DICTU soevereiniteit</span>
-                        <span>{a.sc.dictuAvg ? a.sc.dictuAvg.toFixed(1)+"/5" : "\u2013"}</span>
-                      </div>
-                      <SovBar score5={a.sc.dictuAvg} />
-                    </div>
-                    <div className="grid grid-cols-3 gap-1">
-                      {[
-                        { lbl:"Risico", val:a.sc.risico, color:"#dc2626", hint:"\u2193 beter" },
-                        { lbl:"Mitigatie", val:a.sc.mitigatie, color:"#26B5AE", hint:"\u2191 beter" },
-                        { lbl:"Belang", val:a.sc.belang, color:"#E87722", hint:"\u2193 beter" },
-                      ].map(s => (
-                        <div key={s.lbl} className="text-center rounded py-1.5" style={{ background:"#f8fafc" }}>
-                          <div style={{ fontSize:13, fontWeight:700, color:s.val ? s.color : "#d1d5db" }}>{s.val ? s.val.toFixed(1) : "\u2013"}</div>
-                          <div style={{ fontSize:9, color:"#9ca3af" }}>{s.lbl} {s.hint}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          </>)}
-        </div>
-      </div>
-    );
-  }
 
   function AppsList() {
     return (
@@ -976,7 +992,7 @@ export default function App() {
     return (
       <div className="flex h-full overflow-hidden">
         {/* Main form */}
-        <div className="flex-1 overflow-y-auto p-5" style={{ background:"#EBF3FF" }}>
+        <div ref={assessScrollRef} className="flex-1 overflow-y-auto p-5" style={{ background:"#EBF3FF" }}>
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
               <button onClick={() => setView("apps")} className="text-sm hover:underline font-medium" style={{ color:"#1A56A0" }}>
@@ -992,7 +1008,10 @@ export default function App() {
                 { i:0, label:"1 · DAAF Quick Scan",           bg:"#1A56A0" },
                 { i:1, label:"2 · DICTU Soevereiniteitscheck", bg:"#26B5AE" }
               ].map(t => (
-                <button key={t.i} onClick={() => setStep(t.i)}
+                <button key={t.i} onClick={() => {
+                  setStep(t.i);
+                  if (assessScrollRef.current) assessScrollRef.current.scrollTop = 0;
+                }}
                   className="text-sm px-4 py-2 font-medium transition-all"
                   style={step === t.i
                     ? { background: t.bg, color:"#fff", borderRadius:4 }
@@ -1026,7 +1045,10 @@ export default function App() {
                   </div>
                 );
               })}
-              <button onClick={() => setStep(1)}
+              <button onClick={() => {
+                setStep(1);
+                if (assessScrollRef.current) assessScrollRef.current.scrollTop = 0;
+              }}
                 className="w-full text-white py-3 text-sm font-medium mb-4"
                 style={{ background:"#26B5AE", borderRadius:4 }}>
                 Verder: DICTU Soevereiniteitscheck →
