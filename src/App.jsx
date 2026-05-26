@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -356,7 +356,7 @@ export default function App() {
   const ADMIN_PIN = "nhl2026";
 
   // Ref voor scroll-naar-boven bij stapwissel in Assess
-  const assessScrollRef = React.useRef(null);
+  const assessScrollRef = useRef(null);
 
   // ── Laden van gedeelde data via Netlify Blobs API ───────────
   useEffect(() => {
