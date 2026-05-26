@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v0.9";
+const VERSION = "v1.0";
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
@@ -313,8 +313,66 @@ function calcScores(scores) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// COMPONENTS
+// AANBEVELINGEN — automatisch gegenereerd op basis van scores
 // ──────────────────────────────────────────────────────────────
+function generateRecommendations(scores) {
+  const sc  = calcScores(scores);
+  const get = k => scores[k] || 0;
+
+  // ── Quick win: laagst scorende verbeterbare dimensie ─────────
+  let quickWin = "";
+  const mit = [
+    { k:"C1", s:get("C1"), label:"alternatieven", tip:"Verken en documenteer minimaal twee concrete alternatieven voor deze applicatie, inclusief een Europese optie. Breng switching costs en migratietijd in kaart." },
+    { k:"D1", s:get("D1"), label:"interne kennis", tip:"Start met het documenteren van interne kennis: functioneel, technisch en datakennis. Stel een exitplan op en verbreed de kennisbasis zodat niet alles bij één persoon ligt." },
+    { k:"E1", s:get("E1"), label:"exit-clausules", tip:"Zorg bij de eerstvolgende contractverlenging voor expliciete exit-clausules: open dataformaten, transitieperiode, actieve leveranciersmedewerking en liefst afdwingbare consequenties bij niet-nakoming." },
+  ].filter(m => m.s > 0).sort((a,b) => a.s - b.s);
+
+  const a1=get("A1"), a3=get("A3"), dictu21=get("2.1"), dictu22=get("2.2");
+
+  if (mit.length > 0 && mit[0].s <= 2) {
+    quickWin = mit[0].tip;
+  } else if (a1 >= 4) {
+    quickWin = "Verifieer de juridische jurisdictie van de leverancier. Controleer of er een adequaatheidsbesluit van toepassing is en wat de implicaties zijn van de CLOUD Act of FISA 702. Overweeg een juridisch advies bij twijfel.";
+  } else if (dictu21 <= 2) {
+    quickWin = "Verifieer contractueel of alle data inclusief back-ups en logs uitsluitend binnen de EU worden opgeslagen. Vraag de leverancier om een schriftelijke bevestiging met specifieke datacenterlocaties.";
+  } else if (dictu22 <= 2) {
+    quickWin = "Bespreek met de leverancier de mogelijkheid van klant-beheerde sleutels (BYOK of CMK). Dit is een relatief eenvoudige stap die de technische toegangsbeveiliging significant verbetert.";
+  } else if (mit.length > 0) {
+    quickWin = mit[0].tip;
+  } else {
+    quickWin = "Voer een periodieke hercontrole uit bij de eerstvolgende contractverlenging. Zorg dat de assessmentresultaten worden gedeeld met de contractverantwoordelijke.";
+  }
+
+  // ── Strategische aanbeveling: kwadrantpositie ────────────────
+  let strategic = "";
+  const risB = sc.risico * sc.belang || 0;
+  const mit2 = sc.mitigatie || 0;
+  const inKritiek      = risB > 13 && mit2 < 3;
+  const inBeheersbaar  = risB > 13 && mit2 >= 3;
+  const inAandacht     = risB <= 13 && mit2 < 3;
+  const inOptimaal     = risB <= 13 && mit2 >= 3;
+  const dictuLaag      = sc.dictuAvg && sc.dictuAvg < 3;
+
+  if (inKritiek) {
+    strategic = "Deze applicatie staat in het kwadrant KRITIEK: hoog risico én lage weerbaarheid. Urgente actie is vereist. Overweeg drie opties: (1) Migreer naar een Europese aanbieder met lagere risicoscore, (2) versterk de mitigatie door contractonderhandelingen, kennisborging en alternatieven te ontwikkelen, of (3) accepteer het risico bewust via een bestuurlijk besluit met onderbouwing. Stel een actieplan op met een concrete deadline.";
+  } else if (inBeheersbaar) {
+    strategic = "Deze applicatie staat in het kwadrant BEHEERSBAAR: hoog risico maar goede weerbaarheid. De risico's zijn geaccepteerd met een solide fallback-positie. Strategisch advies: bewaken dat de weerbaarheid op peil blijft, met name als er leverancierswijzigingen plaatsvinden. Neem clausules op die NHL Stenden informeren bij overname of beleidswijzigingen van de leverancier.";
+  } else if (inAandacht) {
+    strategic = "Deze applicatie staat in het kwadrant AANDACHTSPUNT: beperkt risico maar ook beperkte weerbaarheid. Er is ruimte voor verbetering zonder hoge urgentie. Strategisch advies: gebruik de relatief lage druk als momentum om weerbaarheid structureel op te bouwen — begin met kennisborging en contractuele exit-clausules.";
+  } else if (inOptimaal) {
+    strategic = "Deze applicatie staat in het kwadrant OPTIMAAL: beperkt risico en goede weerbaarheid. Behoud de huidige positie. Strategisch advies: zorg voor periodieke hercontrole (jaarlijks of bij contractverlenging) en houd de weerbaarheidsmaatregelen actueel. Deel de aanpak als voorbeeld voor andere applicaties.";
+  } else {
+    strategic = "Vul alle DAAF-dimensies in voor een volledige strategische duiding.";
+  }
+
+  if (dictuLaag && !inKritiek) {
+    strategic += ` Aanvullend: de DICTU-soevereiniteitsscore is laag (${sc.dictuAvg?.toFixed(1)}/5). Prioriteer verbetering van dataresidency en sleutelbeheer bij de volgende leveranciersevaluatie.`;
+  }
+
+  return { quickWin, strategic };
+}
+
+
 
 // About sub-components — module level om React re-mount te voorkomen
 function Section({ title, children, accent="#1A56A0" }) {
@@ -694,6 +752,7 @@ export default function App() {
   const [showModal,  setShowModal] = useState(false);
   const [form,       setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", notes:"" });
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
+  const [compareHidden, setCompareHidden] = useState(new Set()); // IDs verborgen in vergelijking
 
   // Beheer (admin) state
   const [adminUnlocked, setAdminUnlocked] = useState(false);
@@ -1102,6 +1161,7 @@ export default function App() {
     }).join("");
 
     const kwRows = visible.map(a => {
+      const s=calcScores(a.scores), rec=generateRecommendations(a.scores);
       const daafRows=DAAF.map(q=>`<tr>
         <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
         <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
@@ -1112,12 +1172,23 @@ export default function App() {
         <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
         <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
       </tr>`).join("");
+      const lbl=scoreLabel(s.autonomyScore);
       return `<div class="app-section">
-        <h3>${a.name}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""}</h3>
+        <h3>${a.name}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
+          <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
+        </h3>
         <table class="scores-table">
           <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th></tr>
           ${daafRows}${dictuRows}
         </table>
+        <div class="rec-box rec-qw">
+          <div class="rec-label" style="color:#92400e">⚡ Quick win</div>
+          <div class="rec-text">${rec.quickWin}</div>
+        </div>
+        <div class="rec-box rec-str">
+          <div class="rec-label" style="color:#166534">🎯 Strategische aanbeveling</div>
+          <div class="rec-text">${rec.strategic}</div>
+        </div>
       </div>`;
     }).join("");
 
@@ -1135,21 +1206,32 @@ export default function App() {
   .header-sub{font-size:10px;color:#7DD3D0;margin-top:2px}
   .content{padding:20px 24px}
   .meta{color:#6b7280;font-size:10px;margin-bottom:12px}
-  .samenvatting{background:#EBF3FF;border-left:4px solid #1A56A0;padding:12px 16px;margin-bottom:16px;border-radius:2px;line-height:1.6}
-  .samenvatting p{margin-bottom:6px;font-size:11px;color:#1a1a1a}
-  h2{font-size:13px;color:#0C2340;border-bottom:2px solid #1A56A0;padding-bottom:4px;margin:16px 0 10px}
+  .samenvatting{background:#EBF3FF;border-left:4px solid #1A56A0;padding:14px 18px;margin-bottom:16px;border-radius:2px;line-height:1.7}
+  .samenvatting p{margin-bottom:8px;font-size:11px;color:#1a1a1a}
+  .samenvatting p:last-child{margin-bottom:0}
+  h2{font-size:13px;color:#0C2340;border-bottom:2px solid #1A56A0;padding-bottom:4px;margin:20px 0 10px}
   h3{font-size:12px;color:#0C2340;margin:12px 0 6px}
   .sub{font-weight:normal;color:#6b7280}
   table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:10px}
   th{background:#0C2340;color:white;padding:5px 8px;text-align:left;font-size:10px}
   td{padding:4px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}
   tr:nth-child(even) td{background:#f8fafc}
-  .app-section{margin-bottom:20px;page-break-inside:avoid}
+  .app-section{margin-bottom:24px;page-break-inside:avoid}
   .scores-table th{background:#1A56A0}
   .dim-table th{background:#065f46}
-  .chart-wrap{margin:12px 0;page-break-inside:avoid}
+  .chart-wrap{margin:8px 0 16px;page-break-inside:avoid;text-align:center}
+  .rec-box{border-radius:3px;padding:8px 12px;margin-bottom:8px}
+  .rec-qw{background:#fffbeb;border-left:3px solid #f59e0b}
+  .rec-str{background:#f0fdf4;border-left:3px solid #22c55e}
+  .rec-label{font-weight:700;font-size:10px;margin-bottom:3px}
+  .rec-text{font-size:10px;line-height:1.5;color:#374151}
+  .page2{page-break-before:always;padding-top:8px}
   .footer{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:9px;color:#9ca3af;text-align:center}
-  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  @media print{
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .page2{page-break-before:always}
+    .app-section{page-break-inside:avoid}
+  }
 </style>
 </head>
 <body>
@@ -1164,6 +1246,7 @@ export default function App() {
 <div class="content">
   <p class="meta">Gegenereerd op: ${datum} · ${visible.length} applicatie${visible.length!==1?"s":""} in selectie · Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum</p>
 
+  <!-- PAGINA 1: Samenvatting + scoreoverzicht -->
   <h2>Samenvatting en duiding</h2>
   <div class="samenvatting">${generateSummary(visible)}</div>
 
@@ -1173,19 +1256,31 @@ export default function App() {
     ${rows}
   </table>
 
-  <h2>Autonomie-kwadrant (DAAF)</h2>
-  <p style="font-size:10px;color:#6b7280;margin-bottom:8px">Horizontale as = Risico × Belang (verder rechts = urgenter) · Verticale as = Mitigatie (hoger = beter beschermd) · Linksboven ideaal · Rechtsboven kritiek</p>
-  <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
+  <!-- PAGINA 2: Grafieken -->
+  <div class="page2">
+    <h2>Autonomie-kwadrant (DAAF)</h2>
+    <p style="font-size:10px;color:#6b7280;margin-bottom:8px">
+      Horizontale as = Risico × Belang (verder rechts = urgenter) · Verticale as = Mitigatie (hoger = beter beschermd)
+      · Linksboven = OPTIMAAL · Rechtsboven = KRITIEK
+    </p>
+    <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-  <h2>Spindiagram — dimensiescores per applicatie (DAAF)</h2>
-  <p style="font-size:10px;color:#6b7280;margin-bottom:8px">Gewogen dimensiescores 1–5. Risico-assen (A, B): kleiner is beter. Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.</p>
-  <div class="chart-wrap">${generateSpinSVG(visible)}</div>
+    <h2>Spindiagram — dimensiescores per applicatie (DAAF)</h2>
+    <p style="font-size:10px;color:#6b7280;margin-bottom:8px">
+      Gewogen dimensiescores 1–5. Risico-assen (A, B): kleiner is beter.
+      Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.
+    </p>
+    <div class="chart-wrap">${generateSpinSVG(visible)}</div>
 
-  <h2>Dimensiescores tabel</h2>
-  ${generateDimTable(visible)}
+    <h2>Dimensiescores per applicatie</h2>
+    ${generateDimTable(visible)}
+  </div>
 
-  <h2>Detailscores per applicatie</h2>
-  ${kwRows}
+  <!-- PAGINA 3+: Detail per applicatie met aanbevelingen -->
+  <div class="page2">
+    <h2>Detailscores en aanbevelingen per applicatie</h2>
+    ${kwRows}
+  </div>
 
   <div class="footer">NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · ${VERSION}</div>
 </div>
@@ -1447,6 +1542,22 @@ export default function App() {
                           </div>
                         ))}
                       </div>
+                      {/* Aanbevelingen — toon alleen als app volledig genoeg is */}
+                      {a.sc.autonomyScore && (() => {
+                        const rec = generateRecommendations(a.scores);
+                        return (
+                          <div className="mt-2 space-y-1">
+                            <div className="rounded px-2 py-1.5" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+                              <p style={{ fontSize:9, fontWeight:700, color:"#92400e", marginBottom:2 }}>⚡ Quick win</p>
+                              <p style={{ fontSize:9, color:"#78350f", lineHeight:1.4 }}>{rec.quickWin.substring(0,120)}{rec.quickWin.length > 120 ? "…" : ""}</p>
+                            </div>
+                            <div className="rounded px-2 py-1.5" style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
+                              <p style={{ fontSize:9, fontWeight:700, color:"#166534", marginBottom:2 }}>🎯 Strategisch</p>
+                              <p style={{ fontSize:9, color:"#14532d", lineHeight:1.4 }}>{rec.strategic.substring(0,120)}{rec.strategic.length > 120 ? "…" : ""}</p>
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}
@@ -1777,11 +1888,23 @@ export default function App() {
   }
 
   function Compare() {
-    if (apps.length < 2) return (
+    const minCompare = 2;
+    const visibleCompare = apps.filter(a => !compareHidden.has(a.id));
+
+    function toggleCompare(id) {
+      setCompareHidden(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) { next.delete(id); return next; }
+        if (visibleCompare.length <= minCompare) return prev;
+        next.add(id); return next;
+      });
+    }
+
+    if (visibleCompare.length < 2) return (
       <div className="h-full flex items-center justify-center text-gray-400">
         <div className="text-center">
-          <p className="text-lg mb-1">Voeg minimaal 2 applicaties toe</p>
-          <p className="text-sm">om een vergelijking te kunnen maken.</p>
+          <p className="text-lg mb-1">Selecteer minimaal 2 applicaties</p>
+          <p className="text-sm">via de filter hieronder om te vergelijken.</p>
         </div>
       </div>
     );
@@ -1806,11 +1929,11 @@ export default function App() {
     };
     const radarData = dimLettersC.map(letter => {
       const entry = { dim: dimLabelC(letter) };
-      apps.forEach(a => { entry[name14(a.name)] = +dimScoreC(a, letter).toFixed(2); });
+      visibleCompare.forEach(a => { entry[name14(a.name)] = +dimScoreC(a, letter).toFixed(2); });
       return entry;
     });
 
-    const barData = apps.map(a => {
+    const barData = visibleCompare.map(a => {
       const s = calcScores(a.scores);
       return {
         name: a.name.substring(0, 16),
@@ -1822,6 +1945,48 @@ export default function App() {
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
         <div className="p-5 max-w-5xl mx-auto">
+
+          {/* Filter strip */}
+          {apps.length > 2 && (
+            <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
+              style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Vergelijkingsfilter</span>
+                <span style={{ fontSize:10, color:"#9ca3af" }}>
+                  — {visibleCompare.length} van {apps.length} geselecteerd (min. 2)
+                </span>
+              </div>
+              <div className="flex gap-2 flex-wrap flex-1">
+                {apps.map((a, i) => {
+                  const hidden  = compareHidden.has(a.id);
+                  const isLast2 = !hidden && visibleCompare.length <= minCompare;
+                  const col     = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"][i % 6];
+                  return (
+                    <button key={a.id} onClick={() => toggleCompare(a.id)}
+                      disabled={isLast2 && !hidden}
+                      title={isLast2 && !hidden ? "Minimaal 2 applicaties voor vergelijking" : ""}
+                      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium"
+                      style={{
+                        borderRadius:4, border:`2px solid ${hidden?"#e5e7eb":col}`,
+                        background: hidden?"#f9fafb":`${col}18`, color:hidden?"#9ca3af":col,
+                        opacity:isLast2&&!hidden?0.5:1, cursor:isLast2&&!hidden?"not-allowed":"pointer",
+                        textDecoration:hidden?"line-through":"none"
+                      }}>
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:hidden?"#d1d5db":col }}/>
+                      {a.name.substring(0,20)} {hidden?"＋":"✕"}
+                    </button>
+                  );
+                })}
+              </div>
+              {compareHidden.size > 0 && (
+                <button onClick={() => setCompareHidden(new Set())}
+                  className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
+                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                  Alles tonen
+                </button>
+              )}
+            </div>
+          )}
 
           {/* Leeswijzer */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
@@ -1882,7 +2047,7 @@ export default function App() {
                 <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Spindiagram — dimensies</p>
               </div>
               <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen dimensiescores 1-5. Groter = sterker voor mitigatie. Kleiner = beter voor risico en belang.</p>
-              <RadarSVG apps={apps} W={500} H={340} />
+              <RadarSVG apps={visibleCompare} W={500} H={340} />
             </div>
           </div>
 
@@ -1905,7 +2070,7 @@ export default function App() {
                 </tr>
               </thead>
               <tbody>
-                {apps.map(a => {
+                {visibleCompare.map(a => {
                   const s = calcScores(a.scores);
                   const lbl = scoreLabel(s.autonomyScore);
                   return (
