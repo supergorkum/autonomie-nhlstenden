@@ -329,9 +329,18 @@ function QuestionCard({ q, value, onChange, dir }) {
 // ──────────────────────────────────────────────────────────────
 
 export default function App() {
+  // ── Login state ─────────────────────────────────────────────
+  const [loggedIn,   setLoggedIn]   = useState(() => sessionStorage.getItem("nhl_auth") === "ok");
+  const [loginInput, setLoginInput] = useState("");
+  const [loginError, setLoginError] = useState(false);
+  const LOGIN_CODE = "Geheim";
+
+  // ── App state ────────────────────────────────────────────────
   const [apps,      setApps]      = useState([]);
   const [ready,     setReady]     = useState(false);
-  const [view,      setView]      = useState("dashboard");
+  const [saving,    setSaving]    = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [view,      setView]      = useState("about");   // ← About als startpagina
   const [selId,     setSelId]     = useState(null);
   const [step,      setStep]      = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -345,20 +354,120 @@ export default function App() {
   const [editForm,      setEditForm]      = useState({});
   const ADMIN_PIN = "nhl2026";
 
+  // ── Laden van gedeelde data via Netlify Blobs API ───────────
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem("nhl_sov_v2");
-      if (stored) setApps(JSON.parse(stored));
-    } catch {}
-    setReady(true);
-  }, []);
+    if (!loggedIn) return;
+    async function load() {
+      try {
+        const r = await fetch("/api/load-data");
+        if (r.ok) {
+          const data = await r.json();
+          if (Array.isArray(data)) setApps(data);
+        }
+      } catch {
+        // Fallback: lokale opslag als API niet bereikbaar is
+        try {
+          const stored = localStorage.getItem("nhl_sov_v2");
+          if (stored) setApps(JSON.parse(stored));
+        } catch {}
+      }
+      setReady(true);
+    }
+    load();
+  }, [loggedIn]);
 
+  // ── Opslaan naar gedeelde API (debounced 800ms) ─────────────
   useEffect(() => {
     if (!ready) return;
-    try {
-      localStorage.setItem("nhl_sov_v2", JSON.stringify(apps));
-    } catch {}
+    const timer = setTimeout(async () => {
+      setSaveError(false);
+      setSaving(true);
+      try {
+        const r = await fetch("/api/save-data", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(apps)
+        });
+        if (!r.ok) throw new Error("save failed");
+        // Lokale backup
+        localStorage.setItem("nhl_sov_v2", JSON.stringify(apps));
+      } catch {
+        setSaveError(true);
+        // Sla toch lokaal op als fallback
+        try { localStorage.setItem("nhl_sov_v2", JSON.stringify(apps)); } catch {}
+      } finally {
+        setSaving(false);
+      }
+    }, 800);
+    return () => clearTimeout(timer);
   }, [apps, ready]);
+
+  // ── Login handler ────────────────────────────────────────────
+  function handleLogin() {
+    if (loginInput === LOGIN_CODE) {
+      sessionStorage.setItem("nhl_auth", "ok");
+      setLoggedIn(true);
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+      setLoginInput("");
+    }
+  }
+
+  // ── Login scherm ─────────────────────────────────────────────
+  if (!loggedIn) {
+    return (
+      <div className="flex items-center justify-center h-screen" style={{ background:"#EBF3FF", fontFamily:"system-ui,sans-serif" }}>
+        <div className="bg-white w-full max-w-sm p-0 overflow-hidden" style={{ borderRadius:4, boxShadow:"0 8px 32px rgba(12,35,64,0.2)" }}>
+          {/* Header */}
+          <div className="px-8 py-6 text-white" style={{ background:"#0C2340" }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="px-2.5 py-1.5 border-2 border-white" style={{ borderRadius:2 }}>
+                <span className="font-bold leading-none text-white" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
+              </div>
+              <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+              <div>
+                <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Soevereiniteitsassessment</p>
+                <p style={{ fontSize:10, color:"#7DD3D0" }}>Programma Digitale Samenhang</p>
+              </div>
+            </div>
+          </div>
+          {/* Form */}
+          <div className="px-8 py-6">
+            <div className="flex items-center gap-2 mb-5">
+              <div className="w-8 h-8 flex items-center justify-center text-white" style={{ background:"#1A56A0", borderRadius:4, fontSize:16 }}>🔒</div>
+              <div>
+                <p className="font-semibold text-sm" style={{ color:"#0C2340" }}>Toegangscode vereist</p>
+                <p className="text-xs text-gray-400">Voer de code in om toegang te krijgen</p>
+              </div>
+            </div>
+            <input
+              type="password"
+              value={loginInput}
+              onChange={e => { setLoginInput(e.target.value); setLoginError(false); }}
+              onKeyDown={e => e.key === "Enter" && handleLogin()}
+              placeholder="Toegangscode"
+              autoFocus
+              className="w-full border px-3 py-2.5 text-sm focus:outline-none mb-2"
+              style={{ borderColor: loginError ? "#dc2626" : "#D0E4F7", borderRadius:4, letterSpacing:3 }}
+            />
+            {loginError && (
+              <p className="text-xs mb-3" style={{ color:"#dc2626" }}>Toegangscode onjuist. Probeer opnieuw.</p>
+            )}
+            <button
+              onClick={handleLogin}
+              className="w-full text-white py-2.5 text-sm font-semibold mt-1"
+              style={{ background:"#1A56A0", borderRadius:4 }}>
+              Inloggen
+            </button>
+            <p className="text-xs text-center mt-4" style={{ color:"#9ca3af" }}>
+              Neem contact op met de applicatiebeheerder voor de toegangscode.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const selApp = apps.find(a => a.id === selId);
 
@@ -1744,15 +1853,33 @@ export default function App() {
             </p>
           </div>
         </div>
-        <button onClick={exportXlsx} disabled={apps.length === 0}
-          className="flex items-center gap-2 text-white text-xs px-4 py-2 font-medium transition-all"
-          style={{
-            background: apps.length === 0 ? "rgba(255,255,255,0.1)" : "#26B5AE",
-            opacity: apps.length === 0 ? 0.5 : 1,
-            borderRadius: 4
-          }}>
-          📥 Exporteer Excel
-        </button>
+        <div className="flex items-center gap-3">
+          {/* Opslaan status */}
+          {saving && (
+            <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
+              ⏳ Opslaan…
+            </span>
+          )}
+          {saveError && (
+            <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(220,38,38,0.3)", color:"#fca5a5" }}>
+              ⚠️ Opslaan mislukt
+            </span>
+          )}
+          {!saving && !saveError && ready && (
+            <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(38,181,174,0.2)", color:"#7DD3D0" }}>
+              ✓ Gesynchroniseerd
+            </span>
+          )}
+          <button onClick={exportXlsx} disabled={apps.length === 0}
+            className="flex items-center gap-2 text-white text-xs px-4 py-2 font-medium transition-all"
+            style={{
+              background: apps.length === 0 ? "rgba(255,255,255,0.1)" : "#26B5AE",
+              opacity: apps.length === 0 ? 0.5 : 1,
+              borderRadius: 4
+            }}>
+            📥 Exporteer Excel
+          </button>
+        </div>
       </header>
 
       {/* Sub-header nav — lichte blauwe balk (NHS Stenden stijl) */}
