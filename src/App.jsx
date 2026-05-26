@@ -2184,12 +2184,7 @@ export default function App() {
                       <button onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
                         className="text-white text-xs px-3 py-1.5 font-medium"
                         style={{ background:"#1A56A0", borderRadius:4 }}>
-                        Assessment
-                      </button>
-                      <button onClick={() => delApp(a.id)}
-                        className="text-xs px-3 py-1.5"
-                        style={{ borderRadius:4, border:"1px solid #fecaca", color:"#dc2626" }}>
-                        Verwijder
+                        Assessment openen
                       </button>
                     </div>
                   </div>
