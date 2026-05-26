@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v0.6";
+const VERSION = "v0.8";
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
@@ -756,12 +756,132 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
+  function exportDashboardPdf() {
+    const visible = apps.filter(a => !hiddenApps.has(a.id));
+    const datum = new Date().toLocaleDateString("nl-NL", { day:"2-digit", month:"long", year:"numeric" });
+
+    const rows = visible.map(a => {
+      const s = calcScores(a.scores);
+      const lbl = scoreLabel(s.autonomyScore);
+      const statusColor = lbl.fg;
+      return `
+        <tr>
+          <td><strong>${a.name}</strong>${a.supplier ? `<br/><span class="sub">${a.supplier}</span>` : ""}</td>
+          <td style="color:${statusColor}; font-weight:700">${s.autonomyScore ? s.autonomyScore.toFixed(1) : "–"}</td>
+          <td style="color:#dc2626">${s.risico    ? s.risico.toFixed(2)    : "–"}</td>
+          <td style="color:#26B5AE">${s.mitigatie ? s.mitigatie.toFixed(2) : "–"}</td>
+          <td style="color:#E87722">${s.belang    ? s.belang.toFixed(2)    : "–"}</td>
+          <td>${s.dictuAvg  ? s.dictuAvg.toFixed(1)+"/5"  : "–"}</td>
+          <td>${s.completeness}%</td>
+          <td><span style="color:${statusColor}; font-weight:600">${lbl.text}</span></td>
+        </tr>`;
+    }).join("");
+
+    const kwRows = visible.map(a => {
+      const s = calcScores(a.scores);
+      const daafRows = DAAF.map(q => `
+        <tr>
+          <td><strong>${q.key}</strong></td>
+          <td>${q.dimName}</td>
+          <td>${q.name}</td>
+          <td style="text-align:center; font-weight:700">${a.scores[q.key] || "–"}</td>
+          <td>${a.scores[q.key] ? q.scores.find(sc => sc.s === a.scores[q.key])?.label || "" : ""}</td>
+        </tr>`).join("");
+      const dictuRows = DICTU.map(q => `
+        <tr>
+          <td><strong>${q.key}</strong></td>
+          <td>${q.cat}</td>
+          <td>${q.name}</td>
+          <td style="text-align:center; font-weight:700">${a.scores[q.key] || "–"}</td>
+          <td>${a.scores[q.key] ? q.scores.find(sc => sc.s === a.scores[q.key])?.label || "" : ""}</td>
+        </tr>`).join("");
+      return `
+        <div class="app-section">
+          <h3>${a.name} ${a.supplier ? `<span class="sub">— ${a.supplier}</span>` : ""}</h3>
+          <table class="scores-table">
+            <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th></tr>
+            ${daafRows}${dictuRows}
+          </table>
+        </div>`;
+    }).join("");
+
+    const html = `<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8"/>
+<title>Digitale Soevereiniteitsassessment — NHL Stenden</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; font-size: 11px; color: #1a1a1a; }
+  .header { background: #0C2340; color: white; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .logo { border: 2px solid white; padding: 6px 10px; font-weight: 700; font-size: 10px; letter-spacing: 1px; line-height: 1.3; }
+  .header-title { font-size: 14px; font-weight: 700; }
+  .header-sub { font-size: 10px; color: #7DD3D0; margin-top: 2px; }
+  .content { padding: 20px 24px; }
+  .meta { color: #6b7280; font-size: 10px; margin-bottom: 16px; }
+  h2 { font-size: 13px; color: #0C2340; border-bottom: 2px solid #1A56A0; padding-bottom: 4px; margin: 16px 0 10px; }
+  h3 { font-size: 12px; color: #0C2340; margin: 12px 0 6px; }
+  .sub { font-weight: normal; color: #6b7280; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10px; }
+  th { background: #0C2340; color: white; padding: 5px 8px; text-align: left; font-size: 10px; }
+  td { padding: 4px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .app-section { margin-bottom: 20px; page-break-inside: avoid; }
+  .scores-table th { background: #1A56A0; }
+  .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #9ca3af; text-align: center; }
+  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">NHL<br/>STENDEN</div>
+  <div style="width:2px; background:#26B5AE; align-self:stretch;"></div>
+  <div>
+    <div class="header-title">Digitale Soevereiniteitsassessment</div>
+    <div class="header-sub">Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit · ${VERSION}</div>
+  </div>
+</div>
+<div class="content">
+  <p class="meta">Gegenereerd op: ${datum} · ${visible.length} applicatie${visible.length !== 1 ? "s" : ""} in selectie</p>
+
+  <h2>Overzicht — alle applicaties</h2>
+  <table>
+    <tr>
+      <th>Applicatie</th>
+      <th>Autonomiescore (1-10)</th>
+      <th>Risico ↓</th>
+      <th>Mitigatie ↑</th>
+      <th>Belang ↓</th>
+      <th>DICTU</th>
+      <th>Volledigheid</th>
+      <th>Status</th>
+    </tr>
+    ${rows}
+  </table>
+
+  <h2>Detailscores per applicatie</h2>
+  ${kwRows}
+
+  <div class="footer">
+    NHL Stenden Hogeschool · Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · ${VERSION}
+  </div>
+</div>
+</body>
+</html>`;
+
+    const win = window.open("", "_blank");
+    win.document.write(html);
+    win.document.close();
+    win.focus();
+    setTimeout(() => win.print(), 500);
+  }
+
   // ── VIEWS ──────────────────────────────────────────────────
 
   function Dashboard() {
     // ── Zichtbare applicaties (gefilterd op hiddenApps) ─────────
     const visibleApps = apps.filter(a => !hiddenApps.has(a.id));
-    const minVisible  = 2;
+    const minVisible  = 1;
 
     function toggleApp(id) {
       setHiddenApps(prev => {
@@ -784,17 +904,20 @@ export default function App() {
 
     const radarKey = n => n.substring(0, 13);
 
-    // Dedupleer per dim-letter — gebruik dimensiescores uit calcScores
+    // Dimensielabels
     const dimLetters = [...new Set(DAAF.map(d => d.dim))];
     const dimLabel = letter => {
       const first = DAAF.find(d => d.dim === letter);
       return first ? first.dimName.substring(0, 14) : letter;
     };
+
+    // Gebruik scored (al berekend) zodat dims zeker beschikbaar zijn
     const radarData = dimLetters.map(letter => {
       const entry = { dim: dimLabel(letter) };
-      visibleApps.slice(0, 5).forEach(a => {
-        const sc = calcScores(a.scores);
-        entry[radarKey(a.name)] = sc.dims[letter] || 0;
+      scored.slice(0, 5).forEach(a => {
+        entry[radarKey(a.name)] = (a.sc.dims && a.sc.dims[letter] != null)
+          ? +a.sc.dims[letter].toFixed(2)
+          : 0;
       });
       return entry;
     });
@@ -852,7 +975,7 @@ export default function App() {
                     <button key={a.id}
                       onClick={() => toggleApp(a.id)}
                       disabled={isLast2 && !hidden}
-                      title={isLast2 && !hidden ? "Minimaal 2 applicaties moeten zichtbaar blijven" : hidden ? "Klik om zichtbaar te maken" : "Klik om te verbergen"}
+                      title={isLast2 && !hidden ? "Minimaal 1 applicatie moet zichtbaar blijven" : hidden ? "Klik om zichtbaar te maken" : "Klik om te verbergen"}
                       className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium transition-all"
                       style={{
                         borderRadius: 4,
@@ -933,12 +1056,17 @@ export default function App() {
             {/* App-kaarten rechts — 2 kolommen */}
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({apps.length})</h3>
+                <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({visibleApps.length})</h3>
                 <div className="flex gap-2">
                   <button onClick={() => setShowModal(true)}
                     className="text-white text-xs px-3 py-1.5 font-medium"
                     style={{ background:"#1A56A0", borderRadius:4 }}>
                     + Toevoegen
+                  </button>
+                  <button onClick={exportDashboardPdf} disabled={visibleApps.length===0}
+                    className="text-xs px-3 py-1.5 font-medium"
+                    style={{ background:"#fee2e2", color:"#b91c1c", borderRadius:4, border:"1px solid #fecaca", opacity:visibleApps.length===0?0.5:1 }}>
+                    📄 PDF
                   </button>
                   <button onClick={exportXlsx} disabled={apps.length===0}
                     className="text-xs px-3 py-1.5 font-medium"
@@ -1032,7 +1160,7 @@ export default function App() {
                   <PolarGrid stroke="#e5e7eb" />
                   <PolarAngleAxis dataKey="dim" tick={{ fontSize: 12, fill:"#374151" }} />
                   <PolarRadiusAxis domain={[0, 5]} tick={{ fontSize:9, fill:"#9ca3af" }} tickCount={6} />
-                  {apps.slice(0, 5).map((a, i) => (
+                  {scored.slice(0, 5).map((a, i) => (
                     <Radar key={a.id} name={a.name} dataKey={radarKey(a.name)}
                       stroke={COLORS[i % COLORS.length]} fill={COLORS[i % COLORS.length]} fillOpacity={0.15} strokeWidth={2} />
                   ))}
