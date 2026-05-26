@@ -967,23 +967,6 @@ export default function App() {
     );
   }
 
-          {/* ── Stat row ── */}
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            {[
-              { label:"Applicaties",        val: apps.length,     color: "#1A56A0" },
-              { label:"Gem. autonomiescore", val: avgA ? avgA.toFixed(1) : "\u2013", color: scoreColor(avgA) },
-              { label:"Goed (\u22657)",      val: withSc.filter(a=>a.sc.autonomyScore>=7).length, color:"#26B5AE" },
-              { label:"Aandacht nodig (<5)", val: withSc.filter(a=>a.sc.autonomyScore<5).length,  color:"#E87722" },
-            ].map(({ label, val, color }) => (
-              <div key={label} className="rounded text-center px-3 py-3"
-                style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <div style={{ fontSize: 26, fontWeight: 700, color }}>{val}</div>
-                <div className="text-xs mt-0.5" style={{ color:"#6b7280" }}>{label}</div>
-              </div>
-            ))}
-          </div>
-
-
   function AppsList() {
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
