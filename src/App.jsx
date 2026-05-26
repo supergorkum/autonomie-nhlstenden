@@ -1260,11 +1260,11 @@ export default function App() {
 
       {/* Content */}
       <main className="flex-1 overflow-hidden" style={{ background:"#EBF3FF" }}>
-        {view === "dashboard" && <Dashboard />}
-        {view === "apps"      && <AppsList />}
-        {view === "assess"    && <Assess />}
-        {view === "compare"   && <Compare />}
-        {view === "admin"     && <Admin />}
+        {view === "dashboard" && Dashboard()}
+        {view === "apps"      && AppsList()}
+        {view === "assess"    && Assess()}
+        {view === "compare"   && Compare()}
+        {view === "admin"     && Admin()}
       </main>
 
       {/* Add modal */}
