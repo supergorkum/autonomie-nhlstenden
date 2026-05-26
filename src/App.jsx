@@ -648,6 +648,171 @@ function DivergingChart({ apps, compact = false }) {
   );
 }
 
+// ── PortfolioHeatmap — integraal totaalplaatje ───────────────
+// Alle applicaties × alle DAAF-dimensies in één overzicht
+function PortfolioHeatmap({ apps }) {
+  const scored = apps.map(a => ({ ...a, sc: calcScores(a.scores) }));
+
+  const dimScore = (app, letter) => {
+    if (letter === "A") {
+      const a1=app.scores["A1"]||0, a3=app.scores["A3"]||0;
+      const p=[[a1,3],[a3,2]].filter(([v])=>v>0);
+      if (!p.length) return null;
+      const tw=p.reduce((s,[,w])=>s+w,0);
+      return p.reduce((s,[v,w])=>s+v*w,0)/tw;
+    }
+    const qs=DAAF.filter(d=>d.dim===letter);
+    const vals=qs.map(q=>app.scores[q.key]||0).filter(v=>v>0);
+    return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : null;
+  };
+
+  // Kleur op basis van score én dimensietype
+  const cellBg = (score, type) => {
+    if (score === null) return { bg:"#f3f4f6", fg:"#d1d5db" };
+    const v = Math.min(5, Math.max(1, score));
+    const t = (v - 1) / 4; // 0..1
+    if (type === "risk") {
+      // laag=goed (groen), hoog=slecht (rood)
+      const r = Math.round(80 + 175 * t),
+            g = Math.round(220 - 170 * t),
+            b = Math.round(100 - 80 * t);
+      return { bg:`rgb(${r},${g},${b})`, fg: t > 0.55 ? "white" : "#1a1a1a" };
+    } else if (type === "mitigation") {
+      // laag=slecht (rood), hoog=goed (groen)
+      const r = Math.round(255 - 175 * t),
+            g = Math.round(50  + 170 * t),
+            b = Math.round(20  +  80 * t);
+      return { bg:`rgb(${r},${g},${b})`, fg: t < 0.45 ? "white" : "#1a1a1a" };
+    } else {
+      // belang: licht→oranje
+      const r = Math.round(255),
+            g = Math.round(250 - 140 * t),
+            b = Math.round(235 - 200 * t);
+      return { bg:`rgb(${r},${g},${b})`, fg: t > 0.6 ? "white" : "#374151" };
+    }
+  };
+
+  const dims = [
+    { letter:"A", name:"Geopolitiek risico",       type:"risk",       level:"1" },
+    { letter:"B", name:"Leveranciersafh.",          type:"risk",       level:"1" },
+    { letter:"C", name:"Technische weerbaarheid",   type:"mitigation", level:"2" },
+    { letter:"D", name:"Organisatorische wb.",      type:"mitigation", level:"2" },
+    { letter:"E", name:"Contractuele wb.",          type:"mitigation", level:"2" },
+    { letter:"F", name:"Organisatorisch belang",    type:"belang",     level:"3" },
+    { letter:"G", name:"Data-gevoeligheid",         type:"belang",     level:"3" },
+    { letter:"H", name:"Academische impact",        type:"belang",     level:"3" },
+  ];
+
+  const typeColor = t => t==="risk"?"#dc2626":t==="mitigation"?"#16a34a":"#d97706";
+  const levelLabel = l => l==="1"?"Risico ↓":l==="2"?"Mitigatie ↑":"Belang ↑";
+
+  return (
+    <div style={{ overflowX:"auto" }}>
+      <table style={{ borderCollapse:"collapse", width:"100%", fontSize:10 }}>
+        <thead>
+          <tr>
+            <th style={{ textAlign:"left", padding:"6px 8px", fontSize:10, fontWeight:600,
+              color:"#6b7280", borderBottom:"2px solid #e5e7eb", minWidth:170 }}>
+              Dimensie
+            </th>
+            {scored.map(a => {
+              const lbl = scoreLabel(a.sc.autonomyScore);
+              return (
+                <th key={a.id} style={{ textAlign:"center", padding:"4px 6px", minWidth:80,
+                  borderBottom:"2px solid #e5e7eb" }}>
+                  <div style={{ fontWeight:700, color:"#0C2340", fontSize:10 }}>{a.name.substring(0,14)}</div>
+                  {a.sc.autonomyScore && (
+                    <div style={{ display:"inline-block", marginTop:2, padding:"1px 5px",
+                      borderRadius:3, background:lbl.bg, color:lbl.fg, fontSize:9, fontWeight:600 }}>
+                      {a.sc.autonomyScore.toFixed(1)}
+                    </div>
+                  )}
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {dims.map((d, di) => {
+            // Niveau-scheidingslijn bij begin van nieuw niveau
+            const prevLevel = di > 0 ? dims[di-1].level : null;
+            const isNewLevel = prevLevel !== d.level;
+            return (
+              <tr key={d.letter}>
+                <td style={{
+                  padding:"3px 8px", fontSize:10,
+                  borderTop: isNewLevel ? "2px solid #e5e7eb" : "1px solid #f3f4f6",
+                  background: isNewLevel ? "#fafafa" : "white"
+                }}>
+                  <span style={{ fontWeight:700, color:typeColor(d.type), marginRight:5 }}>{d.letter}</span>
+                  <span style={{ color:"#374151" }}>{d.name}</span>
+                  {isNewLevel && (
+                    <span style={{ marginLeft:6, fontSize:8, color:typeColor(d.type),
+                      fontWeight:600, opacity:0.7 }}>{levelLabel(d.level)}</span>
+                  )}
+                </td>
+                {scored.map(a => {
+                  const v = dimScore(a, d.letter);
+                  const {bg, fg} = cellBg(v, d.type);
+                  return (
+                    <td key={a.id} style={{
+                      textAlign:"center", padding:"3px 6px", fontWeight:700,
+                      background:bg, color:fg, fontSize:10,
+                      borderTop: isNewLevel ? "2px solid #e5e7eb" : "1px solid #f3f4f6",
+                    }}>
+                      {v !== null ? v.toFixed(1) : "–"}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+          {/* Samenvatting niveau-scores */}
+          {[
+            { key:"risico",    label:"Niveau 1: Risico gem.",    fg:"#dc2626",  bg:"#fee2e2", val: a => a.sc.risico },
+            { key:"mitigatie", label:"Niveau 2: Mitigatie gem.", fg:"#16a34a",  bg:"#dcfce7", val: a => a.sc.mitigatie },
+            { key:"belang",    label:"Niveau 3: Belang gem.",    fg:"#d97706",  bg:"#fff7ed", val: a => a.sc.belang },
+            { key:"dictu",     label:"DICTU-score",              fg:"#1A56A0",  bg:"#EBF3FF", val: a => a.sc.dictuAvg, suffix:"/5" },
+          ].map(row => (
+            <tr key={row.key}>
+              <td style={{ padding:"3px 8px", fontSize:10, fontWeight:700, color:row.fg,
+                background:row.bg, borderTop:"2px solid #e5e7eb" }}>
+                {row.label}
+              </td>
+              {scored.map(a => {
+                const v = row.val(a);
+                return (
+                  <td key={a.id} style={{ textAlign:"center", padding:"3px 6px",
+                    fontWeight:700, fontSize:11, color:row.fg,
+                    background:row.bg, borderTop:"2px solid #e5e7eb" }}>
+                    {v ? v.toFixed(2)+(row.suffix||"") : "–"}
+                  </td>
+                );
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* Legenda */}
+      <div style={{ display:"flex", gap:16, marginTop:8, flexWrap:"wrap" }}>
+        {[
+          { type:"risk",       label:"Risico-assen (A, B): groen=laag risico (goed) · rood=hoog risico" },
+          { type:"mitigation", label:"Mitigatie-assen (C, D, E): groen=sterk weerbaar (goed) · rood=zwak" },
+          { type:"belang",     label:"Belang-assen (F, G, H): licht=minder urgent · oranje=hoog belang" },
+        ].map(l => (
+          <div key={l.type} style={{ display:"flex", alignItems:"center", gap:5 }}>
+            <div style={{ width:24, height:10, borderRadius:2,
+              background: l.type==="risk"?"linear-gradient(to right,#50dc64,#ef4444)"
+                :l.type==="mitigation"?"linear-gradient(to right,#ef4444,#22c55e)"
+                :"linear-gradient(to right,#fffbeb,#d97706)" }} />
+            <span style={{ fontSize:8.5, color:"#6b7280" }}>{l.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Gauge({ score, size = 88 }) {
   const cx = 50, cy = 46, r = 36, sw = 5.5;
   const rad = d => d * Math.PI / 180;
@@ -1572,6 +1737,20 @@ export default function App() {
             </div>
           ) : (<>
 
+          {/* ── Portfolio heatmap — totaalplaatje ── */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Totaalplaatje — portfolio overzicht</h3>
+            </div>
+            <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
+              Alle applicaties naast elkaar op alle 8 DAAF-dimensies. Cel-kleur toont direct de kwaliteit:
+              voor risico-assen is <span style={{ color:"#16a34a", fontWeight:600 }}>groen = laag risico (goed)</span>.
+              Voor mitigatie-assen is <span style={{ color:"#16a34a", fontWeight:600 }}>groen = sterk weerbaar (goed)</span>.
+            </p>
+            <PortfolioHeatmap apps={scored} />
+          </div>
+
           {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
 
@@ -1672,11 +1851,11 @@ export default function App() {
                           <div className="mt-2 space-y-1">
                             <div className="rounded px-2 py-1.5" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
                               <p style={{ fontSize:9, fontWeight:700, color:"#92400e", marginBottom:2 }}>⚡ Quick win</p>
-                              <p style={{ fontSize:9, color:"#78350f", lineHeight:1.4 }}>{rec.quickWin.substring(0,120)}{rec.quickWin.length > 120 ? "…" : ""}</p>
+                              <p style={{ fontSize:9, color:"#78350f", lineHeight:1.45 }}>{rec.quickWin}</p>
                             </div>
                             <div className="rounded px-2 py-1.5" style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
-                              <p style={{ fontSize:9, fontWeight:700, color:"#166534", marginBottom:2 }}>🎯 Strategisch</p>
-                              <p style={{ fontSize:9, color:"#14532d", lineHeight:1.4 }}>{rec.strategic.substring(0,120)}{rec.strategic.length > 120 ? "…" : ""}</p>
+                              <p style={{ fontSize:9, fontWeight:700, color:"#166534", marginBottom:2 }}>🎯 Strategische aanbeveling</p>
+                              <p style={{ fontSize:9, color:"#14532d", lineHeight:1.45 }}>{rec.strategic}</p>
                             </div>
                           </div>
                         );
