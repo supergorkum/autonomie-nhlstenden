@@ -807,6 +807,17 @@ export default function App() {
           )}
 
           {apps.length === 0 ? (
+            <div className="bg-white rounded border-2 border-dashed border-gray-200 p-16 text-center">
+              <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">Start met uw assessment</h3>
+              <p className="text-gray-400 text-sm mb-5">Voeg een applicatie toe om te beginnen.</p>
+              <button onClick={() => setShowModal(true)}
+                className="text-white text-sm px-5 py-2.5 font-medium"
+                style={{ background:"#1A56A0", borderRadius:4 }}>
+                + Applicatie toevoegen
+              </button>
+            </div>
+          ) : (<>
 
           {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
@@ -1314,7 +1325,7 @@ export default function App() {
                   const s   = calcScores(a.scores);
                   const lbl = scoreLabel(s.autonomyScore);
                   return (
-                    <tr key={a.id} style={{ borderBottom:"1px solid #EBF3FF" }}
+                    <tr key={a.id}
                       className="cursor-pointer transition-colors"
                       style={{ borderBottom:"1px solid #EBF3FF", cursor:"pointer" }}
                       onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}>
