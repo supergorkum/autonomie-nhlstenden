@@ -216,6 +216,108 @@ function calcScores(scores) {
 // COMPONENTS
 // ──────────────────────────────────────────────────────────────
 
+// About sub-components — module level om React re-mount te voorkomen
+function Section({ title, children, accent="#1A56A0" }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-1 h-5 rounded-full flex-shrink-0" style={{ background:accent }}/>
+        <h2 className="font-bold text-base" style={{ color:"#0C2340" }}>{title}</h2>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Tip({ label, children, color="#1A56A0", bg="#EBF3FF" }) {
+  return (
+    <div className="rounded p-3 mb-2" style={{ background:bg, border:`1px solid ${color}33` }}>
+      <p className="text-xs font-bold mb-1" style={{ color }}>{label}</p>
+      <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{children}</p>
+    </div>
+  );
+}
+
+// Kwadrant SVG — module level, ontvangt data als props
+function KwadrantSVG({ kwData, onAppClick }) {
+  const W = 700, H = 420;
+  const pad = { top:32, right:24, bottom:52, left:52 };
+  const iW  = W - pad.left - pad.right;
+  const iH  = H - pad.top  - pad.bottom;
+  const xMin=1, xMax=25, yMin=1, yMax=5;
+  const mx = 13, my = 3;
+  const toX = v => pad.left + (v - xMin) / (xMax - xMin) * iW;
+  const toY = v => pad.top  + (yMax - v) / (yMax - yMin) * iH;
+  const midX = toX(mx), midY = toY(my);
+  const quads = [
+    { x1:pad.left, y1:pad.top,   x2:midX,        y2:midY,        fill:"#e8f5e9", label:"OPTIMAAL",      sub:"Behoud huidige situatie,\nmonitor periodiek",     color:"#2e7d5e" },
+    { x1:midX,     y1:pad.top,   x2:pad.left+iW, y2:midY,        fill:"#fff8e1", label:"BEHEERSBAAR",   sub:"Risico's geaccepteerd\nmet goede fallback",        color:"#e07b20" },
+    { x1:pad.left, y1:midY,      x2:midX,        y2:pad.top+iH,  fill:"#fff3e0", label:"AANDACHTSPUNT", sub:"Bouw mitigatie op of\naccepteer risico bewust",    color:"#e07b20" },
+    { x1:midX,     y1:midY,      x2:pad.left+iW, y2:pad.top+iH,  fill:"#fce4ec", label:"KRITIEK",       sub:"Urgente actie vereist:\nmigreer of mitigeer",      color:"#c0392b" },
+  ];
+  const xTicks = [1,5,10,15,20,25];
+  const yTicks = [1,2,3,4,5];
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ fontFamily:"system-ui,sans-serif", display:"block" }}>
+      {quads.map((q,i) => (
+        <rect key={i} x={q.x1} y={q.y1} width={q.x2-q.x1} height={q.y2-q.y1} fill={q.fill} />
+      ))}
+      {quads.map((q,i) => {
+        const cx = (q.x1+q.x2)/2, cy = (q.y1+q.y2)/2;
+        return (
+          <g key={i}>
+            <text x={cx} y={cy-14} textAnchor="middle" fill={q.color}
+              style={{ fontSize:15, fontWeight:700, fontStyle:"italic", letterSpacing:1 }}>{q.label}</text>
+            {q.sub.split("\n").map((l,j) => (
+              <text key={j} x={cx} y={cy+8+j*16} textAnchor="middle" fill="#555" style={{ fontSize:11 }}>{l}</text>
+            ))}
+          </g>
+        );
+      })}
+      {xTicks.map(v => <line key={v} x1={toX(v)} y1={pad.top} x2={toX(v)} y2={pad.top+iH} stroke="#fff" strokeWidth={v===mx?0:1} strokeDasharray="3 3" />)}
+      {yTicks.map(v => <line key={v} x1={pad.left} y1={toY(v)} x2={pad.left+iW} y2={toY(v)} stroke="#fff" strokeWidth={v===my?0:1} strokeDasharray="3 3" />)}
+      <line x1={midX} y1={pad.top} x2={midX} y2={pad.top+iH} stroke="#aaa" strokeWidth={1.5} />
+      <line x1={pad.left} y1={midY} x2={pad.left+iW} y2={midY} stroke="#aaa" strokeWidth={1.5} />
+      <rect x={pad.left} y={pad.top} width={iW} height={iH} fill="none" stroke="#ccc" strokeWidth={1} />
+      {xTicks.map(v => (
+        <g key={v}>
+          <line x1={toX(v)} y1={pad.top+iH} x2={toX(v)} y2={pad.top+iH+5} stroke="#999" strokeWidth={1}/>
+          <text x={toX(v)} y={pad.top+iH+17} textAnchor="middle" fill="#888" style={{ fontSize:10 }}>{v}</text>
+        </g>
+      ))}
+      {yTicks.map(v => (
+        <g key={v}>
+          <line x1={pad.left-5} y1={toY(v)} x2={pad.left} y2={toY(v)} stroke="#999" strokeWidth={1}/>
+          <text x={pad.left-10} y={toY(v)+4} textAnchor="end" fill="#888" style={{ fontSize:10 }}>{v}</text>
+        </g>
+      ))}
+      <text x={pad.left+iW/2} y={H-4} textAnchor="middle" fill="#444" style={{ fontSize:12, fontWeight:600 }}>Risico-exposure × Strategisch belang</text>
+      <text x={14} y={pad.top+iH/2} textAnchor="middle" fill="#444" transform={`rotate(-90,14,${pad.top+iH/2})`} style={{ fontSize:12, fontWeight:600 }}>Mitigatie</text>
+      <text x={pad.left+6}    y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
+      <text x={pad.left+iW-24} y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
+      <text x={pad.left-46}  y={pad.top+iH-4} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
+      <text x={pad.left-46}  y={pad.top+10}   fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
+      {kwData.length === 0 && (
+        <text x={W/2} y={H/2+10} textAnchor="middle" fill="#bbb" style={{ fontSize:13 }}>
+          Vul minimaal alle dimensies in om applicaties te plotten
+        </text>
+      )}
+      {kwData.map(d => {
+        const cx = toX(d.x), cy = toY(d.y), col = scoreColor(d.score);
+        return (
+          <g key={d.id} style={{ cursor:"pointer" }} onClick={() => onAppClick(d.id)}>
+            <circle cx={cx} cy={cy} r={13} fill={col} fillOpacity={0.2} stroke={col} strokeWidth={2} />
+            <circle cx={cx} cy={cy} r={5} fill={col} />
+            <rect x={cx+10} y={cy-10} width={Math.min(d.name.length*6.5+8,120)} height={16} rx={3} fill="white" fillOpacity={0.88} />
+            <text x={cx+14} y={cy+2} fill={col} style={{ fontSize:10, fontWeight:600 }}>{d.name.substring(0,18)}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function Gauge({ score, size = 88 }) {
   const cx = 50, cy = 46, r = 36, sw = 5.5;
   const rad = d => d * Math.PI / 180;
@@ -601,139 +703,7 @@ export default function App() {
         id: a.id
       }));
 
-    // SVG Autonomie-kwadrant
-    const KwadrantSVG = () => {
-      const W = 700, H = 420;
-      const pad = { top:32, right:24, bottom:52, left:52 };
-      const iW  = W - pad.left - pad.right;
-      const iH  = H - pad.top  - pad.bottom;
-
-      // Scales: X = 1..25, Y = 1..5
-      const xMin=1, xMax=25, yMin=1, yMax=5;
-      const mx = 13; // midpoint X
-      const my = 3;  // midpoint Y
-
-      const toX = v => pad.left + (v - xMin) / (xMax - xMin) * iW;
-      const toY = v => pad.top  + (yMax - v) / (yMax - yMin) * iH;
-      const midX = toX(mx);
-      const midY = toY(my);
-
-      // Quadrant bg colors (matching the image)
-      const quads = [
-        { x1:pad.left, y1:pad.top,  x2:midX,      y2:midY,         fill:"#e8f5e9", label:"OPTIMAAL",      sub:"Behoud huidige situatie,\nmonitor periodiek",        color:"#2e7d5e" },
-        { x1:midX,     y1:pad.top,  x2:pad.left+iW,y2:midY,         fill:"#fff8e1", label:"BEHEERSBAAR",   sub:"Risico's geaccepteerd\nmet goede fallback",           color:"#e07b20" },
-        { x1:pad.left, y1:midY,     x2:midX,       y2:pad.top+iH,   fill:"#fff3e0", label:"AANDACHTSPUNT", sub:"Bouw mitigatie op of\naccep­teer risico bewust",       color:"#e07b20" },
-        { x1:midX,     y1:midY,     x2:pad.left+iW,y2:pad.top+iH,   fill:"#fce4ec", label:"KRITIEK",       sub:"Urgente actie vereist:\nmigreer of mitigeer",         color:"#c0392b" },
-      ];
-
-      // Axis ticks
-      const xTicks = [1,5,10,15,20,25];
-      const yTicks = [1,2,3,4,5];
-
-      return (
-        <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ fontFamily:"system-ui,sans-serif", display:"block" }}>
-          {/* Quadrant backgrounds */}
-          {quads.map((q,i) => (
-            <rect key={i} x={q.x1} y={q.y1} width={q.x2-q.x1} height={q.y2-q.y1} fill={q.fill} />
-          ))}
-
-          {/* Quadrant labels */}
-          {quads.map((q,i) => {
-            const cx = (q.x1 + q.x2) / 2;
-            const cy = (q.y1 + q.y2) / 2;
-            const lines = q.sub.split("\n");
-            return (
-              <g key={i}>
-                <text x={cx} y={cy - 14} textAnchor="middle" fill={q.color}
-                  style={{ fontSize:15, fontWeight:700, fontStyle:"italic", letterSpacing:1 }}>
-                  {q.label}
-                </text>
-                {lines.map((l,j) => (
-                  <text key={j} x={cx} y={cy + 8 + j*16} textAnchor="middle" fill="#555"
-                    style={{ fontSize:11 }}>{l}</text>
-                ))}
-              </g>
-            );
-          })}
-
-          {/* Grid lines */}
-          {xTicks.map(v => (
-            <line key={v} x1={toX(v)} y1={pad.top} x2={toX(v)} y2={pad.top+iH}
-              stroke="#fff" strokeWidth={v===mx?0:1} strokeDasharray="3 3" />
-          ))}
-          {yTicks.map(v => (
-            <line key={v} x1={pad.left} y1={toY(v)} x2={pad.left+iW} y2={toY(v)}
-              stroke="#fff" strokeWidth={v===my?0:1} strokeDasharray="3 3" />
-          ))}
-
-          {/* Midpoint divider lines */}
-          <line x1={midX} y1={pad.top} x2={midX} y2={pad.top+iH} stroke="#aaa" strokeWidth={1.5} />
-          <line x1={pad.left} y1={midY} x2={pad.left+iW} y2={midY} stroke="#aaa" strokeWidth={1.5} />
-
-          {/* Border */}
-          <rect x={pad.left} y={pad.top} width={iW} height={iH}
-            fill="none" stroke="#ccc" strokeWidth={1} />
-
-          {/* X axis ticks & labels */}
-          {xTicks.map(v => (
-            <g key={v}>
-              <line x1={toX(v)} y1={pad.top+iH} x2={toX(v)} y2={pad.top+iH+5} stroke="#999" strokeWidth={1}/>
-              <text x={toX(v)} y={pad.top+iH+17} textAnchor="middle" fill="#888" style={{ fontSize:10 }}>{v}</text>
-            </g>
-          ))}
-
-          {/* Y axis ticks & labels */}
-          {yTicks.map(v => (
-            <g key={v}>
-              <line x1={pad.left-5} y1={toY(v)} x2={pad.left} y2={toY(v)} stroke="#999" strokeWidth={1}/>
-              <text x={pad.left-10} y={toY(v)+4} textAnchor="end" fill="#888" style={{ fontSize:10 }}>{v}</text>
-            </g>
-          ))}
-
-          {/* Axis labels */}
-          <text x={pad.left + iW/2} y={H-4} textAnchor="middle" fill="#444"
-            style={{ fontSize:12, fontWeight:600 }}>
-            Risico-exposure × Strategisch belang
-          </text>
-          <text x={14} y={pad.top + iH/2} textAnchor="middle" fill="#444"
-            transform={`rotate(-90, 14, ${pad.top + iH/2})`}
-            style={{ fontSize:12, fontWeight:600 }}>
-            Mitigatie
-          </text>
-
-          {/* Axis direction hints */}
-          <text x={pad.left+6}  y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
-          <text x={pad.left+iW-24} y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
-          <text x={pad.left-46} y={pad.top+iH-4} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
-          <text x={pad.left-46} y={pad.top+10}   fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
-
-          {/* App dots */}
-          {kwData.length === 0 && (
-            <text x={W/2} y={H/2+10} textAnchor="middle" fill="#bbb" style={{ fontSize:13 }}>
-              Vul minimaal alle dimensies in om applicaties in het kwadrant te plotten
-            </text>
-          )}
-          {kwData.map((d, i) => {
-            const cx = toX(d.x);
-            const cy = toY(d.y);
-            const col = scoreColor(d.score);
-            return (
-              <g key={d.id} style={{ cursor:"pointer" }}
-                onClick={() => { setSelId(d.id); setStep(0); setView("assess"); }}>
-                <circle cx={cx} cy={cy} r={13} fill={col} fillOpacity={0.2} stroke={col} strokeWidth={2} />
-                <circle cx={cx} cy={cy} r={5}  fill={col} />
-                {/* Label — shift to avoid overlap */}
-                <rect x={cx+10} y={cy-10} width={Math.min(d.name.length*6.5+8,120)} height={16} rx={3}
-                  fill="white" fillOpacity={0.88} />
-                <text x={cx+14} y={cy+2} fill={col} style={{ fontSize:10, fontWeight:600 }}>
-                  {d.name.substring(0,18)}
-                </text>
-              </g>
-            );
-          })}
-        </svg>
-      );
-    };
+    const handleKwClick = (id) => { setSelId(id); setStep(0); setView("assess"); };
 
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
@@ -847,7 +817,7 @@ export default function App() {
                 <span style={{ color:"#c0392b", fontWeight:600 }}>Rechtsboven</span> = actie vereist.
                 Klik op een punt om naar het assessment te gaan.
               </div>
-              <KwadrantSVG />
+              <KwadrantSVG kwData={kwData} onAppClick={handleKwClick} />
               <div className="mt-2 px-2 py-1 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#9ca3af" }}>
                 Risico = gem. A1+A3+B1 · Mitigatie = gem. C1+D1+E1 · Belang = gem. F1+G1+H1 · Grens: X=13, Y=3
               </div>
@@ -1634,23 +1604,6 @@ export default function App() {
   // ── ABOUT ─────────────────────────────────────────────────
 
   function About() {
-    const Section = ({ title, children, accent="#1A56A0" }) => (
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-1 h-5 rounded-full flex-shrink-0" style={{ background:accent }}/>
-          <h2 className="font-bold text-base" style={{ color:"#0C2340" }}>{title}</h2>
-        </div>
-        {children}
-      </div>
-    );
-
-    const Tip = ({ label, children, color="#1A56A0", bg="#EBF3FF" }) => (
-      <div className="rounded p-3 mb-2" style={{ background:bg, border:`1px solid ${color}33` }}>
-        <p className="text-xs font-bold mb-1" style={{ color }}>{label}</p>
-        <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{children}</p>
-      </div>
-    );
-
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
         <div className="p-5 max-w-4xl mx-auto">
