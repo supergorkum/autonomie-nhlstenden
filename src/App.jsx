@@ -336,15 +336,16 @@ export default function App() {
   const LOGIN_CODE = "Geheim";
 
   // ── App state ────────────────────────────────────────────────
-  const [apps,      setApps]      = useState([]);
-  const [ready,     setReady]     = useState(false);
-  const [saving,    setSaving]    = useState(false);
-  const [saveError, setSaveError] = useState(false);
-  const [view,      setView]      = useState("about");   // ← About als startpagina
-  const [selId,     setSelId]     = useState(null);
-  const [step,      setStep]      = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [form,      setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", notes:"" });
+  const [apps,       setApps]      = useState([]);
+  const [ready,      setReady]     = useState(false);
+  const [saving,     setSaving]    = useState(false);
+  const [saveError,  setSaveError] = useState(false);
+  const [view,       setView]      = useState("about");
+  const [selId,      setSelId]     = useState(null);
+  const [step,       setStep]      = useState(0);
+  const [showModal,  setShowModal] = useState(false);
+  const [form,       setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", notes:"" });
+  const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
 
   // Beheer (admin) state
   const [adminUnlocked, setAdminUnlocked] = useState(false);
@@ -548,7 +549,25 @@ export default function App() {
   // ── VIEWS ──────────────────────────────────────────────────
 
   function Dashboard() {
-    const scored = apps.map(a => ({ ...a, sc: calcScores(a.scores) }));
+    // ── Zichtbare applicaties (gefilterd op hiddenApps) ─────────
+    const visibleApps = apps.filter(a => !hiddenApps.has(a.id));
+    const minVisible  = 2;
+
+    function toggleApp(id) {
+      setHiddenApps(prev => {
+        const next = new Set(prev);
+        if (next.has(id)) {
+          next.delete(id); // altijd zichtbaar maken mag
+        } else {
+          if (visibleApps.length <= minVisible) return prev; // minimum bewaken
+          next.add(id);
+        }
+        return next;
+      });
+    }
+
+    const scored = visibleApps.map(a => ({ ...a, sc: calcScores(a.scores) }));
+    const allScored = apps.map(a => ({ ...a, sc: calcScores(a.scores) })); // voor filter-strip
     const withSc = scored.filter(a => a.sc.autonomyScore);
     const avgA   = withSc.length ? withSc.map(a => a.sc.autonomyScore).reduce((x,y)=>x+y,0)/withSc.length : null;
     const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
@@ -556,7 +575,7 @@ export default function App() {
     const radarKey = n => n.substring(0, 13);
 
     // Dedupleer per dim-letter: gemiddeld van alle vragen in die dimensie
-    const dimLetters = [...new Set(DAAF.map(d => d.dim))]; // A,B,C,D,E,F,G,H
+    const dimLetters = [...new Set(DAAF.map(d => d.dim))];
     const dimLabel = letter => {
       const first = DAAF.find(d => d.dim === letter);
       return first ? first.dimName.substring(0, 14) : letter;
@@ -564,7 +583,7 @@ export default function App() {
     const radarData = dimLetters.map(letter => {
       const qs = DAAF.filter(d => d.dim === letter);
       const entry = { dim: dimLabel(letter) };
-      apps.slice(0, 5).forEach(a => {
+      visibleApps.slice(0, 5).forEach(a => {
         const vals = qs.map(q => a.scores[q.key] || 0).filter(v => v > 0);
         entry[radarKey(a.name)] = vals.length ? vals.reduce((x,y)=>x+y,0)/vals.length : 0;
       });
@@ -736,18 +755,58 @@ export default function App() {
             ))}
           </div>
 
-          {apps.length === 0 ? (
-            <div className="bg-white rounded border-2 border-dashed border-gray-200 p-16 text-center">
-              <div style={{ fontSize: 48, marginBottom: 12 }}>📊</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">Start met uw assessment</h3>
-              <p className="text-gray-400 text-sm mb-5">Voeg een applicatie toe om te beginnen.</p>
-              <button onClick={() => setShowModal(true)}
-                className="text-white text-sm px-5 py-2.5 font-medium"
-                style={{ background:"#1A56A0", borderRadius:4 }}>
-                + Applicatie toevoegen
-              </button>
+          {/* ── Filter strip — alleen tonen als er >2 apps zijn ── */}
+          {apps.length > 2 && (
+            <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
+              style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Dashboard filter</span>
+                <span style={{ fontSize:10, color:"#9ca3af" }}>
+                  — {visibleApps.length} van {apps.length} zichtbaar
+                  {hiddenApps.size > 0 && ` · ${hiddenApps.size} verborgen`}
+                </span>
+              </div>
+              <div className="flex gap-2 flex-wrap flex-1">
+                {allScored.map((a, i) => {
+                  const hidden  = hiddenApps.has(a.id);
+                  const isLast2 = !hidden && visibleApps.length <= minVisible;
+                  const col     = COLORS[i % COLORS.length];
+                  return (
+                    <button key={a.id}
+                      onClick={() => toggleApp(a.id)}
+                      disabled={isLast2 && !hidden}
+                      title={isLast2 && !hidden ? "Minimaal 2 applicaties moeten zichtbaar blijven" : hidden ? "Klik om zichtbaar te maken" : "Klik om te verbergen"}
+                      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium transition-all"
+                      style={{
+                        borderRadius: 4,
+                        border: `2px solid ${hidden ? "#e5e7eb" : col}`,
+                        background: hidden ? "#f9fafb" : `${col}18`,
+                        color: hidden ? "#9ca3af" : col,
+                        opacity: isLast2 && !hidden ? 0.5 : 1,
+                        cursor: isLast2 && !hidden ? "not-allowed" : "pointer",
+                        textDecoration: hidden ? "line-through" : "none"
+                      }}>
+                      <span className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: hidden ? "#d1d5db" : col }} />
+                      {a.name.substring(0, 22)}
+                      <span style={{ fontSize:10, marginLeft:2, opacity:0.7 }}>
+                        {hidden ? "＋" : "✕"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {hiddenApps.size > 0 && (
+                <button onClick={() => setHiddenApps(new Set())}
+                  className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
+                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                  Alles tonen
+                </button>
+              )}
             </div>
-          ) : (<>
+          )}
+
+          {apps.length === 0 ? (
 
           {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
