@@ -1,10 +1,33 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as XLSX from "xlsx";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ScatterChart, Scatter, Cell
 } from "recharts";
+
+// ── Error Boundary — toont de echte fout in het scherm ────────
+export class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding:32, fontFamily:"monospace", background:"#fff1f2", minHeight:"100vh" }}>
+          <h2 style={{ color:"#b91c1c", marginBottom:16 }}>⚠️ Applicatiefout</h2>
+          <pre style={{ background:"#fff", border:"1px solid #fecaca", padding:16, borderRadius:4,
+            fontSize:12, overflow:"auto", whiteSpace:"pre-wrap", color:"#374151" }}>
+            {String(this.state.error)}{"\n\n"}{this.state.error?.stack}
+          </pre>
+          <p style={{ marginTop:16, fontSize:12, color:"#6b7280" }}>
+            Kopieer bovenstaande foutmelding en stuur naar de ontwikkelaar.
+          </p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
