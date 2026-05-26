@@ -11,26 +11,44 @@ import {
 // ──────────────────────────────────────────────────────────────
 
 const DAAF = [
-  { key:"A1", dim:"A", level:"Risico", dimName:"Hosting & Infrastructuur",
-    name:"Hostinglocatie", hint:"Score 1 = weinig risico · Score 5 = hoog risico",
-    question:"Waar bevinden de servers en klantdata van deze applicatie zich fysiek?",
+  // ── Niveau 1: Risico-exposure ──────────────────────────────
+  { key:"A1", dim:"A", level:"Risico", dimName:"Geopolitiek risico",
+    name:"Jurisdictie leverancier",
+    hint:"Score 1 = weinig risico · Score 5 = hoog risico",
+    question:"Onder welke jurisdictie valt de leverancier en waar staat de data? Geopolitieke en jurisdictierisico's.",
+    toelichting:"Waar is de leverancier gevestigd? Extraterritoriale wetgeving? Adequaatheidsbesluit? Let op: het EU-US Data Privacy Framework (2023) is het derde adequaatheidsbesluit voor de VS; de vorige twee zijn door het Europese Hof vernietigd. De onderliggende wetgeving (CLOUD Act, FISA 702) is echter niet veranderd. Weeg zelf of je dit als score 3 of 4 beschouwt.",
     scores:[
-      {s:1,label:"Volledig EU",    desc:"Servers en data volledig in de EU. Geen overdracht buiten EU."},
-      {s:2,label:"Primair EU",     desc:"Primair EU-gehost, enkele uitzonderingen buiten EU."},
-      {s:3,label:"Gemengd",        desc:"Gemengde hosting: zowel EU- als niet-EU-locaties."},
-      {s:4,label:"Primair non-EU", desc:"Primair buiten EU. Deel van data mogelijk in EU."},
-      {s:5,label:"Volledig non-EU",desc:"Servers en data volledig buiten de EU. Geen EU-garantie."}
+      {s:1,label:"EU/EER volledig",    desc:"EU/EER-jurisdictie. Geen extraterritoriale claims. Volledige EU-bescherming."},
+      {s:2,label:"EU/EER beperkt",     desc:"EU/EER met beperkte extraterritoriale claims. CLOUD Act n.v.t."},
+      {s:3,label:"Adequaatheid + risico",desc:"Adequaatheidsbesluit, maar extraterritoriale wetgeving (CLOUD Act, FISA 702) geeft buitenlandse overheid potentieel toegang."},
+      {s:4,label:"SCCs, geen adequaat",desc:"Geen adequaatheidsbesluit maar contractuele waarborgen (SCCs). Juridische bescherming beperkt."},
+      {s:5,label:"Geen waarborgen",    desc:"Geen adequaatheidsbesluit, geen waarborgen. Directe toegang buitenlandse overheden."}
     ]
   },
-  { key:"B1", dim:"B", level:"Risico", dimName:"Vendor Lock-in",
-    name:"Leveranciersafhankelijkheid", hint:"Score 1 = weinig risico · Score 5 = hoog risico",
-    question:"In hoeverre is NHL Stenden afhankelijk van deze specifieke leverancier?",
+  { key:"A3", dim:"A", level:"Risico", dimName:"Geopolitiek risico",
+    name:"Hosting en datalocatie",
+    hint:"Score 1 = weinig risico · Score 5 = hoog risico",
+    question:"Waar worden data en applicatie fysiek gehost en hoe is dat geborgd?",
+    toelichting:"Waar staan de servers fysiek? Is de data- en applicatielocatie contractueel vastgelegd? Kunnen backups of replicatie buiten de EU terechtkomen? Let op: data en applicatie kunnen op verschillende locaties staan (bijv. applicatie in Ierland, database in Frankfurt, beheerconsole in de VS). Check of er ergens in de keten een niet-Europese jurisdictie meespeelt en neem de slechtste jurisdictie als uitgangspunt.",
     scores:[
-      {s:1,label:"Geen lock-in",      desc:"Open standaarden. Eenvoudig en goedkoop te vervangen."},
-      {s:2,label:"Lichte afh.",        desc:"Lichte afhankelijkheid. Alternatieven beschikbaar, lage switching costs."},
-      {s:3,label:"Matige afh.",        desc:"Matige afhankelijkheid. Alternatieven mogelijk maar tijdrovend."},
-      {s:4,label:"Hoge afh.",          desc:"Hoge afhankelijkheid. Beperkte alternatieven, hoge migratie-inspanning."},
-      {s:5,label:"Volledige lock-in",  desc:"Volledige vendor lock-in. Geen realistisch alternatief beschikbaar."}
+      {s:1,label:"EU/EER contractueel", desc:"Data uitsluitend in EU/EER. Contractueel vastgelegd."},
+      {s:2,label:"EU/EER + adequaat",   desc:"Data in EU/EER. Backups of replicatie mogelijk in land met adequaatheidsbesluit."},
+      {s:3,label:"EU/EER, geen garantie",desc:"Data in EU/EER, maar geen contractuele garantie over locatie. Kan wijzigen."},
+      {s:4,label:"Deels buiten EU",     desc:"Data deels buiten EU, met contractuele waarborgen (SCCs of adequaatheidsbesluit)."},
+      {s:5,label:"Buiten EU",           desc:"Data buiten EU, geen waarborgen, of onduidelijk waar data staat."}
+    ]
+  },
+  { key:"B1", dim:"B", level:"Risico", dimName:"Leveranciersafhankelijkheid",
+    name:"Vendor concentratie",
+    hint:"Score 1 = weinig risico · Score 5 = hoog risico",
+    question:"Hoeveel producten en diensten neem je af bij dezelfde leverancier?",
+    toelichting:"Tel alle producten, diensten, licenties en platformen die je van deze leverancier gebruikt, zowel afgenomen diensten als gekochte software. Denk ook aan onderliggende platformen (bijv. Azure AD, SharePoint, Intune naast Office 365).",
+    scores:[
+      {s:1,label:"1 product",          desc:"1 product of dienst bij deze leverancier."},
+      {s:2,label:"2–3 producten",       desc:"2–3 producten/diensten bij deze leverancier."},
+      {s:3,label:"4–6 producten",       desc:"4–6 producten/diensten bij deze leverancier."},
+      {s:4,label:"7–15 producten",      desc:"7–15 producten/diensten bij deze leverancier."},
+      {s:5,label:"Heel ecosysteem",     desc:"Heel ecosysteem (>15 producten/diensten) bij deze leverancier."}
     ]
   },
   { key:"C1", dim:"C", level:"Mitigatie", dimName:"Technische weerbaarheid",
@@ -174,7 +192,7 @@ function calcScores(scores) {
     const vals = keys.filter(k => (scores[k] || 0) > 0).map(k => scores[k]);
     return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
   };
-  const risico    = avg(["A1","B1"]);
+  const risico    = avg(["A1","A3","B1"]);
   const mitigatie = avg(["C1","D1","E1"]);
   const belang    = avg(["F1","G1","H1"]);
   const dictuAvg  = avg(["2.1","2.2","2.3","4.1"]);
@@ -282,6 +300,11 @@ function QuestionCard({ q, value, onChange, dir }) {
       {q.norm && (
         <div className="rounded p-2 mb-3" style={{ background:"#E6F7F7", border:"1px solid #26B5AE" }}>
           <p style={{ fontSize:11, color:"#0C6B68" }}><span className="font-semibold">Norm: </span>{q.norm}</p>
+        </div>
+      )}
+      {q.toelichting && (
+        <div className="rounded p-2 mb-3" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+          <p style={{ fontSize:11, color:"#78350f" }}><span className="font-semibold">Toelichting: </span>{q.toelichting}</p>
         </div>
       )}
       {q.hint && (
@@ -640,7 +663,7 @@ export default function App() {
                   </p>
                   <div className="space-y-1 mb-2">
                     {[
-                      { lv:"Niveau 1 — Risico (A, B)",     txt:"Hoe groot is het externe risico? Laag = goed.", c:"#dc2626" },
+                      { lv:"Niveau 1 — Risico (A1, A3, B1)", txt:"Hoe groot is het externe risico — jurisdictie, datalocatie en vendor concentratie? Laag = goed.", c:"#dc2626" },
                       { lv:"Niveau 2 — Mitigatie (C, D, E)",txt:"Hoe goed is de weerbaarheid? Hoog = goed.",   c:"#26B5AE" },
                       { lv:"Niveau 3 — Belang (F, G, H)",  txt:"Hoe strategisch is de applicatie? Laag = minder urgent.", c:"#E87722" },
                     ].map(r => (
@@ -1515,7 +1538,7 @@ export default function App() {
                 </p>
                 <div className="space-y-1">
                   {[
-                    { lv:"Niveau 1 · Risico (A, B)",      txt:"Hoe groot is het externe risico — hostinglocatie en leveranciersafhankelijkheid?", c:"#dc2626" },
+                    { lv:"Niveau 1 · Risico (A, B)",      txt:"Hoe groot is het externe risico — jurisdictie leverancier (A1), hosting & datalocatie (A3) en vendor concentratie (B1)?", c:"#dc2626" },
                     { lv:"Niveau 2 · Mitigatie (C, D, E)",txt:"Hoe goed kan NHL Stenden risico's beheersen — alternatieven, kennis, contracten?", c:"#26B5AE" },
                     { lv:"Niveau 3 · Belang (F, G, H)",   txt:"Hoe kritiek is de applicatie — operationeel, data en strategisch belang?",         c:"#E87722" },
                   ].map(r => (
