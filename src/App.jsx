@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.0";
+const VERSION = "v1.1";
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
@@ -476,147 +476,175 @@ function KwadrantSVG({ kwData, onAppClick }) {
   );
 }
 
-// ── RadarSVG — eigen SVG implementatie met hover tooltip ──────
-function RadarSVG({ apps, W = 680, H = 400 }) {
-  const [tooltip, setTooltip] = React.useState(null);
-  const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
+// ── DivergingChart — vervangt het spindiagram ────────────────
+// Semantisch correcte weergave: richting van de as heeft betekenis
+// Links/rood = risico (laag is beter), rechts/groen = weerbaarheid (hoog is beter)
+function DivergingChart({ apps, compact = false }) {
+  const [tip, setTip] = React.useState(null);
+  const APP_COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
 
   const dimScore = (app, letter) => {
     if (letter === "A") {
-      const a1 = app.scores["A1"] || 0, a3 = app.scores["A3"] || 0;
-      const pairs = [[a1,3],[a3,2]].filter(([v]) => v > 0);
-      if (!pairs.length) return 0;
-      const tw = pairs.reduce((s,[,w]) => s+w, 0);
-      return pairs.reduce((s,[v,w]) => s+v*w, 0) / tw;
+      const a1=app.scores["A1"]||0, a3=app.scores["A3"]||0;
+      const p=[[a1,3],[a3,2]].filter(([v])=>v>0);
+      if (!p.length) return 0;
+      const tw=p.reduce((s,[,w])=>s+w,0);
+      return p.reduce((s,[v,w])=>s+v*w,0)/tw;
     }
-    const qs = DAAF.filter(d => d.dim === letter);
-    const vals = qs.map(q => app.scores[q.key] || 0).filter(v => v > 0);
-    return vals.length ? vals.reduce((s,v) => s+v, 0) / vals.length : 0;
+    const qs=DAAF.filter(d=>d.dim===letter);
+    const vals=qs.map(q=>app.scores[q.key]||0).filter(v=>v>0);
+    return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : 0;
   };
 
-  const dims = [...new Set(DAAF.map(d => d.dim))].map(letter => {
-    const f = DAAF.find(d => d.dim === letter);
-    return { letter, label: f ? f.dimName : letter };
-  });
+  const groups = [
+    {
+      id:"risico", title:"Niveau 1 — Risico-exposure",
+      note:"Lagere score is beter — minder blootstelling",
+      tc:"#991b1b", bg:"#fff1f2", border:"#fecaca",
+      gradient:"linear-gradient(to right, #dcfce7 0%, #fef9c3 40%, #fca5a5 75%, #dc2626 100%)",
+      dims:[
+        {l:"A", n:"Geopolitiek risico"},
+        {l:"B", n:"Leveranciersafhankelijkheid"},
+      ]
+    },
+    {
+      id:"mitigatie", title:"Niveau 2 — Mitigatie-capaciteit",
+      note:"Hogere score is beter — meer weerbaarheid",
+      tc:"#166534", bg:"#f0fdf4", border:"#bbf7d0",
+      gradient:"linear-gradient(to right, #dc2626 0%, #fca5a5 25%, #fde68a 55%, #86efac 80%, #16a34a 100%)",
+      dims:[
+        {l:"C", n:"Technische weerbaarheid"},
+        {l:"D", n:"Organisatorische weerbaarheid"},
+        {l:"E", n:"Contractuele weerbaarheid"},
+      ]
+    },
+    {
+      id:"belang", title:"Niveau 3 — Strategisch belang",
+      note:"Hogere score = meer urgentie — vraagt extra aandacht",
+      tc:"#92400e", bg:"#fff7ed", border:"#fed7aa",
+      gradient:"linear-gradient(to right, #fffbeb 0%, #fde68a 40%, #f59e0b 70%, #b45309 100%)",
+      dims:[
+        {l:"F", n:"Organisatorisch belang"},
+        {l:"G", n:"Data-gevoeligheid"},
+        {l:"H", n:"Academische impact"},
+      ]
+    },
+  ];
 
-  const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
-  const cx = W / 2;
-  const cy = (H - 44) / 2 + 10;
-  const maxR = Math.min(W, H - 64) / 2 - 58;
-  const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
-  const pt = (i, v) => {
-    const r = (v / maxV) * maxR, a = axisAngle(i);
-    return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
-  };
-  const anchor = i => { const x = Math.cos(axisAngle(i)); return x>0.3?"start":x<-0.3?"end":"middle"; };
-  const labelPt = i => { const r=maxR+24, a=axisAngle(i); return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
-
-  // Tooltip box: clip to SVG bounds
-  const TW=190, TH=58;
-  const tipX = tooltip ? Math.min(Math.max(tooltip.svgX - TW/2, 4), W - TW - 4) : 0;
-  const tipY = tooltip ? Math.max(tooltip.svgY - TH - 14, 4) : 0;
+  const barH    = compact ? 20 : 24;
+  const labelW  = compact ? 200 : 230;
+  const dotSize = compact ? 14  : 16;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%"
-      style={{ display:"block", overflow:"visible" }}
-      onMouseLeave={() => setTooltip(null)}>
-
-      {/* Grid veelhoeken */}
-      {LEVELS.map(lv => (
-        <polygon key={lv}
-          points={dims.map((_,i) => pt(i,lv).join(",")).join(" ")}
-          fill="none" stroke="#e5e7eb" strokeWidth={lv===5?1.5:0.8} />
-      ))}
-      {/* As-lijnen */}
-      {dims.map((_,i) => { const [x,y]=pt(i,5); return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#d1d5db" strokeWidth={1}/>; })}
-      {/* Gridwaarden op eerste as */}
-      {LEVELS.map(lv => { const [x,y]=pt(0,lv); return <text key={lv} x={x+5} y={y+3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>; })}
-
-      {/* Polygonen per app */}
-      {apps.slice(0,5).map((app, ai) => {
-        const color = COLORS[ai % COLORS.length];
-        const scores = dims.map(d => dimScore(app, d.letter));
-        if (scores.every(v => v === 0)) return null;
-        const poly = dims.map((d,i) => pt(i, scores[i]).join(",")).join(" ");
-        return (
-          <g key={app.id || ai}>
-            <polygon points={poly} fill={color} fillOpacity={0.16} stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
-            {dims.map((d,i) => {
-              const v = scores[i];
-              if (v === 0) return null;
-              const [px,py] = pt(i, v);
-              return (
-                <circle key={i} cx={px} cy={py} r={6}
-                  fill={color} stroke="white" strokeWidth={2}
-                  style={{ cursor:"crosshair" }}
-                  onMouseEnter={e => {
-                    const svgEl = e.currentTarget.closest("svg");
-                    const rect  = svgEl.getBoundingClientRect();
-                    const scale = W / rect.width;
-                    setTooltip({
-                      svgX: (e.clientX - rect.left) * scale,
-                      svgY: (e.clientY - rect.top)  * scale,
-                      appName:  app.name,
-                      dimLabel: d.label,
-                      dimLetter: d.letter,
-                      value: v,
-                      color
-                    });
-                  }}
-                  onMouseLeave={() => setTooltip(null)}
-                />
-              );
-            })}
-          </g>
-        );
-      })}
-
-      {/* As-labels */}
-      {dims.map((d,i) => {
-        const [lx,ly] = labelPt(i);
-        const words = d.label.split(" ");
-        const l1 = words.slice(0, Math.ceil(words.length/2)).join(" ");
-        const l2 = words.slice(Math.ceil(words.length/2)).join(" ");
-        return (
-          <text key={i} x={lx} y={ly-(l2?6:0)} textAnchor={anchor(i)}
-            fill="#374151" fontSize={11} fontWeight={600} fontFamily="system-ui">
-            {l1}{l2 && <tspan x={lx} dy={13}>{l2}</tspan>}
-          </text>
-        );
-      })}
-
+    <div style={{ fontFamily:"system-ui,sans-serif", position:"relative" }}>
       {/* Legenda */}
-      {apps.slice(0,5).map((app, ai) => {
-        const color = COLORS[ai%COLORS.length];
-        const lx = cx - ((Math.min(apps.length,5)-1)*115)/2 + ai*115;
-        return (
-          <g key={app.id || ai}>
-            <rect x={lx-32} y={H-12} width={11} height={11} fill={color} fillOpacity={0.6} rx={2}/>
-            <text x={lx-17} y={H-3} fontSize={10} fill="#374151" fontFamily="system-ui">{app.name.substring(0,14)}</text>
-          </g>
-        );
-      })}
+      <div style={{ display:"flex", gap:14, flexWrap:"wrap", marginBottom:10 }}>
+        {apps.slice(0,5).map((app,i) => (
+          <div key={i} style={{ display:"flex", alignItems:"center", gap:5 }}>
+            <div style={{ width:10,height:10,borderRadius:5,background:APP_COLORS[i],flexShrink:0 }}/>
+            <span style={{ fontSize:10, color:"#374151" }}>{app.name.substring(0,18)}</span>
+          </div>
+        ))}
+      </div>
+
+      {groups.map(g => (
+        <div key={g.id} style={{ marginBottom:compact?10:14 }}>
+          {/* Groepkop */}
+          <div style={{
+            display:"flex", justifyContent:"space-between", alignItems:"center",
+            padding:"3px 10px", marginBottom:6,
+            background:g.bg, border:`1px solid ${g.border}`,
+            borderLeft:`3px solid ${g.tc}`, borderRadius:3
+          }}>
+            <span style={{ fontSize:compact?10:10.5, fontWeight:700, color:g.tc }}>{g.title}</span>
+            <span style={{ fontSize:9, color:g.tc, opacity:0.75 }}>{g.note}</span>
+          </div>
+
+          {g.dims.map(d => {
+            const points = apps.slice(0,5).map((app,ai) => ({
+              name:app.name,
+              score:dimScore(app,d.l),
+              color:APP_COLORS[ai]
+            })).filter(p => p.score > 0);
+
+            return (
+              <div key={d.l} style={{ display:"flex", alignItems:"center", gap:8, marginBottom:compact?3:5 }}>
+                {/* Label */}
+                <div style={{ width:labelW, flexShrink:0, display:"flex", gap:4, alignItems:"center" }}>
+                  <span style={{ fontSize:9,fontWeight:700,color:g.tc,width:16,flexShrink:0 }}>{d.l}</span>
+                  <span style={{ fontSize:9, color:"#374151" }}>{d.n}</span>
+                </div>
+
+                {/* Balk + punten */}
+                <div style={{ flex:1, position:"relative", height:barH+18 }}>
+                  {/* Gradient achtergrond */}
+                  <div style={{
+                    position:"absolute", top:0, left:0, right:0, height:barH,
+                    borderRadius:3, background:g.gradient,
+                    border:"1px solid rgba(0,0,0,0.07)"
+                  }}/>
+                  {/* Tick-lijnen + labels */}
+                  {[1,2,3,4,5].map(v => (
+                    <React.Fragment key={v}>
+                      {v > 1 && <div style={{
+                        position:"absolute", left:`${(v-1)/4*100}%`,
+                        top:0, height:barH, borderLeft:"1px solid rgba(255,255,255,0.55)"
+                      }}/>}
+                      <span style={{
+                        position:"absolute", top:barH+3,
+                        left:`${(v-1)/4*100}%`, transform:"translateX(-50%)",
+                        fontSize:8, color:"#9ca3af"
+                      }}>{v}</span>
+                    </React.Fragment>
+                  ))}
+                  {/* Applicatie-punten */}
+                  {points.map((p,pi) => (
+                    <div key={pi}
+                      onMouseEnter={e => setTip({
+                        x: e.clientX, y: e.clientY,
+                        name:p.name, dim:`${d.l}: ${d.n}`, score:p.score, color:p.color
+                      })}
+                      onMouseLeave={() => setTip(null)}
+                      style={{
+                        position:"absolute",
+                        left:`calc(${(p.score-1)/4*100}% - ${dotSize/2}px)`,
+                        top:(barH-dotSize)/2,
+                        width:dotSize, height:dotSize, borderRadius:dotSize/2,
+                        background:p.color, border:"2.5px solid white",
+                        cursor:"crosshair", zIndex:10,
+                        boxShadow:"0 1px 4px rgba(0,0,0,0.25)"
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Gemiddelde score (voor enkelvoudige app) */}
+                {apps.length === 1 && points.length > 0 && (
+                  <span style={{ fontSize:11,fontWeight:700,color:g.tc,width:32,textAlign:"right",flexShrink:0 }}>
+                    {points[0].score.toFixed(1)}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ))}
 
       {/* Tooltip */}
-      {tooltip && (
-        <g style={{ pointerEvents:"none" }}>
-          <rect x={tipX} y={tipY} width={TW} height={TH} rx={5}
-            fill="white" stroke={tooltip.color} strokeWidth={1.5}
-            style={{ filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.18))" }} />
-          <rect x={tipX} y={tipY} width={TW} height={18} rx={5} fill={tooltip.color} />
-          <rect x={tipX} y={tipY+14} width={TW} height={4} fill={tooltip.color} />
-          <text x={tipX+8} y={tipY+13} fill="white" fontSize={10} fontWeight={700} fontFamily="system-ui">
-            {tooltip.appName.substring(0,24)}
-          </text>
-          <text x={tipX+8} y={tipY+32} fill="#374151" fontSize={9} fontFamily="system-ui">
-            {tooltip.dimLetter}: {tooltip.dimLabel.substring(0,26)}
-          </text>
-          <text x={tipX+8} y={tipY+48} fill={tooltip.color} fontSize={12} fontWeight={700} fontFamily="system-ui">
-            {tooltip.value.toFixed(2)} / 5
-          </text>
-        </g>
+      {tip && (
+        <div style={{
+          position:"fixed", left:tip.x+14, top:tip.y-10,
+          background:"white", border:`2px solid ${tip.color}`,
+          borderRadius:6, padding:"6px 10px",
+          fontSize:11, zIndex:9999, pointerEvents:"none",
+          boxShadow:"0 4px 12px rgba(0,0,0,0.18)", minWidth:150
+        }}>
+          <div style={{ fontWeight:700, color:tip.color, marginBottom:2 }}>{tip.name}</div>
+          <div style={{ fontSize:9, color:"#6b7280", marginBottom:4 }}>{tip.dim}</div>
+          <div style={{ fontSize:14, fontWeight:700, color:tip.color }}>{tip.score.toFixed(2)} / 5</div>
+        </div>
       )}
-    </svg>
+    </div>
   );
 }
 
@@ -1360,7 +1388,7 @@ export default function App() {
     </p>
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-    <h2>Spindiagram — dimensiescores per applicatie (DAAF)</h2>
+    <h2>Dimensieprofiel — per applicatie (DAAF)</h2>
     <p style="font-size:10px;color:#6b7280;margin-bottom:8px">
       Gewogen dimensiescores 1–5. Risico-assen (A, B): kleiner is beter.
       Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.
@@ -1682,28 +1710,28 @@ export default function App() {
             </div>
           </div>
 
-          {/* ── Rij 2: Spindiagram full-width (eigen SVG) ── */}
+          {/* ── Rij 2: Dimensieprofiel full-width ── */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Spindiagram — dimensies per applicatie</h3>
+              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Dimensieprofiel — per applicatie vergelijken</h3>
             </div>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#6b7280" }}>
-              Elke as toont één DAAF-dimensie (gewogen score 1–5).{" "}
-              <span style={{ color:"#26B5AE", fontWeight:600 }}>Mitigatie-assen (C, D, E)</span>: groter is beter.{" "}
-              <span style={{ color:"#dc2626", fontWeight:600 }}>Risico-assen (A, B)</span> en{" "}
-              <span style={{ color:"#E87722", fontWeight:600 }}>Belang-assen (F, G, H)</span>: kleiner is beter.
+              Elke balk toont de gewogen score (1–5) op één DAAF-dimensie. De kleurovergang geeft direct de kwaliteit aan:
+              voor <span style={{ color:"#dc2626", fontWeight:600 }}>risico-assen (A, B)</span> is links/groen beter.
+              Voor <span style={{ color:"#16a34a", fontWeight:600 }}>mitigatie-assen (C, D, E)</span> is rechts/groen beter.
+              Hover over een punt voor applicatienaam en exacte score.
             </p>
             {scored.length >= 1
-              ? <RadarSVG apps={scored} W={800} H={440} />
+              ? <DivergingChart apps={scored} />
               : <div className="text-center py-10 text-sm text-gray-400">Voeg een applicatie toe om het spindiagram te zien.</div>
             }
             {/* Compacte leeswijzer */}
             <div className="grid grid-cols-3 gap-2 mt-3">
               {[
-                { label:"Assen & dimensies", text:"Elke as = 1 DAAF-dimensie (A t/m H). De naam staat bij de punt van de as. Hover over een punt voor de exacte waarde en applicatienaam." },
-                { label:"Waarden (1–5)", text:"Hoe verder van het centrum, hoe hoger de score. Risico-assen (A, B): dichter bij centrum is beter. Mitigatie-assen (C, D, E): verder van centrum is beter. Belang-assen (F, G, H): dichter bij centrum = minder urgent." },
-                { label:"Vorm vergelijken", text:"Elke applicatie krijgt een eigen gekleurde vorm. Grote overlappende vormen = vergelijkbaar profiel. Grote verschillen tonen precies op welke dimensies applicaties van elkaar afwijken." },
+                { label:"Punt op de balk", text:"Elk gekleurde punt = één applicatie. De positie op de balk (1–5) is de gewogen dimensiescore. Hover voor applicatienaam en exacte waarde." },
+                { label:"Kleurovergang", text:"De achtergrondkleur van de balk geeft direct de richting aan: groen = gewenste kant. Risico-assen: groen links (laag risico). Mitigatie-assen: groen rechts (hoog = meer weerbaarheid)." },
+                { label:"Belang-assen (F, G, H)", text:"Hoge belang-scores (oranje/bruin) betekenen meer strategische urgentie. Dit is niet per se slecht — maar vraagt dat de risico- en mitigatiescores voor die applicatie goed op orde zijn." },
               ].map(t => (
                 <div key={t.label} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                   <p style={{ fontSize:9, fontWeight:700, color:"#0C2340", marginBottom:2 }}>{t.label}</p>
@@ -2152,14 +2180,15 @@ export default function App() {
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Spindiagram — dimensies</p>
+                <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Dimensieprofiel — vergelijking</p>
               </div>
-              <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen dimensiescores 1-5. Groter = sterker voor mitigatie. Kleiner = beter voor risico en belang.</p>
-              <RadarSVG apps={visibleCompare} W={500} H={340} />
+              <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen scores 1–5 per dimensie. Kleurovergang toont de richting: groen = gewenste kant. Hover voor details.</p>
+              <DivergingChart apps={visibleCompare} compact={true} />
               <div className="grid grid-cols-1 gap-1 mt-2">
                 {[
-                  "Elke as = 1 DAAF-dimensie (A–H). Hover over punt voor applicatienaam en exacte waarde.",
-                  "Risico-assen (A, B): kleiner is beter. Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.",
+                  "Risico-assen (A, B): groen links — punt dicht bij 1 is goed.",
+                  "Mitigatie-assen (C, D, E): groen rechts — punt dicht bij 5 is goed.",
+                  "Belang-assen (F, G, H): hoge score = meer urgentie, maar vraagt ook sterkere mitigatie.",
                 ].map((t,i) => <p key={i} style={{ fontSize:9, color:"#9ca3af" }}>• {t}</p>)}
               </div>
             </div>
@@ -2570,22 +2599,22 @@ export default function App() {
           </Section>
 
           {/* Wat zegt de score */}
-          <Section title="Hoe lees je het spindiagram?" accent="#1A56A0">
+          <Section title="Hoe lees je het dimensieprofiel?" accent="#1A56A0">
             <div className="rounded p-4 mb-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
               <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-                Het spindiagram (ook wel radardiagram of spinnenwebdiagram) toont alle 8 DAAF-dimensies tegelijk voor één of meerdere applicaties.
-                Elke as stelt één dimensie voor. De afstand van het middelpunt tot een punt op de as geeft de score op die dimensie (schaal 1–5).
-                Hover met de muis over een punt om de applicatienaam, dimensie en exacte waarde te zien.
+                Het dimensieprofiel vervangt het traditionele spindiagram omdat een spindiagram semantisch misleidend is:
+                "een hoge score" betekent niet overal hetzelfde. In het dimensieprofiel heeft elke balk een eigen richting,
+                zodat de kleurovergang direct de kwaliteit aangeeft. Hover over een punt voor applicatienaam en exacte waarde.
               </p>
-              {/* Visuele uitleg assen */}
+              {/* Groep uitleg */}
               <div className="grid grid-cols-3 gap-3 mb-3">
                 {[
                   { letter:"A, B", naam:"Risico-assen", kleur:"#dc2626", bg:"#fee2e2",
-                    uitleg:"Geopolitiek risico (A) en Leveranciersafhankelijkheid (B). Een hogere score betekent meer risico. Dichter bij het centrum is dus beter — dat betekent minder blootstelling." },
+                    uitleg:"Geopolitiek risico (A) en Leveranciersafhankelijkheid (B). De balk loopt van groen (1, laag risico) naar rood (5, hoog risico). Een punt links in de balk is beter. Hoge scores hier vragen mitigatie of een bewuste keuze." },
                   { letter:"C, D, E", naam:"Mitigatie-assen", kleur:"#16a34a", bg:"#dcfce7",
-                    uitleg:"Technische weerbaarheid (C), Organisatorische weerbaarheid (D) en Contractuele weerbaarheid (E). Een hogere score betekent betere weerbaarheid. Verder van het centrum is beter." },
-                  { letter:"F, G, H", naam:"Belang-assen", kleur:"#E87722", bg:"#ffedd5",
-                    uitleg:"Organisatorisch belang (F), Data-gevoeligheid (G) en Academische impact (H). Een hogere score betekent meer strategisch belang. Dichter bij het centrum betekent minder urgentie." },
+                    uitleg:"Technische (C), Organisatorische (D) en Contractuele (E) weerbaarheid. De balk loopt van rood (1, weinig weerbaarheid) naar groen (5, sterke weerbaarheid). Een punt rechts in de balk is beter." },
+                  { letter:"F, G, H", naam:"Belang-assen", kleur:"#d97706", bg:"#ffedd5",
+                    uitleg:"Organisatorisch belang (F), Data-gevoeligheid (G) en Academische impact (H). De balk loopt van licht naar donkeroranje. Hoge belang-scores zijn niet per se slecht, maar ze verhogen de urgentie van risico- en mitigatiescores." },
                 ].map(g => (
                   <div key={g.letter} className="rounded p-3" style={{ background:g.bg, border:`1px solid ${g.kleur}44` }}>
                     <div className="flex items-center gap-1.5 mb-1.5">
@@ -2596,33 +2625,31 @@ export default function App() {
                   </div>
                 ))}
               </div>
-              {/* Schaaluitleg */}
+              {/* Schaal + kleuruitleg */}
               <div className="rounded p-3 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Wat betekenen de waarden 1–5?</p>
-                <div className="grid grid-cols-5 gap-1">
+                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Hoe werkt de kleurovergang?</p>
+                <div className="grid grid-cols-2 gap-3">
                   {[
-                    { v:"1", uitleg:"Minst gunstig / laagste risico voor risico-assen" },
-                    { v:"2", uitleg:"Beperkt" },
-                    { v:"3", uitleg:"Gemiddeld / neutraal" },
-                    { v:"4", uitleg:"Significant" },
-                    { v:"5", uitleg:"Maximum / hoogste risico voor risico-assen" },
-                  ].map(s => (
-                    <div key={s.v} className="text-center rounded p-1.5" style={{ background:"#EBF3FF" }}>
-                      <div style={{ fontSize:16, fontWeight:700, color:"#1A56A0" }}>{s.v}</div>
-                      <div style={{ fontSize:8, color:"#6b7280", lineHeight:1.3 }}>{s.uitleg}</div>
+                    { titel:"Risico-assen (A, B)", gradient:"linear-gradient(to right,#dcfce7,#fef9c3,#fca5a5,#dc2626)", tekst:"Groen = laag risico (goed). Rood = hoog risico. Een punt helemaal links (score 1) is ideaal." },
+                    { titel:"Mitigatie-assen (C, D, E)", gradient:"linear-gradient(to right,#dc2626,#fca5a5,#fde68a,#86efac,#16a34a)", tekst:"Rood = weinig weerbaarheid. Groen = sterk weerbaar. Een punt helemaal rechts (score 5) is ideaal." },
+                  ].map(g => (
+                    <div key={g.titel}>
+                      <p style={{ fontSize:10, fontWeight:600, color:"#0C2340", marginBottom:4 }}>{g.titel}</p>
+                      <div style={{ height:18, borderRadius:3, background:g.gradient, marginBottom:4 }} />
+                      <p style={{ fontSize:9, color:"#6b7280" }}>{g.tekst}</p>
                     </div>
                   ))}
                 </div>
               </div>
-              {/* Vormen vergelijken */}
+              {/* Vergelijken */}
               <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Vormen vergelijken</p>
+                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Applicaties vergelijken</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { titel:"Grote, volle vorm", tekst:"Een applicatie met een grote vorm (ver van het centrum op alle assen) heeft hoge scores op alle dimensies. Of dat goed of slecht is, hangt af van de as: groot op mitigatie-assen is goed, groot op risico-assen is slecht." },
-                    { titel:"Asymmetrische vorm", tekst:"Een asymmetrische of puntige vorm wijst op grote verschillen tussen dimensies. Dat is waardevol: het laat precies zien waar de sterke en zwakke punten zitten, en geeft richting aan verbeteracties." },
-                    { titel:"Overlappende vormen", tekst:"Als twee applicaties sterk overlappen, hebben ze een vergelijkbaar risico- en weerbaarheidsprofiel. Grote afwijkingen tonen juist aan waar applicaties fundamenteel van elkaar verschillen." },
-                    { titel:"Klein centrum-cluster", tekst:"Als de punt van een applicatie dicht bij het centrum zit op een mitigatie-as (C, D of E), betekent dat weinig weerbaarheid op die dimensie — een kwetsbaarheid die aandacht verdient." },
+                    { titel:"Punten dicht bij elkaar", tekst:"Als punten van meerdere applicaties op dezelfde positie staan, hebben ze een vergelijkbaar profiel op die dimensie. Zo ontdek je snel gemeenschappelijke risico's." },
+                    { titel:"Punten ver uit elkaar", tekst:"Grote spreiding op één as betekent dat applicaties fundamenteel verschillen op die dimensie. Bijv. goede vs. slechte contractuele bescherming — prioriteer de applicatie met het slechtste punt." },
+                    { titel:"Risico hoog + mitigatie laag", tekst:"Als een applicatie een punt rechts in een risico-balk heeft én een punt links in een mitigatie-balk, combineer je een hoog risico met een lage weerbaarheid — dit vraagt directe actie." },
+                    { titel:"Belang hoog + risico/mitigatie zwak", tekst:"Een hoge belang-score maakt een slechte risico- of mitigatiescore urgenter. Gebruik dit inzicht voor prioritering in het actieplan." },
                   ].map(t => (
                     <div key={t.titel} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                       <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:3 }}>📌 {t.titel}</p>
@@ -2633,7 +2660,6 @@ export default function App() {
               </div>
             </div>
           </Section>
-
           <Section title="Wat zegt de score? — De urgentie van het autonomieprobleem" accent="#E87722">
             <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"2px solid #E87722" }}>
               <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>
