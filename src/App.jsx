@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v0.8";
+const VERSION = "v0.9";
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
@@ -760,6 +760,79 @@ export default function App() {
     const visible = apps.filter(a => !hiddenApps.has(a.id));
     const datum = new Date().toLocaleDateString("nl-NL", { day:"2-digit", month:"long", year:"numeric" });
 
+    // ── SVG kwadrant generator ────────────────────────────────
+    function generateKwadrantSVG(appsArr) {
+      const W=680, H=380, pad={top:28, right:20, bottom:44, left:48};
+      const iW=W-pad.left-pad.right, iH=H-pad.top-pad.bottom;
+      const xMin=1,xMax=25,yMin=1,yMax=5,mx=13,my=3;
+      const toX = v => pad.left+(v-xMin)/(xMax-xMin)*iW;
+      const toY = v => pad.top+(yMax-v)/(yMax-yMin)*iH;
+      const midX=toX(mx), midY=toY(my);
+      const QCOLORS=["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
+
+      let dots = "";
+      appsArr.forEach((a, i) => {
+        const s = calcScores(a.scores);
+        if (!s.risico || !s.mitigatie || !s.belang) return;
+        const cx = toX(s.risico * s.belang), cy = toY(s.mitigatie);
+        const col = QCOLORS[i % QCOLORS.length];
+        dots += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="${col}" fill-opacity="0.25" stroke="${col}" stroke-width="2"/>`;
+        dots += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="${col}"/>`;
+        dots += `<rect x="${(cx+10).toFixed(1)}" y="${(cy-9).toFixed(1)}" width="${Math.min(a.name.length*5.5+6,110)}" height="14" rx="2" fill="white" fill-opacity="0.85"/>`;
+        dots += `<text x="${(cx+13).toFixed(1)}" y="${(cy+2).toFixed(1)}" fill="${col}" font-size="9" font-weight="bold" font-family="Arial">${a.name.substring(0,18)}</text>`;
+      });
+
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;max-width:100%">
+        <rect x="${pad.left}" y="${pad.top}" width="${midX-pad.left}" height="${midY-pad.top}" fill="#e8f5e9"/>
+        <rect x="${midX}" y="${pad.top}" width="${pad.left+iW-midX}" height="${midY-pad.top}" fill="#fff8e1"/>
+        <rect x="${pad.left}" y="${midY}" width="${midX-pad.left}" height="${pad.top+iH-midY}" fill="#fff3e0"/>
+        <rect x="${midX}" y="${midY}" width="${pad.left+iW-midX}" height="${pad.top+iH-midY}" fill="#fce4ec"/>
+        <text x="${((pad.left+midX)/2).toFixed(0)}" y="${((pad.top+midY)/2-8).toFixed(0)}" text-anchor="middle" fill="#2e7d5e" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">OPTIMAAL</text>
+        <text x="${((midX+pad.left+iW)/2).toFixed(0)}" y="${((pad.top+midY)/2-8).toFixed(0)}" text-anchor="middle" fill="#e07b20" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">BEHEERSBAAR</text>
+        <text x="${((pad.left+midX)/2).toFixed(0)}" y="${((midY+pad.top+iH)/2-8).toFixed(0)}" text-anchor="middle" fill="#e07b20" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">AANDACHTSPUNT</text>
+        <text x="${((midX+pad.left+iW)/2).toFixed(0)}" y="${((midY+pad.top+iH)/2-8).toFixed(0)}" text-anchor="middle" fill="#c0392b" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">KRITIEK</text>
+        <line x1="${midX.toFixed(1)}" y1="${pad.top}" x2="${midX.toFixed(1)}" y2="${pad.top+iH}" stroke="#aaa" stroke-width="1.5"/>
+        <line x1="${pad.left}" y1="${midY.toFixed(1)}" x2="${pad.left+iW}" y2="${midY.toFixed(1)}" stroke="#aaa" stroke-width="1.5"/>
+        <rect x="${pad.left}" y="${pad.top}" width="${iW}" height="${iH}" fill="none" stroke="#ccc" stroke-width="1"/>
+        ${[1,5,10,15,20,25].map(v=>`<text x="${toX(v).toFixed(1)}" y="${pad.top+iH+14}" text-anchor="middle" fill="#888" font-size="8" font-family="Arial">${v}</text>`).join("")}
+        ${[1,2,3,4,5].map(v=>`<text x="${pad.left-6}" y="${(toY(v)+3).toFixed(1)}" text-anchor="end" fill="#888" font-size="8" font-family="Arial">${v}</text>`).join("")}
+        <text x="${(pad.left+iW/2).toFixed(0)}" y="${H-4}" text-anchor="middle" fill="#444" font-size="10" font-weight="bold" font-family="Arial">Risico-exposure x Strategisch belang</text>
+        <text x="12" y="${(pad.top+iH/2).toFixed(0)}" text-anchor="middle" fill="#444" font-size="10" font-weight="bold" font-family="Arial" transform="rotate(-90,12,${(pad.top+iH/2).toFixed(0)})">Mitigatie</text>
+        ${dots}
+      </svg>`;
+    }
+
+    // ── Dimensie-scoretabel voor spindiagram ──────────────────
+    function generateDimTable(appsArr) {
+      const dimLetters = [...new Set(DAAF.map(d => d.dim))];
+      const dimName = l => { const f = DAAF.find(d=>d.dim===l); return f?f.dimName:l; };
+      const dScore = (a, letter) => {
+        if (letter === "A") {
+          const a1=a.scores["A1"]||0, a3=a.scores["A3"]||0;
+          const p=[[a1,3],[a3,2]].filter(([v])=>v>0);
+          if (!p.length) return "–";
+          const tw=p.reduce((s,[,w])=>s+w,0);
+          return (p.reduce((s,[v,w])=>s+v*w,0)/tw).toFixed(2);
+        }
+        const qs=DAAF.filter(d=>d.dim===letter);
+        const vals=qs.map(q=>a.scores[q.key]||0).filter(v=>v>0);
+        return vals.length?(vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(2):"–";
+      };
+      const lvlColor = l => ["A","B"].includes(l)?"#dc2626":["C","D","E"].includes(l)?"#166534":"#92400e";
+      const lvlLabel = l => ["A","B"].includes(l)?"Risico ↓":["C","D","E"].includes(l)?"Mitigatie ↑":"Belang ↓";
+
+      const headers = appsArr.map(a => `<th>${a.name.substring(0,16)}</th>`).join("");
+      const dimRows = dimLetters.map(l => {
+        const cells = appsArr.map(a => `<td style="text-align:center;font-weight:700;color:${lvlColor(l)}">${dScore(a,l)}</td>`).join("");
+        return `<tr><td><strong>${l}</strong></td><td>${dimName(l)}</td><td style="color:${lvlColor(l)};font-size:9px">${lvlLabel(l)}</td>${cells}</tr>`;
+      }).join("");
+
+      return `<table class="dim-table">
+        <tr><th>Dim</th><th>Naam</th><th>Richting</th>${headers}</tr>
+        ${dimRows}
+      </table>`;
+    }
+
     const rows = visible.map(a => {
       const s = calcScores(a.scores);
       const lbl = scoreLabel(s.autonomyScore);
@@ -828,6 +901,8 @@ export default function App() {
   tr:nth-child(even) td { background: #f8fafc; }
   .app-section { margin-bottom: 20px; page-break-inside: avoid; }
   .scores-table th { background: #1A56A0; }
+  .kwadrant-wrap { margin: 12px 0; page-break-inside: avoid; }
+  .dim-table th { background: #065f46; }
   .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #9ca3af; text-align: center; }
   @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 </style>
@@ -847,17 +922,24 @@ export default function App() {
   <h2>Overzicht — alle applicaties</h2>
   <table>
     <tr>
-      <th>Applicatie</th>
-      <th>Autonomiescore (1-10)</th>
-      <th>Risico ↓</th>
-      <th>Mitigatie ↑</th>
-      <th>Belang ↓</th>
-      <th>DICTU</th>
-      <th>Volledigheid</th>
-      <th>Status</th>
+      <th>Applicatie</th><th>Autonomiescore (1-10)</th><th>Risico ↓</th>
+      <th>Mitigatie ↑</th><th>Belang ↓</th><th>DICTU</th><th>Volledigheid</th><th>Status</th>
     </tr>
     ${rows}
   </table>
+
+  <h2>Autonomie-kwadrant (DAAF)</h2>
+  <p style="font-size:10px;color:#6b7280;margin-bottom:8px;">
+    Horizontale as = Risico × Belang (rechts = meer urgentie) · Verticale as = Mitigatie (hoger = beter)
+    · Linksboven = OPTIMAAL · Rechtsboven = KRITIEK
+  </p>
+  <div class="kwadrant-wrap">${generateKwadrantSVG(visible)}</div>
+
+  <h2>Dimensiescores per applicatie (DAAF spindiagram)</h2>
+  <p style="font-size:10px;color:#6b7280;margin-bottom:8px;">
+    Gewogen dimensiescores 1-5. Risico-dimensies: laag is beter. Mitigatie-dimensies: hoog is beter.
+  </p>
+  ${generateDimTable(visible)}
 
   <h2>Detailscores per applicatie</h2>
   ${kwRows}
@@ -911,13 +993,25 @@ export default function App() {
       return first ? first.dimName.substring(0, 14) : letter;
     };
 
-    // Gebruik scored (al berekend) zodat dims zeker beschikbaar zijn
+    // Radar: directe berekening per dimensie vanuit ruwe scores
+    // (omzeilt dims-veld van calcScores om rendering-bugs te vermijden)
+    const dimScore = (a, letter) => {
+      if (letter === "A") {
+        const a1 = a.scores["A1"] || 0, a3 = a.scores["A3"] || 0;
+        const pairs = [[a1, 3], [a3, 2]].filter(([v]) => v > 0);
+        if (!pairs.length) return 0;
+        const tw = pairs.reduce((s, [,w]) => s+w, 0);
+        return pairs.reduce((s, [v,w]) => s+v*w, 0) / tw;
+      }
+      const qs = DAAF.filter(d => d.dim === letter);
+      const vals = qs.map(q => a.scores[q.key] || 0).filter(v => v > 0);
+      return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : 0;
+    };
+
     const radarData = dimLetters.map(letter => {
       const entry = { dim: dimLabel(letter) };
       scored.slice(0, 5).forEach(a => {
-        entry[radarKey(a.name)] = (a.sc.dims && a.sc.dims[letter] != null)
-          ? +a.sc.dims[letter].toFixed(2)
-          : 0;
+        entry[radarKey(a.name)] = +dimScore(a, letter).toFixed(2);
       });
       return entry;
     });
@@ -1468,28 +1562,78 @@ export default function App() {
     const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
     const name14 = n => n.substring(0, 14);
 
-    const radarData = DAAF.map(d => ({
-      dim: d.dimName.substring(0, 12),
-      ...Object.fromEntries(apps.map(a => [name14(a.name), a.scores[d.key] || 0]))
-    }));
+    // Radar met gewogen dimensiescores
+    const dimLettersC = [...new Set(DAAF.map(d => d.dim))];
+    const dimLabelC   = letter => { const f = DAAF.find(d => d.dim===letter); return f ? f.dimName.substring(0,12) : letter; };
+    const dimScoreC   = (a, letter) => {
+      if (letter === "A") {
+        const a1 = a.scores["A1"]||0, a3 = a.scores["A3"]||0;
+        const pairs = [[a1,3],[a3,2]].filter(([v])=>v>0);
+        if (!pairs.length) return 0;
+        const tw = pairs.reduce((s,[,w])=>s+w,0);
+        return pairs.reduce((s,[v,w])=>s+v*w,0)/tw;
+      }
+      const qs = DAAF.filter(d=>d.dim===letter);
+      const vals = qs.map(q=>a.scores[q.key]||0).filter(v=>v>0);
+      return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : 0;
+    };
+    const radarData = dimLettersC.map(letter => {
+      const entry = { dim: dimLabelC(letter) };
+      apps.forEach(a => { entry[name14(a.name)] = +dimScoreC(a, letter).toFixed(2); });
+      return entry;
+    });
 
     const barData = apps.map(a => {
       const s = calcScores(a.scores);
       return {
         name: a.name.substring(0, 16),
         Autonomiescore: s.autonomyScore ? +s.autonomyScore.toFixed(1) : 0,
-        "DICTU ×2":     s.dictuAvg     ? +(s.dictuAvg * 2).toFixed(1) : 0
+        "DICTU x2": s.dictuAvg ? +(s.dictuAvg * 2).toFixed(1) : 0
       };
     });
 
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
         <div className="p-5 max-w-5xl mx-auto">
-          <h2 className="text-lg font-semibold mb-4" style={{ color:"#0C2340" }}>Applicatievergelijking</h2>
+
+          {/* Leeswijzer */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <h2 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Leeswijzer vergelijking</h2>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { badge:"DAAF", bg:"#1A56A0", title:"Autonomiescore (1-10)",
+                  body:"Toont hoe urgent het autonomieprobleem is. Berekend via Mitigatie / (Risico x Belang). Hoger = minder urgent. De kleur geeft de status aan.",
+                  statuses:[{t:">=7 Goed",sb:"#dcfce7",sf:"#15803d"},{t:"5-7 Acceptabel",sb:"#fef9c3",sf:"#a16207"},{t:"3-5 Zorgwekkend",sb:"#ffedd5",sf:"#c2410c"},{t:"<3 Kritiek",sb:"#fee2e2",sf:"#b91c1c"}]
+                },
+                { badge:"DAAF", bg:"#1A56A0", title:"Risico / Mitigatie / Belang",
+                  body:"Drie DAAF-niveauscores (1-5). Risico (rood): laag is beter. Mitigatie (teal): hoog is beter. Belang (oranje): laag = minder urgent. Zijn gewogen gemiddelden van de ingevulde dimensies." },
+                { badge:"DICTU", bg:"#26B5AE", title:"DICTU-score (1-5)",
+                  body:"Gemiddelde van 4 vragen: 2.1 Dataresidency, 2.2 Technische beveiliging, 2.3 Juridische bescherming, 4.1 EU-infrastructuur. Score 1 = volledig afhankelijk, 5 = maximaal soeverein." }
+              ].map(c => (
+                <div key={c.title} className="rounded p-3" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold px-1.5 py-0.5" style={{ background:c.bg, color:"#fff", borderRadius:3 }}>{c.badge}</span>
+                    <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>{c.title}</span>
+                  </div>
+                  <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>{c.body}</p>
+                  {c.statuses && (
+                    <div className="flex gap-1 flex-wrap">
+                      {c.statuses.map(s=>(
+                        <span key={s.t} style={{ fontSize:9, background:s.sb, color:s.sf, borderRadius:2, padding:"1px 5px", fontWeight:600 }}>{s.t}</span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <p className="text-sm font-semibold text-gray-700 mb-3">Scores — alle applicaties</p>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF + DICTU</span>
+                <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Scores per applicatie</p>
+              </div>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={barData} margin={{ top:5, right:10, bottom:65, left:0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
@@ -1500,14 +1644,18 @@ export default function App() {
                   <Bar dataKey="Autonomiescore" radius={[3,3,0,0]} name="Autonomiescore (1-10)">
                     {barData.map((d,i) => <Cell key={i} fill={scoreColor(d.Autonomiescore)} />)}
                   </Bar>
-                  <Bar dataKey="DICTU ×2" fill="#7c3aed" fillOpacity={0.7} radius={[3,3,0,0]} name="DICTU score ×2 (schaal 0-10)" />
+                  <Bar dataKey="DICTU x2" fill="#26B5AE" fillOpacity={0.7} radius={[3,3,0,0]} name="DICTU x2 (schaal 0-10)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <p className="text-sm font-semibold text-gray-700 mb-3">DAAF Radar — per dimensie</p>
-              <ResponsiveContainer width="100%" height={260}>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Spindiagram — dimensies</p>
+              </div>
+              <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen dimensiescores 1-5. Groter = sterker voor mitigatie. Kleiner = beter voor risico en belang.</p>
+              <ResponsiveContainer width="100%" height={240}>
                 <RadarChart data={radarData}>
                   <PolarGrid stroke="#f3f4f6" />
                   <PolarAngleAxis dataKey="dim" tick={{ fontSize:9 }} />
@@ -1523,38 +1671,42 @@ export default function App() {
             </div>
           </div>
 
-          {/* Table */}
+          {/* Vergelijkingstabel */}
           <div className="rounded p-4 overflow-x-auto" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <p className="text-sm font-semibold mb-3" style={{ color:"#0C2340" }}>Vergelijkingstabel</p>
+            <div className="flex items-center gap-2 mb-3">
+              <h3 className="font-semibold text-sm" style={{ color:"#0C2340" }}>Vergelijkingstabel</h3>
+              <span className="text-xs text-gray-400">klik op een rij om naar het assessment te gaan</span>
+            </div>
             <table className="w-full" style={{ fontSize:12 }}>
               <thead>
-                <tr style={{ borderBottom:`2px solid #1A56A0` }}>
-                  {["Applicatie","Leverancier","Auto-score","Risico","Mitigatie","Belang","DICTU","Volledigheid"].map(h => (
-                    <th key={h} className="text-left py-1.5 px-2 font-semibold" style={{ color:"#1A56A0" }}>{h}</th>
+                <tr style={{ borderBottom:"2px solid #1A56A0" }}>
+                  {[
+                    "Applicatie","Leverancier",
+                    "Autonomiescore (1-10)","Risico (1-5) ↓","Mitigatie (1-5) ↑","Belang (1-5) ↓",
+                    "DICTU (1-5)","Volledigheid"
+                  ].map(h => (
+                    <th key={h} className="text-left py-2 px-2 font-semibold" style={{ color:"#1A56A0", fontSize:11 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {apps.map(a => {
-                  const s   = calcScores(a.scores);
+                  const s = calcScores(a.scores);
                   const lbl = scoreLabel(s.autonomyScore);
                   return (
-                    <tr key={a.id}
-                      className="cursor-pointer transition-colors"
-                      style={{ borderBottom:"1px solid #EBF3FF", cursor:"pointer" }}
+                    <tr key={a.id} style={{ borderBottom:"1px solid #EBF3FF", cursor:"pointer" }}
                       onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}>
                       <td className="py-2 px-2 font-medium" style={{ color:"#0C2340" }}>{a.name}</td>
                       <td className="py-2 px-2 text-gray-500">{a.supplier}</td>
                       <td className="py-2 px-2">
-                        <span className="px-2 py-0.5 font-semibold text-xs"
-                          style={{ borderRadius:3, background:lbl.bg, color:lbl.fg }}>
-                          {s.autonomyScore ? s.autonomyScore.toFixed(1) : "–"}
+                        <span className="px-2 py-0.5 font-semibold text-xs" style={{ borderRadius:3, background:lbl.bg, color:lbl.fg }}>
+                          {s.autonomyScore ? s.autonomyScore.toFixed(1) : "--"}
                         </span>
                       </td>
-                      <td className="py-2 px-2 text-gray-600">{s.risico    ? s.risico.toFixed(1)    : "–"}</td>
-                      <td className="py-2 px-2 text-gray-600">{s.mitigatie ? s.mitigatie.toFixed(1) : "–"}</td>
-                      <td className="py-2 px-2 text-gray-600">{s.belang    ? s.belang.toFixed(1)    : "–"}</td>
-                      <td className="py-2 px-2 text-gray-600">{s.dictuAvg  ? s.dictuAvg.toFixed(1)  : "–"}/5</td>
+                      <td className="py-2 px-2 font-semibold" style={{ color:"#dc2626" }}>{s.risico    ? s.risico.toFixed(2)    : "--"}</td>
+                      <td className="py-2 px-2 font-semibold" style={{ color:"#26B5AE" }}>{s.mitigatie ? s.mitigatie.toFixed(2) : "--"}</td>
+                      <td className="py-2 px-2 font-semibold" style={{ color:"#E87722" }}>{s.belang    ? s.belang.toFixed(2)    : "--"}</td>
+                      <td className="py-2 px-2 text-gray-600">{s.dictuAvg  ? s.dictuAvg.toFixed(1)+"/5"  : "--"}</td>
                       <td className="py-2 px-2 text-gray-600">{s.completeness}%</td>
                     </tr>
                   );
@@ -1566,8 +1718,6 @@ export default function App() {
       </div>
     );
   }
-
-  // ── ADMIN ─────────────────────────────────────────────────
 
   function Admin() {
     // PIN lock screen
