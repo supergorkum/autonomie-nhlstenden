@@ -74,70 +74,94 @@ const DAAF = [
       {s:5,label:"Heel ecosysteem",     desc:"Heel ecosysteem (>15 producten/diensten) bij deze leverancier."}
     ]
   },
-  { key:"C1", dim:"C", level:"Mitigatie", dimName:"Technische weerbaarheid",
-    name:"Alternatief beschikbaar", hint:"Score 1 = zwakke mitigatie · Score 5 = sterke mitigatie",
-    question:"Is er een realistisch en praktisch inzetbaar alternatief voor deze applicatie?",
+  { key:"C1", dim:"C", level:"Mitigatie",
+    dimName:"Technische weerbaarheid",
+    dimSub:"Kun je technisch gezien overstappen? Zijn er alternatieven, is data exporteerbaar, is de software open?",
+    name:"Alternatief beschikbaar",
+    hint:"1 = slechte mitigatie ... 5 = sterke mitigatie (goed)",
+    question:"Bestaan er vergelijkbare diensten als vervanging?",
+    toelichting:"Welke alternatieven? Gebruikt door andere universiteiten? Europees/open source?",
     scores:[
-      {s:1,label:"Geen alternatief",    desc:"Geen alternatief beschikbaar of realistisch denkbaar."},
-      {s:2,label:"Theoretisch",         desc:"Theoretisch alternatief aanwezig, niet praktisch inzetbaar."},
-      {s:3,label:"Met inspanning",      desc:"Alternatief beschikbaar, maar migratie is complex en tijdrovend."},
-      {s:4,label:"Goed alternatief",    desc:"Goed alternatief beschikbaar. Migratie is haalbaar."},
-      {s:5,label:"Meerdere alt.",       desc:"Meerdere volwaardige alternatieven. Eenvoudige en snelle migratie mogelijk."}
+      {s:1,label:"Geen alternatief", desc:"Geen alternatief. Uniek product zonder concurrenten."},
+      {s:2,label:"Onvolwassen",      desc:"Alternatief bestaat maar onvolwassen of functioneel beperkt."},
+      {s:3,label:"Vergelijkbaar",    desc:"Meerdere alternatieven bij vergelijkbare organisaties. Dekt het meeste."},
+      {s:4,label:"Volwassen",        desc:"Volwassen alternatieven incl. Europese optie."},
+      {s:5,label:"Breed aanbod",     desc:"Breed aanbod incl. Europese en open source opties. Competitieve markt."}
     ]
   },
-  { key:"D1", dim:"D", level:"Mitigatie", dimName:"Kennisweerbaarheid",
-    name:"Interne kennis & exitstrategie", hint:"Score 1 = zwakke mitigatie · Score 5 = sterke mitigatie",
-    question:"Is er voldoende interne kennis aanwezig en een concrete exitstrategie?",
+  { key:"D1", dim:"D", level:"Mitigatie",
+    dimName:"Organisatorische weerbaarheid",
+    dimSub:"Heb je de kennis, plannen en backups om een overstap daadwerkelijk uit te voeren?",
+    name:"Interne expertise en kennisborging",
+    hint:"1 = slechte mitigatie ... 5 = sterke mitigatie (goed)",
+    question:"Hoeveel interne kennis hebben we over dit systeem?",
+    toelichting:"Denk aan alle relevante kennis: functioneel (wat doet het systeem), technisch (configuratie, koppelingen), data (welke data zit erin, hoe exporteer je die). Niet alleen technisch beheer. Wat gebeurt er als de belangrijkste expert vertrekt?",
     scores:[
-      {s:1,label:"Geen",         desc:"Geen interne kennis. Geen exitstrategie aanwezig."},
-      {s:2,label:"Minimaal",     desc:"Minimale kennis aanwezig. Globale exitstrategie beschikbaar."},
-      {s:3,label:"Basis",        desc:"Basiskennis aanwezig. Exitstrategie in ontwikkeling."},
-      {s:4,label:"Goed",         desc:"Goede interne kennis. Exitstrategie gedocumenteerd en actueel."},
-      {s:5,label:"Uitgebreid",   desc:"Uitgebreide expertise. Exitstrategie getest en periodiek bijgewerkt."}
+      {s:1,label:"Geen kennis",       desc:"Geen interne kennis. Volledig afhankelijk van leverancier."},
+      {s:2,label:"Beperkt",           desc:"Kennis bij een of twee personen, niet vastgelegd."},
+      {s:3,label:"Basisdocumentatie", desc:"Kennis bij meerdere personen, basisdocumentatie aanwezig."},
+      {s:4,label:"Breed gedeeld",     desc:"Kennis breed gedeeld en gedocumenteerd. Niet persoonsafhankelijk."},
+      {s:5,label:"Structureel geborgd",desc:"Kennis structureel geborgd. Volledige documentatie, periodiek bijgewerkt."}
     ]
   },
-  { key:"E1", dim:"E", level:"Mitigatie", dimName:"Contractuele weerbaarheid",
-    name:"Contractuele bescherming", hint:"Score 1 = zwakke mitigatie · Score 5 = sterke mitigatie",
-    question:"In hoeverre biedt het contract bescherming bij geopolitieke risico's en onwenselijke toegang?",
+  { key:"E1", dim:"E", level:"Mitigatie",
+    dimName:"Contractuele weerbaarheid",
+    dimSub:"Wat is er contractueel geregeld over vertrek, data-overdracht en flexibiliteit?",
+    name:"Exit-clausules en transitieregeling",
+    hint:"1 = slechte mitigatie ... 5 = sterke mitigatie (goed)",
+    question:"Wat is contractueel geregeld over data-overdracht bij beëindiging?",
+    toelichting:"Contract over beëindiging? Formaat data? Transitieperiode? Consequenties?",
     scores:[
-      {s:1,label:"Geen",          desc:"Geen contractuele bescherming. Aanbieder bepaalt alles."},
-      {s:2,label:"Basis",         desc:"Standaard contract. Geen autonomie- of databeschermingsbepalingen."},
-      {s:3,label:"Beperkt",       desc:"Contract met enige beschermingsclausules. Beperkte afdwingbaarheid."},
-      {s:4,label:"Sterk",         desc:"Sterk contract met EU-rechtskeuze, databepalingen en meldplicht."},
-      {s:5,label:"Maximaal",      desc:"Maximale bescherming incl. escrow, actief juridisch verzet en MLAT."}
+      {s:1,label:"Geen afspraken",    desc:"Geen afspraken over beëindiging."},
+      {s:2,label:"Minimaal",          desc:"Minimale bepalingen, zonder termijn of formaat."},
+      {s:3,label:"Transitieperiode",  desc:"Exit-clausules met transitieperiode aanwezig."},
+      {s:4,label:"Uitgebreid",        desc:"Uitgebreide exit-regeling: open formaten, transitieperiode, actieve medewerking leverancier."},
+      {s:5,label:"Afdwingbaar",       desc:"Uitgebreide exit-regeling met afdwingbare consequenties bij niet-nakoming (boeteclausule, escalatieprocedure, verwijdergarantie)."}
     ]
   },
-  { key:"F1", dim:"F", level:"Belang", dimName:"Operationeel belang",
-    name:"Kriticiteit primair proces", hint:"Score 1 = minder urgent · Score 5 = hoogste urgentie",
-    question:"Hoe kritiek is de applicatie voor het primaire onderwijs- of onderzoeksproces van NHL Stenden?",
+  { key:"F1", dim:"F", level:"Belang",
+    dimName:"Organisatorisch belang",
+    dimSub:"Hoe belangrijk is deze applicatie voor de organisatie en hoeveel hangt ervan af?",
+    name:"Impact bij uitval",
+    hint:"1 = laag belang ... 5 = hoog belang (urgent)",
+    question:"Wat is de impact als dit systeem uitvalt?",
+    toelichting:"Stel dat het systeem 48 uur uitvalt. Wat is de impact? Dit geldt voor alle processen: onderwijs, onderzoek en bedrijfsvoering. Weeg mee: het aantal getroffen gebruikers, de beschikbaarheid van workarounds, en hoe kritiek de getroffen processen zijn.",
     scores:[
-      {s:1,label:"Ondersteunend",   desc:"Uitval heeft minimale impact. Makkelijk op te vangen."},
-      {s:2,label:"Beperkt",         desc:"Tijdelijke vervanging of workaround eenvoudig mogelijk."},
-      {s:3,label:"Relevant",        desc:"Uitval leidt tot merkbare verstoring van processen."},
-      {s:4,label:"Kritiek",         desc:"Uitval verstoort het primaire proces significant."},
-      {s:5,label:"Mission-critical",desc:"Uitval stopt primaire processen direct. Geen alternatief."}
+      {s:1,label:"Geen impact",        desc:"Geen merkbare impact bij uitval."},
+      {s:2,label:"Minimale hinder",    desc:"Minimale hinder. Organisatie draait door."},
+      {s:3,label:"Verstoord",          desc:"Meerdere processen verstoord maar niet stilgevallen."},
+      {s:4,label:"Stilgevallen",       desc:"Belangrijke processen stilgevallen."},
+      {s:5,label:"Organisatiebreed",   desc:"Organisatiebrede stilstand."}
     ]
   },
-  { key:"G1", dim:"G", level:"Belang", dimName:"Data-kritikaliteit",
-    name:"Gevoeligheid verwerkte data", hint:"Score 1 = minder urgent · Score 5 = hoogste urgentie",
-    question:"Hoe gevoelig of strategisch waardevol zijn de gegevens die de applicatie verwerkt?",
+  { key:"G1", dim:"G", level:"Belang",
+    dimName:"Data-gevoeligheid",
+    dimSub:"Welke gevoelige gegevens zitten in dit systeem? Persoonsgegevens, onderzoeksdata, intellectueel eigendom.",
+    name:"Persoonsgegevens",
+    hint:"1 = laag belang ... 5 = hoog belang (urgent)",
+    question:"Welke persoonsgegevens worden verwerkt?",
+    toelichting:"Welke gegevens? Gevoelige categorieën? Hoeveel personen? DPIA?",
     scores:[
-      {s:1,label:"Openbaar",     desc:"Openbare of anonieme data. Geen privacyrisico of strategische waarde."},
-      {s:2,label:"Intern",       desc:"Interne data. Beperkt privacygevoelig. Geen bijzondere persoonsgegevens."},
-      {s:3,label:"Gevoelig",     desc:"Gevoelige persoonsgegevens. AVG-relevant."},
-      {s:4,label:"Bijzonder",    desc:"Bijzondere persoonsgegevens of strategisch waardevolle bedrijfsdata."},
-      {s:5,label:"Hoogst gev.",  desc:"Hoogst gevoelige data. Inbreuk heeft ernstige gevolgen."}
+      {s:1,label:"Geen",              desc:"Geen persoonsgegevens."},
+      {s:2,label:"Basisgegevens",     desc:"Basisgegevens: naam, e-mail, functie. Beperkt aantal."},
+      {s:3,label:"Studie-/werkgeg.",  desc:"Studie-/werkgegevens, beoordelingen, financieel. Significant."},
+      {s:4,label:"Bijzondere geg.",   desc:"Bijzondere persoonsgegevens of grootschalige verwerking."},
+      {s:5,label:"Grootschalig bijz.",desc:"Grootschalig bijzondere gegevens van kwetsbare groepen."}
     ]
   },
-  { key:"H1", dim:"H", level:"Belang", dimName:"Strategisch belang",
-    name:"Bijdrage aan kernmissie", hint:"Score 1 = minder urgent · Score 5 = hoogste urgentie",
-    question:"In hoeverre is de applicatie essentieel voor de strategische doelen van NHL Stenden?",
+  { key:"H1", dim:"H", level:"Belang",
+    dimName:"Academische impact",
+    dimSub:"Raakt deze applicatie aan academische vrijheid, samenwerking of langetermijnarchivering?",
+    name:"Academische vrijheid",
+    hint:"1 = laag belang ... 5 = hoog belang (urgent)",
+    question:"Kan de leverancier invloed uitoefenen op academische activiteiten?",
+    toelichting:"Kan de leverancier of een buitenlandse overheid inzicht krijgen in onderzoeksactiviteiten? Zijn er eerdere gevallen van censuur of datavordering bij deze leverancier?",
     scores:[
-      {s:1,label:"Geen bijdrage", desc:"Geen directe bijdrage aan strategische doelen van NHL Stenden."},
-      {s:2,label:"Marginaal",     desc:"Marginale bijdrage. Makkelijk vervangbaar zonder strategisch verlies."},
-      {s:3,label:"Relevant",      desc:"Relevante bijdrage aan doelen. Niet uniek maar waardevol."},
-      {s:4,label:"Significant",   desc:"Significante bijdrage aan realisatie van strategische doelen."},
-      {s:5,label:"Onmisbaar",     desc:"Onmisbaar voor realisatie van de kernmissie van NHL Stenden."}
+      {s:1,label:"Geen relatie",      desc:"Geen relatie met onderzoek."},
+      {s:2,label:"Theoretisch risico",desc:"Theoretisch risico, geen eerdere gevallen bekend."},
+      {s:3,label:"Beperkt risico",    desc:"Toegang tot onderzoekspatronen. Beperkt risico op indirecte beïnvloeding."},
+      {s:4,label:"Reëel risico",      desc:"Reëel risico. Land waar overheden onderzoek kunnen censureren."},
+      {s:5,label:"Aangetoond",        desc:"Aangetoonde censuur of datavordering bij deze leverancier of overheid."}
     ]
   }
 ];
@@ -1071,23 +1095,49 @@ export default function App() {
             {step === 0 && <>
               <div className="rounded p-3 mb-4 text-xs"
                 style={{ background:"#EBF3FF", border:"1px solid #D0E4F7", color:"#1A56A0" }}>
-                <strong>DAAF Framework — Quick Scan</strong> — Niveau 1 (Risico): lager = minder risico.
-                Niveau 2 (Mitigatie): hoger = betere weerbaarheid. Niveau 3 (Belang): lager = minder urgent autonomieprobleem.
+                <strong>DAAF Framework — Quick Scan</strong> — Niveau 1 (Risico): score 1 = weinig risico, score 5 = hoog risico.
+                Niveau 2 (Mitigatie): score 1 = slechte mitigatie, score 5 = sterke mitigatie (goed).
+                Niveau 3 (Belang): score 1 = laag belang, score 5 = hoog belang (urgent).
               </div>
               {["Risico","Mitigatie","Belang"].map(lv => {
-                const colors = { Risico:"#dc2626", Mitigatie:"#26B5AE", Belang:"#E87722" };
-                const labels = { Risico:"Niveau 1: Risico-exposure", Mitigatie:"Niveau 2: Mitigatie-capaciteit", Belang:"Niveau 3: Strategisch belang" };
+                const colors  = { Risico:"#dc2626", Mitigatie:"#26B5AE", Belang:"#E87722" };
+                const bgColors = { Risico:"#0C2340", Mitigatie:"#166534", Belang:"#92400e" };
+                const hints   = {
+                  Risico:    "1 = weinig risico ... 5 = hoog risico",
+                  Mitigatie: "1 = slechte mitigatie ... 5 = sterke mitigatie (goed)",
+                  Belang:    "1 = laag belang ... 5 = hoog belang (urgent)"
+                };
+                const dims = DAAF.filter(d => d.level === lv);
+                // Groepeer per unieke dimensie
+                const uniqueDims = [...new Set(dims.map(d => d.dimName))];
                 return (
                   <div key={lv} className="mb-5">
-                    <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: colors[lv] }}>
-                      <span className="w-1 inline-block rounded-full" style={{ background:colors[lv], height:14 }}/>
-                      {labels[lv]}
-                    </h3>
-                    {DAAF.filter(d => d.level === lv).map(q => (
-                      <QuestionCard key={q.key} q={q} value={selApp.scores[q.key] || 0}
-                        dir={lv === "Mitigatie" ? "fwd" : "inv"}
-                        onChange={v => setScore(selApp.id, q.key, v)} />
-                    ))}
+                    {/* Niveau header — stijl conform framework */}
+                    <div className="rounded px-3 py-2 mb-3 flex items-center justify-between"
+                      style={{ background: bgColors[lv] }}>
+                      <span className="text-white font-semibold text-sm">Niveau {lv === "Risico" ? "1" : lv === "Mitigatie" ? "2" : "3"}: {lv === "Risico" ? "Risico-exposure" : lv === "Mitigatie" ? "Mitigatie-capaciteit" : "Strategisch belang"}</span>
+                      <span className="text-xs" style={{ color:"rgba(255,255,255,0.7)" }}>{hints[lv]}</span>
+                    </div>
+                    {uniqueDims.map(dimName => {
+                      const dimQuestions = dims.filter(d => d.dimName === dimName);
+                      const firstQ = dimQuestions[0];
+                      return (
+                        <div key={dimName} className="mb-4">
+                          {/* Dimensie header */}
+                          <div className="rounded px-3 py-2 mb-2" style={{ background:"#f3f4f6", border:"1px solid #e5e7eb" }}>
+                            <p className="font-semibold text-sm" style={{ color:"#0C2340" }}>
+                              Dimensie {firstQ.dim}: {dimName}
+                            </p>
+                            {firstQ.dimSub && <p className="text-xs text-gray-500 mt-0.5">{firstQ.dimSub}</p>}
+                          </div>
+                          {dimQuestions.map(q => (
+                            <QuestionCard key={q.key} q={q} value={selApp.scores[q.key] || 0}
+                              dir={lv === "Mitigatie" ? "fwd" : "inv"}
+                              onChange={v => setScore(selApp.id, q.key, v)} />
+                          ))}
+                        </div>
+                      );
+                    })}
                   </div>
                 );
               })}
