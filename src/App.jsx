@@ -354,7 +354,7 @@ function generateRecommendations(scores) {
   const dictuLaag      = sc.dictuAvg && sc.dictuAvg < 3;
 
   if (inKritiek) {
-    strategic = "Deze applicatie staat in het kwadrant KRITIEK: hoog risico én lage weerbaarheid. Urgente actie is vereist. Overweeg drie opties: (1) Migreer naar een Europese aanbieder met lagere risicoscore, (2) versterk de mitigatie door contractonderhandelingen, kennisborging en alternatieven te ontwikkelen, of (3) accepteer het risico bewust via een bestuurlijk besluit met onderbouwing. Stel een actieplan op met een concrete deadline.";
+    strategic = "Deze applicatie staat in het kwadrant KRITIEK: hoog risico én lage weerbaarheid. Urgente actie is vereist. Overweeg drie opties: (1) Migreer naar een Europese aanbieder met lagere risicoscore, (2) versterk de mitigatie door contractonderhandelingen, kennisborging en alternatieven te ontwikkelen, of (3) accepteer het risico bewust via een bewust genomen besluit met onderbouwing. Stel een actieplan op met een concrete deadline.";
   } else if (inBeheersbaar) {
     strategic = "Deze applicatie staat in het kwadrant BEHEERSBAAR: hoog risico maar goede weerbaarheid. De risico's zijn geaccepteerd met een solide fallback-positie. Strategisch advies: bewaken dat de weerbaarheid op peil blijft, met name als er leverancierswijzigingen plaatsvinden. Neem clausules op die NHL Stenden informeren bij overname of beleidswijzigingen van de leverancier.";
   } else if (inAandacht) {
@@ -648,166 +648,149 @@ function DivergingChart({ apps, compact = false }) {
   );
 }
 
-// ── PortfolioHeatmap — integraal totaalplaatje ───────────────
-// Alle applicaties × alle DAAF-dimensies in één overzicht
-function PortfolioHeatmap({ apps }) {
-  const scored = apps.map(a => ({ ...a, sc: calcScores(a.scores) }));
+// ── OpdrachtKaart — centrale vraagstelling visueel ───────────
+function OpdrachtKaart({ apps }) {
+  const scored = apps.map(a => ({ ...a, sc: calcScores(a.scores) })).filter(a => a.sc.autonomyScore);
+  if (apps.length === 0) return null;
 
-  const dimScore = (app, letter) => {
-    if (letter === "A") {
-      const a1=app.scores["A1"]||0, a3=app.scores["A3"]||0;
-      const p=[[a1,3],[a3,2]].filter(([v])=>v>0);
-      if (!p.length) return null;
-      const tw=p.reduce((s,[,w])=>s+w,0);
-      return p.reduce((s,[v,w])=>s+v*w,0)/tw;
-    }
-    const qs=DAAF.filter(d=>d.dim===letter);
-    const vals=qs.map(q=>app.scores[q.key]||0).filter(v=>v>0);
-    return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : null;
-  };
-
-  // Kleur op basis van score én dimensietype
-  const cellBg = (score, type) => {
-    if (score === null) return { bg:"#f3f4f6", fg:"#d1d5db" };
-    const v = Math.min(5, Math.max(1, score));
-    const t = (v - 1) / 4; // 0..1
-    if (type === "risk") {
-      // laag=goed (groen), hoog=slecht (rood)
-      const r = Math.round(80 + 175 * t),
-            g = Math.round(220 - 170 * t),
-            b = Math.round(100 - 80 * t);
-      return { bg:`rgb(${r},${g},${b})`, fg: t > 0.55 ? "white" : "#1a1a1a" };
-    } else if (type === "mitigation") {
-      // laag=slecht (rood), hoog=goed (groen)
-      const r = Math.round(255 - 175 * t),
-            g = Math.round(50  + 170 * t),
-            b = Math.round(20  +  80 * t);
-      return { bg:`rgb(${r},${g},${b})`, fg: t < 0.45 ? "white" : "#1a1a1a" };
-    } else {
-      // belang: licht→oranje
-      const r = Math.round(255),
-            g = Math.round(250 - 140 * t),
-            b = Math.round(235 - 200 * t);
-      return { bg:`rgb(${r},${g},${b})`, fg: t > 0.6 ? "white" : "#374151" };
-    }
-  };
-
-  const dims = [
-    { letter:"A", name:"Geopolitiek risico",       type:"risk",       level:"1" },
-    { letter:"B", name:"Leveranciersafh.",          type:"risk",       level:"1" },
-    { letter:"C", name:"Technische weerbaarheid",   type:"mitigation", level:"2" },
-    { letter:"D", name:"Organisatorische wb.",      type:"mitigation", level:"2" },
-    { letter:"E", name:"Contractuele wb.",          type:"mitigation", level:"2" },
-    { letter:"F", name:"Organisatorisch belang",    type:"belang",     level:"3" },
-    { letter:"G", name:"Data-gevoeligheid",         type:"belang",     level:"3" },
-    { letter:"H", name:"Academische impact",        type:"belang",     level:"3" },
-  ];
-
-  const typeColor = t => t==="risk"?"#dc2626":t==="mitigation"?"#16a34a":"#d97706";
-  const levelLabel = l => l==="1"?"Risico ↓":l==="2"?"Mitigatie ↑":"Belang ↑";
+  const kritiek  = scored.filter(a => a.sc.autonomyScore < 3);
+  const zorg     = scored.filter(a => a.sc.autonomyScore >= 3 && a.sc.autonomyScore < 5);
+  const ok       = scored.filter(a => a.sc.autonomyScore >= 5);
+  const laagMit  = scored.filter(a => a.sc.mitigatie && a.sc.mitigatie < 2.5);
+  const hoogRisk = scored.filter(a => a.sc.risico    && a.sc.risico    > 3.5);
 
   return (
-    <div style={{ overflowX:"auto" }}>
-      <table style={{ borderCollapse:"collapse", width:"100%", fontSize:10 }}>
-        <thead>
-          <tr>
-            <th style={{ textAlign:"left", padding:"6px 8px", fontSize:10, fontWeight:600,
-              color:"#6b7280", borderBottom:"2px solid #e5e7eb", minWidth:170 }}>
-              Dimensie
-            </th>
-            {scored.map(a => {
-              const lbl = scoreLabel(a.sc.autonomyScore);
-              return (
-                <th key={a.id} style={{ textAlign:"center", padding:"4px 6px", minWidth:80,
-                  borderBottom:"2px solid #e5e7eb" }}>
-                  <div style={{ fontWeight:700, color:"#0C2340", fontSize:10 }}>{a.name.substring(0,14)}</div>
-                  {a.sc.autonomyScore && (
-                    <div style={{ display:"inline-block", marginTop:2, padding:"1px 5px",
-                      borderRadius:3, background:lbl.bg, color:lbl.fg, fontSize:9, fontWeight:600 }}>
-                      {a.sc.autonomyScore.toFixed(1)}
-                    </div>
-                  )}
-                </th>
-              );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {dims.map((d, di) => {
-            // Niveau-scheidingslijn bij begin van nieuw niveau
-            const prevLevel = di > 0 ? dims[di-1].level : null;
-            const isNewLevel = prevLevel !== d.level;
-            return (
-              <tr key={d.letter}>
-                <td style={{
-                  padding:"3px 8px", fontSize:10,
-                  borderTop: isNewLevel ? "2px solid #e5e7eb" : "1px solid #f3f4f6",
-                  background: isNewLevel ? "#fafafa" : "white"
-                }}>
-                  <span style={{ fontWeight:700, color:typeColor(d.type), marginRight:5 }}>{d.letter}</span>
-                  <span style={{ color:"#374151" }}>{d.name}</span>
-                  {isNewLevel && (
-                    <span style={{ marginLeft:6, fontSize:8, color:typeColor(d.type),
-                      fontWeight:600, opacity:0.7 }}>{levelLabel(d.level)}</span>
-                  )}
-                </td>
-                {scored.map(a => {
-                  const v = dimScore(a, d.letter);
-                  const {bg, fg} = cellBg(v, d.type);
-                  return (
-                    <td key={a.id} style={{
-                      textAlign:"center", padding:"3px 6px", fontWeight:700,
-                      background:bg, color:fg, fontSize:10,
-                      borderTop: isNewLevel ? "2px solid #e5e7eb" : "1px solid #f3f4f6",
-                    }}>
-                      {v !== null ? v.toFixed(1) : "–"}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-          {/* Samenvatting niveau-scores */}
-          {[
-            { key:"risico",    label:"Niveau 1: Risico gem.",    fg:"#dc2626",  bg:"#fee2e2", val: a => a.sc.risico },
-            { key:"mitigatie", label:"Niveau 2: Mitigatie gem.", fg:"#16a34a",  bg:"#dcfce7", val: a => a.sc.mitigatie },
-            { key:"belang",    label:"Niveau 3: Belang gem.",    fg:"#d97706",  bg:"#fff7ed", val: a => a.sc.belang },
-            { key:"dictu",     label:"DICTU-score",              fg:"#1A56A0",  bg:"#EBF3FF", val: a => a.sc.dictuAvg, suffix:"/5" },
-          ].map(row => (
-            <tr key={row.key}>
-              <td style={{ padding:"3px 8px", fontSize:10, fontWeight:700, color:row.fg,
-                background:row.bg, borderTop:"2px solid #e5e7eb" }}>
-                {row.label}
-              </td>
-              {scored.map(a => {
-                const v = row.val(a);
-                return (
-                  <td key={a.id} style={{ textAlign:"center", padding:"3px 6px",
-                    fontWeight:700, fontSize:11, color:row.fg,
-                    background:row.bg, borderTop:"2px solid #e5e7eb" }}>
-                    {v ? v.toFixed(2)+(row.suffix||"") : "–"}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Legenda */}
-      <div style={{ display:"flex", gap:16, marginTop:8, flexWrap:"wrap" }}>
-        {[
-          { type:"risk",       label:"Risico-assen (A, B): groen=laag risico (goed) · rood=hoog risico" },
-          { type:"mitigation", label:"Mitigatie-assen (C, D, E): groen=sterk weerbaar (goed) · rood=zwak" },
-          { type:"belang",     label:"Belang-assen (F, G, H): licht=minder urgent · oranje=hoog belang" },
-        ].map(l => (
-          <div key={l.type} style={{ display:"flex", alignItems:"center", gap:5 }}>
-            <div style={{ width:24, height:10, borderRadius:2,
-              background: l.type==="risk"?"linear-gradient(to right,#50dc64,#ef4444)"
-                :l.type==="mitigation"?"linear-gradient(to right,#ef4444,#22c55e)"
-                :"linear-gradient(to right,#fffbeb,#d97706)" }} />
-            <span style={{ fontSize:8.5, color:"#6b7280" }}>{l.label}</span>
+    <div className="rounded mb-4" style={{ border:"2px solid #1A56A0", overflow:"hidden" }}>
+      {/* Koptekst */}
+      <div style={{ background:"#0C2340", padding:"14px 20px" }}>
+        <div className="flex items-center gap-3">
+          <div style={{ background:"#26B5AE", borderRadius:3, padding:"4px 10px",
+            fontSize:10, fontWeight:700, color:"white", flexShrink:0 }}>
+            VRAAGSTELLING
           </div>
-        ))}
+          <p style={{ fontSize:13, fontWeight:700, color:"white", lineHeight:1.3 }}>
+            Waar zetten we onze data neer en waar liggen de potentiële problemen?
+          </p>
+        </div>
+        <p style={{ fontSize:10, color:"#7DD3D0", marginTop:4 }}>
+          Aanleiding: inventarisatie digitale soevereiniteit — aansluiting bij VH en SURF digitale strategie
+        </p>
+      </div>
+
+      {/* Inhoud */}
+      <div className="grid grid-cols-3 gap-0" style={{ background:"#EBF3FF" }}>
+
+        {/* Kolom 1: Applicatieoverzicht */}
+        <div style={{ padding:"14px 16px", borderRight:"1px solid #D0E4F7" }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:8 }}>
+            📋 Geassesseerd ({apps.length})
+          </p>
+          {[
+            { label:"Kritiek (score &lt;3)",    items:kritiek,  color:"#b91c1c", bg:"#fee2e2" },
+            { label:"Aandacht (score 3–5)", items:zorg,     color:"#c2410c", bg:"#ffedd5" },
+            { label:"Acceptabel (score ≥5)", items:ok,      color:"#15803d", bg:"#dcfce7" },
+          ].map(row => (
+            <div key={row.label} className="flex items-start gap-2 mb-2">
+              <div style={{ minWidth:10, height:10, borderRadius:2, background:row.color, marginTop:2, flexShrink:0 }}/>
+              <div>
+                <span style={{ fontSize:9, color:row.color, fontWeight:700 }}
+                  dangerouslySetInnerHTML={{ __html: row.label }} />
+                {row.items.length > 0 && (
+                  <p style={{ fontSize:9, color:"#374151", lineHeight:1.4 }}>
+                    {row.items.map(a=>a.name).join(", ")}
+                  </p>
+                )}
+                {row.items.length === 0 && (
+                  <p style={{ fontSize:9, color:"#9ca3af" }}>geen</p>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Kolom 2: Waar liggen de risico's */}
+        <div style={{ padding:"14px 16px", borderRight:"1px solid #D0E4F7" }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:8 }}>
+            ⚠️ Potentiële problemen
+          </p>
+          {scored.length > 0 ? (
+            <>
+              {hoogRisk.length > 0 && (
+                <div className="rounded mb-2 px-2 py-1.5" style={{ background:"#fee2e2", border:"1px solid #fca5a5" }}>
+                  <p style={{ fontSize:9, fontWeight:700, color:"#b91c1c", marginBottom:2 }}>
+                    Hoog risico ({hoogRisk.length})
+                  </p>
+                  <p style={{ fontSize:9, color:"#7f1d1d", lineHeight:1.4 }}>
+                    {hoogRisk.map(a => `${a.name} (risico ${a.sc.risico?.toFixed(1)}/5)`).join(" · ")}
+                  </p>
+                </div>
+              )}
+              {laagMit.length > 0 && (
+                <div className="rounded mb-2 px-2 py-1.5" style={{ background:"#ffedd5", border:"1px solid #fed7aa" }}>
+                  <p style={{ fontSize:9, fontWeight:700, color:"#c2410c", marginBottom:2 }}>
+                    Lage weerbaarheid ({laagMit.length})
+                  </p>
+                  <p style={{ fontSize:9, color:"#7c2d12", lineHeight:1.4 }}>
+                    {laagMit.map(a => `${a.name} (mitigatie ${a.sc.mitigatie?.toFixed(1)}/5)`).join(" · ")}
+                  </p>
+                </div>
+              )}
+              {hoogRisk.length === 0 && laagMit.length === 0 && (
+                <div className="rounded px-2 py-1.5" style={{ background:"#dcfce7", border:"1px solid #86efac" }}>
+                  <p style={{ fontSize:9, color:"#15803d" }}>Geen urgente problemen geïdentificeerd op basis van huidige assessments.</p>
+                </div>
+              )}
+            </>
+          ) : (
+            <p style={{ fontSize:9, color:"#9ca3af" }}>Voeg applicaties toe om problemen in kaart te brengen.</p>
+          )}
+        </div>
+
+        {/* Kolom 3: Waar staat de data */}
+        <div style={{ padding:"14px 16px" }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:8 }}>
+            🌍 Datalocatie & jurisdictie
+          </p>
+          {apps.length > 0 ? (() => {
+            const a1Scores = apps.map(a => ({ name:a.name, v: a.scores["A1"]||0, d: a.scores["A3"]||0 }));
+            const nonEU   = a1Scores.filter(a => a.v >= 4);
+            const onduidelijk = a1Scores.filter(a => a.v === 0);
+            const euOk    = a1Scores.filter(a => a.v > 0 && a.v < 4);
+            return (
+              <>
+                {nonEU.length > 0 && (
+                  <div className="rounded mb-2 px-2 py-1.5" style={{ background:"#fee2e2", border:"1px solid #fca5a5" }}>
+                    <p style={{ fontSize:9, fontWeight:700, color:"#b91c1c", marginBottom:2 }}>
+                      Niet-EU jurisdictie ({nonEU.length})
+                    </p>
+                    <p style={{ fontSize:9, color:"#7f1d1d", lineHeight:1.4 }}>
+                      {nonEU.map(a=>a.name).join(", ")}
+                    </p>
+                  </div>
+                )}
+                {euOk.length > 0 && (
+                  <div className="rounded mb-2 px-2 py-1.5" style={{ background:"#dcfce7", border:"1px solid #86efac" }}>
+                    <p style={{ fontSize:9, fontWeight:700, color:"#15803d", marginBottom:2 }}>
+                      EU/beheersbaar ({euOk.length})
+                    </p>
+                    <p style={{ fontSize:9, color:"#14532d", lineHeight:1.4 }}>
+                      {euOk.map(a=>a.name).join(", ")}
+                    </p>
+                  </div>
+                )}
+                {onduidelijk.length > 0 && (
+                  <div className="rounded px-2 py-1.5" style={{ background:"#f3f4f6", border:"1px solid #e5e7eb" }}>
+                    <p style={{ fontSize:9, color:"#6b7280" }}>
+                      Nog niet beoordeeld ({onduidelijk.length}): {onduidelijk.map(a=>a.name).join(", ")}
+                    </p>
+                  </div>
+                )}
+              </>
+            );
+          })() : (
+            <p style={{ fontSize:9, color:"#9ca3af" }}>Nog geen data beschikbaar.</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -1220,64 +1203,85 @@ export default function App() {
       return tekst;
     }
 
-    // ── Spindiagram als SVG ───────────────────────────────────
+    // ── Dimensieprofiel als SVG (horizontale balken) ─────────────
     function generateSpinSVG(appsArr) {
-      const W=680, H=440, cx=W/2, cy=(H-50)/2+10;
-      const maxR = Math.min(W, H-60)/2 - 60;
-      const maxV = 5;
-      const dims = [...new Set(DAAF.map(d=>d.dim))].map(letter => {
-        const f = DAAF.find(d=>d.dim===letter);
-        return { letter, label: f ? f.dimName : letter };
-      });
-      const N = dims.length;
-      const ang = i => (2*Math.PI*i/N) - Math.PI/2;
-      const ptX = (i,v) => (cx + (v/maxV)*maxR*Math.cos(ang(i))).toFixed(1);
-      const ptY = (i,v) => (cy + (v/maxV)*maxR*Math.sin(ang(i))).toFixed(1);
-      const anchor = i => { const x=Math.cos(ang(i)); return x>0.3?"start":x<-0.3?"end":"middle"; };
+      const groups = [
+        { title:"Niveau 1 — Risico-exposure (laag is beter)",   tc:"#991b1b", bg:"#fff1f2",
+          grad:"#dcfce7,#fef9c3,#fca5a5,#dc2626",
+          dims:[{l:"A",n:"Geopolitiek risico"},{l:"B",n:"Leveranciersafh."}] },
+        { title:"Niveau 2 — Mitigatie-capaciteit (hoog is beter)", tc:"#166534", bg:"#f0fdf4",
+          grad:"#dc2626,#fca5a5,#fde68a,#86efac,#16a34a",
+          dims:[{l:"C",n:"Technische weerbaarheid"},{l:"D",n:"Organisatorische wb."},{l:"E",n:"Contractuele wb."}] },
+        { title:"Niveau 3 — Strategisch belang (hoog = meer urgentie)", tc:"#92400e", bg:"#fff7ed",
+          grad:"#fffbeb,#fde68a,#f59e0b,#b45309",
+          dims:[{l:"F",n:"Organisatorisch belang"},{l:"G",n:"Data-gevoeligheid"},{l:"H",n:"Academische impact"}] },
+      ];
 
-      // Grid
-      let grid="", axes="", labels="", polygons="", legend="";
-      for(let lv=1;lv<=5;lv++){
-        const pts=dims.map((_,i)=>`${ptX(i,lv)},${ptY(i,lv)}`).join(" ");
-        grid+=`<polygon points="${pts}" fill="none" stroke="#e5e7eb" stroke-width="${lv===5?1.5:0.8}"/>`;
-      }
-      dims.forEach((_,i)=>{
-        axes+=`<line x1="${cx}" y1="${cy}" x2="${ptX(i,5)}" y2="${ptY(i,5)}" stroke="#d1d5db" stroke-width="1"/>`;
+      const W=680, barH=18, labelW=180, gapBetweenGroups=16, rowGap=6, headerH=22;
+      const totalRows = groups.reduce((s,g)=>s+g.dims.length,0);
+      const H = groups.length*(headerH+gapBetweenGroups) + totalRows*(barH+rowGap) + 50;
+      const barW = W - labelW - 60;
+
+      // Legenda
+      const legendH = 28;
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H+legendH}" width="${W}" style="display:block;max-width:100%;font-family:Arial">`;
+
+      // Legenda bovenaan
+      appsArr.slice(0,6).forEach((a,ai) => {
+        const col = PCOLORS[ai%PCOLORS.length];
+        const lx = ai * 105 + 10;
+        svg += `<rect x="${lx}" y="6" width="10" height="10" fill="${col}" fill-opacity="0.7" rx="2"/>`;
+        svg += `<text x="${lx+14}" y="15" font-size="9" fill="#374151">${a.name.substring(0,14)}</text>`;
       });
-      // Labels
-      dims.forEach((d,i)=>{
-        const lx=(cx+(maxR+26)*Math.cos(ang(i))).toFixed(1);
-        const ly=(cy+(maxR+26)*Math.sin(ang(i))).toFixed(1);
-        const words=d.label.split(" ");
-        const l1=words.slice(0,Math.ceil(words.length/2)).join(" ");
-        const l2=words.slice(Math.ceil(words.length/2)).join(" ");
-        labels+=`<text x="${lx}" y="${l2?(+ly-5).toFixed(1):ly}" text-anchor="${anchor(i)}" fill="#374151" font-size="10" font-weight="600" font-family="Arial">${l1}${l2?`<tspan x="${lx}" dy="13">${l2}</tspan>`:""}</text>`;
-      });
-      // App polygons
-      appsArr.slice(0,6).forEach((a,ai)=>{
-        const col=PCOLORS[ai%PCOLORS.length];
-        const hasData=dims.some(d=>pdfDimScore(a,d.letter)!==null);
-        if(!hasData) return;
-        const pts=dims.map((d,i)=>`${ptX(i,pdfDimScore(a,d.letter)||0)},${ptY(i,pdfDimScore(a,d.letter)||0)}`).join(" ");
-        polygons+=`<polygon points="${pts}" fill="${col}" fill-opacity="0.18" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
-        dims.forEach((d,i)=>{
-          const v=pdfDimScore(a,d.letter); if(!v) return;
-          polygons+=`<circle cx="${ptX(i,v)}" cy="${ptY(i,v)}" r="4" fill="${col}" stroke="white" stroke-width="1.5"/>`;
+
+      let y = legendH + 4;
+
+      groups.forEach(g => {
+        // Groep header
+        svg += `<rect x="0" y="${y}" width="${W}" height="${headerH}" fill="${g.bg}"/>`;
+        svg += `<rect x="0" y="${y}" width="3" height="${headerH}" fill="${g.tc}"/>`;
+        svg += `<text x="8" y="${y+14}" font-size="10" font-weight="700" fill="${g.tc}">${g.title}</text>`;
+        y += headerH + 4;
+
+        g.dims.forEach(d => {
+          // Dim label
+          svg += `<text x="8" y="${y+12}" font-size="9" font-weight="600" fill="${g.tc}">${d.l}</text>`;
+          svg += `<text x="22" y="${y+12}" font-size="9" fill="#374151">${d.n}</text>`;
+
+          // Gradient bar background (als linearGradient)
+          const gradId = `grad_${d.l}`;
+          svg += `<defs><linearGradient id="${gradId}" x1="0%" y1="0%" x2="100%" y2="0%">`;
+          const stops = g.grad.split(",");
+          stops.forEach((c,si) => {
+            svg += `<stop offset="${(si/(stops.length-1)*100).toFixed(0)}%" stop-color="${c.trim()}"/>`;
+          });
+          svg += `</linearGradient></defs>`;
+          svg += `<rect x="${labelW}" y="${y}" width="${barW}" height="${barH}" rx="3" fill="url(#${gradId})" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>`;
+
+          // Tick-labels
+          [1,2,3,4,5].forEach(v => {
+            const tx = labelW + (v-1)/4*barW;
+            svg += `<text x="${tx.toFixed(1)}" y="${y+barH+10}" text-anchor="middle" font-size="7" fill="#9ca3af">${v}</text>`;
+            if (v>1) svg += `<line x1="${tx.toFixed(1)}" y1="${y}" x2="${tx.toFixed(1)}" y2="${y+barH}" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>`;
+          });
+
+          // App dots
+          appsArr.slice(0,6).forEach((a,ai) => {
+            const v = pdfDimScore(a,d.l);
+            if (!v) return;
+            const col = PCOLORS[ai%PCOLORS.length];
+            const dx = labelW + (v-1)/4*barW;
+            svg += `<circle cx="${dx.toFixed(1)}" cy="${(y+barH/2).toFixed(1)}" r="6" fill="${col}" stroke="white" stroke-width="2"/>`;
+            svg += `<text x="${dx.toFixed(1)}" y="${(y+barH/2+3).toFixed(1)}" text-anchor="middle" font-size="6" fill="white" font-weight="700">${v.toFixed(1)}</text>`;
+          });
+
+          y += barH + rowGap;
         });
-        // Legend
-        const lx=cx-((Math.min(appsArr.length,6)-1)*105)/2+ai*105;
-        legend+=`<rect x="${(lx-28).toFixed(0)}" y="${(H-36).toFixed(0)}" width="11" height="11" fill="${col}" fill-opacity="0.6" rx="2"/>`;
-        legend+=`<text x="${(lx-14).toFixed(0)}" y="${(H-27).toFixed(0)}" font-size="9" fill="#374151" font-family="Arial">${a.name.substring(0,14)}</text>`;
-      });
-      // Gridwaarden
-      let gridVals="";
-      [1,2,3,4,5].forEach(v=>{
-        gridVals+=`<text x="${(+ptX(0,v)+5).toFixed(0)}" y="${(+ptY(0,v)+3).toFixed(0)}" font-size="8" fill="#9ca3af" font-family="Arial">${v}</text>`;
+        y += gapBetweenGroups;
       });
 
-      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;max-width:100%">
-        ${grid}${axes}${gridVals}${polygons}${labels}${legend}
-      </svg>`;
+      svg += `</svg>`;
+      return svg;
     }
 
     // ── SVG kwadrant ─────────────────────────────────────────
@@ -1361,7 +1365,7 @@ export default function App() {
 
       if (critApp.length > 0) {
         html += ` <strong style="color:#b91c1c">${critApp.length} applicatie${critApp.length!==1?"s vereisen":"vereist"} directe 
-        bestuurlijke aandacht</strong> vanwege een kritieke autonomiescore: ${critApp.map(a=>a.name).join(", ")}.`;
+        directe aandacht</strong> vanwege een kritieke autonomiescore: ${critApp.map(a=>a.name).join(", ")}.`;
       }
       html += `</p>`;
 
@@ -1412,8 +1416,8 @@ export default function App() {
       }
 
       // Aanbeveling
-      html += `<p style="margin-top:10px;padding:10px 14px;background:#fff3cd;border-left:3px solid #f59e0b;border-radius:2px">
-        <strong>Bestuurlijke aanbeveling:</strong> `;
+      html += `<p style="margin-top:10px;padding:10px 14px;background:#fff8f0;border-left:4px solid #f59e0b;border-radius:0 4px 4px 0">
+        <strong>Aanbeveling:</strong> `;
       if (critApp.length > 0) {
         html += `Stel voor ${critApp.map(a=>a.name).join(" en ")} op korte termijn een actieplan op met concrete 
           maatregelen, een verantwoordelijke en een deadline. `;
@@ -1427,7 +1431,7 @@ export default function App() {
           hoog is — dit is een quick win met direct effect op de weerbaarheid. `;
       }
       html += `Bespreek de uitkomsten van dit assessment in het Transitieteam Digitalisering en leg de 
-        prioritering bestuurlijk vast.</p>`;
+        prioritering vast.</p>`;
 
       return html;
     }
@@ -1484,34 +1488,45 @@ export default function App() {
 <title>Digitale Soevereiniteitsassessment — NHL Stenden ${datum}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a1a}
+  body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.6}
   .header{background:#0C2340;color:white;padding:16px 24px;display:flex;align-items:center;gap:16px}
-  .logo{border:2px solid white;padding:6px 10px;font-weight:700;font-size:10px;letter-spacing:1px;line-height:1.3}
-  .header-title{font-size:14px;font-weight:700}
-  .header-sub{font-size:10px;color:#7DD3D0;margin-top:2px}
-  .content{padding:20px 24px}
-  .meta{color:#6b7280;font-size:10px;margin-bottom:12px}
-  .samenvatting{background:#EBF3FF;border-left:4px solid #1A56A0;padding:14px 18px;margin-bottom:16px;border-radius:2px;line-height:1.7}
-  .samenvatting p{margin-bottom:8px;font-size:11px;color:#1a1a1a}
-  .samenvatting p:last-child{margin-bottom:0}
-  h2{font-size:13px;color:#0C2340;border-bottom:2px solid #1A56A0;padding-bottom:4px;margin:20px 0 10px}
-  h3{font-size:12px;color:#0C2340;margin:12px 0 6px}
-  .sub{font-weight:normal;color:#6b7280}
-  table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:10px}
+  .logo{border:2px solid white;padding:6px 10px;font-weight:700;font-size:10px;letter-spacing:1px;line-height:1.3;font-family:Arial}
+  .header-title{font-size:14px;font-weight:700;font-family:Arial}
+  .header-sub{font-size:10px;color:#7DD3D0;margin-top:2px;font-family:Arial}
+  .content{padding:24px 28px}
+  .meta{color:#6b7280;font-size:10px;margin-bottom:16px;font-family:Arial}
+  /* Secties */
+  h2{font-family:Arial;font-size:14px;color:#0C2340;border-bottom:2px solid #1A56A0;
+     padding-bottom:5px;margin:24px 0 12px;font-weight:700}
+  h3{font-family:Arial;font-size:12px;color:#0C2340;margin:14px 0 5px;font-weight:700}
+  /* Verhalende tekst */
+  .narrative{font-size:11px;line-height:1.75;color:#1a1a1a}
+  .narrative p{margin-bottom:10px}
+  .narrative strong{font-weight:700;color:#0C2340}
+  .narrative em{font-style:italic}
+  /* Aanbeveling blok */
+  .rec-block{background:#fff8f0;border-left:4px solid #f59e0b;padding:12px 16px;
+             border-radius:0 4px 4px 0;margin-top:12px}
+  .rec-block p{margin-bottom:6px;font-size:11px}
+  .rec-block p:last-child{margin-bottom:0}
+  .sub{font-weight:normal;color:#6b7280;font-family:Arial}
+  /* Tabellen */
+  table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:10px;font-family:Arial}
   th{background:#0C2340;color:white;padding:5px 8px;text-align:left;font-size:10px}
-  td{padding:4px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+  td{padding:4px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top;font-family:Arial}
   tr:nth-child(even) td{background:#f8fafc}
   .app-section{margin-bottom:24px;page-break-inside:avoid}
   .scores-table th{background:#1A56A0}
   .dim-table th{background:#065f46}
-  .chart-wrap{margin:8px 0 16px;page-break-inside:avoid;text-align:center}
+  .chart-wrap{margin:10px 0 18px;page-break-inside:avoid;text-align:center}
   .rec-box{border-radius:3px;padding:8px 12px;margin-bottom:8px}
   .rec-qw{background:#fffbeb;border-left:3px solid #f59e0b}
   .rec-str{background:#f0fdf4;border-left:3px solid #22c55e}
-  .rec-label{font-weight:700;font-size:10px;margin-bottom:3px}
-  .rec-text{font-size:10px;line-height:1.5;color:#374151}
+  .rec-label{font-weight:700;font-size:10px;margin-bottom:3px;font-family:Arial}
+  .rec-text{font-size:10px;line-height:1.55;color:#374151;font-family:Arial}
   .page2{page-break-before:always;padding-top:8px}
-  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:9px;color:#9ca3af;text-align:center}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;
+          font-size:9px;color:#9ca3af;text-align:center;font-family:Arial}
   @media print{
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .page2{page-break-before:always}
@@ -1532,11 +1547,11 @@ export default function App() {
   <p class="meta">Gegenereerd op: ${datum} · ${visible.length} applicatie${visible.length!==1?"s":""} in selectie · Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum</p>
 
   <!-- PAGINA 1: Samenvatting + scoreoverzicht -->
-  <h2>Samenvatting en duiding</h2>
-  <div class="samenvatting">${generateSummary(visible)}</div>
+  <h2>Samenvatting</h2>
+  <div class="narrative">${generateSummary(visible)}</div>
 
-  <h2>Algemeen risico-conclusie en bestuurlijke aanbeveling</h2>
-  <div class="samenvatting" style="background:#fff8f0;border-left-color:#f59e0b">${generateRisicoConclusion(visible)}</div>
+  <h2>Risico-analyse en aanbeveling</h2>
+  <div class="narrative">${generateRisicoConclusion(visible)}</div>
 
   <h2>Scoreoverzicht — alle applicaties</h2>
   <table>
@@ -1553,7 +1568,7 @@ export default function App() {
     </p>
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-    <h2>Dimensieprofiel — per applicatie (DAAF)</h2>
+    <h2>Dimensieprofiel — per applicatie</h2>
     <p style="font-size:10px;color:#6b7280;margin-bottom:8px">
       Gewogen dimensiescores 1–5. Risico-assen (A, B): kleiner is beter.
       Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.
@@ -1737,19 +1752,8 @@ export default function App() {
             </div>
           ) : (<>
 
-          {/* ── Portfolio heatmap — totaalplaatje ── */}
-          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Totaalplaatje — portfolio overzicht</h3>
-            </div>
-            <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
-              Alle applicaties naast elkaar op alle 8 DAAF-dimensies. Cel-kleur toont direct de kwaliteit:
-              voor risico-assen is <span style={{ color:"#16a34a", fontWeight:600 }}>groen = laag risico (goed)</span>.
-              Voor mitigatie-assen is <span style={{ color:"#16a34a", fontWeight:600 }}>groen = sterk weerbaar (goed)</span>.
-            </p>
-            <PortfolioHeatmap apps={scored} />
-          </div>
+          {/* ── Opdrachtskaart — centrale vraagstelling ── */}
+          <OpdrachtKaart apps={visibleApps} />
 
           {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
