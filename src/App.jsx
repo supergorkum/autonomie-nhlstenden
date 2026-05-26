@@ -904,39 +904,160 @@ export default function App() {
 
   function exportDashboardPdf() {
     const visible = apps.filter(a => !hiddenApps.has(a.id));
-    const datum = new Date().toLocaleDateString("nl-NL", { day:"2-digit", month:"long", year:"numeric" });
+    const datum   = new Date().toLocaleDateString("nl-NL", { day:"2-digit", month:"long", year:"numeric" });
+    const PCOLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
 
-    // ── SVG kwadrant generator ────────────────────────────────
+    // ── Hulpfunctie: dimensiescore ────────────────────────────
+    function pdfDimScore(a, letter) {
+      if (letter === "A") {
+        const a1=a.scores["A1"]||0, a3=a.scores["A3"]||0;
+        const p=[[a1,3],[a3,2]].filter(([v])=>v>0);
+        if (!p.length) return null;
+        const tw=p.reduce((s,[,w])=>s+w,0);
+        return p.reduce((s,[v,w])=>s+v*w,0)/tw;
+      }
+      const qs=DAAF.filter(d=>d.dim===letter);
+      const vals=qs.map(q=>a.scores[q.key]||0).filter(v=>v>0);
+      return vals.length ? vals.reduce((s,v)=>s+v,0)/vals.length : null;
+    }
+
+    // ── Samenvatting genereren ────────────────────────────────
+    function generateSummary(appsArr) {
+      const scored = appsArr.map(a => ({ ...a, sc: calcScores(a.scores) })).filter(a => a.sc.autonomyScore);
+      if (scored.length === 0) return "<p>Nog geen volledig ingevulde assessments beschikbaar.</p>";
+
+      const sorted    = [...scored].sort((a,b) => (a.sc.autonomyScore||0) - (b.sc.autonomyScore||0));
+      const kritiek   = sorted.filter(a => a.sc.autonomyScore < 3);
+      const zorg      = sorted.filter(a => a.sc.autonomyScore >= 3 && a.sc.autonomyScore < 5);
+      const acceptabel= sorted.filter(a => a.sc.autonomyScore >= 5 && a.sc.autonomyScore < 7);
+      const goed      = sorted.filter(a => a.sc.autonomyScore >= 7);
+      const avg       = scored.reduce((s,a) => s+(a.sc.autonomyScore||0),0)/scored.length;
+      const hoogsteRisico = [...scored].sort((a,b) => (b.sc.risico||0)-(a.sc.risico||0))[0];
+      const besteInsol   = [...scored].sort((a,b) => (b.sc.mitigatie||0)-(a.sc.mitigatie||0))[0];
+      const laagsteDictu = [...scored].filter(a=>a.sc.dictuAvg).sort((a,b)=>(a.sc.dictuAvg||5)-(b.sc.dictuAvg||5))[0];
+
+      let tekst = `<p>Dit rapport beschrijft de uitkomsten van het digitale soevereiniteitsassessment van <strong>NHL Stenden Hogeschool</strong>, 
+        uitgevoerd in het kader van de Ambassadeurslijn Digitale Soevereiniteit. 
+        In deze rapportage zijn <strong>${appsArr.length} applicatie${appsArr.length!==1?"s":""}</strong> beoordeeld op basis van twee frameworks: 
+        het <strong>DAAF Framework</strong> (Utrecht University) voor digitale autonomie en het <strong>DICTU Framework</strong> (Rijksoverheid) voor technische en juridische soevereiniteit.</p>`;
+
+      tekst += `<p style="margin-top:8px;">De gemiddelde autonomiescore over alle beoordeelde applicaties bedraagt <strong>${avg.toFixed(1)} op een schaal van 1 tot 10</strong>. 
+        De autonomiescore is geen maat voor hoe soeverein een applicatie is, maar voor <em>hoe urgent het autonomieprobleem is</em>: 
+        een hogere score betekent dat de risico's goed zijn afgedekt of het strategisch belang beperkt is, en er dus minder reden tot zorg bestaat.`;
+
+      if (goed.length)      tekst += ` <strong>${goed.length} applicatie${goed.length!==1?"s":""}</strong> scoort goed (≥7): ${goed.map(a=>a.name).join(", ")}.`;
+      if (acceptabel.length) tekst += ` <strong>${acceptabel.length}</strong> scoort acceptabel (5–7): ${acceptabel.map(a=>a.name).join(", ")}.`;
+      if (zorg.length)      tekst += ` <strong>${zorg.length}</strong> vraagt aandacht (3–5): ${zorg.map(a=>a.name).join(", ")}.`;
+      if (kritiek.length)   tekst += ` <strong style="color:#b91c1c">${kritiek.length} applicatie${kritiek.length!==1?"s":""} scoort kritiek (&lt;3) en vraagt om directe actie: ${kritiek.map(a=>a.name).join(", ")}.</strong>`;
+      tekst += `</p>`;
+
+      if (hoogsteRisico) tekst += `<p style="margin-top:6px;">De hoogste risico-exposure wordt gemeten bij <strong>${hoogsteRisico.name}</strong> 
+        (risicoscore ${hoogsteRisico.sc.risico?.toFixed(2)}), wat duidt op een combinatie van geopolitieke blootstelling en leveranciersafhankelijkheid. 
+        De sterkste mitigatie-capaciteit toont <strong>${besteInsol.name}</strong> 
+        (mitigatiescore ${besteInsol.sc.mitigatie?.toFixed(2)}): er zijn alternatieven beschikbaar, de interne kennis is geborgd en de contractuele bescherming is op orde.</p>`;
+
+      if (laagsteDictu) tekst += `<p style="margin-top:6px;">Vanuit het DICTU-perspectief (technische en juridische soevereiniteit, schaal 1–5) verdient 
+        <strong>${laagsteDictu.name}</strong> extra aandacht met een soevereiniteitsscore van ${laagsteDictu.sc.dictuAvg?.toFixed(1)}. 
+        Dit vraagt om nadere controle van datalocatie, sleutelbeheer en juridische beschermingsclausules.</p>`;
+
+      if (appsArr.length > 1) {
+        tekst += `<p style="margin-top:6px;">Het autonomie-kwadrant hieronder plaatst elke applicatie op twee assen: 
+          de horizontale as toont de gecombineerde druk van risico en strategisch belang; de verticale as toont de weerbaarheid (mitigatie). 
+          Applicaties in het kwadrant <em>KRITIEK</em> (rechtsboven) vragen om de meest urgente actie: hoog risico én lage weerbaarheid. 
+          Het spindiagram geeft inzicht in welke specifieke dimensies de sterkste en zwakste posities kennen.</p>`;
+      }
+
+      return tekst;
+    }
+
+    // ── Spindiagram als SVG ───────────────────────────────────
+    function generateSpinSVG(appsArr) {
+      const W=680, H=440, cx=W/2, cy=(H-50)/2+10;
+      const maxR = Math.min(W, H-60)/2 - 60;
+      const maxV = 5;
+      const dims = [...new Set(DAAF.map(d=>d.dim))].map(letter => {
+        const f = DAAF.find(d=>d.dim===letter);
+        return { letter, label: f ? f.dimName : letter };
+      });
+      const N = dims.length;
+      const ang = i => (2*Math.PI*i/N) - Math.PI/2;
+      const ptX = (i,v) => (cx + (v/maxV)*maxR*Math.cos(ang(i))).toFixed(1);
+      const ptY = (i,v) => (cy + (v/maxV)*maxR*Math.sin(ang(i))).toFixed(1);
+      const anchor = i => { const x=Math.cos(ang(i)); return x>0.3?"start":x<-0.3?"end":"middle"; };
+
+      // Grid
+      let grid="", axes="", labels="", polygons="", legend="";
+      for(let lv=1;lv<=5;lv++){
+        const pts=dims.map((_,i)=>`${ptX(i,lv)},${ptY(i,lv)}`).join(" ");
+        grid+=`<polygon points="${pts}" fill="none" stroke="#e5e7eb" stroke-width="${lv===5?1.5:0.8}"/>`;
+      }
+      dims.forEach((_,i)=>{
+        axes+=`<line x1="${cx}" y1="${cy}" x2="${ptX(i,5)}" y2="${ptY(i,5)}" stroke="#d1d5db" stroke-width="1"/>`;
+      });
+      // Labels
+      dims.forEach((d,i)=>{
+        const lx=(cx+(maxR+26)*Math.cos(ang(i))).toFixed(1);
+        const ly=(cy+(maxR+26)*Math.sin(ang(i))).toFixed(1);
+        const words=d.label.split(" ");
+        const l1=words.slice(0,Math.ceil(words.length/2)).join(" ");
+        const l2=words.slice(Math.ceil(words.length/2)).join(" ");
+        labels+=`<text x="${lx}" y="${l2?(+ly-5).toFixed(1):ly}" text-anchor="${anchor(i)}" fill="#374151" font-size="10" font-weight="600" font-family="Arial">${l1}${l2?`<tspan x="${lx}" dy="13">${l2}</tspan>`:""}</text>`;
+      });
+      // App polygons
+      appsArr.slice(0,6).forEach((a,ai)=>{
+        const col=PCOLORS[ai%PCOLORS.length];
+        const hasData=dims.some(d=>pdfDimScore(a,d.letter)!==null);
+        if(!hasData) return;
+        const pts=dims.map((d,i)=>`${ptX(i,pdfDimScore(a,d.letter)||0)},${ptY(i,pdfDimScore(a,d.letter)||0)}`).join(" ");
+        polygons+=`<polygon points="${pts}" fill="${col}" fill-opacity="0.18" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
+        dims.forEach((d,i)=>{
+          const v=pdfDimScore(a,d.letter); if(!v) return;
+          polygons+=`<circle cx="${ptX(i,v)}" cy="${ptY(i,v)}" r="4" fill="${col}" stroke="white" stroke-width="1.5"/>`;
+        });
+        // Legend
+        const lx=cx-((Math.min(appsArr.length,6)-1)*105)/2+ai*105;
+        legend+=`<rect x="${(lx-28).toFixed(0)}" y="${(H-36).toFixed(0)}" width="11" height="11" fill="${col}" fill-opacity="0.6" rx="2"/>`;
+        legend+=`<text x="${(lx-14).toFixed(0)}" y="${(H-27).toFixed(0)}" font-size="9" fill="#374151" font-family="Arial">${a.name.substring(0,14)}</text>`;
+      });
+      // Gridwaarden
+      let gridVals="";
+      [1,2,3,4,5].forEach(v=>{
+        gridVals+=`<text x="${(+ptX(0,v)+5).toFixed(0)}" y="${(+ptY(0,v)+3).toFixed(0)}" font-size="8" fill="#9ca3af" font-family="Arial">${v}</text>`;
+      });
+
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;max-width:100%">
+        ${grid}${axes}${gridVals}${polygons}${labels}${legend}
+      </svg>`;
+    }
+
+    // ── SVG kwadrant ─────────────────────────────────────────
     function generateKwadrantSVG(appsArr) {
-      const W=680, H=380, pad={top:28, right:20, bottom:44, left:48};
+      const W=680, H=360, pad={top:28, right:20, bottom:44, left:48};
       const iW=W-pad.left-pad.right, iH=H-pad.top-pad.bottom;
       const xMin=1,xMax=25,yMin=1,yMax=5,mx=13,my=3;
       const toX = v => pad.left+(v-xMin)/(xMax-xMin)*iW;
       const toY = v => pad.top+(yMax-v)/(yMax-yMin)*iH;
       const midX=toX(mx), midY=toY(my);
-      const QCOLORS=["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
-
-      let dots = "";
-      appsArr.forEach((a, i) => {
-        const s = calcScores(a.scores);
-        if (!s.risico || !s.mitigatie || !s.belang) return;
-        const cx = toX(s.risico * s.belang), cy = toY(s.mitigatie);
-        const col = QCOLORS[i % QCOLORS.length];
-        dots += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8" fill="${col}" fill-opacity="0.25" stroke="${col}" stroke-width="2"/>`;
-        dots += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="4" fill="${col}"/>`;
-        dots += `<rect x="${(cx+10).toFixed(1)}" y="${(cy-9).toFixed(1)}" width="${Math.min(a.name.length*5.5+6,110)}" height="14" rx="2" fill="white" fill-opacity="0.85"/>`;
-        dots += `<text x="${(cx+13).toFixed(1)}" y="${(cy+2).toFixed(1)}" fill="${col}" font-size="9" font-weight="bold" font-family="Arial">${a.name.substring(0,18)}</text>`;
+      let dots="";
+      appsArr.forEach((a,i)=>{
+        const s=calcScores(a.scores);
+        if(!s.risico||!s.mitigatie||!s.belang) return;
+        const cx2=toX(s.risico*s.belang), cy2=toY(s.mitigatie);
+        const col=PCOLORS[i%PCOLORS.length];
+        dots+=`<circle cx="${cx2.toFixed(1)}" cy="${cy2.toFixed(1)}" r="8" fill="${col}" fill-opacity="0.25" stroke="${col}" stroke-width="2"/>`;
+        dots+=`<circle cx="${cx2.toFixed(1)}" cy="${cy2.toFixed(1)}" r="4" fill="${col}"/>`;
+        dots+=`<rect x="${(cx2+10).toFixed(1)}" y="${(cy2-9).toFixed(1)}" width="${Math.min(a.name.length*5.5+6,110)}" height="14" rx="2" fill="white" fill-opacity="0.85"/>`;
+        dots+=`<text x="${(cx2+13).toFixed(1)}" y="${(cy2+2).toFixed(1)}" fill="${col}" font-size="9" font-weight="bold" font-family="Arial">${a.name.substring(0,18)}</text>`;
       });
-
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;max-width:100%">
         <rect x="${pad.left}" y="${pad.top}" width="${midX-pad.left}" height="${midY-pad.top}" fill="#e8f5e9"/>
         <rect x="${midX}" y="${pad.top}" width="${pad.left+iW-midX}" height="${midY-pad.top}" fill="#fff8e1"/>
         <rect x="${pad.left}" y="${midY}" width="${midX-pad.left}" height="${pad.top+iH-midY}" fill="#fff3e0"/>
         <rect x="${midX}" y="${midY}" width="${pad.left+iW-midX}" height="${pad.top+iH-midY}" fill="#fce4ec"/>
-        <text x="${((pad.left+midX)/2).toFixed(0)}" y="${((pad.top+midY)/2-8).toFixed(0)}" text-anchor="middle" fill="#2e7d5e" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">OPTIMAAL</text>
-        <text x="${((midX+pad.left+iW)/2).toFixed(0)}" y="${((pad.top+midY)/2-8).toFixed(0)}" text-anchor="middle" fill="#e07b20" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">BEHEERSBAAR</text>
-        <text x="${((pad.left+midX)/2).toFixed(0)}" y="${((midY+pad.top+iH)/2-8).toFixed(0)}" text-anchor="middle" fill="#e07b20" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">AANDACHTSPUNT</text>
-        <text x="${((midX+pad.left+iW)/2).toFixed(0)}" y="${((midY+pad.top+iH)/2-8).toFixed(0)}" text-anchor="middle" fill="#c0392b" font-size="11" font-weight="bold" font-style="italic" font-family="Arial">KRITIEK</text>
+        <text x="${((pad.left+midX)/2).toFixed(0)}" y="${((pad.top+midY)/2).toFixed(0)}" text-anchor="middle" fill="#2e7d5e" font-size="12" font-weight="bold" font-style="italic" font-family="Arial">OPTIMAAL</text>
+        <text x="${((midX+pad.left+iW)/2).toFixed(0)}" y="${((pad.top+midY)/2).toFixed(0)}" text-anchor="middle" fill="#e07b20" font-size="12" font-weight="bold" font-style="italic" font-family="Arial">BEHEERSBAAR</text>
+        <text x="${((pad.left+midX)/2).toFixed(0)}" y="${((midY+pad.top+iH)/2).toFixed(0)}" text-anchor="middle" fill="#e07b20" font-size="12" font-weight="bold" font-style="italic" font-family="Arial">AANDACHTSPUNT</text>
+        <text x="${((midX+pad.left+iW)/2).toFixed(0)}" y="${((midY+pad.top+iH)/2).toFixed(0)}" text-anchor="middle" fill="#c0392b" font-size="12" font-weight="bold" font-style="italic" font-family="Arial">KRITIEK</text>
         <line x1="${midX.toFixed(1)}" y1="${pad.top}" x2="${midX.toFixed(1)}" y2="${pad.top+iH}" stroke="#aaa" stroke-width="1.5"/>
         <line x1="${pad.left}" y1="${midY.toFixed(1)}" x2="${pad.left+iW}" y2="${midY.toFixed(1)}" stroke="#aaa" stroke-width="1.5"/>
         <rect x="${pad.left}" y="${pad.top}" width="${iW}" height="${iH}" fill="none" stroke="#ccc" stroke-width="1"/>
@@ -948,151 +1069,125 @@ export default function App() {
       </svg>`;
     }
 
-    // ── Dimensie-scoretabel voor spindiagram ──────────────────
+    // ── Dimensietabel ─────────────────────────────────────────
     function generateDimTable(appsArr) {
-      const dimLetters = [...new Set(DAAF.map(d => d.dim))];
-      const dimName = l => { const f = DAAF.find(d=>d.dim===l); return f?f.dimName:l; };
-      const dScore = (a, letter) => {
-        if (letter === "A") {
-          const a1=a.scores["A1"]||0, a3=a.scores["A3"]||0;
-          const p=[[a1,3],[a3,2]].filter(([v])=>v>0);
-          if (!p.length) return "–";
-          const tw=p.reduce((s,[,w])=>s+w,0);
-          return (p.reduce((s,[v,w])=>s+v*w,0)/tw).toFixed(2);
-        }
-        const qs=DAAF.filter(d=>d.dim===letter);
-        const vals=qs.map(q=>a.scores[q.key]||0).filter(v=>v>0);
-        return vals.length?(vals.reduce((s,v)=>s+v,0)/vals.length).toFixed(2):"–";
-      };
-      const lvlColor = l => ["A","B"].includes(l)?"#dc2626":["C","D","E"].includes(l)?"#166534":"#92400e";
-      const lvlLabel = l => ["A","B"].includes(l)?"Risico ↓":["C","D","E"].includes(l)?"Mitigatie ↑":"Belang ↓";
-
-      const headers = appsArr.map(a => `<th>${a.name.substring(0,16)}</th>`).join("");
-      const dimRows = dimLetters.map(l => {
-        const cells = appsArr.map(a => `<td style="text-align:center;font-weight:700;color:${lvlColor(l)}">${dScore(a,l)}</td>`).join("");
+      const dimLetters=[...new Set(DAAF.map(d=>d.dim))];
+      const dimName=l=>{const f=DAAF.find(d=>d.dim===l);return f?f.dimName:l;};
+      const lvlColor=l=>["A","B"].includes(l)?"#dc2626":["C","D","E"].includes(l)?"#166534":"#92400e";
+      const lvlLabel=l=>["A","B"].includes(l)?"Risico ↓":["C","D","E"].includes(l)?"Mitigatie ↑":"Belang ↓";
+      const headers=appsArr.map(a=>`<th>${a.name.substring(0,16)}</th>`).join("");
+      const dimRows=dimLetters.map(l=>{
+        const cells=appsArr.map(a=>{
+          const v=pdfDimScore(a,l);
+          return `<td style="text-align:center;font-weight:700;color:${lvlColor(l)}">${v!=null?v.toFixed(2):"–"}</td>`;
+        }).join("");
         return `<tr><td><strong>${l}</strong></td><td>${dimName(l)}</td><td style="color:${lvlColor(l)};font-size:9px">${lvlLabel(l)}</td>${cells}</tr>`;
       }).join("");
-
-      return `<table class="dim-table">
-        <tr><th>Dim</th><th>Naam</th><th>Richting</th>${headers}</tr>
-        ${dimRows}
-      </table>`;
+      return `<table class="dim-table"><tr><th>Dim</th><th>Naam</th><th>Richting</th>${headers}</tr>${dimRows}</table>`;
     }
 
+    // ── Tabelrijen ────────────────────────────────────────────
     const rows = visible.map(a => {
-      const s = calcScores(a.scores);
-      const lbl = scoreLabel(s.autonomyScore);
-      const statusColor = lbl.fg;
-      return `
-        <tr>
-          <td><strong>${a.name}</strong>${a.supplier ? `<br/><span class="sub">${a.supplier}</span>` : ""}</td>
-          <td style="color:${statusColor}; font-weight:700">${s.autonomyScore ? s.autonomyScore.toFixed(1) : "–"}</td>
-          <td style="color:#dc2626">${s.risico    ? s.risico.toFixed(2)    : "–"}</td>
-          <td style="color:#26B5AE">${s.mitigatie ? s.mitigatie.toFixed(2) : "–"}</td>
-          <td style="color:#E87722">${s.belang    ? s.belang.toFixed(2)    : "–"}</td>
-          <td>${s.dictuAvg  ? s.dictuAvg.toFixed(1)+"/5"  : "–"}</td>
-          <td>${s.completeness}%</td>
-          <td><span style="color:${statusColor}; font-weight:600">${lbl.text}</span></td>
-        </tr>`;
+      const s=calcScores(a.scores), lbl=scoreLabel(s.autonomyScore);
+      return `<tr>
+        <td><strong>${a.name}</strong>${a.supplier?`<br/><span class="sub">${a.supplier}</span>`:""}</td>
+        <td style="color:${lbl.fg};font-weight:700">${s.autonomyScore?s.autonomyScore.toFixed(1):"–"}</td>
+        <td style="color:#dc2626">${s.risico?s.risico.toFixed(2):"–"}</td>
+        <td style="color:#26B5AE">${s.mitigatie?s.mitigatie.toFixed(2):"–"}</td>
+        <td style="color:#E87722">${s.belang?s.belang.toFixed(2):"–"}</td>
+        <td>${s.dictuAvg?s.dictuAvg.toFixed(1)+"/5":"–"}</td>
+        <td>${s.completeness}%</td>
+        <td style="color:${lbl.fg};font-weight:600">${lbl.text}</td>
+      </tr>`;
     }).join("");
 
     const kwRows = visible.map(a => {
-      const s = calcScores(a.scores);
-      const daafRows = DAAF.map(q => `
-        <tr>
-          <td><strong>${q.key}</strong></td>
-          <td>${q.dimName}</td>
-          <td>${q.name}</td>
-          <td style="text-align:center; font-weight:700">${a.scores[q.key] || "–"}</td>
-          <td>${a.scores[q.key] ? q.scores.find(sc => sc.s === a.scores[q.key])?.label || "" : ""}</td>
-        </tr>`).join("");
-      const dictuRows = DICTU.map(q => `
-        <tr>
-          <td><strong>${q.key}</strong></td>
-          <td>${q.cat}</td>
-          <td>${q.name}</td>
-          <td style="text-align:center; font-weight:700">${a.scores[q.key] || "–"}</td>
-          <td>${a.scores[q.key] ? q.scores.find(sc => sc.s === a.scores[q.key])?.label || "" : ""}</td>
-        </tr>`).join("");
-      return `
-        <div class="app-section">
-          <h3>${a.name} ${a.supplier ? `<span class="sub">— ${a.supplier}</span>` : ""}</h3>
-          <table class="scores-table">
-            <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th></tr>
-            ${daafRows}${dictuRows}
-          </table>
-        </div>`;
+      const daafRows=DAAF.map(q=>`<tr>
+        <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
+        <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
+        <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
+      </tr>`).join("");
+      const dictuRows=DICTU.map(q=>`<tr>
+        <td><strong>${q.key}</strong></td><td>${q.cat}</td><td>${q.name}</td>
+        <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
+        <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
+      </tr>`).join("");
+      return `<div class="app-section">
+        <h3>${a.name}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""}</h3>
+        <table class="scores-table">
+          <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th></tr>
+          ${daafRows}${dictuRows}
+        </table>
+      </div>`;
     }).join("");
 
     const html = `<!DOCTYPE html>
 <html lang="nl">
 <head>
 <meta charset="UTF-8"/>
-<title>Digitale Soevereiniteitsassessment — NHL Stenden</title>
+<title>Digitale Soevereiniteitsassessment — NHL Stenden ${datum}</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; font-size: 11px; color: #1a1a1a; }
-  .header { background: #0C2340; color: white; padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
-  .logo { border: 2px solid white; padding: 6px 10px; font-weight: 700; font-size: 10px; letter-spacing: 1px; line-height: 1.3; }
-  .header-title { font-size: 14px; font-weight: 700; }
-  .header-sub { font-size: 10px; color: #7DD3D0; margin-top: 2px; }
-  .content { padding: 20px 24px; }
-  .meta { color: #6b7280; font-size: 10px; margin-bottom: 16px; }
-  h2 { font-size: 13px; color: #0C2340; border-bottom: 2px solid #1A56A0; padding-bottom: 4px; margin: 16px 0 10px; }
-  h3 { font-size: 12px; color: #0C2340; margin: 12px 0 6px; }
-  .sub { font-weight: normal; color: #6b7280; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10px; }
-  th { background: #0C2340; color: white; padding: 5px 8px; text-align: left; font-size: 10px; }
-  td { padding: 4px 8px; border-bottom: 1px solid #e5e7eb; vertical-align: top; }
-  tr:nth-child(even) td { background: #f8fafc; }
-  .app-section { margin-bottom: 20px; page-break-inside: avoid; }
-  .scores-table th { background: #1A56A0; }
-  .kwadrant-wrap { margin: 12px 0; page-break-inside: avoid; }
-  .dim-table th { background: #065f46; }
-  .footer { margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 9px; color: #9ca3af; text-align: center; }
-  @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Arial,sans-serif;font-size:11px;color:#1a1a1a}
+  .header{background:#0C2340;color:white;padding:16px 24px;display:flex;align-items:center;gap:16px}
+  .logo{border:2px solid white;padding:6px 10px;font-weight:700;font-size:10px;letter-spacing:1px;line-height:1.3}
+  .header-title{font-size:14px;font-weight:700}
+  .header-sub{font-size:10px;color:#7DD3D0;margin-top:2px}
+  .content{padding:20px 24px}
+  .meta{color:#6b7280;font-size:10px;margin-bottom:12px}
+  .samenvatting{background:#EBF3FF;border-left:4px solid #1A56A0;padding:12px 16px;margin-bottom:16px;border-radius:2px;line-height:1.6}
+  .samenvatting p{margin-bottom:6px;font-size:11px;color:#1a1a1a}
+  h2{font-size:13px;color:#0C2340;border-bottom:2px solid #1A56A0;padding-bottom:4px;margin:16px 0 10px}
+  h3{font-size:12px;color:#0C2340;margin:12px 0 6px}
+  .sub{font-weight:normal;color:#6b7280}
+  table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:10px}
+  th{background:#0C2340;color:white;padding:5px 8px;text-align:left;font-size:10px}
+  td{padding:4px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}
+  tr:nth-child(even) td{background:#f8fafc}
+  .app-section{margin-bottom:20px;page-break-inside:avoid}
+  .scores-table th{background:#1A56A0}
+  .dim-table th{background:#065f46}
+  .chart-wrap{margin:12px 0;page-break-inside:avoid}
+  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;font-size:9px;color:#9ca3af;text-align:center}
+  @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 </style>
 </head>
 <body>
 <div class="header">
   <div class="logo">NHL<br/>STENDEN</div>
-  <div style="width:2px; background:#26B5AE; align-self:stretch;"></div>
+  <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
   <div>
     <div class="header-title">Digitale Soevereiniteitsassessment</div>
     <div class="header-sub">Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit · ${VERSION}</div>
   </div>
 </div>
 <div class="content">
-  <p class="meta">Gegenereerd op: ${datum} · ${visible.length} applicatie${visible.length !== 1 ? "s" : ""} in selectie</p>
+  <p class="meta">Gegenereerd op: ${datum} · ${visible.length} applicatie${visible.length!==1?"s":""} in selectie · Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum</p>
 
-  <h2>Overzicht — alle applicaties</h2>
+  <h2>Samenvatting en duiding</h2>
+  <div class="samenvatting">${generateSummary(visible)}</div>
+
+  <h2>Scoreoverzicht — alle applicaties</h2>
   <table>
-    <tr>
-      <th>Applicatie</th><th>Autonomiescore (1-10)</th><th>Risico ↓</th>
-      <th>Mitigatie ↑</th><th>Belang ↓</th><th>DICTU</th><th>Volledigheid</th><th>Status</th>
-    </tr>
+    <tr><th>Applicatie</th><th>Autonomiescore (1-10)</th><th>Risico ↓</th><th>Mitigatie ↑</th><th>Belang ↓</th><th>DICTU</th><th>Volledigheid</th><th>Status</th></tr>
     ${rows}
   </table>
 
   <h2>Autonomie-kwadrant (DAAF)</h2>
-  <p style="font-size:10px;color:#6b7280;margin-bottom:8px;">
-    Horizontale as = Risico × Belang (rechts = meer urgentie) · Verticale as = Mitigatie (hoger = beter)
-    · Linksboven = OPTIMAAL · Rechtsboven = KRITIEK
-  </p>
-  <div class="kwadrant-wrap">${generateKwadrantSVG(visible)}</div>
+  <p style="font-size:10px;color:#6b7280;margin-bottom:8px">Horizontale as = Risico × Belang (verder rechts = urgenter) · Verticale as = Mitigatie (hoger = beter beschermd) · Linksboven ideaal · Rechtsboven kritiek</p>
+  <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-  <h2>Dimensiescores per applicatie (DAAF spindiagram)</h2>
-  <p style="font-size:10px;color:#6b7280;margin-bottom:8px;">
-    Gewogen dimensiescores 1-5. Risico-dimensies: laag is beter. Mitigatie-dimensies: hoog is beter.
-  </p>
+  <h2>Spindiagram — dimensiescores per applicatie (DAAF)</h2>
+  <p style="font-size:10px;color:#6b7280;margin-bottom:8px">Gewogen dimensiescores 1–5. Risico-assen (A, B): kleiner is beter. Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.</p>
+  <div class="chart-wrap">${generateSpinSVG(visible)}</div>
+
+  <h2>Dimensiescores tabel</h2>
   ${generateDimTable(visible)}
 
   <h2>Detailscores per applicatie</h2>
   ${kwRows}
 
-  <div class="footer">
-    NHL Stenden Hogeschool · Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · ${VERSION}
-  </div>
+  <div class="footer">NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · ${VERSION}</div>
 </div>
 </body>
 </html>`;
@@ -1101,7 +1196,7 @@ export default function App() {
     win.document.write(html);
     win.document.close();
     win.focus();
-    setTimeout(() => win.print(), 500);
+    setTimeout(() => win.print(), 600);
   }
 
   // ── VIEWS ──────────────────────────────────────────────────
