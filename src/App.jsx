@@ -1430,6 +1430,11 @@ export default function App() {
 
   function exportXlsx() {
     const dName = (a) => (useSecondaryName && a.nameSecondary) ? a.nameSecondary : a.name;
+    // Vervang ook in motivatieteksten de primaire naam door de secundaire als toggle actief is
+    const dNote = (a, tekst) => {
+      if (!tekst || !useSecondaryName || !a.nameSecondary || !a.name) return tekst || "";
+      return tekst.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), a.nameSecondary);
+    };
     const wb = XLSX.utils.book_new();
 
     const ws1 = XLSX.utils.aoa_to_sheet([
@@ -1452,7 +1457,7 @@ export default function App() {
       ["Applicatie","Leverancier", ...DAAF.map(d => `${d.key} ${d.name}`), ...DAAF.map(d => `${d.key} Motivatie`)],
       ...apps.map(a => [dName(a), a.supplier,
         ...DAAF.map(d => a.scores[d.key] || ""),
-        ...DAAF.map(d => (a.notes || {})[d.key] || "")
+        ...DAAF.map(d => dNote(a, (a.notes || {})[d.key]))
       ])
     ]);
     XLSX.utils.book_append_sheet(wb, ws2, "DAAF Scores");
@@ -1461,7 +1466,7 @@ export default function App() {
       ["Applicatie","Leverancier", ...DICTU.map(q => `${q.key} ${q.name}`), ...DICTU.map(q => `${q.key} Motivatie`)],
       ...apps.map(a => [dName(a), a.supplier,
         ...DICTU.map(q => a.scores[q.key] || ""),
-        ...DICTU.map(q => (a.notes || {})[q.key] || "")
+        ...DICTU.map(q => dNote(a, (a.notes || {})[q.key]))
       ])
     ]);
     XLSX.utils.book_append_sheet(wb, ws3, "DICTU Scores");
@@ -1477,7 +1482,7 @@ export default function App() {
             dName(a), a.supplier || "",
             q.key, q.name,
             a.scores[q.key] || "",
-            (a.notes || {})[q.key]
+            dNote(a, (a.notes || {})[q.key])
           ])
       )
     ]);
