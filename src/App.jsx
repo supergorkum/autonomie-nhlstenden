@@ -32,7 +32,50 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.2";
+const VERSION = "v1.3";
+
+const CHANGELOG = [
+  {
+    versie: "v1.2",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "DICTU spindiagram toegevoegd aan dashboard — alle 4 assen met hover-tooltip",
+      "Tooltip DICTU spindiagram gefixed via onMouseMove proximiteit (werkt nu voor alle applicaties)",
+      "Toevoegen van applicaties hersteld voor gewone gebruikers; verwijderen/bewerken alleen voor beheerder",
+      "Versienummer bijgewerkt en changelog toegevoegd",
+    ]
+  },
+  {
+    versie: "v1.1",
+    datum: "Mei 2026",
+    wijzigingen: [
+      "Spindiagram vervangen door DivergingChart voor DAAF — semantisch correcte assen (richting heeft betekenis)",
+      "Opdrachtskaart toegevoegd bovenaan dashboard met centrale CvB-vraagstelling",
+      "Heatmap verwijderd (onleesbaar bij veel applicaties)",
+      "Tekst afbreking Quick win en Strategische aanbeveling opgelost — volledige tekst zichtbaar",
+      "Label 'Strategisch' hernoemd naar 'Strategische aanbeveling'",
+      "Term 'bestuurlijk' volledig verwijderd uit de applicatie",
+      "PDF typografie verbeterd — lopende tekst met koppen en alinea's",
+      "PDF dimensieprofiel: spindiagram vervangen door horizontale balkengrafiek",
+    ]
+  },
+  {
+    versie: "v1.0",
+    datum: "Mei 2026",
+    wijzigingen: [
+      "Eerste volledige versie live op nhl-soevereiniteitsassessment.netlify.app",
+      "DAAF Quick Scan (9 indicatoren) volledig geïmplementeerd conform Utrecht University framework",
+      "DICTU Soevereiniteitscheck (4 vragen) toegevoegd",
+      "Autonomie-kwadrant (4 kwadranten: OPTIMAAL / BEHEERSBAAR / AANDACHTSPUNT / KRITIEK)",
+      "Applicatiekaarten met snelheidsmeter, DICTU-balk en aanbevelingen",
+      "Vergelijkingspagina met filter, staafdiagram en vergelijkingstabel",
+      "PDF-export met samenvatting, kwadrant, dimensieprofiel en aanbevelingen per app",
+      "Excel-export met 4 tabbladen",
+      "Beheeromgeving met pincode, bewerken en verwijderen",
+      "Netlify Blobs opslag voor gedeelde data tussen gebruikers",
+    ]
+  },
+];
 
 // ──────────────────────────────────────────────────────────────
 // FRAMEWORK DATA
@@ -1111,6 +1154,7 @@ export default function App() {
 
   // Beheer (admin) state
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [showChangelog, setShowChangelog] = useState(false);
   const [adminPin,      setAdminPin]      = useState("");
   const [adminPinError, setAdminPinError] = useState(false);
   const [editAppId,     setEditAppId]     = useState(null);
@@ -2703,11 +2747,18 @@ export default function App() {
                 <p className="text-xs text-gray-400">{apps.length} applicatie{apps.length !== 1 ? "s" : ""} in het systeem</p>
               </div>
             </div>
-            <button onClick={() => { setAdminUnlocked(false); setView("dashboard"); }}
-              className="text-xs px-3 py-1.5 font-medium"
-              style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280", background:"#fff" }}>
-              🔒 Vergrendelen
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowChangelog(true)}
+                className="text-xs px-3 py-1.5 font-medium"
+                style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
+                📋 Changelog
+              </button>
+              <button onClick={() => { setAdminUnlocked(false); setView("dashboard"); }}
+                className="text-xs px-3 py-1.5 font-medium"
+                style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280", background:"#fff" }}>
+                🔒 Vergrendelen
+              </button>
+            </div>
           </div>
 
           {apps.length === 0 ? (
@@ -2905,11 +2956,67 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {/* ── Changelog modal ── */}
+        {showChangelog && (
+          <div className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ background:"rgba(12,35,64,0.6)" }}
+            onClick={() => setShowChangelog(false)}>
+            <div className="bg-white w-full max-w-lg mx-4 overflow-hidden"
+              style={{ borderRadius:6, boxShadow:"0 8px 32px rgba(12,35,64,0.3)", maxHeight:"80vh" }}
+              onClick={e => e.stopPropagation()}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4"
+                style={{ background:"#0C2340", borderBottom:"3px solid #26B5AE" }}>
+                <div className="flex items-center gap-3">
+                  <span style={{ fontSize:18 }}>📋</span>
+                  <div>
+                    <h2 className="font-bold text-white text-sm">Changelog</h2>
+                    <p className="text-xs" style={{ color:"#7DD3D0" }}>Overzicht van alle versies en wijzigingen</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowChangelog(false)}
+                  style={{ color:"#7DD3D0", fontSize:20, lineHeight:1 }}>✕</button>
+              </div>
+              {/* Inhoud */}
+              <div className="overflow-y-auto" style={{ maxHeight:"calc(80vh - 72px)" }}>
+                {CHANGELOG.map((v, vi) => (
+                  <div key={v.versie} style={{ borderBottom:"1px solid #D0E4F7" }}>
+                    {/* Versie header */}
+                    <div className="flex items-center gap-3 px-5 py-3"
+                      style={{ background: vi === 0 ? "#EBF3FF" : "#f8fafc" }}>
+                      <span className="text-xs font-bold px-2 py-1 text-white"
+                        style={{ background: vi === 0 ? "#1A56A0" : "#6b7280", borderRadius:3 }}>
+                        {v.versie}
+                      </span>
+                      <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>
+                        {vi === 0 ? "Huidige versie" : ""}
+                      </span>
+                      <span className="text-xs ml-auto" style={{ color:"#9ca3af" }}>{v.datum}</span>
+                    </div>
+                    {/* Wijzigingen */}
+                    <ul className="px-5 py-3 space-y-1.5">
+                      {v.wijzigingen.map((w, wi) => (
+                        <li key={wi} className="flex items-start gap-2">
+                          <span style={{ color:"#26B5AE", fontSize:10, marginTop:3, flexShrink:0 }}>●</span>
+                          <span className="text-xs leading-relaxed" style={{ color:"#374151" }}>{w}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+                <div className="px-5 py-3 text-center">
+                  <p className="text-xs" style={{ color:"#9ca3af" }}>
+                    Klik buiten dit venster om te sluiten
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
-
-  // ── ABOUT ─────────────────────────────────────────────────
 
   function About() {
     return (
