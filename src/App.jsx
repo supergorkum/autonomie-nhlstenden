@@ -1024,17 +1024,28 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       {/* Legenda */}
       {apps.slice(0, 5).map((app, ai) => {
         const color = APP_COLORS[ai % APP_COLORS.length];
-        const lx    = cx - ((Math.min(apps.length, 5) - 1) * 115) / 2 + ai * 115;
+        const scores = dims.map(d => app.scores[d.key] || 0);
+        const heeftData = !scores.every(v => v === 0);
+        const lx    = cx - ((Math.min(apps.length, 5) - 1) * 130) / 2 + ai * 130;
         return (
           <g key={app.id || ai}>
             <rect x={lx - 32} y={H - 12} width={11} height={11}
-              fill={color} fillOpacity={0.6} rx={2} />
-            <text x={lx - 17} y={H - 3} fontSize={10} fill="#374151" fontFamily="system-ui">
-              {dn(app, useSecondaryName).substring(0, 14)}
+              fill={heeftData ? color : "#d1d5db"} fillOpacity={heeftData ? 0.6 : 1} rx={2} />
+            <text x={lx - 17} y={H - 3} fontSize={10}
+              fill={heeftData ? "#374151" : "#9ca3af"} fontFamily="system-ui">
+              {dn(app, useSecondaryName).substring(0, 14)}{!heeftData ? " *" : ""}
             </text>
           </g>
         );
       })}
+
+      {/* Noot als er apps zijn zonder DICTU-scores */}
+      {apps.slice(0, 5).some(app => dims.map(d => app.scores[d.key] || 0).every(v => v === 0)) && (
+        <text x={cx} y={H - 0} textAnchor="middle" fontSize={9} fill="#9ca3af" fontFamily="system-ui"
+          fontStyle="italic">
+          * DICTU-vragen nog niet ingevuld — niet zichtbaar in diagram
+        </text>
+      )}
 
       {/* Tooltip — puur SVG, altijd bovenop */}
       {tip && (
@@ -1981,8 +1992,12 @@ export default function App() {
         Bespreek de uitkomsten van deze analyse in het <strong style="color:white">Transitieteam Digitalisering</strong> 
         en leg de prioritering vast in het portfolioplan. De <strong style="color:white">Ambassadeurs</strong> 
         (J. Haije, E. Rolf en J. Blom) coördineren de vervolgacties in afstemming met de 
-        Multidisciplinaire Expertisegroep. Kwartiermaker E. van Gorkum begeleid het gehele traject 
-        en is het aanspreekpunt voor methodiek en toolbeheer.
+        Multidisciplinaire Expertisegroep. De rollen zijn als volgt belegd: 
+        <strong style="color:white">E. van Gorkum</strong> is verantwoordelijk voor de tool, 
+        het beheer en het onderhoud. <strong style="color:white">J. Blom en E. Rolf</strong> 
+        richten zich op de methodiek en de inhoudelijke begeleiding van het assessmentproces. 
+        Dit is de taakverdeling voor de huidige projectfase — voorlopig, totdat er een 
+        officiële inbedding in de organisatie is gerealiseerd als vervolg op dit traject.
       </div>
       <div style="font-family:Arial;font-size:10px;color:white;font-weight:700;margin-bottom:6px">Voor applicatie-eigenaren:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
@@ -2494,14 +2509,14 @@ export default function App() {
     </div>
 
     <h3>7.2 Overzicht kernapplicaties</h3>
-    <div class="section-intro">
+    <div style="font-size:10px;line-height:1.6;color:#374151;border-left:3px solid #D0E4F7;padding-left:12px;margin-bottom:8px;font-family:Arial">
       Onderstaande tabel toont de 23 kernapplicaties met leverancier en contractstatus. 
       De kolom <strong>Gegevensbescherming</strong> geeft aan of er een 
       <strong>Verwerkersovereenkomst (VOK)</strong> beschikbaar is — een juridisch document 
       waarin is vastgelegd hoe de leverancier omgaat met persoonsgegevens van NHL Stenden, 
       conform de AVG. Een ontbrekende of verouderde VOK is een aandachtspunt voor Fase 2.
     </div>
-    <table style="font-size:10px">
+    <table style="font-size:9.5px;margin-top:0">
       <tr>
         <th style="width:28%">Applicatie</th>
         <th style="width:30%">Leverancier</th>
