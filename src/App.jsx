@@ -1127,15 +1127,19 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick }) {
 }
 
 function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondaryName = false, appName = "", appNameSecondary = "" }) {
-  // Preview: toon hoe de motivatietekst eruitziet met de actieve naam
+  // Preview: toon hoe de motivatietekst eruitziet met de andere naam
+  // De opgeslagen tekst bevat altijd de primaire naam.
+  // Als toggle op Primair: preview toont hoe het eruitziet MET secundaire naam.
+  // Als toggle op Secundair: de tekst bevat al de primaire naam — toon preview met secundaire naam.
   const previewNote = React.useMemo(() => {
-    if (!note || !appName) return "";
-    const from = useSecondaryName ? appNameSecondary : appName;
-    const to   = useSecondaryName ? appName : appNameSecondary;
-    if (!from || !to || from === to) return "";
-    const replaced = note.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), to);
+    if (!note || !appName || !appNameSecondary || appName === appNameSecondary) return "";
+    // Vervang altijd de primaire naam door de secundaire naam voor de preview
+    const replaced = note.replace(
+      new RegExp(appName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
+      appNameSecondary
+    );
     return replaced !== note ? replaced : "";
-  }, [note, useSecondaryName, appName, appNameSecondary]);
+  }, [note, appName, appNameSecondary]);
   return (
     <div className="mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7", borderRadius:4, padding:16 }}>
       <div className="flex items-start gap-2 mb-3">
@@ -1193,12 +1197,12 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
         {note && (
           <p style={{ fontSize:9, color:"#16a34a", marginTop:2 }}>✓ Motivatie opgeslagen</p>
         )}
-        {/* Preview: toont hoe tekst eruitziet met de andere naam */}
+        {/* Preview: toont hoe tekst eruitziet met de secundaire naam */}
         {previewNote && (
           <div className="mt-2 rounded px-3 py-2"
             style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
             <p style={{ fontSize:9, fontWeight:600, color:"#92400e", marginBottom:2 }}>
-              👁 Weergave met {useSecondaryName ? "primaire" : "secundaire"} naam:
+              👁 Weergave met secundaire naam ({appNameSecondary}):
             </p>
             <p style={{ fontSize:10, color:"#78350f", lineHeight:1.5, fontStyle:"italic" }}>
               "{previewNote}"
