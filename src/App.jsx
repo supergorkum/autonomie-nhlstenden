@@ -36,6 +36,14 @@ const VERSION = "v1.3";
 
 const CHANGELOG = [
   {
+    versie: "v1.3",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Changelog toegevoegd in beheeromgeving — overzicht van alle versies en wijzigingen",
+      "Versienummer wordt voortaan bijgewerkt bij elke nieuwe release",
+    ]
+  },
+  {
     versie: "v1.2",
     datum: "Juni 2026",
     wijzigingen: [
