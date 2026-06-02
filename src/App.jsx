@@ -2413,29 +2413,34 @@ export default function App() {
       zwaktes per DAAF-dimensie, en de tabel maakt de scores vergelijkbaar.
     </div>
 
-    <div style="page-break-inside:avoid">
-    <h3>5.1 Autonomie-kwadrant (DAAF)</h3>
-    <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
-      Horizontale as: Risico × Belang (verder rechts = urgenter). Verticale as: Mitigatie (hoger = beter beschermd). 
-      OPTIMAAL (linksboven) · BEHEERSBAAR (rechtsboven) · AANDACHTSPUNT (linksonder) · KRITIEK (rechtsonder).
-    </p>
-    <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
+    <!-- 5.1: koptekst + uitleg vastgeplakt aan grafiek via page-break-after:avoid -->
+    <div style="page-break-after:avoid">
+      <h3>5.1 Autonomie-kwadrant (DAAF)</h3>
+      <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
+        Horizontale as: Risico × Belang (verder rechts = urgenter). Verticale as: Mitigatie (hoger = beter beschermd). 
+        OPTIMAAL (linksboven) · BEHEERSBAAR (rechtsboven) · AANDACHTSPUNT (linksonder) · KRITIEK (rechtsonder).
+      </p>
     </div>
+    <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-    <div style="page-break-before:always;padding-top:4px">
+    <!-- 5.2: koptekst + uitleg vastgeplakt aan grafiek via page-break-after:avoid -->
+    <div style="page-break-after:avoid">
       <h3>5.2 Dimensieprofiel per applicatie</h3>
       <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
         Elke balk toont de gewogen score (1–5) voor één DAAF-dimensie. De kleurovergang geeft 
         direct de richting aan: risico-assen (A, B) — groen links is goed. 
         Mitigatie-assen (C, D, E) — groen rechts is goed. Stippen = applicaties.
       </p>
-      <div class="chart-wrap">${generateSpinSVG(visible)}</div>
     </div>
+    <div class="chart-wrap">${generateSpinSVG(visible)}</div>
 
-    <h3>5.3 Dimensiescores per applicatie</h3>
-    <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
-      Gewogen dimensiescores (1–5) per applicatie. Groen = goed voor dat type as. Rood = aandacht vereist.
-    </p>
+    <!-- 5.3: koptekst + uitleg vastgeplakt aan tabel -->
+    <div style="page-break-after:avoid">
+      <h3>5.3 Dimensiescores per applicatie</h3>
+      <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
+        Gewogen dimensiescores (1–5) per applicatie. Groen = goed voor dat type as. Rood = aandacht vereist.
+      </p>
+    </div>
     ${generateDimTable(visible)}
   </div>
 
@@ -2483,40 +2488,41 @@ export default function App() {
 
     <h3>8.2 Overzicht kernapplicaties</h3>
     <div class="section-intro">
-      Onderstaande tabel toont de 23 kernapplicaties, de leverancier en de 
-      laatst bekende contractstatus. De kolom "Status" geeft aan of er een 
-      verwerkersovereenkomst (VOK) bekend is — relevant voor de prioritering 
-      van de review in Fase 2.
+      Onderstaande tabel toont de 23 kernapplicaties met leverancier en contractstatus. 
+      De kolom <strong>Gegevensbescherming</strong> geeft aan of er een 
+      <strong>Verwerkersovereenkomst (VOK)</strong> beschikbaar is — een juridisch document 
+      waarin is vastgelegd hoe de leverancier omgaat met persoonsgegevens van NHL Stenden, 
+      conform de AVG. Een ontbrekende of verouderde VOK is een aandachtspunt voor Fase 2.
     </div>
     <table style="font-size:10px">
       <tr>
-        <th style="width:30%">Applicatie</th>
-        <th style="width:35%">Leverancier / Crediteur</th>
-        <th style="width:35%">Contract / VOK status</th>
+        <th style="width:28%">Applicatie</th>
+        <th style="width:30%">Leverancier</th>
+        <th style="width:42%">Contractstatus &amp; Gegevensbescherming</th>
       </tr>
-      <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">M365 / Microsoft 365</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">Actief via SURF · VOK aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Blackboard</td><td style="color:#374151">Blackboard International BV</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">PROGRESS</td><td style="color:#374151">Progress</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td><td style="color:#374151">SURF bv / BEND (Axelio)</td><td style="color:#16a34a;font-size:9px">Actief · VOK deels aanwezig</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">Actief via SURF · VOK aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">RAET Youforce</td><td style="color:#374151">RAET / Visma</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Xedule</td><td style="color:#374151">Xedule</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">AFAS</td><td style="color:#374151">Afas Software B.V.</td><td style="color:#16a34a;font-size:9px">Actief · VOK klantportal 2016</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">GBS — Gebouwbeheersysteem</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">SALTO / OMNI</td><td style="color:#374151">Salto / Omni</td><td style="color:#dc2626;font-size:9px">Salto niet in contractregister</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">ANS — Toetsapplicatie</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">DOCCENTER</td><td style="color:#374151">Canon</td><td style="color:#6b7280;font-size:9px">Contract via FLWO</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">RICOH</td><td style="color:#374151">Ricoh</td><td style="color:#6b7280;font-size:9px">Contract via FLWO</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Online Event Tools</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Geen contract bekend (Banopro vervallen 12-2025)</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Website & Hosting</td><td style="color:#374151">Netvlies</td><td style="color:#6b7280;font-size:9px">Contract via M&amp;C</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">TOPdesk</td><td style="color:#374151">TOPdesk</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">JOIN</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">ProctorExam</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td><td style="color:#374151">Bhosted</td><td style="color:#dc2626;font-size:9px">Geen contract — alleen crediteur bekend</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">OfficeBooking</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">Contract via FLWO</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">Contract via HRM</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Innovation Lab</td><td style="color:#374151">MySchoolsNetwork</td><td style="color:#6b7280;font-size:9px">Zie MySchoolsNetwork</td></tr>
+      <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">M365 / Microsoft 365</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">✓ Contract actief via SURF · Verwerkersovereenkomst aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Blackboard</td><td style="color:#374151">Blackboard International BV</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">PROGRESS</td><td style="color:#374151">Progress</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td><td style="color:#374151">SURF bv / BEND (Axelio)</td><td style="color:#16a34a;font-size:9px">⚠ Contract actief · Verwerkersovereenkomst deels beschikbaar</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">✓ Contract actief via SURF · Verwerkersovereenkomst aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">RAET Youforce</td><td style="color:#374151">RAET / Visma</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Xedule</td><td style="color:#374151">Xedule</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">AFAS</td><td style="color:#374151">Afas Software B.V.</td><td style="color:#16a34a;font-size:9px">⚠ Contract actief · Verwerkersovereenkomst via klantportal (2016, controleer actualiteit)</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">GBS — Gebouwbeheersysteem</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">SALTO / OMNI</td><td style="color:#374151">Salto / Omni</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in contractregister — nader onderzoek vereist</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">ANS — Toetsapplicatie</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">DOCCENTER</td><td style="color:#374151">Canon</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">RICOH</td><td style="color:#374151">Ricoh</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Online Event Tools</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">✗ Geen actief contract — vorig contract vervallen december 2025</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Website & Hosting</td><td style="color:#374151">Netvlies</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via Marketing &amp; Communicatie</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">TOPdesk</td><td style="color:#374151">TOPdesk</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">JOIN</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">ProctorExam</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td><td style="color:#374151">Bhosted</td><td style="color:#dc2626;font-size:9px">✗ Geen contract — alleen crediteur bekend in de financiële administratie</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">OfficeBooking</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via HRM</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Innovation Lab</td><td style="color:#374151">MySchoolsNetwork</td><td style="color:#6b7280;font-size:9px">~ Zie MySchoolsNetwork (onderdeel van hetzelfde platform)</td></tr>
 </table>
 
     <h3>8.3 Concrete acties Fase 2</h3>
