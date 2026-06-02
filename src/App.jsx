@@ -1979,9 +1979,10 @@ export default function App() {
       <div style="font-family:Arial;font-size:11px;font-weight:700;color:white;margin-bottom:6px">Vervolgstap</div>
       <div style="font-family:Arial;font-size:10px;color:#7DD3D0;line-height:1.7;margin-bottom:10px">
         Bespreek de uitkomsten van deze analyse in het <strong style="color:white">Transitieteam Digitalisering</strong> 
-        en leg de prioritering vast in het portfolioplan. Het Expertiseteam Digitale Soevereiniteit 
-        (kwartiermaker E. van Gorkum en ambassadeurs J. Haije, E. Rolf en J. Blom) staat klaar om 
-        applicatie-eigenaren te begeleiden.
+        en leg de prioritering vast in het portfolioplan. De <strong style="color:white">Ambassadeurs</strong> 
+        (J. Haije, E. Rolf en J. Blom) coördineren de vervolgacties in afstemming met de 
+        Multidisciplinaire Expertisegroep. Kwartiermaker E. van Gorkum begeleid het gehele traject 
+        en is het aanspreekpunt voor methodiek en toolbeheer.
       </div>
       <div style="font-family:Arial;font-size:10px;color:white;font-weight:700;margin-bottom:6px">Voor applicatie-eigenaren:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
@@ -2238,18 +2239,94 @@ export default function App() {
     van digitale soevereiniteit in het Nederlandse hoger onderwijs.
   </div>
 
-  <h3>1.1 Over dit rapport</h3>
+  <h3>1.1 Over deze analyse en de tool</h3>
   <div class="narrative">
-    <p>Dit rapport bevat de uitkomsten van het digitale soevereiniteitsassessment van 
-    <strong>NHL Stenden Hogeschool</strong>, uitgevoerd in het kader van de 
-    <strong>Ambassadeurslijn Digitale Soevereiniteit</strong> — onderdeel van het Programma 
-    Digitale Samenhang. Het assessment geeft antwoord op de centrale vraag van het College van Bestuur: 
-    <em>"Waar zetten we onze data neer en waar liggen de potentiële problemen?"</em></p>
-    <p>Voor dit rapport zijn <strong>${visible.length} applicatie${visible.length!==1?"s":""}</strong> 
-    beoordeeld. Elke applicatie is geanalyseerd op geopolitiek risico, leveranciersafhankelijkheid, 
-    technische en contractuele weerbaarheid, strategisch belang en technische soevereiniteit. 
-    De scores zijn ingevoerd via de Digitale Soevereiniteitsassessment Tool (${VERSION}) 
-    en zijn gebaseerd op publiek beschikbare informatie, interne kennis en contractuele documentatie.</p>
+    <p>Deze portfolioanalyse is automatisch gegenereerd door de <strong>Digitale Soevereiniteitsassessment Tool</strong> 
+    van NHL Stenden Hogeschool (${VERSION}). De tool is een levend, realtime instrument — 
+    géén statisch rapport. Assessments worden bijgehouden en bijgewerkt naarmate contracten wijzigen, 
+    leveranciers hun beleid aanpassen of nieuwe inzichten beschikbaar komen. Dit rapport is een momentopname; 
+    de tool zelf biedt altijd de meest actuele stand.</p>
+    <p>De analyse geeft antwoord op de centrale bestuursvraag: 
+    <em>"Waar zetten we onze data neer en waar liggen de potentiële problemen?"</em> 
+    Voor deze analyse zijn <strong>${visible.length} applicatie${visible.length!==1?"s":""}</strong> beoordeeld 
+    uit het kern-applicatielandschap. De tool is opgezet rondom <strong>23 kernsystemen</strong>, 
+    maar is nadrukkelijk open voor elk informatiesysteem dat NHL Stenden inzet. 
+    Applicatie-eigenaren en beheerders kunnen de tool <strong>proactief inzetten</strong> 
+    om op elk gewenst moment de soevereiniteit van een applicatie te controleren en te documenteren.</p>
+  </div>
+
+  <h3>1.2 De Kwartiermaker, Ambassadeurs en Multidisciplinaire Expertisegroep</h3>
+  <div class="narrative">
+    <p>Het traject Digitale Soevereiniteit wordt uitgevoerd door een combinatie van een 
+    <strong>kwartiermaker</strong>, <strong>drie ambassadeurs</strong> en een 
+    <strong>multidisciplinaire expertisegroep</strong>. Elk speelt een eigen en duidelijk onderscheiden rol.</p>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:10px 0 12px;page-break-inside:avoid;font-family:Arial;font-size:10px">
+    <div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:11px 13px;border-radius:0 4px 4px 0">
+      <div style="font-weight:700;color:#0C2340;margin-bottom:2px">Kwartiermaker</div>
+      <div style="color:#1A56A0;font-size:9px;margin-bottom:6px">E. van Gorkum · Programma Digitale Samenhang</div>
+      <div style="color:#374151;line-height:1.55;font-size:9px">
+        Verantwoordelijk voor de assessmenttool, de methodiek en de begeleiding van het assessmentproces 
+        op instellingsniveau. Stuurt de ambassadeurslijn aan en bewaakt de samenhang met het 
+        bredere Programma Digitale Samenhang.
+      </div>
+    </div>
+    <div style="background:#f0f9f9;border-left:3px solid #26B5AE;padding:11px 13px;border-radius:0 4px 4px 0">
+      <div style="font-weight:700;color:#0C2340;margin-bottom:2px">De Ambassadeurs</div>
+      <div style="color:#26B5AE;font-size:9px;margin-bottom:6px">Jooske Haije · Esther Rolf · Jorn Blom</div>
+      <div style="color:#374151;line-height:1.55;font-size:9px">
+        Verbinden initiatieven, bieden een ordenend kader en zijn de schakel tussen de ambassadeurslijn 
+        en de projectorganisatie. Focus op rust, overzicht en gerichte besluitvorming. 
+        Maandelijks overleg met de expertisegroep borgt afstemming en voortgang.
+      </div>
+    </div>
+    <div style="background:#fff8f0;border-left:3px solid #E87722;padding:11px 13px;border-radius:0 4px 4px 0">
+      <div style="font-weight:700;color:#0C2340;margin-bottom:2px">Multidisciplinaire Expertisegroep</div>
+      <div style="color:#E87722;font-size:9px;margin-bottom:6px">Voortgekomen uit het kernteam · 3 domeinen</div>
+      <div style="color:#374151;line-height:1.55;font-size:9px">
+        <strong>Beleid &amp; Juridisch</strong> (strategie, compliance, juridische kaders) · 
+        <strong>Techniek &amp; Beheer</strong> (CISO, architectuur, informatiemanagement) · 
+        <strong>Onderwijs &amp; Onderzoek</strong> (onderwijskundige innovatie, lectoraten, SURF). 
+        Leden worden flexibel ingezet per product of vraagstuk.
+      </div>
+    </div>
+  </div>
+  <div class="narrative">
+    <p>De expertisegroep levert input en feedback op de concrete deliverables, borgt de opgebouwde kennis 
+    en waarborgt dat digitale soevereiniteit vanuit alle relevante invalshoeken wordt benaderd. 
+    Bij applicaties met aandachtspunten adviseert de expertisegroep nadrukkelijk om ook de 
+    <strong>applicatie-eigenaar, contract-eigenaar en functioneel beheerder</strong> te betrekken — 
+    zij beschikken over de operationele kennis die scores kan nuanceren en aanbevelingen 
+    uitvoerbaar maakt (zie hoofdstuk 7 en 8).</p>
+  </div>
+
+  <h3>1.3 Organisatorische context</h3>
+  <div class="narrative">
+    <p>In december 2025 heeft het kernteam Digitale Soevereiniteit een adviesopdracht aangeboden 
+    aan het College van Bestuur. Het CvB heeft het thema strategisch belangrijk bevonden en groen 
+    licht gegeven om Digitale Soevereiniteit te verankeren als ambassadeurslijn binnen het 
+    Programma Digitale Samenhang — geen apart project, maar een 
+    <strong>ordenend perspectief</strong> dat bestaande initiatieven verbindt en richting geeft.</p>
+  </div>
+  <div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;margin:10px 0 14px;font-family:Arial;font-size:10px;page-break-inside:avoid">
+    <div style="font-weight:700;color:#0C2340;margin-bottom:8px">Roadmap 2026 — drie fasen</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:white;border-left:3px solid #1A56A0;padding:8px 10px;border-radius:0 3px 3px 0">
+        <div style="font-weight:700;color:#1A56A0;font-size:9px">FASE 1 · Feb–Mrt</div>
+        <div style="font-weight:600;color:#0C2340;margin:2px 0">Verkenning &amp; Analyse</div>
+        <div style="color:#6b7280;font-size:9px">Analyse huidige situatie, benchmark en kernwaarden-afwegingskader</div>
+      </div>
+      <div style="background:white;border-left:3px solid #26B5AE;padding:8px 10px;border-radius:0 3px 3px 0">
+        <div style="font-weight:700;color:#26B5AE;font-size:9px">FASE 2 · Apr–Mei</div>
+        <div style="font-weight:600;color:#0C2340;margin:2px 0">Strategische Verkenning</div>
+        <div style="color:#6b7280;font-size:9px">Strategische dilemma's en 2–3 scenario's met kosten-batenanalyse</div>
+      </div>
+      <div style="background:white;border-left:3px solid #E87722;padding:8px 10px;border-radius:0 3px 3px 0">
+        <div style="font-weight:700;color:#E87722;font-size:9px">FASE 3 · Juni</div>
+        <div style="font-weight:600;color:#0C2340;margin:2px 0">Advies &amp; Besluitvorming</div>
+        <div style="color:#6b7280;font-size:9px">Onderbouwd eindadvies en implementatie-roadmap aan het CvB</div>
+      </div>
+    </div>
   </div>
 
   <h3>1.4 Toegepaste frameworks</h3>
@@ -2345,13 +2422,15 @@ export default function App() {
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
     </div>
 
-    <h3>5.2 Dimensieprofiel per applicatie</h3>
-    <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
-      Elke balk toont de gewogen score (1–5) voor één DAAF-dimensie. De kleurovergang geeft 
-      direct de richting aan: risico-assen (A, B) — groen links is goed. 
-      Mitigatie-assen (C, D, E) — groen rechts is goed. Stippen = applicaties.
-    </p>
-    <div class="chart-wrap">${generateSpinSVG(visible)}</div>
+    <div style="page-break-before:always;padding-top:4px">
+      <h3>5.2 Dimensieprofiel per applicatie</h3>
+      <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
+        Elke balk toont de gewogen score (1–5) voor één DAAF-dimensie. De kleurovergang geeft 
+        direct de richting aan: risico-assen (A, B) — groen links is goed. 
+        Mitigatie-assen (C, D, E) — groen rechts is goed. Stippen = applicaties.
+      </p>
+      <div class="chart-wrap">${generateSpinSVG(visible)}</div>
+    </div>
 
     <h3>5.3 Dimensiescores per applicatie</h3>
     <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
