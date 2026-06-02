@@ -1998,7 +1998,7 @@ export default function App() {
     const kwData = scored
       .filter(a => a.sc.risico && a.sc.mitigatie && a.sc.belang)
       .map(a => ({
-        name: dName(a),
+        name: displayName(a),
         x: +((a.sc.risico * a.sc.belang).toFixed(2)),
         y: +a.sc.mitigatie.toFixed(2),
         score: a.sc.autonomyScore,
@@ -2625,7 +2625,7 @@ export default function App() {
     const barData = visibleCompare.map(a => {
       const s = calcScores(a.scores);
       return {
-        name: dName(a).substring(0, 16),
+        name: displayName(a).substring(0, 16),
         Autonomiescore: s.autonomyScore ? +s.autonomyScore.toFixed(1) : 0,
         "DICTU x2": s.dictuAvg ? +(s.dictuAvg * 2).toFixed(1) : 0
       };
