@@ -1126,7 +1126,16 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick }) {
   );
 }
 
-function QuestionCard({ q, value, onChange, dir, note, onNoteChange }) {
+function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondaryName = false, appName = "", appNameSecondary = "" }) {
+  // Preview: toon hoe de motivatietekst eruitziet met de actieve naam
+  const previewNote = React.useMemo(() => {
+    if (!note || !appName) return "";
+    const from = useSecondaryName ? appNameSecondary : appName;
+    const to   = useSecondaryName ? appName : appNameSecondary;
+    if (!from || !to || from === to) return "";
+    const replaced = note.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), to);
+    return replaced !== note ? replaced : "";
+  }, [note, useSecondaryName, appName, appNameSecondary]);
   return (
     <div className="mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7", borderRadius:4, padding:16 }}>
       <div className="flex items-start gap-2 mb-3">
@@ -1183,6 +1192,18 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange }) {
         />
         {note && (
           <p style={{ fontSize:9, color:"#16a34a", marginTop:2 }}>✓ Motivatie opgeslagen</p>
+        )}
+        {/* Preview: toont hoe tekst eruitziet met de andere naam */}
+        {previewNote && (
+          <div className="mt-2 rounded px-3 py-2"
+            style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+            <p style={{ fontSize:9, fontWeight:600, color:"#92400e", marginBottom:2 }}>
+              👁 Weergave met {useSecondaryName ? "primaire" : "secundaire"} naam:
+            </p>
+            <p style={{ fontSize:10, color:"#78350f", lineHeight:1.5, fontStyle:"italic" }}>
+              "{previewNote}"
+            </p>
+          </div>
         )}
       </div>
     </div>
@@ -2452,7 +2473,10 @@ export default function App() {
                               dir={lv === "Mitigatie" ? "fwd" : "inv"}
                               note={(selApp.notes || {})[q.key] || ""}
                               onNoteChange={t => setNote(selApp.id, q.key, t)}
-                              onChange={v => setScore(selApp.id, q.key, v)} />
+                              onChange={v => setScore(selApp.id, q.key, v)}
+                              useSecondaryName={useSecondaryName}
+                              appName={selApp.name}
+                              appNameSecondary={selApp.nameSecondary || ""} />
                           ))}
                         </div>
                       );
@@ -2487,7 +2511,10 @@ export default function App() {
                       dir="fwd"
                       note={(selApp.notes || {})[q.key] || ""}
                       onNoteChange={t => setNote(selApp.id, q.key, t)}
-                      onChange={v => setScore(selApp.id, q.key, v)} />
+                      onChange={v => setScore(selApp.id, q.key, v)}
+                      useSecondaryName={useSecondaryName}
+                      appName={selApp.name}
+                      appNameSecondary={selApp.nameSecondary || ""} />
                   ))}
                 </div>
               ))}
@@ -3636,7 +3663,7 @@ export default function App() {
           {[
             { k:"dashboard", label:"Dashboard" },
             { k:"apps",      label:"Applicaties" },
-            ...(selApp ? [{ k:"assess", label:selApp.name.substring(0,20) }] : []),
+            ...(selApp ? [{ k:"assess", label:displayName(selApp).substring(0,20) }] : []),
             { k:"compare",   label:"Vergelijking" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
             { k:"admin",     label:"🔐 Beheer" },
