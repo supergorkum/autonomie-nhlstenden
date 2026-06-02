@@ -32,9 +32,19 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.3";
+const VERSION = "v1.4";
 
 const CHANGELOG = [
+  {
+    versie: "v1.4",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Motivatieveld toegevoegd bij elke vraag in het assessment — optionele toelichting op de score",
+      "Motivaties zichtbaar in de beheeromgeving per applicatie (groen icoontje 💬 als er een motivatie is)",
+      "Motivaties opgenomen in de PDF-export als extra kolom in de scoretabel",
+      "Excel-export uitgebreid: motivatiekolommen in DAAF en DICTU tabbladen, plus nieuw tabblad 'Motivaties'",
+    ]
+  },
   {
     versie: "v1.3",
     datum: "Juni 2026",
@@ -1098,7 +1108,7 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick }) {
   );
 }
 
-function QuestionCard({ q, value, onChange, dir }) {
+function QuestionCard({ q, value, onChange, dir, note, onNoteChange }) {
   return (
     <div className="mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7", borderRadius:4, padding:16 }}>
       <div className="flex items-start gap-2 mb-3">
@@ -1132,6 +1142,31 @@ function QuestionCard({ q, value, onChange, dir }) {
           {q.scores.find(sc => sc.s === value)?.desc}
         </p>
       )}
+      {/* Motivatieveld */}
+      <div className="mt-3">
+        <label style={{ fontSize:10, color:"#6b7280", fontWeight:600, display:"block", marginBottom:3 }}>
+          Motivatie / toelichting score <span style={{ fontWeight:400 }}>(optioneel)</span>
+        </label>
+        <textarea
+          value={note || ""}
+          onChange={e => onNoteChange && onNoteChange(e.target.value)}
+          placeholder="Waarom kies je voor deze score? Voeg context toe voor toekomstig gebruik..."
+          rows={2}
+          style={{
+            width:"100%", fontSize:11, padding:"7px 10px",
+            border:"1px solid #D0E4F7", borderRadius:4,
+            color:"#374151", lineHeight:1.5, resize:"vertical",
+            background: note ? "#f0fdf4" : "#f8fafc",
+            borderColor: note ? "#86efac" : "#D0E4F7",
+            outline:"none", fontFamily:"inherit", boxSizing:"border-box"
+          }}
+          onFocus={e => e.target.style.borderColor = "#1A56A0"}
+          onBlur={e => e.target.style.borderColor = note ? "#86efac" : "#D0E4F7"}
+        />
+        {note && (
+          <p style={{ fontSize:9, color:"#16a34a", marginTop:2 }}>✓ Motivatie opgeslagen</p>
+        )}
+      </div>
     </div>
   );
 }
@@ -1316,6 +1351,13 @@ export default function App() {
     setApps(p => p.map(a => a.id === appId ? { ...a, scores: { ...a.scores, [key]: val } } : a));
   }
 
+  function setNote(appId, key, tekst) {
+    setApps(p => p.map(a => a.id === appId
+      ? { ...a, notes: { ...(a.notes || {}), [key]: tekst } }
+      : a
+    ));
+  }
+
   function delApp(id) {
     if (!confirm("Applicatie verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
     setApps(p => p.filter(a => a.id !== id));
@@ -1342,16 +1384,39 @@ export default function App() {
     XLSX.utils.book_append_sheet(wb, ws1, "Overzicht");
 
     const ws2 = XLSX.utils.aoa_to_sheet([
-      ["Applicatie","Leverancier", ...DAAF.map(d => `${d.key} ${d.name}`)],
-      ...apps.map(a => [a.name, a.supplier, ...DAAF.map(d => a.scores[d.key] || "")])
+      ["Applicatie","Leverancier", ...DAAF.map(d => `${d.key} ${d.name}`), ...DAAF.map(d => `${d.key} Motivatie`)],
+      ...apps.map(a => [a.name, a.supplier,
+        ...DAAF.map(d => a.scores[d.key] || ""),
+        ...DAAF.map(d => (a.notes || {})[d.key] || "")
+      ])
     ]);
     XLSX.utils.book_append_sheet(wb, ws2, "DAAF Scores");
 
     const ws3 = XLSX.utils.aoa_to_sheet([
-      ["Applicatie","Leverancier", ...DICTU.map(q => `${q.key} ${q.name}`)],
-      ...apps.map(a => [a.name, a.supplier, ...DICTU.map(q => a.scores[q.key] || "")])
+      ["Applicatie","Leverancier", ...DICTU.map(q => `${q.key} ${q.name}`), ...DICTU.map(q => `${q.key} Motivatie`)],
+      ...apps.map(a => [a.name, a.supplier,
+        ...DICTU.map(q => a.scores[q.key] || ""),
+        ...DICTU.map(q => (a.notes || {})[q.key] || "")
+      ])
     ]);
     XLSX.utils.book_append_sheet(wb, ws3, "DICTU Scores");
+
+    // Extra tabblad: alle motivaties op een rij
+    const allQ2 = [...DAAF, ...DICTU];
+    const ws5 = XLSX.utils.aoa_to_sheet([
+      ["Applicatie","Leverancier","Vraag","Naam","Score","Motivatie"],
+      ...apps.flatMap(a =>
+        allQ2
+          .filter(q => (a.notes || {})[q.key])
+          .map(q => [
+            a.name, a.supplier || "",
+            q.key, q.name,
+            a.scores[q.key] || "",
+            (a.notes || {})[q.key]
+          ])
+      )
+    ]);
+    XLSX.utils.book_append_sheet(wb, ws5, "Motivaties");
 
     const ws4 = XLSX.utils.aoa_to_sheet([
       ["Vraag","Beschrijving","Norm (min. vereiste score)"],
@@ -1684,23 +1749,32 @@ export default function App() {
 
     const kwRows = visible.map(a => {
       const s=calcScores(a.scores), rec=generateRecommendations(a.scores);
-      const daafRows=DAAF.map(q=>`<tr>
-        <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
-        <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
-        <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-      </tr>`).join("");
-      const dictuRows=DICTU.map(q=>`<tr>
-        <td><strong>${q.key}</strong></td><td>${q.cat}</td><td>${q.name}</td>
-        <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
-        <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-      </tr>`).join("");
+      const daafRows=DAAF.map(q=>{
+        const motivatie = (a.notes||{})[q.key] || "";
+        return `<tr>
+          <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
+          <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
+          <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
+          <td style="color:#374151;font-style:${motivatie?"normal":"italic"};color:${motivatie?"#374151":"#9ca3af"}">${motivatie||"–"}</td>
+        </tr>`;
+      }).join("");
+      const dictuRows=DICTU.map(q=>{
+        const motivatie = (a.notes||{})[q.key] || "";
+        return `<tr>
+          <td><strong>${q.key}</strong></td><td>${q.cat}</td><td>${q.name}</td>
+          <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
+          <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
+          <td style="font-style:${motivatie?"normal":"italic"};color:${motivatie?"#374151":"#9ca3af"}">${motivatie||"–"}</td>
+        </tr>`;
+      }).join("");
       const lbl=scoreLabel(s.autonomyScore);
+      const heeftMotivaties = [...DAAF,...DICTU].some(q => (a.notes||{})[q.key]);
       return `<div class="app-section">
         <h3>${a.name}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
           <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
         </h3>
         <table class="scores-table">
-          <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th></tr>
+          <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th><th>Motivatie</th></tr>
           ${daafRows}${dictuRows}
         </table>
         <div class="rec-box rec-qw">
@@ -2332,6 +2406,8 @@ export default function App() {
                           {dimQuestions.map(q => (
                             <QuestionCard key={q.key} q={q} value={selApp.scores[q.key] || 0}
                               dir={lv === "Mitigatie" ? "fwd" : "inv"}
+                              note={(selApp.notes || {})[q.key] || ""}
+                              onNoteChange={t => setNote(selApp.id, q.key, t)}
                               onChange={v => setScore(selApp.id, q.key, v)} />
                           ))}
                         </div>
@@ -2365,6 +2441,8 @@ export default function App() {
                   {DICTU.filter(q => q.cat === cat).map(q => (
                     <QuestionCard key={q.key} q={q} value={selApp.scores[q.key] || 0}
                       dir="fwd"
+                      note={(selApp.notes || {})[q.key] || ""}
+                      onNoteChange={t => setNote(selApp.id, q.key, t)}
                       onChange={v => setScore(selApp.id, q.key, v)} />
                   ))}
                 </div>
@@ -2854,19 +2932,34 @@ export default function App() {
                     {/* Ingevulde scores per vraag */}
                     <div className="px-4 py-3" style={{ borderTop:"1px solid #EBF3FF" }}>
                       <p className="text-xs font-semibold mb-2" style={{ color:"#0C2340" }}>Scores per vraag</p>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-wrap gap-1.5 mb-2">
                         {allQ.map(q => {
                           const s = a.scores[q.key] || 0;
+                          const n = (a.notes || {})[q.key] || "";
                           return (
-                            <div key={q.key} title={`${q.key}: ${q.name}\nScore: ${s || "niet ingevuld"}`}
+                            <div key={q.key} title={`${q.key}: ${q.name}\nScore: ${s || "niet ingevuld"}${n ? `\nMotivatie: ${n}` : ""}`}
                               className="flex items-center gap-1 px-2 py-1 text-xs"
-                              style={{ borderRadius:3, background: s ? "#EBF3FF" : "#f9fafb", border:"1px solid #D0E4F7", color:"#0C2340" }}>
+                              style={{ borderRadius:3, background: s ? "#EBF3FF" : "#f9fafb", border:`1px solid ${n ? "#86efac" : "#D0E4F7"}`, color:"#0C2340" }}>
                               <span style={{ color:"#1A56A0", fontWeight:600 }}>{q.key}</span>
                               <span style={{ fontWeight:700, color: s ? scoreColor(s, 5) : "#d1d5db" }}>{s || "–"}</span>
+                              {n && <span style={{ color:"#16a34a", fontSize:9 }}>💬</span>}
                             </div>
                           );
                         })}
                       </div>
+                      {/* Motivaties tonen als die er zijn */}
+                      {allQ.some(q => (a.notes || {})[q.key]) && (
+                        <div className="mt-2 space-y-1.5">
+                          <p className="text-xs font-semibold" style={{ color:"#16a34a" }}>💬 Motivaties</p>
+                          {allQ.filter(q => (a.notes || {})[q.key]).map(q => (
+                            <div key={q.key} className="rounded px-3 py-2"
+                              style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
+                              <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>{q.key} — {q.name}: </span>
+                              <span className="text-xs" style={{ color:"#374151" }}>{(a.notes || {})[q.key]}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
