@@ -3815,8 +3815,8 @@ export default function App() {
               </div>
               <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
               <div>
-                <h1 className="font-bold" style={{ fontSize:17 }}>Digitale Soevereiniteitsassessment</h1>
-                <p style={{ fontSize:12, color:"#7DD3D0" }}>Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit</p>
+                <h1 className="font-bold" style={{ fontSize:17 }}>Portfolioanalyse Digitale Soevereiniteit</h1>
+                <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Soevereiniteit · Programma Digitale Samenhang</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
