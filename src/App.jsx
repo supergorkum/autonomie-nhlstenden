@@ -1288,7 +1288,7 @@ export default function App() {
       } finally {
         setSaving(false);
       }
-    }, 800);
+    }, 200);
     return () => clearTimeout(timer);
   }, [apps, ready]);
 
@@ -1447,7 +1447,7 @@ export default function App() {
         allQ2
           .filter(q => (a.notes || {})[q.key])
           .map(q => [
-            a.name, a.supplier || "",
+            dName(a), a.supplier || "",
             q.key, q.name,
             a.scores[q.key] || "",
             (a.notes || {})[q.key]
@@ -1736,7 +1736,7 @@ export default function App() {
       if (laagDictu.length > 0) {
         html += `<p style="margin-top:8px"><strong>Technische soevereiniteit (DICTU):</strong> 
           ${laagDictu.length} applicatie${laagDictu.length!==1?"s scoren":"scoort"} laag op de DICTU-soevereiniteitsmaatstaf 
-          (${laagDictu.map(a=>a.name+" "+a.sc.dictuAvg?.toFixed(1)+"/5").join(", ")}). 
+          (${laagDictu.map(a=>dName(a)+" "+a.sc.dictuAvg?.toFixed(1)+"/5").join(", ")}). 
           Dit duidt op onvoldoende waarborgen voor dataresidency, sleutelbeheer of juridische bescherming. 
           Technische soevereiniteit is een noodzakelijke randvoorwaarde: juridische bescherming alleen is onvoldoende 
           als de technische infrastructuur toegang voor derden niet uitsluit.</p>`;
@@ -1746,7 +1746,7 @@ export default function App() {
       if (hoogBelang.length > 0) {
         html += `<p style="margin-top:8px"><strong>Strategisch belang en continuïteit:</strong> 
           ${hoogBelang.length} applicatie${hoogBelang.length!==1?"s zijn":"is"} van hoog strategisch belang voor 
-          de organisatie (${hoogBelang.map(a=>a.name).join(", ")}). 
+          de organisatie (${hoogBelang.map(a=>dName(a)).join(", ")}). 
           Uitval of ongewenste toegang bij deze applicaties raakt direct aan de continuïteit van onderwijs, 
           onderzoek of bedrijfsvoering van NHL Stenden. De afhankelijkheid van externe partijen bij deze 
           applicaties vraagt om de sterkste contractuele en technische waarborgen.</p>`;
@@ -1788,28 +1788,31 @@ export default function App() {
 
     const kwRows = visible.map(a => {
       const s=calcScores(a.scores), rec=generateRecommendations(a.scores);
+      const aN = dName(a); // actieve naam (primair of secundair)
       const daafRows=DAAF.map(q=>{
-        const motivatie = (a.notes||{})[q.key] || "";
+        const motivatieRaw = (a.notes||{})[q.key] || "";
+        const motivatie = motivatieRaw ? motivatieRaw.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN) : "";
         return `<tr>
           <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
           <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
           <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-          <td style="color:#374151;font-style:${motivatie?"normal":"italic"};color:${motivatie?"#374151":"#9ca3af"}">${motivatie||"–"}</td>
+          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}</td>
         </tr>`;
       }).join("");
       const dictuRows=DICTU.map(q=>{
-        const motivatie = (a.notes||{})[q.key] || "";
+        const motivatieRaw = (a.notes||{})[q.key] || "";
+        const motivatie = motivatieRaw ? motivatieRaw.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN) : "";
         return `<tr>
           <td><strong>${q.key}</strong></td><td>${q.cat}</td><td>${q.name}</td>
           <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
           <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-          <td style="font-style:${motivatie?"normal":"italic"};color:${motivatie?"#374151":"#9ca3af"}">${motivatie||"–"}</td>
+          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}</td>
         </tr>`;
       }).join("");
       const lbl=scoreLabel(s.autonomyScore);
       const heeftMotivaties = [...DAAF,...DICTU].some(q => (a.notes||{})[q.key]);
       return `<div class="app-section">
-        <h3>${displayName(a)}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
+        <h3>${aN}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
           <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
         </h3>
         <table class="scores-table">
@@ -1818,11 +1821,11 @@ export default function App() {
         </table>
         <div class="rec-box rec-qw">
           <div class="rec-label" style="color:#92400e">⚡ Quick win</div>
-          <div class="rec-text">${rec.quickWin}</div>
+          <div class="rec-text">${rec.quickWin.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN)}</div>
         </div>
         <div class="rec-box rec-str">
           <div class="rec-label" style="color:#166534">🎯 Strategische aanbeveling</div>
-          <div class="rec-text">${rec.strategic}</div>
+          <div class="rec-text">${rec.strategic.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN)}</div>
         </div>
       </div>`;
     }).join("");
@@ -1996,7 +1999,7 @@ export default function App() {
     const radarData = dimLetters.map(letter => {
       const entry = { dim: dimLabel(letter) };
       scored.slice(0, 5).forEach(a => {
-        entry[radarKey(a.name)] = +dimScore(a, letter).toFixed(2);
+        entry[radarKey(displayName(a))] = +dimScore(a, letter).toFixed(2);
       });
       return entry;
     });
@@ -2625,7 +2628,7 @@ export default function App() {
     };
     const radarData = dimLettersC.map(letter => {
       const entry = { dim: dimLabelC(letter) };
-      visibleCompare.forEach(a => { entry[name14(a.name)] = +dimScoreC(a, letter).toFixed(2); });
+      visibleCompare.forEach(a => { entry[name14(displayName(a))] = +dimScoreC(a, letter).toFixed(2); });
       return entry;
     });
 
