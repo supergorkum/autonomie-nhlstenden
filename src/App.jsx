@@ -1191,7 +1191,7 @@ export default function App() {
   const [selId,      setSelId]     = useState(null);
   const [step,       setStep]      = useState(0);
   const [showModal,  setShowModal] = useState(false);
-  const [form,       setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", notes:"" });
+  const [form,       setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", appNotes:"" });
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
   const [compareHidden, setCompareHidden] = useState(new Set()); // IDs verborgen in vergelijking
 
@@ -1336,11 +1336,11 @@ export default function App() {
     if (!form.name.trim()) return;
     const a = {
       id: Date.now() + "", name: form.name, cat: form.cat,
-      supplier: form.supplier, owner: form.owner, notes: form.notes,
+      supplier: form.supplier, owner: form.owner, appNotes: form.appNotes,
       scores: {}, createdAt: new Date().toISOString()
     };
     setApps(p => [...p, a]);
-    setForm({ name:"", cat:"", supplier:"", owner:"", notes:"" });
+    setForm({ name:"", cat:"", supplier:"", owner:"", appNotes:"" });
     setShowModal(false);
     setSelId(a.id);
     setStep(0);
@@ -2876,7 +2876,7 @@ export default function App() {
                           <span className="text-xs text-gray-400">{sc.completeness}% ingevuld · {filled.length}/{allQ.length} vragen</span>
                           <span className="text-xs text-gray-400">Aangemaakt: {new Date(a.createdAt).toLocaleDateString("nl-NL")}</span>
                         </div>
-                        {a.notes && <p className="text-xs text-gray-400 mt-1 italic">"{a.notes}"</p>}
+                        {a.appNotes && <p className="text-xs text-gray-400 mt-1 italic">"{a.appNotes}"</p>}
                       </div>
                       {/* Action buttons */}
                       <div className="flex gap-2 flex-shrink-0">
@@ -2889,7 +2889,7 @@ export default function App() {
                         <button
                           onClick={() => {
                             setEditAppId(a.id);
-                            setEditForm({ name:a.name, cat:a.cat, supplier:a.supplier, owner:a.owner, notes:a.notes });
+                            setEditForm({ name:a.name, cat:a.cat, supplier:a.supplier, owner:a.owner, appNotes:a.appNotes });
                           }}
                           className="text-xs px-3 py-1.5 font-medium"
                           style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#fff" }}>
@@ -3026,7 +3026,7 @@ export default function App() {
                   <div>
                     <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>Toelichting</label>
                     <textarea
-                      value={editForm.notes || ""}
+                      value={editForm.appNotes || ""}
                       onChange={e => setEditForm(p => ({ ...p, notes: e.target.value }))}
                       rows={2}
                       className="w-full border px-3 py-2 text-sm focus:outline-none"
@@ -3043,7 +3043,7 @@ export default function App() {
                     disabled={!editForm.name?.trim()}
                     onClick={() => {
                       setApps(p => p.map(a => a.id === editAppId
-                        ? { ...a, name:editForm.name, cat:editForm.cat, supplier:editForm.supplier, owner:editForm.owner, notes:editForm.notes }
+                        ? { ...a, name:editForm.name, cat:editForm.cat, supplier:editForm.supplier, owner:editForm.owner, appNotes:editForm.appNotes }
                         : a
                       ));
                       setEditAppId(null);
@@ -3518,7 +3518,7 @@ export default function App() {
                 ))}
                 <div>
                   <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>Toelichting</label>
-                  <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+                  <textarea value={form.appNotes} onChange={e => setForm(p => ({ ...p, appNotes: e.target.value }))}
                     rows={2} placeholder="Optionele context of notities"
                     className="w-full border px-3 py-2 text-sm focus:outline-none"
                     style={{ borderColor:"#D0E4F7", borderRadius:4 }}/>
