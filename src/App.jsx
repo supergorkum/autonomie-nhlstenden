@@ -1830,22 +1830,31 @@ export default function App() {
       const aN = dName(a); // actieve naam (primair of secundair)
       const daafRows=DAAF.map(q=>{
         const motivatieRaw = (a.notes||{})[q.key] || "";
-        const motivatie = motivatieRaw ? motivatieRaw.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN) : "";
+        const motivatieFull = motivatieRaw ? motivatieRaw.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN) : "";
+        // Samenvatting: max 300 tekens, afkappen op laatste woord
+        const motivatie = motivatieFull.length > 300
+          ? motivatieFull.substring(0, motivatieFull.lastIndexOf(" ", 300)) + "…"
+          : motivatieFull;
+        const heeftSamenvatting = motivatieFull.length > 300;
         return `<tr>
           <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
           <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
           <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}</td>
+          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}${heeftSamenvatting?` <span style="font-size:9px;color:#9ca3af;font-style:italic">→ zie tool</span>`:""}</td>
         </tr>`;
       }).join("");
       const dictuRows=DICTU.map(q=>{
         const motivatieRaw = (a.notes||{})[q.key] || "";
-        const motivatie = motivatieRaw ? motivatieRaw.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN) : "";
+        const motivatieFull = motivatieRaw ? motivatieRaw.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), aN) : "";
+        const motivatie = motivatieFull.length > 300
+          ? motivatieFull.substring(0, motivatieFull.lastIndexOf(" ", 300)) + "…"
+          : motivatieFull;
+        const heeftSamenvatting2 = motivatieFull.length > 300;
         return `<tr>
           <td><strong>${q.key}</strong></td><td>${q.cat}</td><td>${q.name}</td>
           <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
           <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}</td>
+          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}${heeftSamenvatting2?` <span style="font-size:9px;color:#9ca3af;font-style:italic">→ zie tool</span>`:""}</td>
         </tr>`;
       }).join("");
       const lbl=scoreLabel(s.autonomyScore);
@@ -1854,6 +1863,7 @@ export default function App() {
         <h3>${aN}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
           <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
         </h3>
+        ${[...DAAF,...DICTU].some(q=>(a.notes||{})[q.key]&&(a.notes||{})[q.key].length>300)?`<p style="font-size:9px;color:#9ca3af;font-family:Arial;margin-bottom:6px;font-style:italic">Motivaties zijn samengevat. De volledige toelichting is terug te lezen in de Digitale Soevereiniteitsassessment Tool.</p>`:""}
         <table class="scores-table">
           <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th><th>Motivatie</th></tr>
           ${daafRows}${dictuRows}
@@ -2180,8 +2190,9 @@ export default function App() {
   <div class="toc-section"><span class="toc-nr">1.</span><span class="toc-lbl">Inleiding en kader</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
   <div class="toc-sub"><span class="toc-nr">1.1</span><span class="toc-lbl">Over deze analyse en de tool</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
   <div class="toc-sub"><span class="toc-nr">1.2</span><span class="toc-lbl">Het Expertiseteam Digitale Soevereiniteit</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
-  <div class="toc-sub"><span class="toc-nr">1.3</span><span class="toc-lbl">Toegepaste frameworks</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
-  <div class="toc-sub"><span class="toc-nr">1.4</span><span class="toc-lbl">Gebruik in het hoger onderwijs</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.3</span><span class="toc-lbl">Organisatorische context</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.4</span><span class="toc-lbl">Toegepaste frameworks</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.5</span><span class="toc-lbl">Gebruik in het hoger onderwijs</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
 
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">2.</span><span class="toc-lbl">Samenvatting</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
 
@@ -2236,7 +2247,7 @@ export default function App() {
     en zijn gebaseerd op publiek beschikbare informatie, interne kennis en contractuele documentatie.</p>
   </div>
 
-  <h3>1.3 Toegepaste frameworks</h3>
+  <h3>1.4 Toegepaste frameworks</h3>
   <div class="section-intro">
     De beoordeling is gebaseerd op twee complementaire en erkende normenkaders voor digitale soevereiniteit.
   </div>
@@ -2263,7 +2274,7 @@ export default function App() {
     </div>
   </div>
 
-  <h3>1.4 Gebruik in het hoger onderwijs</h3>
+  <h3>1.5 Gebruik in het hoger onderwijs</h3>
   <div class="narrative">
     <p>Digitale soevereiniteit staat breed op de agenda in het Nederlandse hoger onderwijs. 
     De <strong>Vereniging Hogescholen (VH)</strong> en <strong>SURF</strong> — de ICT-samenwerkingsorganisatie 
