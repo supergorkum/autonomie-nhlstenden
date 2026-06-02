@@ -2057,6 +2057,12 @@ export default function App() {
 
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Detailscores en aanbevelingen per applicatie</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
   ${visible.map((a,i) => `<div class="toc-sub"><span class="toc-nr">${i+1}.</span><span class="toc-lbl">${dName(a)}${a.supplier?` <span style="color:#9ca3af;font-weight:400">— ${a.supplier}</span>`:""}</span><span class="toc-dots"></span><span class="toc-pg">${6+i}</span></div>`).join("")}
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Slotbevindingen</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">7.1</span><span class="toc-lbl">Belangrijkste aandachtspunten</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">7.2</span><span class="toc-lbl">Quick wins — direct uitvoerbaar</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">7.3</span><span class="toc-lbl">Strategisch advies</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">7.4</span><span class="toc-lbl">Vervolgstap</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
 </div>
 
 <!-- ════════════════════════════════════════════════
@@ -2206,6 +2212,131 @@ export default function App() {
       en de specifieke score-combinatie van elke applicatie.
     </div>
     ${kwRows}
+  </div>
+
+  <!-- SLOTPAGINA: Aandachtspunten, quick wins en strategisch advies -->
+  <div class="page-break">
+    <h2>7. Slotbevindingen</h2>
+    <div class="section-intro">
+      Deze pagina brengt de belangrijkste bevindingen samen. De aandachtspunten zijn 
+      direct afgeleid uit de assessmentscores. De quick wins zijn per direct uitvoerbaar. 
+      Het strategisch advies richt zich op de middellange termijn.
+    </div>
+
+    <!-- Aandachtspunten: kritieke en zorgwekkende apps -->
+    <h3>Belangrijkste aandachtspunten</h3>
+    <table style="margin-bottom:20px">
+      <tr>
+        <th style="width:22%">Applicatie</th>
+        <th style="width:10%">Score</th>
+        <th style="width:14%">Status</th>
+        <th style="width:54%">Aandachtspunt</th>
+      </tr>
+      ${(() => {
+        const scored2 = visible
+          .map(a => ({ ...a, sc: calcScores(a.scores) }))
+          .filter(a => a.sc.autonomyScore)
+          .sort((a,b) => (a.sc.autonomyScore||10)-(b.sc.autonomyScore||10));
+        if (scored2.length === 0) return `<tr><td colspan="4" style="color:#9ca3af;font-style:italic">Nog geen volledig ingevulde assessments beschikbaar.</td></tr>`;
+        return scored2.map(a => {
+          const lbl = scoreLabel(a.sc.autonomyScore);
+          // Bepaal voornaamste aandachtspunt op basis van laagste score
+          const dimScoreFor = (letter) => {
+            if (letter === "A") {
+              const p = [["A1",3],["A3",2]].filter(([k])=>a.scores[k]>0);
+              if (!p.length) return 0;
+              const tw = p.reduce((s,[,w])=>s+w,0);
+              return p.reduce((s,[k,w])=>s+a.scores[k]*w,0)/tw;
+            }
+            const qs = DAAF.filter(d=>d.dim===letter);
+            const vs = qs.map(q=>a.scores[q.key]||0).filter(v=>v>0);
+            return vs.length ? vs.reduce((s,v)=>s+v,0)/vs.length : 0;
+          };
+          const punten = [];
+          if ((a.sc.risico||0) > 3.5)    punten.push("Hoog geopolitiek of leveranciersrisico");
+          if ((a.sc.mitigatie||0) < 2.5)  punten.push("Lage weerbaarheid — weinig alternatieven of zwakke contractbescherming");
+          if (dimScoreFor("C") < 2)       punten.push("Nauwelijks technische exitopties");
+          if (dimScoreFor("D") < 2)       punten.push("Interne kennis onvoldoende geborgd");
+          if (dimScoreFor("E") < 2)       punten.push("Exit-clausules ontbreken of zijn zwak");
+          if ((a.sc.dictuAvg||5) < 3)     punten.push("Onvoldoende technische soevereiniteit (DICTU)");
+          if ((a.scores["A1"]||0) >= 4)   punten.push("Leverancier valt onder niet-EU jurisdictie");
+          const punt = punten.length > 0 ? punten[0] : "Geen urgente aandachtspunten";
+          return `<tr>
+            <td><strong>${dName(a)}</strong>${a.supplier?`<br/><span style="color:#9ca3af;font-size:9px">${a.supplier}</span>`:"" }</td>
+            <td style="font-weight:700;color:${lbl.fg}">${a.sc.autonomyScore?.toFixed(1)}</td>
+            <td><span style="background:${lbl.bg};color:${lbl.fg};padding:2px 6px;border-radius:3px;font-size:9px;font-weight:600">${lbl.text}</span></td>
+            <td style="color:#374151">${punt}${punten.length>1?`<br/><span style="color:#9ca3af;font-size:9px">+ ${punten.length-1} overig${punten.length>2?"e punten":" punt"}</span>`:""}</td>
+          </tr>`;
+        }).join("");
+      })()}
+    </table>
+
+    <!-- Quick wins -->
+    <h3>Quick wins — direct uitvoerbaar</h3>
+    <p style="font-family:Arial;font-size:10px;color:#6b7280;margin-bottom:10px">
+      Onderstaande acties zijn per direct uitvoerbaar zonder grote organisatorische of financiële investering.
+    </p>
+    ${(() => {
+      const scored3 = visible
+        .map(a => ({ ...a, sc: calcScores(a.scores), rec: generateRecommendations(a.scores) }))
+        .filter(a => a.sc.autonomyScore && a.rec.quickWin)
+        .sort((a,b) => (a.sc.autonomyScore||10)-(b.sc.autonomyScore||10))
+        .slice(0, 5);
+      if (scored3.length === 0) return `<p style="color:#9ca3af;font-style:italic;font-family:Arial;font-size:10px">Nog geen aanbevelingen beschikbaar.</p>`;
+      return scored3.map((a,i) => {
+        const qw = a.rec.quickWin.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), dName(a));
+        return `<div style="display:flex;gap:10px;margin-bottom:8px;page-break-inside:avoid">
+          <div style="background:#f59e0b;color:white;font-family:Arial;font-weight:700;font-size:10px;
+            padding:4px 8px;border-radius:3px;flex-shrink:0;align-self:flex-start">⚡ ${i+1}</div>
+          <div style="background:#fffbeb;border-left:3px solid #f59e0b;padding:8px 12px;border-radius:0 4px 4px 0;flex:1">
+            <div style="font-family:Arial;font-size:10px;font-weight:700;color:#0C2340;margin-bottom:2px">${dName(a)}</div>
+            <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.5">${qw}</div>
+          </div>
+        </div>`;
+      }).join("");
+    })()}
+
+    <!-- Strategisch advies -->
+    <h3 style="margin-top:20px">Strategisch advies</h3>
+    <p style="font-family:Arial;font-size:10px;color:#6b7280;margin-bottom:10px">
+      De strategische aanbevelingen zijn gericht op structurele verbetering van de digitale soevereiniteit 
+      op de middellange termijn (6–18 maanden).
+    </p>
+    ${(() => {
+      const scored4 = visible
+        .map(a => ({ ...a, sc: calcScores(a.scores), rec: generateRecommendations(a.scores) }))
+        .filter(a => a.sc.autonomyScore && a.rec.strategic)
+        .sort((a,b) => (a.sc.autonomyScore||10)-(b.sc.autonomyScore||10))
+        .slice(0, 5);
+      if (scored4.length === 0) return "";
+      return scored4.map((a,i) => {
+        const str = a.rec.strategic.replace(new RegExp(a.name.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi"), dName(a));
+        return `<div style="display:flex;gap:10px;margin-bottom:8px;page-break-inside:avoid">
+          <div style="background:#1A56A0;color:white;font-family:Arial;font-weight:700;font-size:10px;
+            padding:4px 8px;border-radius:3px;flex-shrink:0;align-self:flex-start">🎯 ${i+1}</div>
+          <div style="background:#f0fdf4;border-left:3px solid #22c55e;padding:8px 12px;border-radius:0 4px 4px 0;flex:1">
+            <div style="font-family:Arial;font-size:10px;font-weight:700;color:#0C2340;margin-bottom:2px">${dName(a)}</div>
+            <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.5">${str}</div>
+          </div>
+        </div>`;
+      }).join("");
+    })()}
+
+    <!-- Slotwoord -->
+    <div style="margin-top:28px;padding:16px 20px;background:#0C2340;border-radius:4px;page-break-inside:avoid">
+      <div style="font-family:Arial;font-size:11px;font-weight:700;color:white;margin-bottom:6px">
+        Vervolgstap
+      </div>
+      <div style="font-family:Arial;font-size:10px;color:#7DD3D0;line-height:1.7">
+        Bespreek de uitkomsten van dit assessment in het <strong style="color:white">Transitieteam Digitalisering</strong> 
+        en leg de prioritering vast. Gebruik de quick wins als startpunt voor directe actie en 
+        stel voor de kritieke applicaties een actieplan op met verantwoordelijke, maatregel en deadline. 
+        Herbeoordeeel het portfolio over 12 maanden om de voortgang te meten.
+      </div>
+      <div style="font-family:Arial;font-size:9px;color:#26B5AE;margin-top:8px">
+        NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · Aansluiting VH en SURF
+      </div>
+    </div>
   </div>
 
   <div class="doc-footer">
