@@ -34,6 +34,13 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 const VERSION = "v1.5";
 
+// Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
+function dn(app, useSecondary) {
+  if (!app) return "";
+  if (useSecondary && app.nameSecondary && app.nameSecondary.trim()) return app.nameSecondary.trim();
+  return app.name || "";
+}
+
 const CHANGELOG = [
   {
     versie: "v1.5",
@@ -551,7 +558,7 @@ function KwadrantSVG({ kwData, onAppClick }) {
 // ── DivergingChart — vervangt het spindiagram ────────────────
 // Semantisch correcte weergave: richting van de as heeft betekenis
 // Links/rood = risico (laag is beter), rechts/groen = weerbaarheid (hoog is beter)
-function DivergingChart({ apps, compact = false }) {
+function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
   const APP_COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
 
@@ -614,7 +621,7 @@ function DivergingChart({ apps, compact = false }) {
         {apps.slice(0,5).map((app,i) => (
           <div key={i} style={{ display:"flex", alignItems:"center", gap:5 }}>
             <div style={{ width:10,height:10,borderRadius:5,background:APP_COLORS[i],flexShrink:0 }}/>
-            <span style={{ fontSize:10, color:"#374151" }}>{displayName(app).substring(0,18)}</span>
+            <span style={{ fontSize:10, color:"#374151" }}>{dn(app, useSecondaryName).substring(0,18)}</span>
           </div>
         ))}
       </div>
@@ -721,7 +728,7 @@ function DivergingChart({ apps, compact = false }) {
 }
 
 // ── OpdrachtKaart — centrale vraagstelling visueel ───────────
-function OpdrachtKaart({ apps }) {
+function OpdrachtKaart({ apps, useSecondaryName = false }) {
   const scored = apps.map(a => ({ ...a, sc: calcScores(a.scores) })).filter(a => a.sc.autonomyScore);
   if (apps.length === 0) return null;
 
@@ -793,7 +800,7 @@ function OpdrachtKaart({ apps }) {
                     Hoog risico ({hoogRisk.length})
                   </p>
                   <p style={{ fontSize:9, color:"#7f1d1d", lineHeight:1.4 }}>
-                    {hoogRisk.map(a => `${displayName(a)} (risico ${a.sc.risico?.toFixed(1)}/5)`).join(" · ")}
+                    {hoogRisk.map(a => `${dn(a, useSecondaryName)} (risico ${a.sc.risico?.toFixed(1)}/5)`).join(" · ")}
                   </p>
                 </div>
               )}
@@ -803,7 +810,7 @@ function OpdrachtKaart({ apps }) {
                     Lage weerbaarheid ({laagMit.length})
                   </p>
                   <p style={{ fontSize:9, color:"#7c2d12", lineHeight:1.4 }}>
-                    {laagMit.map(a => `${displayName(a)} (mitigatie ${a.sc.mitigatie?.toFixed(1)}/5)`).join(" · ")}
+                    {laagMit.map(a => `${dn(a, useSecondaryName)} (mitigatie ${a.sc.mitigatie?.toFixed(1)}/5)`).join(" · ")}
                   </p>
                 </div>
               )}
@@ -870,7 +877,7 @@ function OpdrachtKaart({ apps }) {
 
 // ── DictuRadarSVG — spindiagram voor DICTU soevereiniteitscheck ──
 // Alle 4 assen hebben dezelfde richting: hoger = meer soeverein (goed)
-function DictuRadarSVG({ apps, W = 480, H = 380 }) {
+function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
   const svgRef = React.useRef(null);
   const APP_COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
@@ -1012,7 +1019,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380 }) {
             <rect x={lx - 32} y={H - 12} width={11} height={11}
               fill={color} fillOpacity={0.6} rx={2} />
             <text x={lx - 17} y={H - 3} fontSize={10} fill="#374151" fontFamily="system-ui">
-              {displayName(app).substring(0, 14)}
+              {dn(app, useSecondaryName).substring(0, 14)}
             </text>
           </g>
         );
@@ -1561,7 +1568,7 @@ export default function App() {
         const col = PCOLORS[ai%PCOLORS.length];
         const lx = ai * 105 + 10;
         svg += `<rect x="${lx}" y="6" width="10" height="10" fill="${col}" fill-opacity="0.7" rx="2"/>`;
-        svg += `<text x="${lx+14}" y="15" font-size="9" fill="#374151">${displayName(a).substring(0,14)}</text>`;
+        svg += `<text x="${lx+14}" y="15" font-size="9" fill="#374151">${dn(a, useSecondaryName).substring(0,14)}</text>`;
       });
 
       let y = legendH + 4;
@@ -2092,7 +2099,7 @@ export default function App() {
           ) : (<>
 
           {/* ── Opdrachtskaart — centrale vraagstelling ── */}
-          <OpdrachtKaart apps={visibleApps} />
+          <OpdrachtKaart apps={visibleApps} useSecondaryName={useSecondaryName} />
 
           {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
@@ -2245,7 +2252,7 @@ export default function App() {
               Hover over een punt voor applicatienaam en exacte score.
             </p>
             {scored.length >= 1
-              ? <DivergingChart apps={scored} />
+              ? <DivergingChart apps={scored} useSecondaryName={useSecondaryName} />
               : <div className="text-center py-10 text-sm text-gray-400">Voeg een applicatie toe om het spindiagram te zien.</div>
             }
             {/* Compacte leeswijzer */}
@@ -2276,7 +2283,7 @@ export default function App() {
                 Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
               <div style={{ maxWidth:520, margin:"0 auto" }}>
-                <DictuRadarSVG apps={scored} W={480} H={360} />
+                <DictuRadarSVG apps={scored} W={480} H={360} useSecondaryName={useSecondaryName} />
               </div>
               {/* Legenda dimensies */}
               <div className="grid grid-cols-4 gap-2 mt-3">
@@ -2736,7 +2743,7 @@ export default function App() {
                 <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Dimensieprofiel — vergelijking</p>
               </div>
               <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen scores 1–5 per dimensie. Kleurovergang toont de richting: groen = gewenste kant. Hover voor details.</p>
-              <DivergingChart apps={visibleCompare} compact={true} />
+              <DivergingChart apps={visibleCompare} compact={true} useSecondaryName={useSecondaryName} />
               <div className="grid grid-cols-1 gap-1 mt-2">
                 {[
                   "Risico-assen (A, B): groen links — punt dicht bij 1 is goed.",
