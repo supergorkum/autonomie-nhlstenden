@@ -776,7 +776,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
                   dangerouslySetInnerHTML={{ __html: row.label }} />
                 {row.items.length > 0 && (
                   <p style={{ fontSize:9, color:"#374151", lineHeight:1.4 }}>
-                    {row.items.map(a=>a.name).join(", ")}
+                    {row.items.map(a=>dn(a, useSecondaryName)).join(", ")}
                   </p>
                 )}
                 {row.items.length === 0 && (
@@ -831,7 +831,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
             🌍 Datalocatie & jurisdictie
           </p>
           {apps.length > 0 ? (() => {
-            const a1Scores = apps.map(a => ({ name:a.name, v: a.scores["A1"]||0, d: a.scores["A3"]||0 }));
+            const a1Scores = apps.map(a => ({ name:dn(a, useSecondaryName), v: a.scores["A1"]||0, d: a.scores["A3"]||0 }));
             const nonEU   = a1Scores.filter(a => a.v >= 4);
             const onduidelijk = a1Scores.filter(a => a.v === 0);
             const euOk    = a1Scores.filter(a => a.v > 0 && a.v < 4);
@@ -843,7 +843,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
                       Niet-EU jurisdictie ({nonEU.length})
                     </p>
                     <p style={{ fontSize:9, color:"#7f1d1d", lineHeight:1.4 }}>
-                      {nonEU.map(a=>a.name).join(", ")}
+                      {nonEU.map(a=>dName(a)).join(", ")}
                     </p>
                   </div>
                 )}
@@ -853,14 +853,14 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
                       EU/beheersbaar ({euOk.length})
                     </p>
                     <p style={{ fontSize:9, color:"#14532d", lineHeight:1.4 }}>
-                      {euOk.map(a=>a.name).join(", ")}
+                      {euOk.map(a=>dn(a, useSecondaryName)).join(", ")}
                     </p>
                   </div>
                 )}
                 {onduidelijk.length > 0 && (
                   <div className="rounded px-2 py-1.5" style={{ background:"#f3f4f6", border:"1px solid #e5e7eb" }}>
                     <p style={{ fontSize:9, color:"#6b7280" }}>
-                      Nog niet beoordeeld ({onduidelijk.length}): {onduidelijk.map(a=>a.name).join(", ")}
+                      Nog niet beoordeeld ({onduidelijk.length}): {onduidelijk.map(a=>dn(a, useSecondaryName)).join(", ")}
                     </p>
                   </div>
                 )}
@@ -1515,10 +1515,10 @@ export default function App() {
         De autonomiescore is geen maat voor hoe soeverein een applicatie is, maar voor <em>hoe urgent het autonomieprobleem is</em>: 
         een hogere score betekent dat de risico's goed zijn afgedekt of het strategisch belang beperkt is, en er dus minder reden tot zorg bestaat.`;
 
-      if (goed.length)      tekst += ` <strong>${goed.length} applicatie${goed.length!==1?"s":""}</strong> scoort goed (≥7): ${goed.map(a=>a.name).join(", ")}.`;
-      if (acceptabel.length) tekst += ` <strong>${acceptabel.length}</strong> scoort acceptabel (5–7): ${acceptabel.map(a=>a.name).join(", ")}.`;
-      if (zorg.length)      tekst += ` <strong>${zorg.length}</strong> vraagt aandacht (3–5): ${zorg.map(a=>a.name).join(", ")}.`;
-      if (kritiek.length)   tekst += ` <strong style="color:#b91c1c">${kritiek.length} applicatie${kritiek.length!==1?"s":""} scoort kritiek (&lt;3) en vraagt om directe actie: ${kritiek.map(a=>a.name).join(", ")}.</strong>`;
+      if (goed.length)      tekst += ` <strong>${goed.length} applicatie${goed.length!==1?"s":""}</strong> scoort goed (≥7): ${goed.map(a=>dName(a)).join(", ")}.`;
+      if (acceptabel.length) tekst += ` <strong>${acceptabel.length}</strong> scoort acceptabel (5–7): ${acceptabel.map(a=>dName(a)).join(", ")}.`;
+      if (zorg.length)      tekst += ` <strong>${zorg.length}</strong> vraagt aandacht (3–5): ${zorg.map(a=>dName(a)).join(", ")}.`;
+      if (kritiek.length)   tekst += ` <strong style="color:#b91c1c">${kritiek.length} applicatie${kritiek.length!==1?"s":""} scoort kritiek (&lt;3) en vraagt om directe actie: ${kritiek.map(a=>dName(a)).join(", ")}.</strong>`;
       tekst += `</p>`;
 
       if (hoogsteRisico) tekst += `<p style="margin-top:6px;">De hoogste risico-exposure wordt gemeten bij <strong>${hoogsteRisico.name}</strong> 
@@ -1637,8 +1637,8 @@ export default function App() {
         const col=PCOLORS[i%PCOLORS.length];
         dots+=`<circle cx="${cx2.toFixed(1)}" cy="${cy2.toFixed(1)}" r="8" fill="${col}" fill-opacity="0.25" stroke="${col}" stroke-width="2"/>`;
         dots+=`<circle cx="${cx2.toFixed(1)}" cy="${cy2.toFixed(1)}" r="4" fill="${col}"/>`;
-        dots+=`<rect x="${(cx2+10).toFixed(1)}" y="${(cy2-9).toFixed(1)}" width="${Math.min(a.name.length*5.5+6,110)}" height="14" rx="2" fill="white" fill-opacity="0.85"/>`;
-        dots+=`<text x="${(cx2+13).toFixed(1)}" y="${(cy2+2).toFixed(1)}" fill="${col}" font-size="9" font-weight="bold" font-family="Arial">${a.name.substring(0,18)}</text>`;
+        dots+=`<rect x="${(cx2+10).toFixed(1)}" y="${(cy2-9).toFixed(1)}" width="${Math.min(dName(a).length*5.5+6,110)}" height="14" rx="2" fill="white" fill-opacity="0.85"/>`;
+        dots+=`<text x="${(cx2+13).toFixed(1)}" y="${(cy2+2).toFixed(1)}" fill="${col}" font-size="9" font-weight="bold" font-family="Arial">${dName(a).substring(0,18)}</text>`;
       });
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" style="display:block;max-width:100%">
         <rect x="${pad.left}" y="${pad.top}" width="${midX-pad.left}" height="${midY-pad.top}" fill="#e8f5e9"/>
@@ -1666,7 +1666,7 @@ export default function App() {
       const dimName=l=>{const f=DAAF.find(d=>d.dim===l);return f?f.dimName:l;};
       const lvlColor=l=>["A","B"].includes(l)?"#dc2626":["C","D","E"].includes(l)?"#166534":"#92400e";
       const lvlLabel=l=>["A","B"].includes(l)?"Risico ↓":["C","D","E"].includes(l)?"Mitigatie ↑":"Belang ↓";
-      const headers=appsArr.map(a=>`<th>${a.name.substring(0,16)}</th>`).join("");
+      const headers=appsArr.map(a=>`<th>${dName(a).substring(0,16)}</th>`).join("");
       const dimRows=dimLetters.map(l=>{
         const cells=appsArr.map(a=>{
           const v=pdfDimScore(a,l);
@@ -1702,14 +1702,14 @@ export default function App() {
 
       if (critApp.length > 0) {
         html += ` <strong style="color:#b91c1c">${critApp.length} applicatie${critApp.length!==1?"s vereisen":"vereist"} directe 
-        directe aandacht</strong> vanwege een kritieke autonomiescore: ${critApp.map(a=>a.name).join(", ")}.`;
+        directe aandacht</strong> vanwege een kritieke autonomiescore: ${critApp.map(a=>dName(a)).join(", ")}.`;
       }
       html += `</p>`;
 
       // Strategische risico's benoemen
       html += `<p style="margin-top:8px"><strong>Geopolitieke en juridische risico's:</strong> `;
       if (nonEU.length > 0) {
-        html += `Bij ${nonEU.length} van de ${n} applicaties (${nonEU.map(a=>a.name).join(", ")}) is de leverancier 
+        html += `Bij ${nonEU.length} van de ${n} applicaties (${nonEU.map(a=>dName(a)).join(", ")}) is de leverancier 
           gevestigd buiten de EU of valt de leverancier onder wetgeving zoals de CLOUD Act of FISA 702 (VS) of vergelijkbare 
           wetgeving in andere jurisdicties. Dit betekent dat een buitenlandse overheid in theorie toegang kan vorderen tot 
           data die NHL Stenden verwerkt via deze applicaties, ook als de data fysiek in Europa staat. `;
@@ -1723,9 +1723,9 @@ export default function App() {
       html += `<p style="margin-top:8px"><strong>Vendor lock-in en exitrisico:</strong> `;
       if (geenAlt.length > 0 || laagKennis.length > 0 || laagContr.length > 0) {
         const risks = [];
-        if (geenAlt.length > 0)    risks.push(`${geenAlt.length} applicatie${geenAlt.length!==1?"s hebben":"heeft"} geen of nauwelijks reëele alternatieven (${geenAlt.map(a=>a.name).join(", ")})`);
-        if (laagKennis.length > 0) risks.push(`voor ${laagKennis.length} applicatie${laagKennis.length!==1?"s is de":"is de"} interne kennis onvoldoende geborgd (${laagKennis.map(a=>a.name).join(", ")})`);
-        if (laagContr.length > 0)  risks.push(`${laagContr.length} applicatie${laagContr.length!==1?"s missen":"mist"} adequate exit-clausules in het contract (${laagContr.map(a=>a.name).join(", ")})`);
+        if (geenAlt.length > 0)    risks.push(`${geenAlt.length} applicatie${geenAlt.length!==1?"s hebben":"heeft"} geen of nauwelijks reëele alternatieven (${geenAlt.map(a=>dName(a)).join(", ")})`);
+        if (laagKennis.length > 0) risks.push(`voor ${laagKennis.length} applicatie${laagKennis.length!==1?"s is de":"is de"} interne kennis onvoldoende geborgd (${laagKennis.map(a=>dName(a)).join(", ")})`);
+        if (laagContr.length > 0)  risks.push(`${laagContr.length} applicatie${laagContr.length!==1?"s missen":"mist"} adequate exit-clausules in het contract (${laagContr.map(a=>dName(a)).join(", ")})`);
         html += `Er is sprake van significante lock-in risico's: ${risks.join("; ")}. Dit maakt een ongewenste situatie moeilijk omkeerbaar. `;
       } else {
         html += `De mitigatie-capaciteit voor vendor lock-in is over het algemeen op orde: er zijn alternatieven beschikbaar, de interne kennis is geborgd en contracten bevatten exitbepalingen. `;
@@ -1756,7 +1756,7 @@ export default function App() {
       html += `<p style="margin-top:10px;padding:10px 14px;background:#fff8f0;border-left:4px solid #f59e0b;border-radius:0 4px 4px 0">
         <strong>Aanbeveling:</strong> `;
       if (critApp.length > 0) {
-        html += `Stel voor ${critApp.map(a=>a.name).join(" en ")} op korte termijn een actieplan op met concrete 
+        html += `Stel voor ${critApp.map(a=>dName(a)).join(" en ")} op korte termijn een actieplan op met concrete 
           maatregelen, een verantwoordelijke en een deadline. `;
       }
       if (nonEU.length > 0 && laagContr.length > 0) {
@@ -2201,11 +2201,11 @@ export default function App() {
                           <div className="mt-2 space-y-1">
                             <div className="rounded px-2 py-1.5" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
                               <p style={{ fontSize:9, fontWeight:700, color:"#92400e", marginBottom:2 }}>⚡ Quick win</p>
-                              <p style={{ fontSize:9, color:"#78350f", lineHeight:1.45 }}>{rec.quickWin}</p>
+                              <p style={{ fontSize:9, color:"#78350f", lineHeight:1.45 }}>{adaptNote(rec.quickWin, a)}</p>
                             </div>
                             <div className="rounded px-2 py-1.5" style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
                               <p style={{ fontSize:9, fontWeight:700, color:"#166534", marginBottom:2 }}>🎯 Strategische aanbeveling</p>
-                              <p style={{ fontSize:9, color:"#14532d", lineHeight:1.45 }}>{rec.strategic}</p>
+                              <p style={{ fontSize:9, color:"#14532d", lineHeight:1.45 }}>{adaptNote(rec.strategic, a)}</p>
                             </div>
                           </div>
                         );
@@ -2935,7 +2935,7 @@ export default function App() {
                           <span className="text-xs text-gray-400">{sc.completeness}% ingevuld · {filled.length}/{allQ.length} vragen</span>
                           <span className="text-xs text-gray-400">Aangemaakt: {new Date(a.createdAt).toLocaleDateString("nl-NL")}</span>
                         </div>
-                        {a.appNotes && <p className="text-xs text-gray-400 mt-1 italic">"{a.appNotes}"</p>}
+                        {a.appNotes && <p className="text-xs text-gray-400 mt-1 italic">"{adaptNote(a.appNotes, a)}"</p>}
                       </div>
                       {/* Action buttons */}
                       <div className="flex gap-2 flex-shrink-0">
@@ -3014,7 +3014,7 @@ export default function App() {
                             <div key={q.key} className="rounded px-3 py-2"
                               style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
                               <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>{q.key} — {q.name}: </span>
-                              <span className="text-xs" style={{ color:"#374151" }}>{(a.notes || {})[q.key]}</span>
+                              <span className="text-xs" style={{ color:"#374151" }}>{adaptNote((a.notes || {})[q.key], a)}</span>
                             </div>
                           ))}
                         </div>
@@ -3503,17 +3503,36 @@ export default function App() {
               ✓ Gesynchroniseerd
             </span>
           )}
-          {/* Naamweergave schakelaar */}
+          {/* Naamweergave toggle switch */}
           {apps.some(a => a.nameSecondary) && (
             <button onClick={() => setUseSecondaryName(p => !p)}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 font-medium transition-all"
+              className="flex items-center gap-2 text-xs font-medium px-3 py-1.5"
               style={{
-                background: useSecondaryName ? "rgba(232,119,34,0.25)" : "rgba(255,255,255,0.12)",
-                color: useSecondaryName ? "#f8b87a" : "#cbd5e1",
-                borderRadius: 4, border: `1px solid ${useSecondaryName ? "rgba(232,119,34,0.5)" : "rgba(255,255,255,0.15)"}`,
+                borderRadius: 20,
+                border: `1px solid ${useSecondaryName ? "rgba(232,119,34,0.6)" : "rgba(255,255,255,0.2)"}`,
+                background: useSecondaryName ? "rgba(232,119,34,0.2)" : "rgba(255,255,255,0.08)",
+                color: useSecondaryName ? "#f8b87a" : "#94a3b8",
+                transition: "all 0.2s",
               }}
-              title={useSecondaryName ? "Klik om primaire namen te tonen" : "Klik om secundaire namen te tonen"}>
-              {useSecondaryName ? "🏷 Secundaire namen" : "🏷 Primaire namen"}
+              title={useSecondaryName ? "Schakel naar primaire namen" : "Schakel naar secundaire namen"}>
+              <span style={{ fontSize:11 }}>🏷</span>
+              {/* Schuifje */}
+              <div style={{
+                width: 28, height: 16, borderRadius: 8, position: "relative",
+                background: useSecondaryName ? "#E87722" : "rgba(255,255,255,0.2)",
+                transition: "background 0.2s", flexShrink: 0
+              }}>
+                <div style={{
+                  width: 12, height: 12, borderRadius: 6,
+                  background: "white", position: "absolute",
+                  top: 2, transition: "left 0.2s",
+                  left: useSecondaryName ? 14 : 2,
+                  boxShadow: "0 1px 3px rgba(0,0,0,0.3)"
+                }}/>
+              </div>
+              <span style={{ fontSize:10, letterSpacing: "0.02em" }}>
+                {useSecondaryName ? "Secundair" : "Primair"}
+              </span>
             </button>
           )}
           <button onClick={exportXlsx} disabled={apps.length === 0}
