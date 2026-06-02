@@ -2213,6 +2213,11 @@ export default function App() {
   <div class="toc-sub"><span class="toc-nr">7.2</span><span class="toc-lbl">Quick wins — direct uitvoerbaar</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
   <div class="toc-sub"><span class="toc-nr">7.3</span><span class="toc-lbl">Strategisch advies</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
   <div class="toc-sub"><span class="toc-nr">7.4</span><span class="toc-lbl">Vervolgstap</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">8.</span><span class="toc-lbl">Vervolgacties Fase 2 — Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">8.1</span><span class="toc-lbl">Context van de huidige scores</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">8.2</span><span class="toc-lbl">Overzicht applicaties en contactpersonen</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
+  <div class="toc-sub"><span class="toc-nr">8.3</span><span class="toc-lbl">Concrete acties Fase 2</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
 </div>
 
 <!-- ════════════════════════════════════════════════
@@ -2365,6 +2370,178 @@ export default function App() {
   </div>
 
   ${slotHTML}
+
+  <!-- FASE 2 PAGINA: Eigenaren review -->
+  <div class="page-break">
+    <h2>8. Vervolgacties Fase 2 — Review door applicatie-eigenaren</h2>
+    <div class="section-intro">
+      Deze pagina beschrijft de context van de huidige scores, de beoogde vervolgstap 
+      met applicatie-eigenaren en de concrete acties voor Fase 2 van het traject.
+    </div>
+
+    <h3>8.1 Context van de huidige scores</h3>
+    <div class="narrative">
+      <p>De scores in dit rapport zijn in eerste instantie ingevuld door het 
+      <strong>Expertiseteam Digitale Soevereiniteit</strong> op basis van 
+      beschikbare contractgegevens, publieke documentatie en interne kennis. 
+      Dit is een bewuste methodische keuze: door eerst een nulmeting te doen 
+      op basis van contractinformatie, ontstaat een objectief startpunt dat 
+      onafhankelijk is van subjectieve perceptie.</p>
+      <p>Deze aanpak heeft echter een inherente beperking: contractdocumentatie 
+      beschrijft niet altijd de volledige operationele realiteit. 
+      <strong>Applicatie-eigenaren, contract-eigenaren en functioneel beheerders</strong> 
+      beschikken over praktijkkennis die de scores kan nuanceren, verbeteren of 
+      corrigeren. Scores kunnen daardoor nog wijzigen — en dat is niet alleen 
+      acceptabel, het is nadrukkelijk de bedoeling.</p>
+      <p>Dit past precies in de opzet van de tool: de 
+      <strong>Digitale Soevereiniteitsassessment Tool is geen statisch rapport 
+      maar een levend instrument</strong>. Scores worden bijgehouden en bijgewerkt 
+      naarmate nieuwe informatie beschikbaar komt, contracten wijzigen of 
+      leveranciers hun beleid aanpassen.</p>
+    </div>
+
+    <h3>8.2 Overzicht applicaties en contactpersonen</h3>
+    <div class="section-intro">
+      Onderstaande tabel bevat de 23 kernapplicaties met de contactpersonen 
+      die worden gevraagd voor de review in Fase 2.
+    </div>
+    <table style="font-size:10px">
+      <tr>
+        <th style="width:30%">Applicatie</th>
+        <th style="width:35%">Contactpersoon / Eigenaar</th>
+        <th style="width:35%">Leverancier</th>
+      </tr>
+      <tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">M365</td>
+      <td style="color:#374151">Stef Wanders</td>
+      <td style="color:#6b7280">SURF / Microsoft</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">Blackboard</td>
+      <td style="color:#374151">Greet van Terwisga</td>
+      <td style="color:#6b7280">Blackboard International BV</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">PROGRESS</td>
+      <td style="color:#374151">Tom van der Meer / Esther Siboni</td>
+      <td style="color:#6b7280">Progress</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td>
+      <td style="color:#374151">Sylvia Wiener / Esther Smink</td>
+      <td style="color:#6b7280">SURF / BEND (Axelio)</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td>
+      <td style="color:#374151">Marian Brouwer</td>
+      <td style="color:#6b7280">SURF / Microsoft</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">RAET Youforce</td>
+      <td style="color:#374151">Hielke Visser</td>
+      <td style="color:#6b7280">RAET</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">Xedule</td>
+      <td style="color:#374151">Susan Westera</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">AFAS</td>
+      <td style="color:#374151">Hessel de Jong</td>
+      <td style="color:#6b7280">Afas Software B.V.</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">GBS</td>
+      <td style="color:#374151">Johan Meiberg</td>
+      <td style="color:#6b7280">Gebouwbeheersysteem</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">SALTO / OMNI</td>
+      <td style="color:#374151">Johan Meiberg</td>
+      <td style="color:#6b7280">Salto / Omni</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td>
+      <td style="color:#374151">Esther Siboni</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">ANS</td>
+      <td style="color:#374151">Eelco Braaksma</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">DOCCENTER</td>
+      <td style="color:#374151">FLWO</td>
+      <td style="color:#6b7280">Canon</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">RICOH</td>
+      <td style="color:#374151">Johan Meiberg</td>
+      <td style="color:#6b7280">Ricoh</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">Online Event Tools</td>
+      <td style="color:#374151">M&C</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">Website & Hosting</td>
+      <td style="color:#374151">M&C</td>
+      <td style="color:#6b7280">Netvlies</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">TOPdesk</td>
+      <td style="color:#374151">Jeffrey Klein</td>
+      <td style="color:#6b7280">TOPdesk</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">JOIN</td>
+      <td style="color:#374151">Jouke Jan de Jong</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">ProctorExam</td>
+      <td style="color:#374151">Eelco Braaksma</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td>
+      <td style="color:#374151">Ron & Rolien</td>
+      <td style="color:#6b7280">Bhosted</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">OfficeBooking</td>
+      <td style="color:#374151">FLWO</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:white">
+      <td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td>
+      <td style="color:#374151">HRM</td>
+      <td style="color:#6b7280">—</td>
+    </tr><tr style="background:#f8fafc">
+      <td style="font-weight:600;color:#0C2340">Innovation Lab</td>
+      <td style="color:#374151">Ron & Rolien</td>
+      <td style="color:#6b7280">MySchoolsNetwork</td>
+    </tr>
+    </table>
+
+    <h3>8.3 Concrete acties Fase 2</h3>
+    <div class="narrative">
+      <p>In Fase 2 (Strategische Verkenning, april–mei 2026) worden de volgende 
+      vervolgacties uitgevoerd rondom de review door applicatie-eigenaren:</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;page-break-inside:avoid">
+      <div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
+        <div style="font-weight:700;color:#1A56A0;margin-bottom:4px">① Uitnodiging applicatie-eigenaren</div>
+        <div style="color:#374151;line-height:1.6">Elke contactpersoon uit bovenstaande lijst ontvangt een gerichte uitnodiging van het Expertiseteam. Zij worden gevraagd de scores voor hun applicatie(s) te reviewen en — waar nodig — te corrigeren of aan te vullen met contractuele en operationele kennis.</div>
+      </div>
+      <div style="background:#E6F7F7;border-left:3px solid #26B5AE;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
+        <div style="font-weight:700;color:#26B5AE;margin-bottom:4px">② Begeleide review sessies</div>
+        <div style="color:#374151;line-height:1.6">Een medewerker met Digitale Soevereiniteit in de portefeuille begeleidt de review. Per applicatie wordt een korte werksessie gepland met eigenaar, contract-eigenaar en functioneel beheerder. Het Expertiseteam faciliteert en zorgt voor een gestructureerde aanpak.</div>
+      </div>
+      <div style="background:#fff8f0;border-left:3px solid #E87722;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
+        <div style="font-weight:700;color:#E87722;margin-bottom:4px">③ Bijwerken in de tool</div>
+        <div style="color:#374151;line-height:1.6">Na elke review worden de scores bijgewerkt in de Digitale Soevereiniteitsassessment Tool. Motivatieteksten worden aangevuld of gecorrigeerd. De tool genereert automatisch een bijgewerkte rapportage die de actuele stand weerspiegelt.</div>
+      </div>
+      <div style="background:#f0fdf4;border-left:3px solid #22c55e;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
+        <div style="font-weight:700;color:#166534;margin-bottom:4px">④ Input voor scenario's en advies</div>
+        <div style="color:#374151;line-height:1.6">De herziene scores en praktijkinzichten van eigenaren vormen directe input voor de producten van Fase 2: de strategische dilemma's (Product 3) en de scenario's met kosten-batenanalyse (Product 4), als voorbereiding op het eindadvies aan het CvB.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;padding:14px 18px;background:#f8fafc;border:1px solid #D0E4F7;border-radius:4px;font-family:Arial;font-size:10px;page-break-inside:avoid">
+      <div style="font-weight:700;color:#0C2340;margin-bottom:6px">Noot over de scores in dit rapport</div>
+      <div style="color:#374151;line-height:1.7">
+        De scores in dit rapport zijn een <strong>nulmeting op basis van contractgegevens</strong> 
+        en vormen een objectief vertrekpunt. Ze zijn niet definitief. Na de review door 
+        applicatie-eigenaren in Fase 2 wordt een herziene versie van dit rapport gegenereerd 
+        met bijgewerkte scores en aanvullende motivaties. Dat herziene rapport vormt de 
+        feitelijke grondslag voor de strategische besluitvorming in Fase 3.
+      </div>
+    </div>
+  </div>
 
   <div class="doc-footer">
     NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · 
