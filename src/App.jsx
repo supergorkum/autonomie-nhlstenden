@@ -1967,14 +1967,33 @@ export default function App() {
 
     <div style="margin-top:28px;padding:16px 20px;background:#0C2340;border-radius:4px;page-break-inside:avoid">
       <div style="font-family:Arial;font-size:11px;font-weight:700;color:white;margin-bottom:6px">Vervolgstap</div>
-      <div style="font-family:Arial;font-size:10px;color:#7DD3D0;line-height:1.7">
-        Bespreek de uitkomsten van dit assessment in het <strong style="color:white">Transitieteam Digitalisering</strong> 
-        en leg de prioritering vast. Gebruik de quick wins als startpunt voor directe actie en stel voor de applicaties 
-        met de laagste score een actieplan op met verantwoordelijke, maatregel en deadline. 
-        Herbeoordeeel het portfolio over 12 maanden om de voortgang te meten.
+      <div style="font-family:Arial;font-size:10px;color:#7DD3D0;line-height:1.7;margin-bottom:10px">
+        Bespreek de uitkomsten van deze analyse in het <strong style="color:white">Transitieteam Digitalisering</strong> 
+        en leg de prioritering vast in het portfolioplan. Het Expertiseteam Digitale Soevereiniteit 
+        (kwartiermaker E. van Gorkum en ambassadeurs J. Haije, E. Rolf en J. Blom) staat klaar om 
+        applicatie-eigenaren te begeleiden.
       </div>
-      <div style="font-family:Arial;font-size:9px;color:#26B5AE;margin-top:8px">
-        NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · Aansluiting VH en SURF
+      <div style="font-family:Arial;font-size:10px;color:white;font-weight:700;margin-bottom:6px">Voor applicatie-eigenaren:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
+          <div style="color:white;font-weight:700;margin-bottom:3px">① Stap 1 — Bekijk je applicatie</div>
+          Lees de score en de aandachtspunten van jouw applicatie(s) in dit rapport. Identificeer de quick win die direct uitvoerbaar is.
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
+          <div style="color:white;font-weight:700;margin-bottom:3px">② Stap 2 — Vorm een mini-team</div>
+          Betrek je contract-eigenaar en functioneel beheerder. Samen hebben jullie de kennis en mandaat om aanbevelingen uit te voeren.
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
+          <div style="color:white;font-weight:700;margin-bottom:3px">③ Stap 3 — Neem contact op</div>
+          Neem contact op met het Expertiseteam. Zij begeleiden jullie mini-project: van analyse naar concreet actieplan met eigenaar, maatregel en deadline.
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
+          <div style="color:white;font-weight:700;margin-bottom:3px">④ Stap 4 — Herbeoordeel</div>
+          Na uitvoering van de aanbevelingen wordt de applicatie opnieuw beoordeeld. Het Expertiseteam verzorgt de herbeoordeling en rapportage.
+        </div>
+      </div>
+      <div style="font-family:Arial;font-size:9px;color:#26B5AE">
+        NHL Stenden · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · Aansluiting VH en SURF
       </div>
     </div>
   </div>`;
@@ -1987,7 +2006,7 @@ export default function App() {
 <html lang="nl">
 <head>
 <meta charset="UTF-8"/>
-<title>Digitale Soevereiniteitsassessment — NHL Stenden ${datum}</title>
+<title>Portfolioanalyse Digitale Soevereiniteit — NHL Stenden ${datum}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.7}
@@ -2033,7 +2052,7 @@ export default function App() {
   /* ── Typografie ── */
   h2{font-family:Arial;font-size:15px;color:#0C2340;padding-bottom:5px;margin:28px 0 6px;font-weight:700;
      border-bottom:2px solid #1A56A0}
-  h3{font-family:Arial;font-size:12px;color:#0C2340;margin:16px 0 5px;font-weight:700}
+  h3{font-family:Arial;font-size:12px;color:#0C2340;margin:16px 0 5px;font-weight:700;page-break-after:avoid}
   .section-intro{font-size:10.5px;line-height:1.7;color:#374151;margin-bottom:14px;
      border-left:3px solid #D0E4F7;padding-left:12px;font-family:Arial}
   .narrative{font-size:11px;line-height:1.75;color:#1a1a1a}
@@ -2092,21 +2111,24 @@ export default function App() {
 ════════════════════════════════════════════════ -->
 <div class="cover">
   <div class="cover-top">
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px">
-      <div class="logo">NHL<br/>STENDEN</div>
-      <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px">
+      <div style="border:2.5px solid white;padding:8px 12px;display:inline-block;line-height:1.2">
+        <div style="font-family:Arial;font-size:13px;font-weight:900;color:white;letter-spacing:1px">NHL</div>
+        <div style="font-family:Arial;font-size:13px;font-weight:900;color:white;letter-spacing:1px">STENDEN</div>
+      </div>
+      <div style="width:2px;background:#26B5AE;height:44px"></div>
       <div>
-        <div style="font-family:Arial;font-size:11px;font-weight:700;color:white">NHL Stenden Hogeschool</div>
-        <div style="font-family:Arial;font-size:9px;color:#7DD3D0">Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit</div>
+        <div style="font-family:Arial;font-size:12px;font-weight:700;color:white">NHL Stenden Hogeschool</div>
+        <div style="font-family:Arial;font-size:9px;color:#7DD3D0;margin-top:2px">Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit</div>
       </div>
     </div>
     <div style="height:2px;background:rgba(255,255,255,0.15);margin-bottom:28px"></div>
-    <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">RAPPORTAGE</div>
+    <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">AUTOMATISCH GEGENEREERDE ANALYSE</div>
     <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">
-      Digitale<br/>Soevereiniteitsassessment
+      Portfolioanalyse<br/>Digitale Soevereiniteit
     </div>
     <div style="font-family:Arial;font-size:13px;color:#7DD3D0">
-      Portfoliorapportage applicatielandschap · ${datum}
+      Applicatielandschap NHL Stenden · ${datum}
     </div>
   </div>
   <div class="cover-teal-bar"></div>
@@ -2120,11 +2142,17 @@ export default function App() {
         <div class="cover-meta-row"><span class="cover-meta-label">Kwartiermaker</span><span class="cover-meta-value">E. van Gorkum</span></div>
         <div class="cover-meta-row"><span class="cover-meta-label">Ambassadeurs</span><span class="cover-meta-value">J. Haije · E. Rolf · J. Blom</span></div>
       </div>
+      <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:12px">
+        Deze analyse is automatisch gegenereerd door de <strong style="color:#0C2340">Digitale Soevereiniteitsassessment Tool</strong> 
+        van NHL Stenden Hogeschool. De tool is ontwikkeld door het Expertiseteam Digitale Soevereiniteit 
+        in het kader van de centrale bestuursvraag: <em>"Waar zetten we onze data neer en waar 
+        liggen de potentiële problemen?"</em>
+      </div>
       <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:16px">
-        Dit rapport is opgesteld in opdracht van het College van Bestuur van NHL Stenden Hogeschool, 
-        in het kader van de centrale vraagstelling: <em>"Waar zetten we onze data neer en waar 
-        liggen de potentiële problemen?"</em> Het rapport maakt gebruik van de Digitale 
-        Soevereiniteitsassessment Tool en twee erkende frameworks voor digitale autonomie.
+        De analyse combineert twee erkende normenkaders (DAAF en DICTU) en genereert automatisch 
+        scores, aanbevelingen en prioritering op basis van de ingevoerde assessmentdata. 
+        De uitkomsten zijn daarmee direct bruikbaar voor gesprekken met applicatie-eigenaren, 
+        leveranciers en het management.
       </div>
     </div>
     <div class="cover-disclaimer">
@@ -2141,8 +2169,8 @@ export default function App() {
 <div class="page-header">
   <div class="logo">NHL<br/>STENDEN</div>
   <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
-  <div><div class="header-title">Digitale Soevereiniteitsassessment</div>
-  <div class="header-sub">Portfoliorapportage · ${datum} · ${VERSION}</div></div>
+  <div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div>
+  <div class="header-sub">Applicatielandschap NHL Stenden · ${datum} · ${VERSION}</div></div>
   <div class="header-right">${naamModus}</div>
 </div>
 <div class="toc-page">
@@ -2150,9 +2178,10 @@ export default function App() {
   <div class="toc-bar"></div>
 
   <div class="toc-section"><span class="toc-nr">1.</span><span class="toc-lbl">Inleiding en kader</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
-  <div class="toc-sub"><span class="toc-nr">1.1</span><span class="toc-lbl">Over dit rapport</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
-  <div class="toc-sub"><span class="toc-nr">1.2</span><span class="toc-lbl">Toegepaste frameworks</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
-  <div class="toc-sub"><span class="toc-nr">1.3</span><span class="toc-lbl">Gebruik in het hoger onderwijs</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.1</span><span class="toc-lbl">Over deze analyse en de tool</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.2</span><span class="toc-lbl">Het Expertiseteam Digitale Soevereiniteit</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.3</span><span class="toc-lbl">Toegepaste frameworks</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.4</span><span class="toc-lbl">Gebruik in het hoger onderwijs</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
 
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">2.</span><span class="toc-lbl">Samenvatting</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
 
@@ -2181,8 +2210,8 @@ export default function App() {
 <div class="page-header">
   <div class="logo">NHL<br/>STENDEN</div>
   <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
-  <div><div class="header-title">Digitale Soevereiniteitsassessment</div>
-  <div class="header-sub">Portfoliorapportage · ${datum} · ${VERSION}</div></div>
+  <div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div>
+  <div class="header-sub">Applicatielandschap NHL Stenden · ${datum} · ${VERSION}</div></div>
   <div class="header-right">${naamModus}</div>
 </div>
 <div class="content">
@@ -2207,7 +2236,7 @@ export default function App() {
     en zijn gebaseerd op publiek beschikbare informatie, interne kennis en contractuele documentatie.</p>
   </div>
 
-  <h3>1.2 Toegepaste frameworks</h3>
+  <h3>1.3 Toegepaste frameworks</h3>
   <div class="section-intro">
     De beoordeling is gebaseerd op twee complementaire en erkende normenkaders voor digitale soevereiniteit.
   </div>
@@ -2234,7 +2263,7 @@ export default function App() {
     </div>
   </div>
 
-  <h3>1.3 Gebruik in het hoger onderwijs</h3>
+  <h3>1.4 Gebruik in het hoger onderwijs</h3>
   <div class="narrative">
     <p>Digitale soevereiniteit staat breed op de agenda in het Nederlandse hoger onderwijs. 
     De <strong>Vereniging Hogescholen (VH)</strong> en <strong>SURF</strong> — de ICT-samenwerkingsorganisatie 
