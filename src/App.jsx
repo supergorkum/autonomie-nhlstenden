@@ -1235,6 +1235,8 @@ export default function App() {
   // Beheer (admin) state
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [showChangelog, setShowChangelog] = useState(false);
+  const [showDeleteAll, setShowDeleteAll] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [adminPin,      setAdminPin]      = useState("");
   const [adminPinError, setAdminPinError] = useState(false);
   const [editAppId,     setEditAppId]     = useState(null);
@@ -3035,18 +3037,96 @@ export default function App() {
               <p className="text-xs font-semibold mb-1" style={{ color:"#dc2626" }}>⚠️ Gevaarlijke zone</p>
               <p className="text-xs text-gray-500 mb-3">Hiermee worden ALLE applicaties en scores definitief gewist. Niet terug te draaien.</p>
               <button
-                onClick={() => {
-                  if (confirm("ALLE applicaties verwijderen? Dit wist alle assessmentdata permanent.")) {
-                    if (confirm("Weet u het zeker? Dit kan NIET ongedaan worden gemaakt.")) {
-                      setApps([]);
-                      setSelId(null);
-                    }
-                  }
-                }}
+                onClick={() => { setDeleteConfirmText(""); setShowDeleteAll(true); }}
                 className="text-xs px-4 py-2 font-semibold text-white"
                 style={{ background:"#dc2626", borderRadius:4 }}>
                 🗑 Alles wissen
               </button>
+            </div>
+          )}
+
+          {/* Bevestigingsmodal alles wissen */}
+          {showDeleteAll && (
+            <div className="fixed inset-0 flex items-center justify-center z-50"
+              style={{ background:"rgba(12,35,64,0.7)" }}
+              onClick={() => setShowDeleteAll(false)}>
+              <div className="bg-white rounded-lg mx-4 overflow-hidden"
+                style={{ width:"100%", maxWidth:420, boxShadow:"0 8px 32px rgba(220,38,38,0.3)", border:"2px solid #dc2626" }}
+                onClick={e => e.stopPropagation()}>
+                {/* Header */}
+                <div style={{ background:"#dc2626", padding:"14px 20px" }}>
+                  <div className="flex items-center gap-3">
+                    <span style={{ fontSize:22 }}>⚠️</span>
+                    <div>
+                      <h2 className="font-bold text-white text-sm">Alle data permanent verwijderen</h2>
+                      <p style={{ fontSize:10, color:"#fca5a5", marginTop:2 }}>
+                        Deze actie kan niet ongedaan worden gemaakt
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {/* Inhoud */}
+                <div style={{ padding:"20px 24px" }}>
+                  <p className="text-sm mb-4" style={{ color:"#374151", lineHeight:1.6 }}>
+                    Dit wist <strong>alle {apps.length} applicaties</strong> inclusief alle ingevulde assessments,
+                    scores en motivaties. Er is geen herstel mogelijk.
+                  </p>
+                  <div className="rounded p-3 mb-4" style={{ background:"#fff5f5", border:"1px solid #fecaca" }}>
+                    <p className="text-xs mb-2 font-semibold" style={{ color:"#dc2626" }}>
+                      Typ <span style={{ fontFamily:"monospace", background:"#fee2e2", padding:"1px 6px", borderRadius:3 }}>VERWIJDER ALLES</span> om te bevestigen:
+                    </p>
+                    <input
+                      autoFocus
+                      value={deleteConfirmText}
+                      onChange={e => setDeleteConfirmText(e.target.value)}
+                      onPaste={e => e.preventDefault()}
+                      placeholder="VERWIJDER ALLES"
+                      className="w-full px-3 py-2 text-sm font-mono"
+                      style={{
+                        border: `2px solid ${deleteConfirmText === "VERWIJDER ALLES" ? "#22c55e" : "#fecaca"}`,
+                        borderRadius:4, outline:"none",
+                        background: deleteConfirmText === "VERWIJDER ALLES" ? "#f0fdf4" : "white",
+                        color:"#0C2340", letterSpacing:"0.05em"
+                      }}
+                      onFocus={e => e.target.style.borderColor = deleteConfirmText === "VERWIJDER ALLES" ? "#22c55e" : "#dc2626"}
+                    />
+                    {deleteConfirmText.length > 0 && deleteConfirmText !== "VERWIJDER ALLES" && (
+                      <p style={{ fontSize:10, color:"#dc2626", marginTop:4 }}>
+                        Tekst klopt niet — typ exact: VERWIJDER ALLES
+                      </p>
+                    )}
+                    {deleteConfirmText === "VERWIJDER ALLES" && (
+                      <p style={{ fontSize:10, color:"#16a34a", marginTop:4 }}>✓ Bevestigingstekst correct</p>
+                    )}
+                  </div>
+                  {/* Knoppen */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => { setShowDeleteAll(false); setDeleteConfirmText(""); }}
+                      className="flex-1 py-2 text-sm font-medium"
+                      style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280", background:"white" }}>
+                      Annuleren
+                    </button>
+                    <button
+                      disabled={deleteConfirmText !== "VERWIJDER ALLES"}
+                      onClick={() => {
+                        setApps([]);
+                        setSelId(null);
+                        setShowDeleteAll(false);
+                        setDeleteConfirmText("");
+                      }}
+                      className="flex-1 py-2 text-sm font-bold text-white"
+                      style={{
+                        borderRadius:4,
+                        background: deleteConfirmText === "VERWIJDER ALLES" ? "#dc2626" : "#fca5a5",
+                        cursor: deleteConfirmText === "VERWIJDER ALLES" ? "pointer" : "not-allowed",
+                        transition:"background 0.2s"
+                      }}>
+                      🗑 Definitief alles wissen
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
