@@ -1945,7 +1945,7 @@ export default function App() {
     const slotHTML = `
   <!-- SLOTPAGINA -->
   <div class="page-break">
-    <h2>7. Slotbevindingen</h2>
+    <h2>6. Slotbevindingen</h2>
     <div class="section-intro">
       Deze pagina brengt de belangrijkste bevindingen samen. De aandachtspunten zijn direct afgeleid 
       uit de assessmentscores, gesorteerd van meest urgent naar minst urgent. De quick wins zijn 
@@ -2155,8 +2155,8 @@ export default function App() {
       </div>
       <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:12px">
         Deze analyse is automatisch gegenereerd door de <strong style="color:#0C2340">Digitale Soevereiniteitsassessment Tool</strong> 
-        van NHL Stenden Hogeschool. De tool is ontwikkeld door het Expertiseteam Digitale Soevereiniteit 
-        in het kader van de centrale bestuursvraag: <em>"Waar zetten we onze data neer en waar 
+        van NHL Stenden Hogeschool. De tool is ontwikkeld door <strong>kwartiermaker E. van Gorkum</strong> samen met de <strong>Ambassadeurs J. Haije, E. Rolf en J. Blom</strong>, 
+        als antwoord op de centrale bestuursvraag: <em>"Waar zetten we onze data neer en waar 
         liggen de potentiële problemen?"</em>
       </div>
       <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:16px">
@@ -2206,19 +2206,11 @@ export default function App() {
   <div class="toc-sub"><span class="toc-nr">5.2</span><span class="toc-lbl">Dimensieprofiel per applicatie</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
   <div class="toc-sub"><span class="toc-nr">5.3</span><span class="toc-lbl">Dimensiescores tabel</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
 
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Detailscores en aanbevelingen per applicatie</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Slotbevindingen — aandachtspunten, quick wins en advies</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Vervolgacties Fase 2 — Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">8.</span><span class="toc-lbl">Bijlage — Detailscores per applicatie</span><span class="toc-dots"></span><span class="toc-pg">8+</span></div>
   ${visible.map((a,i) => `<div class="toc-sub"><span class="toc-nr">${i+1}.</span><span class="toc-lbl">${dName(a)}${a.supplier?` <span style="color:#9ca3af;font-weight:400">— ${a.supplier}</span>`:""}</span><span class="toc-dots"></span><span class="toc-pg">${6+i}</span></div>`).join("")}
 
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Slotbevindingen</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">7.1</span><span class="toc-lbl">Belangrijkste aandachtspunten</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">7.2</span><span class="toc-lbl">Quick wins — direct uitvoerbaar</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">7.3</span><span class="toc-lbl">Strategisch advies</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">7.4</span><span class="toc-lbl">Vervolgstap</span><span class="toc-dots"></span><span class="toc-pg">${6+visible.length}</span></div>
-
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">8.</span><span class="toc-lbl">Vervolgacties Fase 2 — Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">8.1</span><span class="toc-lbl">Context van de huidige scores</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">8.2</span><span class="toc-lbl">Overzicht applicaties en contactpersonen</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
-  <div class="toc-sub"><span class="toc-nr">8.3</span><span class="toc-lbl">Concrete acties Fase 2</span><span class="toc-dots"></span><span class="toc-pg">${7+visible.length}</span></div>
 </div>
 
 <!-- ════════════════════════════════════════════════
@@ -2376,10 +2368,20 @@ export default function App() {
   <div class="page-break">
     <h2>2. Samenvatting</h2>
     <div class="section-intro">
-      Een beknopt overzicht van de belangrijkste bevindingen uit het assessment van 
-      ${visible.length} applicatie${visible.length!==1?"s":""}.
+      Een beknopt overzicht van de belangrijkste bevindingen, gevolgd door de opbouw van dit rapport.
     </div>
     <div class="narrative">${generateSummary(visible)}</div>
+    <div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;margin-top:14px;font-family:Arial;font-size:10px;page-break-inside:avoid">
+      <div style="font-weight:700;color:#0C2340;margin-bottom:8px">Opbouw van dit rapport</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H3</span><span style="color:#374151">Risico-analyse en aanbevelingen — de grootste risico's en concrete aanbevelingen</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H4</span><span style="color:#374151">Scoreoverzicht — kerncijfers van alle applicaties op één pagina</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H5</span><span style="color:#374151">Visuele analyse — kwadrant, dimensieprofiel en scoretabel</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#26B5AE;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H6</span><span style="color:#374151">Slotbevindingen — aandachtspunten, quick wins en strategisch advies</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#26B5AE;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H7</span><span style="color:#374151">Vervolgacties Fase 2 — review door applicatie-eigenaren en concrete acties</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#6b7280;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H8</span><span style="color:#6b7280">Bijlage — detailscores per applicatie (voor geïnteresseerden en eigenaren)</span></div>
+      </div>
+    </div>
 
     <h2>3. Risico-analyse en aanbevelingen</h2>
     <div class="section-intro">
@@ -2416,20 +2418,36 @@ export default function App() {
     <!-- 5.1: koptekst + uitleg vastgeplakt aan grafiek via page-break-after:avoid -->
     <div style="page-break-after:avoid">
       <h3>5.1 Autonomie-kwadrant (DAAF)</h3>
-      <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
-        Horizontale as: Risico × Belang (verder rechts = urgenter). Verticale as: Mitigatie (hoger = beter beschermd). 
-        OPTIMAAL (linksboven) · BEHEERSBAAR (rechtsboven) · AANDACHTSPUNT (linksonder) · KRITIEK (rechtsonder).
+      <p style="font-size:10px;color:#374151;margin-bottom:8px;font-family:Arial;line-height:1.6">
+        Dit kwadrant plaatst elke applicatie op twee assen en maakt in één oogopslag zichtbaar 
+        welke applicaties de meeste aandacht verdienen.<br/>
+        <strong>Horizontale as</strong> — Risico × Belang: hoe verder naar rechts, hoe urgenter 
+        (combinatie van geopolitiek risico, leveranciersafhankelijkheid en strategisch belang).<br/>
+        <strong>Verticale as</strong> — Mitigatie: hoe hoger, hoe beter de organisatie is beschermd 
+        (technische exitopties, interne kennis, contractuele weerbaarheid).<br/>
+        <strong>Vier kwadranten:</strong> 
+        OPTIMAAL (linksboven: laag risico, goede bescherming) · 
+        BEHEERSBAAR (rechtsboven: hoog risico maar goede bescherming) · 
+        AANDACHTSPUNT (linksonder: laag risico maar weinig bescherming) · 
+        KRITIEK (rechtsonder: hoog risico én weinig bescherming — vraagt directe actie).
       </p>
     </div>
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-    <!-- 5.2: koptekst + uitleg vastgeplakt aan grafiek via page-break-after:avoid -->
-    <div style="page-break-after:avoid">
+    <!-- 5.2: altijd nieuwe pagina zodat kop en grafiek samen staan -->
+    <div style="page-break-before:always;padding-top:0">
       <h3>5.2 Dimensieprofiel per applicatie</h3>
-      <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
-        Elke balk toont de gewogen score (1–5) voor één DAAF-dimensie. De kleurovergang geeft 
-        direct de richting aan: risico-assen (A, B) — groen links is goed. 
-        Mitigatie-assen (C, D, E) — groen rechts is goed. Stippen = applicaties.
+      <p style="font-size:10px;color:#374151;margin-bottom:8px;font-family:Arial;line-height:1.6">
+        Dit profiel toont per DAAF-dimensie hoe alle applicaties scoren op een schaal van 1 tot 5. 
+        Elke gekleurde stip op de balk is één applicatie. De kleurovergang laat zien wat 
+        goed of slecht is voor die specifieke dimensie:<br/>
+        <strong>Risico-assen (A, B)</strong> — groen aan de linkerkant (lage score = weinig risico = goed). 
+        Rood aan de rechterkant betekent hoog risico.<br/>
+        <strong>Mitigatie-assen (C, D, E)</strong> — groen aan de rechterkant (hoge score = sterke weerbaarheid = goed). 
+        Rood aan de linkerkant betekent weinig bescherming.<br/>
+        <strong>Belang-assen (F, G, H)</strong> — hoge score betekent hoog strategisch belang. 
+        Op zichzelf niet goed of slecht, maar in combinatie met laag risico geeft het prioriteit.<br/>
+        Stippen die ver van het groene uiteinde liggen, zijn aandachtspunten.
       </p>
     </div>
     <div class="chart-wrap">${generateSpinSVG(visible)}</div>
@@ -2444,28 +2462,17 @@ export default function App() {
     ${generateDimTable(visible)}
   </div>
 
-  <!-- PAGINA 4+: Detail per applicatie -->
-  <div class="page-break">
-    <h2>6. Detailscores en aanbevelingen per applicatie</h2>
-    <div class="section-intro">
-      Per applicatie worden alle ingevulde scores, eventuele motivaties en de automatisch 
-      gegenereerde aanbevelingen weergegeven. De aanbevelingen zijn gebaseerd op de kwadrant-positie 
-      en de specifieke score-combinatie van elke applicatie.
-    </div>
-    ${kwRows}
-  </div>
-
   ${slotHTML}
 
   <!-- FASE 2 PAGINA: Eigenaren review -->
   <div class="page-break">
-    <h2>8. Vervolgacties Fase 2 — Review door applicatie-eigenaren</h2>
+    <h2>7. Vervolgacties Fase 2 — Review door applicatie-eigenaren</h2>
     <div class="section-intro">
       Deze pagina beschrijft de context van de huidige scores, de beoogde vervolgstap 
       met applicatie-eigenaren en de concrete acties voor Fase 2 van het traject.
     </div>
 
-    <h3>8.1 Context van de huidige scores</h3>
+    <h3>7.1 Context van de huidige scores</h3>
     <div class="narrative">
       <p>De scores in dit rapport zijn in eerste instantie ingevuld door het 
       <strong>Expertiseteam Digitale Soevereiniteit</strong> op basis van 
@@ -2486,7 +2493,7 @@ export default function App() {
       leveranciers hun beleid aanpassen.</p>
     </div>
 
-    <h3>8.2 Overzicht kernapplicaties</h3>
+    <h3>7.2 Overzicht kernapplicaties</h3>
     <div class="section-intro">
       Onderstaande tabel toont de 23 kernapplicaties met leverancier en contractstatus. 
       De kolom <strong>Gegevensbescherming</strong> geeft aan of er een 
@@ -2506,29 +2513,34 @@ export default function App() {
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td><td style="color:#374151">SURF bv / BEND (Axelio)</td><td style="color:#16a34a;font-size:9px">⚠ Contract actief · Verwerkersovereenkomst deels beschikbaar</td></tr>
 <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">✓ Contract actief via SURF · Verwerkersovereenkomst aanwezig</td></tr>
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">RAET Youforce</td><td style="color:#374151">RAET / Visma</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Xedule</td><td style="color:#374151">Xedule</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Xedule</td><td style="color:#374151">Xedule</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">AFAS</td><td style="color:#374151">Afas Software B.V.</td><td style="color:#16a34a;font-size:9px">⚠ Contract actief · Verwerkersovereenkomst via klantportal (2016, controleer actualiteit)</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">GBS — Gebouwbeheersysteem</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">SALTO / OMNI</td><td style="color:#374151">Salto / Omni</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in contractregister — nader onderzoek vereist</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">ANS — Toetsapplicatie</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">GBS — Gebouwbeheersysteem</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">SALTO / OMNI</td><td style="color:#374151">Salto / Omni</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">ANS — Toetsapplicatie</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
 <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">DOCCENTER</td><td style="color:#374151">Canon</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">RICOH</td><td style="color:#374151">Ricoh</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
 <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Online Event Tools</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">✗ Geen actief contract — vorig contract vervallen december 2025</td></tr>
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">Website & Hosting</td><td style="color:#374151">Netvlies</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via Marketing &amp; Communicatie</td></tr>
 <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">TOPdesk</td><td style="color:#374151">TOPdesk</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">JOIN</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">ProctorExam</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Contractstatus onbekend — nader onderzoek vereist</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">JOIN</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">ProctorExam</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td><td style="color:#374151">Bhosted</td><td style="color:#dc2626;font-size:9px">✗ Geen contract — alleen crediteur bekend in de financiële administratie</td></tr>
 <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">OfficeBooking</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
 <tr style="background:white"><td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via HRM</td></tr>
 <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Innovation Lab</td><td style="color:#374151">MySchoolsNetwork</td><td style="color:#6b7280;font-size:9px">~ Zie MySchoolsNetwork (onderdeel van hetzelfde platform)</td></tr>
 </table>
 
-    <h3>8.3 Concrete acties Fase 2</h3>
+    <h3>7.3 Concrete acties Fase 2</h3>
     <div class="narrative">
-      <p>In Fase 2 (Strategische Verkenning, april–mei 2026) worden de volgende 
-      vervolgacties uitgevoerd rondom de review door applicatie-eigenaren:</p>
+      <p>In Fase 2 (Strategische Verkenning, april–mei 2026) worden de assessments 
+      verfijnd op basis van input van applicatie-eigenaren. Elk van de vier acties 
+      hieronder is een stap in dat proces. <strong>Bij vragen over de inhoud, 
+      aanpak of focus van de review: raadpleeg altijd de Multidisciplinaire 
+      Expertisegroep</strong> — die is er specifiek voor samengesteld om 
+      applicatie-eigenaren te ondersteunen vanuit de disciplines Beleid &amp; Juridisch, 
+      Techniek &amp; Beheer en Onderwijs &amp; Onderzoek.</p>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;page-break-inside:avoid">
@@ -2562,7 +2574,21 @@ export default function App() {
     </div>
   </div>
 
-  <div class="doc-footer">
+  <!-- PAGINA 4+: Detail per applicatie -->
+  <div class="page-break">
+    <h2>8. Detailscores en aanbevelingen per applicatie — Bijlage</h2>
+    <div class="section-intro">
+      Dit hoofdstuk bevat de volledige detailscores per applicatie — inclusief alle ingevulde scores, 
+      motivaties en automatisch gegenereerde aanbevelingen. Het is bedoeld als <strong>naslagwerk</strong> 
+      voor geïnteresseerden en applicatie-eigenaren die de volledige onderbouwing willen inzien. 
+      De kern van de analyse en de aanbevelingen staan in de voorgaande hoofdstukken.
+    </div>
+    ${kwRows}
+  </div>
+
+
+
+    <div class="doc-footer">
     NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · 
     ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
   </div>
