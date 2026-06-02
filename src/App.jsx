@@ -1840,7 +1840,7 @@ export default function App() {
           <td><strong>${q.key}</strong></td><td>${q.dimName}</td><td>${q.name}</td>
           <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
           <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}${heeftSamenvatting?` <span style="font-size:9px;color:#9ca3af;font-style:italic">→ zie tool</span>`:""}</td>
+          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}${heeftSamenvatting?` <span style="font-size:9px;color:#9ca3af;font-style:italic">(zie tool voor uitgebreide toelichting)</span>`:""}</td>
         </tr>`;
       }).join("");
       const dictuRows=DICTU.map(q=>{
@@ -1854,7 +1854,7 @@ export default function App() {
           <td><strong>${q.key}</strong></td><td>${q.cat}</td><td>${q.name}</td>
           <td style="text-align:center;font-weight:700">${a.scores[q.key]||"–"}</td>
           <td>${a.scores[q.key]?q.scores.find(sc=>sc.s===a.scores[q.key])?.label||"":""}</td>
-          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}${heeftSamenvatting2?` <span style="font-size:9px;color:#9ca3af;font-style:italic">→ zie tool</span>`:""}</td>
+          <td style="color:${motivatie?"#374151":"#9ca3af"};font-style:${motivatie?"normal":"italic"}">${motivatie||"–"}${heeftSamenvatting2?` <span style="font-size:9px;color:#9ca3af;font-style:italic">(zie tool voor uitgebreide toelichting)</span>`:""}</td>
         </tr>`;
       }).join("");
       const lbl=scoreLabel(s.autonomyScore);
@@ -2336,12 +2336,14 @@ export default function App() {
       zwaktes per DAAF-dimensie, en de tabel maakt de scores vergelijkbaar.
     </div>
 
+    <div style="page-break-inside:avoid">
     <h3>5.1 Autonomie-kwadrant (DAAF)</h3>
     <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
       Horizontale as: Risico × Belang (verder rechts = urgenter). Verticale as: Mitigatie (hoger = beter beschermd). 
       OPTIMAAL (linksboven) · BEHEERSBAAR (rechtsboven) · AANDACHTSPUNT (linksonder) · KRITIEK (rechtsonder).
     </p>
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
+    </div>
 
     <h3>5.2 Dimensieprofiel per applicatie</h3>
     <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
@@ -2400,111 +2402,43 @@ export default function App() {
       leveranciers hun beleid aanpassen.</p>
     </div>
 
-    <h3>8.2 Overzicht applicaties en contactpersonen</h3>
+    <h3>8.2 Overzicht kernapplicaties</h3>
     <div class="section-intro">
-      Onderstaande tabel bevat de 23 kernapplicaties met de contactpersonen 
-      die worden gevraagd voor de review in Fase 2.
+      Onderstaande tabel toont de 23 kernapplicaties, de leverancier en de 
+      laatst bekende contractstatus. De kolom "Status" geeft aan of er een 
+      verwerkersovereenkomst (VOK) bekend is — relevant voor de prioritering 
+      van de review in Fase 2.
     </div>
     <table style="font-size:10px">
       <tr>
         <th style="width:30%">Applicatie</th>
-        <th style="width:35%">Contactpersoon / Eigenaar</th>
-        <th style="width:35%">Leverancier</th>
+        <th style="width:35%">Leverancier / Crediteur</th>
+        <th style="width:35%">Contract / VOK status</th>
       </tr>
-      <tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">M365</td>
-      <td style="color:#374151">Stef Wanders</td>
-      <td style="color:#6b7280">SURF / Microsoft</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">Blackboard</td>
-      <td style="color:#374151">Greet van Terwisga</td>
-      <td style="color:#6b7280">Blackboard International BV</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">PROGRESS</td>
-      <td style="color:#374151">Tom van der Meer / Esther Siboni</td>
-      <td style="color:#6b7280">Progress</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td>
-      <td style="color:#374151">Sylvia Wiener / Esther Smink</td>
-      <td style="color:#6b7280">SURF / BEND (Axelio)</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td>
-      <td style="color:#374151">Marian Brouwer</td>
-      <td style="color:#6b7280">SURF / Microsoft</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">RAET Youforce</td>
-      <td style="color:#374151">Hielke Visser</td>
-      <td style="color:#6b7280">RAET</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">Xedule</td>
-      <td style="color:#374151">Susan Westera</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">AFAS</td>
-      <td style="color:#374151">Hessel de Jong</td>
-      <td style="color:#6b7280">Afas Software B.V.</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">GBS</td>
-      <td style="color:#374151">Johan Meiberg</td>
-      <td style="color:#6b7280">Gebouwbeheersysteem</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">SALTO / OMNI</td>
-      <td style="color:#374151">Johan Meiberg</td>
-      <td style="color:#6b7280">Salto / Omni</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td>
-      <td style="color:#374151">Esther Siboni</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">ANS</td>
-      <td style="color:#374151">Eelco Braaksma</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">DOCCENTER</td>
-      <td style="color:#374151">FLWO</td>
-      <td style="color:#6b7280">Canon</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">RICOH</td>
-      <td style="color:#374151">Johan Meiberg</td>
-      <td style="color:#6b7280">Ricoh</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">Online Event Tools</td>
-      <td style="color:#374151">M&C</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">Website & Hosting</td>
-      <td style="color:#374151">M&C</td>
-      <td style="color:#6b7280">Netvlies</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">TOPdesk</td>
-      <td style="color:#374151">Jeffrey Klein</td>
-      <td style="color:#6b7280">TOPdesk</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">JOIN</td>
-      <td style="color:#374151">Jouke Jan de Jong</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">ProctorExam</td>
-      <td style="color:#374151">Eelco Braaksma</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td>
-      <td style="color:#374151">Ron & Rolien</td>
-      <td style="color:#6b7280">Bhosted</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">OfficeBooking</td>
-      <td style="color:#374151">FLWO</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:white">
-      <td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td>
-      <td style="color:#374151">HRM</td>
-      <td style="color:#6b7280">—</td>
-    </tr><tr style="background:#f8fafc">
-      <td style="font-weight:600;color:#0C2340">Innovation Lab</td>
-      <td style="color:#374151">Ron & Rolien</td>
-      <td style="color:#6b7280">MySchoolsNetwork</td>
-    </tr>
-    </table>
+      <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">M365 / Microsoft 365</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">Actief via SURF · VOK aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Blackboard</td><td style="color:#374151">Blackboard International BV</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">PROGRESS</td><td style="color:#374151">Progress</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td><td style="color:#374151">SURF bv / BEND (Axelio)</td><td style="color:#16a34a;font-size:9px">Actief · VOK deels aanwezig</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">Actief via SURF · VOK aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">RAET Youforce</td><td style="color:#374151">RAET / Visma</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Xedule</td><td style="color:#374151">Xedule</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">AFAS</td><td style="color:#374151">Afas Software B.V.</td><td style="color:#16a34a;font-size:9px">Actief · VOK klantportal 2016</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">GBS — Gebouwbeheersysteem</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">SALTO / OMNI</td><td style="color:#374151">Salto / Omni</td><td style="color:#dc2626;font-size:9px">Salto niet in contractregister</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">ANS — Toetsapplicatie</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">DOCCENTER</td><td style="color:#374151">Canon</td><td style="color:#6b7280;font-size:9px">Contract via FLWO</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">RICOH</td><td style="color:#374151">Ricoh</td><td style="color:#6b7280;font-size:9px">Contract via FLWO</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Online Event Tools</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Geen contract bekend (Banopro vervallen 12-2025)</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Website & Hosting</td><td style="color:#374151">Netvlies</td><td style="color:#6b7280;font-size:9px">Contract via M&amp;C</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">TOPdesk</td><td style="color:#374151">TOPdesk</td><td style="color:#16a34a;font-size:9px">Actief · VOK aanwezig</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">JOIN</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">ProctorExam</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">Contract status onbekend</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td><td style="color:#374151">Bhosted</td><td style="color:#dc2626;font-size:9px">Geen contract — alleen crediteur bekend</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">OfficeBooking</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">Contract via FLWO</td></tr>
+<tr style="background:white"><td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">Contract via HRM</td></tr>
+<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Innovation Lab</td><td style="color:#374151">MySchoolsNetwork</td><td style="color:#6b7280;font-size:9px">Zie MySchoolsNetwork</td></tr>
+</table>
 
     <h3>8.3 Concrete acties Fase 2</h3>
     <div class="narrative">
@@ -3886,9 +3820,13 @@ export default function App() {
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
-              Dit instrument helpt het Transitieteam Digitalisering van NHL Stenden Hogeschool om per applicatie
-              te beoordelen hoe urgent het autonomieprobleem is en in hoeverre de instelling digitaal soeverein opereert.
-              De tool combineert twee erkende frameworks: <strong>DAAF</strong> (Universiteit Utrecht) en <strong>DICTU</strong> (Rijksoverheid).
+              De <strong>Portfolioanalyse Digitale Soevereiniteit</strong> is een levend instrument 
+              voor NHL Stenden Hogeschool om per applicatie te beoordelen hoe urgent het 
+              autonomieprobleem is. Geen statisch rapport, maar een realtime tool die continu 
+              actueel blijft naarmate contracten wijzigen of nieuwe inzichten beschikbaar komen. 
+              De tool combineert twee erkende frameworks: <strong>DAAF</strong> (Universiteit Utrecht) 
+              en <strong>DICTU</strong> (Rijksoverheid), en genereert automatisch scores, 
+              aanbevelingen en een volledige rapportage.
             </p>
           </div>
 
