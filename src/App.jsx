@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.5";
+const VERSION = "v1.6";
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -42,6 +42,17 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v1.6",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "PDF volledig herschreven: voorblad, inhoudsopgave, inleiding met frameworkuitleg",
+      "PDF: paragraafteksten boven elk onderdeel, betere paginabreaks",
+      "PDF: datum, versie en naamweergave (primair/secundair) vermeld op voorblad en header",
+      "PDF: herhaalende paginaheader op elke pagina met versie en naamstatus",
+      "'Alles wissen' knop verwijderd uit de beheeromgeving",
+    ]
+  },
   {
     versie: "v1.5",
     datum: "Juni 2026",
@@ -1858,6 +1869,10 @@ export default function App() {
       </div>`;
     }).join("");
 
+    const naamModus = useSecondaryName && visible.some(a => a.nameSecondary)
+      ? `Secundaire namen actief`
+      : `Primaire namen actief`;
+
     const html = `<!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -1865,104 +1880,338 @@ export default function App() {
 <title>Digitale Soevereiniteitsassessment — NHL Stenden ${datum}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.6}
-  .header{background:#0C2340;color:white;padding:16px 24px;display:flex;align-items:center;gap:16px}
-  .logo{border:2px solid white;padding:6px 10px;font-weight:700;font-size:10px;letter-spacing:1px;line-height:1.3;font-family:Arial}
-  .header-title{font-size:14px;font-weight:700;font-family:Arial}
-  .header-sub{font-size:10px;color:#7DD3D0;margin-top:2px;font-family:Arial}
-  .content{padding:24px 28px}
-  .meta{color:#6b7280;font-size:10px;margin-bottom:16px;font-family:Arial}
-  /* Secties */
-  h2{font-family:Arial;font-size:14px;color:#0C2340;border-bottom:2px solid #1A56A0;
-     padding-bottom:5px;margin:24px 0 12px;font-weight:700}
-  h3{font-family:Arial;font-size:12px;color:#0C2340;margin:14px 0 5px;font-weight:700}
-  /* Verhalende tekst */
+  body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.7}
+
+  /* ── Vaste header op elke pagina ── */
+  .page-header{background:#0C2340;color:white;padding:11px 24px;display:flex;align-items:center;gap:14px;position:running(pageHeader)}
+  .logo{border:2px solid white;padding:5px 9px;font-weight:700;font-size:9px;letter-spacing:1px;line-height:1.3;font-family:Arial;flex-shrink:0}
+  .header-title{font-size:12px;font-weight:700;font-family:Arial}
+  .header-sub{font-size:9px;color:#7DD3D0;margin-top:1px;font-family:Arial}
+  .header-right{margin-left:auto;font-family:Arial;font-size:9px;color:#7DD3D0;text-align:right}
+
+  /* ── Voorblad ── */
+  .cover{min-height:100vh;display:flex;flex-direction:column;page-break-after:always}
+  .cover-top{background:#0C2340;padding:40px 48px 32px;flex:0}
+  .cover-teal-bar{height:5px;background:#26B5AE}
+  .cover-body{padding:48px 48px 32px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+  .cover-title{font-size:28px;font-weight:700;font-family:Arial;color:#0C2340;line-height:1.2;margin-bottom:8px}
+  .cover-subtitle{font-size:15px;font-family:Arial;color:#1A56A0;margin-bottom:32px}
+  .cover-meta-block{background:#EBF3FF;border-left:4px solid #1A56A0;padding:16px 20px;border-radius:0 4px 4px 0;margin-bottom:24px}
+  .cover-meta-row{display:flex;gap:8px;margin-bottom:5px;font-family:Arial;font-size:10px}
+  .cover-meta-label{color:#6b7280;width:120px;flex-shrink:0}
+  .cover-meta-value{color:#0C2340;font-weight:600}
+  .cover-disclaimer{font-size:9px;color:#9ca3af;font-family:Arial;line-height:1.5;border-top:1px solid #e5e7eb;padding-top:12px;margin-top:auto}
+
+  /* ── Inhoudsopgave ── */
+  .toc-page{page-break-after:always;padding:32px 48px}
+  .toc-title{font-size:18px;font-weight:700;font-family:Arial;color:#0C2340;margin-bottom:4px}
+  .toc-bar{height:3px;background:#26B5AE;width:48px;margin-bottom:24px}
+  .toc-section{margin-bottom:6px;display:flex;align-items:baseline;gap:6px;font-family:Arial}
+  .toc-nr{font-size:10px;color:#1A56A0;font-weight:700;width:24px;flex-shrink:0}
+  .toc-lbl{font-size:11px;color:#0C2340;font-weight:700;flex:1}
+  .toc-sub{margin-bottom:3px;display:flex;align-items:baseline;gap:6px;padding-left:24px;font-family:Arial}
+  .toc-sub .toc-nr{font-size:9px;color:#6b7280;font-weight:400}
+  .toc-sub .toc-lbl{font-size:10px;color:#374151;font-weight:400}
+  .toc-dots{flex:1;border-bottom:1px dotted #d1d5db;margin:0 6px;position:relative;top:-2px}
+  .toc-pg{font-size:10px;color:#1A56A0;font-weight:600;width:20px;text-align:right;flex-shrink:0}
+
+  /* ── Pagina inhoud ── */
+  .content{padding:28px 48px}
+  .page-break{page-break-before:always;padding-top:4px}
+  .meta{color:#6b7280;font-size:9px;margin-bottom:16px;font-family:Arial}
+
+  /* ── Typografie ── */
+  h2{font-family:Arial;font-size:15px;color:#0C2340;padding-bottom:5px;margin:28px 0 6px;font-weight:700;
+     border-bottom:2px solid #1A56A0}
+  h3{font-family:Arial;font-size:12px;color:#0C2340;margin:16px 0 5px;font-weight:700}
+  .section-intro{font-size:10.5px;line-height:1.7;color:#374151;margin-bottom:14px;
+     border-left:3px solid #D0E4F7;padding-left:12px;font-family:Arial}
   .narrative{font-size:11px;line-height:1.75;color:#1a1a1a}
   .narrative p{margin-bottom:10px}
   .narrative strong{font-weight:700;color:#0C2340}
   .narrative em{font-style:italic}
-  /* Aanbeveling blok */
-  .rec-block{background:#fff8f0;border-left:4px solid #f59e0b;padding:12px 16px;
-             border-radius:0 4px 4px 0;margin-top:12px}
-  .rec-block p{margin-bottom:6px;font-size:11px}
-  .rec-block p:last-child{margin-bottom:0}
-  .sub{font-weight:normal;color:#6b7280;font-family:Arial}
-  /* Tabellen */
-  table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:10px;font-family:Arial}
+
+  /* ── Intro-blokken ── */
+  .intro-kader{background:#EBF3FF;border-left:4px solid #1A56A0;padding:12px 16px;border-radius:0 4px 4px 0;margin:14px 0;font-family:Arial;font-size:10.5px;color:#0C2340;line-height:1.6}
+  .intro-kader strong{color:#0C2340}
+  .framework-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  .framework-card{padding:12px 14px;border-radius:4px;font-family:Arial;font-size:10px;line-height:1.55}
+  .fw-daaf{background:#f0f4ff;border:1px solid #c7d7ff}
+  .fw-dictu{background:#E6F7F7;border:1px solid #26B5AE44}
+  .fw-title{font-size:11px;font-weight:700;color:#0C2340;margin-bottom:4px}
+  .fw-sub{font-size:9px;color:#6b7280;margin-bottom:6px}
+  .fw-body{color:#374151}
+
+  /* ── Tabellen ── */
+  table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:10px;font-family:Arial;page-break-inside:avoid}
   th{background:#0C2340;color:white;padding:5px 8px;text-align:left;font-size:10px}
   td{padding:4px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top;font-family:Arial}
   tr:nth-child(even) td{background:#f8fafc}
-  .app-section{margin-bottom:24px;page-break-inside:avoid}
   .scores-table th{background:#1A56A0}
   .dim-table th{background:#065f46}
+
+  /* ── Grafieken + aanbevelingen ── */
   .chart-wrap{margin:10px 0 18px;page-break-inside:avoid;text-align:center}
-  .rec-box{border-radius:3px;padding:8px 12px;margin-bottom:8px}
+  .app-section{margin-bottom:28px;page-break-inside:avoid;border-bottom:1px solid #e5e7eb;padding-bottom:20px}
+  .app-section:last-child{border-bottom:none}
+  .rec-box{border-radius:3px;padding:9px 13px;margin-bottom:8px;page-break-inside:avoid}
   .rec-qw{background:#fffbeb;border-left:3px solid #f59e0b}
   .rec-str{background:#f0fdf4;border-left:3px solid #22c55e}
   .rec-label{font-weight:700;font-size:10px;margin-bottom:3px;font-family:Arial}
   .rec-text{font-size:10px;line-height:1.55;color:#374151;font-family:Arial}
-  .page2{page-break-before:always;padding-top:8px}
-  .footer{margin-top:24px;padding-top:12px;border-top:1px solid #e5e7eb;
-          font-size:9px;color:#9ca3af;text-align:center;font-family:Arial}
+  .sub{font-weight:normal;color:#6b7280;font-family:Arial}
+
+  /* ── Footer ── */
+  .doc-footer{margin-top:32px;padding-top:12px;border-top:1px solid #e5e7eb;
+    font-size:9px;color:#9ca3af;text-align:center;font-family:Arial}
+
   @media print{
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-    .page2{page-break-before:always}
+    .page-break{page-break-before:always}
     .app-section{page-break-inside:avoid}
+    table{page-break-inside:avoid}
+    .chart-wrap{page-break-inside:avoid}
+    .framework-grid{page-break-inside:avoid}
   }
 </style>
 </head>
 <body>
-<div class="header">
-  <div class="logo">NHL<br/>STENDEN</div>
-  <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
-  <div>
-    <div class="header-title">Digitale Soevereiniteitsassessment</div>
-    <div class="header-sub">Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit · ${VERSION}</div>
+
+<!-- ════════════════════════════════════════════════
+     VOORBLAD
+════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-top">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:28px">
+      <div class="logo">NHL<br/>STENDEN</div>
+      <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
+      <div>
+        <div style="font-family:Arial;font-size:11px;font-weight:700;color:white">NHL Stenden Hogeschool</div>
+        <div style="font-family:Arial;font-size:9px;color:#7DD3D0">Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit</div>
+      </div>
+    </div>
+    <div style="height:2px;background:rgba(255,255,255,0.15);margin-bottom:28px"></div>
+    <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">RAPPORTAGE</div>
+    <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">
+      Digitale<br/>Soevereiniteitsassessment
+    </div>
+    <div style="font-family:Arial;font-size:13px;color:#7DD3D0">
+      Portfoliorapportage applicatielandschap · ${datum}
+    </div>
+  </div>
+  <div class="cover-teal-bar"></div>
+  <div class="cover-body">
+    <div>
+      <div class="cover-meta-block">
+        <div class="cover-meta-row"><span class="cover-meta-label">Datum rapport</span><span class="cover-meta-value">${datum}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Versie tool</span><span class="cover-meta-value">${VERSION}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Applicaties</span><span class="cover-meta-value">${visible.length} applicatie${visible.length!==1?"s":""} in selectie</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Naamweergave</span><span class="cover-meta-value">${naamModus}</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Kwartiermaker</span><span class="cover-meta-value">E. van Gorkum</span></div>
+        <div class="cover-meta-row"><span class="cover-meta-label">Ambassadeurs</span><span class="cover-meta-value">J. Haije · E. Rolf · J. Blom</span></div>
+      </div>
+      <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:16px">
+        Dit rapport is opgesteld in opdracht van het College van Bestuur van NHL Stenden Hogeschool, 
+        in het kader van de centrale vraagstelling: <em>"Waar zetten we onze data neer en waar 
+        liggen de potentiële problemen?"</em> Het rapport maakt gebruik van de Digitale 
+        Soevereiniteitsassessment Tool en twee erkende frameworks voor digitale autonomie.
+      </div>
+    </div>
+    <div class="cover-disclaimer">
+      Dit document is vertrouwelijk en bestemd voor intern gebruik binnen NHL Stenden Hogeschool. 
+      Scores en aanbevelingen zijn gebaseerd op de op het moment van assessment beschikbare informatie. 
+      NHL Stenden Hogeschool · Programma Digitale Samenhang · ${VERSION}
+    </div>
   </div>
 </div>
+
+<!-- ════════════════════════════════════════════════
+     INHOUDSOPGAVE
+════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="logo">NHL<br/>STENDEN</div>
+  <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
+  <div><div class="header-title">Digitale Soevereiniteitsassessment</div>
+  <div class="header-sub">Portfoliorapportage · ${datum} · ${VERSION}</div></div>
+  <div class="header-right">${naamModus}</div>
+</div>
+<div class="toc-page">
+  <div class="toc-title">Inhoudsopgave</div>
+  <div class="toc-bar"></div>
+
+  <div class="toc-section"><span class="toc-nr">1.</span><span class="toc-lbl">Inleiding en kader</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.1</span><span class="toc-lbl">Over dit rapport</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.2</span><span class="toc-lbl">Toegepaste frameworks</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.3</span><span class="toc-lbl">Gebruik in het hoger onderwijs</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">2.</span><span class="toc-lbl">Samenvatting</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">3.</span><span class="toc-lbl">Risico-analyse en aanbevelingen</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">4.</span><span class="toc-lbl">Scoreoverzicht — alle applicaties</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">5.</span><span class="toc-lbl">Visuele analyse</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
+  <div class="toc-sub"><span class="toc-nr">5.1</span><span class="toc-lbl">Autonomie-kwadrant (DAAF)</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
+  <div class="toc-sub"><span class="toc-nr">5.2</span><span class="toc-lbl">Dimensieprofiel per applicatie</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
+  <div class="toc-sub"><span class="toc-nr">5.3</span><span class="toc-lbl">Dimensiescores tabel</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
+
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Detailscores en aanbevelingen per applicatie</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
+  ${visible.map((a,i) => `<div class="toc-sub"><span class="toc-nr">${i+1}.</span><span class="toc-lbl">${dName(a)}${a.supplier?` <span style="color:#9ca3af;font-weight:400">— ${a.supplier}</span>`:""}</span><span class="toc-dots"></span><span class="toc-pg">${6+i}</span></div>`).join("")}
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PAGINA 1: INLEIDING
+════════════════════════════════════════════════ -->
+<div class="page-header">
+  <div class="logo">NHL<br/>STENDEN</div>
+  <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
+  <div><div class="header-title">Digitale Soevereiniteitsassessment</div>
+  <div class="header-sub">Portfoliorapportage · ${datum} · ${VERSION}</div></div>
+  <div class="header-right">${naamModus}</div>
+</div>
 <div class="content">
-  <p class="meta">Gegenereerd op: ${datum} · ${visible.length} applicatie${visible.length!==1?"s":""} in selectie · Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum</p>
 
-  <!-- PAGINA 1: Samenvatting + scoreoverzicht -->
-  <h2>Samenvatting</h2>
-  <div class="narrative">${generateSummary(visible)}</div>
+  <h2>1. Inleiding en kader</h2>
+  <div class="section-intro">
+    Dit hoofdstuk beschrijft de aanleiding voor het rapport, de toegepaste frameworks en de bredere context 
+    van digitale soevereiniteit in het Nederlandse hoger onderwijs.
+  </div>
 
-  <h2>Risico-analyse en aanbeveling</h2>
-  <div class="narrative">${generateRisicoConclusion(visible)}</div>
+  <h3>1.1 Over dit rapport</h3>
+  <div class="narrative">
+    <p>Dit rapport bevat de uitkomsten van het digitale soevereiniteitsassessment van 
+    <strong>NHL Stenden Hogeschool</strong>, uitgevoerd in het kader van de 
+    <strong>Ambassadeurslijn Digitale Soevereiniteit</strong> — onderdeel van het Programma 
+    Digitale Samenhang. Het assessment geeft antwoord op de centrale vraag van het College van Bestuur: 
+    <em>"Waar zetten we onze data neer en waar liggen de potentiële problemen?"</em></p>
+    <p>Voor dit rapport zijn <strong>${visible.length} applicatie${visible.length!==1?"s":""}</strong> 
+    beoordeeld. Elke applicatie is geanalyseerd op geopolitiek risico, leveranciersafhankelijkheid, 
+    technische en contractuele weerbaarheid, strategisch belang en technische soevereiniteit. 
+    De scores zijn ingevoerd via de Digitale Soevereiniteitsassessment Tool (${VERSION}) 
+    en zijn gebaseerd op publiek beschikbare informatie, interne kennis en contractuele documentatie.</p>
+  </div>
 
-  <h2>Scoreoverzicht — alle applicaties</h2>
-  <table>
-    <tr><th>Applicatie</th><th>Autonomiescore (1-10)</th><th>Risico ↓</th><th>Mitigatie ↑</th><th>Belang ↓</th><th>DICTU</th><th>Volledigheid</th><th>Status</th></tr>
-    ${rows}
-  </table>
+  <h3>1.2 Toegepaste frameworks</h3>
+  <div class="section-intro">
+    De beoordeling is gebaseerd op twee complementaire en erkende normenkaders voor digitale soevereiniteit.
+  </div>
+  <div class="framework-grid">
+    <div class="framework-card fw-daaf">
+      <div class="fw-title">DAAF — Digital Autonomy Assessment Framework</div>
+      <div class="fw-sub">Utrecht University · Open source · github.com/utrechtuniversity</div>
+      <div class="fw-body">Het DAAF-framework beoordeelt applicaties op drie niveaus: 
+      <strong>Risico-exposure</strong> (geopolitieke en leveranciersrisico's), 
+      <strong>Mitigatie-capaciteit</strong> (technische, organisatorische en contractuele weerbaarheid) 
+      en <strong>Strategisch belang</strong> (impact bij uitval, datagevoeligheid en academische impact). 
+      De uitkomst is een gewogen autonomiescore op een schaal van 1 tot 10. 
+      NHL Stenden past de Quick Scan variant toe met 9 kernindicatoren.</div>
+    </div>
+    <div class="framework-card fw-dictu">
+      <div class="fw-title">DICTU Soevereiniteitscheck</div>
+      <div class="fw-sub">Rijksoverheid / DICTU · Technische soevereiniteit</div>
+      <div class="fw-body">De DICTU Soevereiniteitscheck richt zich specifiek op de technische dimensie 
+      van soevereiniteit. Vier vragen beoordelen: <strong>data residency</strong> (opslag uitsluitend 
+      in de EU), <strong>technische toegangsbeveiliging</strong> (geen leverancierstoegang zonder 
+      toestemming), <strong>juridische bescherming</strong> (leverancier bestrijdt niet-EU 
+      datavorderingen) en <strong>EU-infrastructuur</strong> (control plane volledig in de EU). 
+      Score loopt van 1 (volledig afhankelijk) tot 5 (maximaal soeverein).</div>
+    </div>
+  </div>
 
-  <!-- PAGINA 2: Grafieken -->
-  <div class="page2">
-    <h2>Autonomie-kwadrant (DAAF)</h2>
-    <p style="font-size:10px;color:#6b7280;margin-bottom:8px">
-      Horizontale as = Risico × Belang (verder rechts = urgenter) · Verticale as = Mitigatie (hoger = beter beschermd)
-      · Linksboven = OPTIMAAL · Rechtsboven = KRITIEK
+  <h3>1.3 Gebruik in het hoger onderwijs</h3>
+  <div class="narrative">
+    <p>Digitale soevereiniteit staat breed op de agenda in het Nederlandse hoger onderwijs. 
+    De <strong>Vereniging Hogescholen (VH)</strong> en <strong>SURF</strong> — de ICT-samenwerkingsorganisatie 
+    van onderwijs en onderzoek — werken aan gezamenlijke kaders en richtlijnen voor instellingen 
+    die hun digitale afhankelijkheden in kaart willen brengen. Daarin zijn vier pijlers leidend: 
+    juridische soevereiniteit (onder welk recht valt de leverancier?), technische soevereiniteit 
+    (is data-portabiliteit en exitbaarheid geborgd?), organisatorische soevereiniteit (is er interne 
+    kennis en zijn er exitplannen?) en geopolitieke soevereiniteit (welke risico's brengt de 
+    jurisdictie van de leverancier met zich mee?).</p>
+    <p>NHL Stenden loopt voorop door het DAAF-framework van Utrecht University en de DICTU 
+    Soevereiniteitscheck te combineren in één geïntegreerde assessmenttool. De uitkomsten sluiten 
+    aan bij de digitale strategie van VH en SURF en geven het Programma Digitale Samenhang 
+    concrete handvatten voor prioritering, leveranciersgesprekken en beleidsvorming.</p>
+  </div>
+
+  <!-- PAGINA 2: Samenvatting + analyse -->
+  <div class="page-break">
+    <h2>2. Samenvatting</h2>
+    <div class="section-intro">
+      Een beknopt overzicht van de belangrijkste bevindingen uit het assessment van 
+      ${visible.length} applicatie${visible.length!==1?"s":""}.
+    </div>
+    <div class="narrative">${generateSummary(visible)}</div>
+
+    <h2>3. Risico-analyse en aanbevelingen</h2>
+    <div class="section-intro">
+      Op basis van de assessmentresultaten worden hieronder de belangrijkste risicogebieden 
+      geduid en concrete aanbevelingen geformuleerd voor het Transitieteam Digitalisering.
+    </div>
+    <div class="narrative">${generateRisicoConclusion(visible)}</div>
+  </div>
+
+  <!-- Scoreoverzicht -->
+  <div class="page-break">
+    <h2>4. Scoreoverzicht — alle applicaties</h2>
+    <div class="section-intro">
+      Onderstaande tabel geeft een overzicht van alle beoordeelde applicaties met de 
+      kerncijfers per applicatie. De autonomiescore (1–10) is de centrale uitkomst: 
+      een lagere score betekent urgentere aandacht. Risico en Belang: laag is beter. 
+      Mitigatie: hoog is beter. DICTU: schaal 1–5, hoger is soevereiner.
+    </div>
+    <table>
+      <tr><th>Applicatie</th><th>Autonomie (1-10)</th><th>Risico ↓</th><th>Mitigatie ↑</th><th>Belang ↓</th><th>DICTU ↑</th><th>Volledigheid</th><th>Status</th></tr>
+      ${rows}
+    </table>
+  </div>
+
+  <!-- PAGINA 3: Visuele analyse -->
+  <div class="page-break">
+    <h2>5. Visuele analyse</h2>
+    <div class="section-intro">
+      De onderstaande visualisaties geven op drie manieren inzicht in het applicatieportfolio: 
+      het kwadrant toont de strategische positie, het dimensieprofiel toont de sterktes en 
+      zwaktes per DAAF-dimensie, en de tabel maakt de scores vergelijkbaar.
+    </div>
+
+    <h3>5.1 Autonomie-kwadrant (DAAF)</h3>
+    <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
+      Horizontale as: Risico × Belang (verder rechts = urgenter). Verticale as: Mitigatie (hoger = beter beschermd). 
+      OPTIMAAL (linksboven) · BEHEERSBAAR (rechtsboven) · AANDACHTSPUNT (linksonder) · KRITIEK (rechtsonder).
     </p>
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
 
-    <h2>Dimensieprofiel — per applicatie</h2>
-    <p style="font-size:10px;color:#6b7280;margin-bottom:8px">
-      Gewogen dimensiescores 1–5. Risico-assen (A, B): kleiner is beter.
-      Mitigatie-assen (C, D, E): groter is beter. Belang-assen (F, G, H): kleiner = minder urgent.
+    <h3>5.2 Dimensieprofiel per applicatie</h3>
+    <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
+      Elke balk toont de gewogen score (1–5) voor één DAAF-dimensie. De kleurovergang geeft 
+      direct de richting aan: risico-assen (A, B) — groen links is goed. 
+      Mitigatie-assen (C, D, E) — groen rechts is goed. Stippen = applicaties.
     </p>
     <div class="chart-wrap">${generateSpinSVG(visible)}</div>
 
-    <h2>Dimensiescores per applicatie</h2>
+    <h3>5.3 Dimensiescores per applicatie</h3>
+    <p style="font-size:10px;color:#6b7280;margin-bottom:8px;font-family:Arial">
+      Gewogen dimensiescores (1–5) per applicatie. Groen = goed voor dat type as. Rood = aandacht vereist.
+    </p>
     ${generateDimTable(visible)}
   </div>
 
-  <!-- PAGINA 3+: Detail per applicatie met aanbevelingen -->
-  <div class="page2">
-    <h2>Detailscores en aanbevelingen per applicatie</h2>
+  <!-- PAGINA 4+: Detail per applicatie -->
+  <div class="page-break">
+    <h2>6. Detailscores en aanbevelingen per applicatie</h2>
+    <div class="section-intro">
+      Per applicatie worden alle ingevulde scores, eventuele motivaties en de automatisch 
+      gegenereerde aanbevelingen weergegeven. De aanbevelingen zijn gebaseerd op de kwadrant-positie 
+      en de specifieke score-combinatie van elke applicatie.
+    </div>
     ${kwRows}
   </div>
 
-  <div class="footer">NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · ${VERSION}</div>
+  <div class="doc-footer">
+    NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · 
+    ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
+  </div>
 </div>
 </body>
 </html>`;
@@ -3063,19 +3312,7 @@ export default function App() {
             </div>
           )}
 
-          {/* Danger zone */}
-          {apps.length > 0 && (
-            <div className="mt-6 p-4 rounded" style={{ border:"1px solid #fecaca", background:"#fff5f5" }}>
-              <p className="text-xs font-semibold mb-1" style={{ color:"#dc2626" }}>⚠️ Gevaarlijke zone</p>
-              <p className="text-xs text-gray-500 mb-3">Hiermee worden ALLE applicaties en scores definitief gewist. Niet terug te draaien.</p>
-              <button
-                onClick={() => { setDeleteConfirmText(""); setShowDeleteAll(true); }}
-                className="text-xs px-4 py-2 font-semibold text-white"
-                style={{ background:"#dc2626", borderRadius:4 }}>
-                🗑 Alles wissen
-              </button>
-            </div>
-          )}
+          {/* Danger zone verwijderd — data wissen niet beschikbaar via de interface */}
 
           {/* Bevestigingsmodal alles wissen */}
           {showDeleteAll && (
