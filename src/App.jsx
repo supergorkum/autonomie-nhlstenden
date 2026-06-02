@@ -1544,13 +1544,13 @@ export default function App() {
       if (kritiek.length)   tekst += ` <strong style="color:#b91c1c">${kritiek.length} applicatie${kritiek.length!==1?"s":""} scoort kritiek (&lt;3) en vraagt om directe actie: ${kritiek.map(a=>dName(a)).join(", ")}.</strong>`;
       tekst += `</p>`;
 
-      if (hoogsteRisico) tekst += `<p style="margin-top:6px;">De hoogste risico-exposure wordt gemeten bij <strong>${hoogsteRisico.name}</strong> 
+      if (hoogsteRisico) tekst += `<p style="margin-top:6px;">De hoogste risico-exposure wordt gemeten bij <strong>${dName(hoogsteRisico)}</strong> 
         (risicoscore ${hoogsteRisico.sc.risico?.toFixed(2)}), wat duidt op een combinatie van geopolitieke blootstelling en leveranciersafhankelijkheid. 
-        De sterkste mitigatie-capaciteit toont <strong>${besteInsol.name}</strong> 
+        De sterkste mitigatie-capaciteit toont <strong>${dName(besteInsol)}</strong> 
         (mitigatiescore ${besteInsol.sc.mitigatie?.toFixed(2)}): er zijn alternatieven beschikbaar, de interne kennis is geborgd en de contractuele bescherming is op orde.</p>`;
 
       if (laagsteDictu) tekst += `<p style="margin-top:6px;">Vanuit het DICTU-perspectief (technische en juridische soevereiniteit, schaal 1–5) verdient 
-        <strong>${laagsteDictu.name}</strong> extra aandacht met een soevereiniteitsscore van ${laagsteDictu.sc.dictuAvg?.toFixed(1)}. 
+        <strong>${dName(laagsteDictu)}</strong> extra aandacht met een soevereiniteitsscore van ${laagsteDictu.sc.dictuAvg?.toFixed(1)}. 
         Dit vraagt om nadere controle van datalocatie, sleutelbeheer en juridische beschermingsclausules.</p>`;
 
       if (appsArr.length > 1) {
