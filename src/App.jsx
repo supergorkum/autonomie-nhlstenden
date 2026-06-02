@@ -32,9 +32,20 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.4";
+const VERSION = "v1.5";
 
 const CHANGELOG = [
+  {
+    versie: "v1.5",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Secundaire applicatienaam toegevoegd — elke app kan naast een primaire naam ook een alternatieve weergavenaam krijgen",
+      "Zichtbaarheidsschakelaar in de header — wissel met één klik tussen primaire en secundaire namen (overal tegelijk: dashboard, grafieken, PDF, Excel)",
+      "Beheeromgeving: 'Dummie namen toewijzen' knop voor het automatisch toewijzen van tijdelijke namen aan bestaande apps",
+      "Beheeromgeving: beide namen zichtbaar in de app-kaart (primair + geel secundair label)",
+      "Add-app formulier en bewerk-scherm uitgebreid met veld voor secundaire naam",
+    ]
+  },
   {
     versie: "v1.4",
     datum: "Juni 2026",
@@ -603,7 +614,7 @@ function DivergingChart({ apps, compact = false }) {
         {apps.slice(0,5).map((app,i) => (
           <div key={i} style={{ display:"flex", alignItems:"center", gap:5 }}>
             <div style={{ width:10,height:10,borderRadius:5,background:APP_COLORS[i],flexShrink:0 }}/>
-            <span style={{ fontSize:10, color:"#374151" }}>{app.name.substring(0,18)}</span>
+            <span style={{ fontSize:10, color:"#374151" }}>{displayName(app).substring(0,18)}</span>
           </div>
         ))}
       </div>
@@ -782,7 +793,7 @@ function OpdrachtKaart({ apps }) {
                     Hoog risico ({hoogRisk.length})
                   </p>
                   <p style={{ fontSize:9, color:"#7f1d1d", lineHeight:1.4 }}>
-                    {hoogRisk.map(a => `${a.name} (risico ${a.sc.risico?.toFixed(1)}/5)`).join(" · ")}
+                    {hoogRisk.map(a => `${displayName(a)} (risico ${a.sc.risico?.toFixed(1)}/5)`).join(" · ")}
                   </p>
                 </div>
               )}
@@ -792,7 +803,7 @@ function OpdrachtKaart({ apps }) {
                     Lage weerbaarheid ({laagMit.length})
                   </p>
                   <p style={{ fontSize:9, color:"#7c2d12", lineHeight:1.4 }}>
-                    {laagMit.map(a => `${a.name} (mitigatie ${a.sc.mitigatie?.toFixed(1)}/5)`).join(" · ")}
+                    {laagMit.map(a => `${displayName(a)} (mitigatie ${a.sc.mitigatie?.toFixed(1)}/5)`).join(" · ")}
                   </p>
                 </div>
               )}
@@ -1001,7 +1012,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380 }) {
             <rect x={lx - 32} y={H - 12} width={11} height={11}
               fill={color} fillOpacity={0.6} rx={2} />
             <text x={lx - 17} y={H - 3} fontSize={10} fill="#374151" fontFamily="system-ui">
-              {app.name.substring(0, 14)}
+              {displayName(app).substring(0, 14)}
             </text>
           </g>
         );
@@ -1184,6 +1195,25 @@ export default function App() {
 
   // ── App state ────────────────────────────────────────────────
   const [apps,       setApps]      = useState([]);
+  const [useSecondaryName, setUseSecondaryName] = useState(false);
+
+  // Helper: geeft de juiste naam terug op basis van de zichtbaarheidsschakelaar
+  const displayName = (app) => {
+    if (!app) return "";
+    if (useSecondaryName && app.nameSecondary && app.nameSecondary.trim()) {
+      return app.nameSecondary.trim();
+    }
+    return app.name || "";
+  };
+
+  // Helper: vervangt primaire naam door secondaire (of vice versa) in motivatieteksten
+  const adaptNote = (tekst, app) => {
+    if (!tekst || !app) return tekst;
+    const from = useSecondaryName ? app.name : (app.nameSecondary || "");
+    const to   = useSecondaryName ? (app.nameSecondary || "") : app.name;
+    if (!from || !to || from === to) return tekst;
+    return tekst.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), to);
+  };
   const [ready,      setReady]     = useState(false);
   const [saving,     setSaving]    = useState(false);
   const [saveError,  setSaveError] = useState(false);
@@ -1191,7 +1221,7 @@ export default function App() {
   const [selId,      setSelId]     = useState(null);
   const [step,       setStep]      = useState(0);
   const [showModal,  setShowModal] = useState(false);
-  const [form,       setForm]      = useState({ name:"", cat:"", supplier:"", owner:"", appNotes:"" });
+  const [form,       setForm]      = useState({ name:"", nameSecondary:"", cat:"", supplier:"", owner:"", appNotes:"" });
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
   const [compareHidden, setCompareHidden] = useState(new Set()); // IDs verborgen in vergelijking
 
@@ -1336,11 +1366,11 @@ export default function App() {
     if (!form.name.trim()) return;
     const a = {
       id: Date.now() + "", name: form.name, cat: form.cat,
-      supplier: form.supplier, owner: form.owner, appNotes: form.appNotes,
+      supplier: form.supplier, owner: form.owner, appNotes: form.appNotes, nameSecondary: form.nameSecondary,
       scores: {}, createdAt: new Date().toISOString()
     };
     setApps(p => [...p, a]);
-    setForm({ name:"", cat:"", supplier:"", owner:"", appNotes:"" });
+    setForm({ name:"", nameSecondary:"", cat:"", supplier:"", owner:"", appNotes:"" });
     setShowModal(false);
     setSelId(a.id);
     setStep(0);
@@ -1365,13 +1395,14 @@ export default function App() {
   }
 
   function exportXlsx() {
+    const dName = (a) => (useSecondaryName && a.nameSecondary) ? a.nameSecondary : a.name;
     const wb = XLSX.utils.book_new();
 
     const ws1 = XLSX.utils.aoa_to_sheet([
       ["Applicatie","Leverancier","Categorie","Eigenaar","Autonomiescore (1-10)","Risico","Mitigatie","Belang","DICTU Score (1-5)","Volledigheid (%)"],
       ...apps.map(a => {
         const s = calcScores(a.scores);
-        return [a.name, a.supplier, a.cat, a.owner,
+        return [dName(a), a.supplier, a.cat, a.owner,
           s.autonomyScore ? +s.autonomyScore.toFixed(2) : "",
           s.risico    ? +s.risico.toFixed(2)    : "",
           s.mitigatie ? +s.mitigatie.toFixed(2) : "",
@@ -1385,7 +1416,7 @@ export default function App() {
 
     const ws2 = XLSX.utils.aoa_to_sheet([
       ["Applicatie","Leverancier", ...DAAF.map(d => `${d.key} ${d.name}`), ...DAAF.map(d => `${d.key} Motivatie`)],
-      ...apps.map(a => [a.name, a.supplier,
+      ...apps.map(a => [dName(a), a.supplier,
         ...DAAF.map(d => a.scores[d.key] || ""),
         ...DAAF.map(d => (a.notes || {})[d.key] || "")
       ])
@@ -1394,7 +1425,7 @@ export default function App() {
 
     const ws3 = XLSX.utils.aoa_to_sheet([
       ["Applicatie","Leverancier", ...DICTU.map(q => `${q.key} ${q.name}`), ...DICTU.map(q => `${q.key} Motivatie`)],
-      ...apps.map(a => [a.name, a.supplier,
+      ...apps.map(a => [dName(a), a.supplier,
         ...DICTU.map(q => a.scores[q.key] || ""),
         ...DICTU.map(q => (a.notes || {})[q.key] || "")
       ])
@@ -1434,6 +1465,7 @@ export default function App() {
   }
 
   function exportDashboardPdf() {
+    const dName = (a) => (useSecondaryName && a.nameSecondary) ? a.nameSecondary : a.name;
     const visible = apps.filter(a => !hiddenApps.has(a.id));
     const datum   = new Date().toLocaleDateString("nl-NL", { day:"2-digit", month:"long", year:"numeric" });
     const PCOLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
@@ -1529,7 +1561,7 @@ export default function App() {
         const col = PCOLORS[ai%PCOLORS.length];
         const lx = ai * 105 + 10;
         svg += `<rect x="${lx}" y="6" width="10" height="10" fill="${col}" fill-opacity="0.7" rx="2"/>`;
-        svg += `<text x="${lx+14}" y="15" font-size="9" fill="#374151">${a.name.substring(0,14)}</text>`;
+        svg += `<text x="${lx+14}" y="15" font-size="9" fill="#374151">${displayName(a).substring(0,14)}</text>`;
       });
 
       let y = legendH + 4;
@@ -1736,7 +1768,7 @@ export default function App() {
     const rows = visible.map(a => {
       const s=calcScores(a.scores), lbl=scoreLabel(s.autonomyScore);
       return `<tr>
-        <td><strong>${a.name}</strong>${a.supplier?`<br/><span class="sub">${a.supplier}</span>`:""}</td>
+        <td><strong>${displayName(a)}</strong>${a.supplier?`<br/><span class="sub">${a.supplier}</span>`:""}</td>
         <td style="color:${lbl.fg};font-weight:700">${s.autonomyScore?s.autonomyScore.toFixed(1):"–"}</td>
         <td style="color:#dc2626">${s.risico?s.risico.toFixed(2):"–"}</td>
         <td style="color:#26B5AE">${s.mitigatie?s.mitigatie.toFixed(2):"–"}</td>
@@ -1770,7 +1802,7 @@ export default function App() {
       const lbl=scoreLabel(s.autonomyScore);
       const heeftMotivaties = [...DAAF,...DICTU].some(q => (a.notes||{})[q.key]);
       return `<div class="app-section">
-        <h3>${a.name}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
+        <h3>${displayName(a)}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
           <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
         </h3>
         <table class="scores-table">
@@ -1966,7 +1998,7 @@ export default function App() {
     const kwData = scored
       .filter(a => a.sc.risico && a.sc.mitigatie && a.sc.belang)
       .map(a => ({
-        name: a.name,
+        name: dName(a),
         x: +((a.sc.risico * a.sc.belang).toFixed(2)),
         y: +a.sc.mitigatie.toFixed(2),
         score: a.sc.autonomyScore,
@@ -2028,7 +2060,7 @@ export default function App() {
                       }}>
                       <span className="w-2 h-2 rounded-full flex-shrink-0"
                         style={{ background: hidden ? "#d1d5db" : col }} />
-                      {a.name.substring(0, 22)}
+                      {displayName(a).substring(0, 22)}
                       <span style={{ fontSize:10, marginLeft:2, opacity:0.7 }}>
                         {hidden ? "＋" : "✕"}
                       </span>
@@ -2131,7 +2163,7 @@ export default function App() {
                       <div className="flex items-start gap-2 mb-2">
                         <Gauge score={a.sc.autonomyScore} size={58} />
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-xs truncate" style={{ color:"#0C2340" }}>{a.name}</h3>
+                          <h3 className="font-bold text-xs truncate" style={{ color:"#0C2340" }}>{displayName(a)}</h3>
                           {a.supplier && <p style={{ fontSize:10, color:"#9ca3af" }}>{a.supplier}</p>}
                           <span className="text-xs px-1.5 py-0.5 font-medium mt-1 inline-block"
                             style={{ borderRadius:3, background: lbl.bg, color: lbl.fg, fontSize:10 }}>{lbl.text}</span>
@@ -2297,7 +2329,7 @@ export default function App() {
                              borderLeft:`4px solid ${scoreColor(sc.autonomyScore)}` }}>
                     <Gauge score={sc.autonomyScore} size={64} />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold" style={{ color:"#0C2340" }}>{a.name}</h3>
+                      <h3 className="font-semibold" style={{ color:"#0C2340" }}>{displayName(a)}</h3>
                       <p className="text-xs text-gray-500">{a.supplier}{a.cat ? ` · ${a.cat}` : ""}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs px-2 py-0.5 font-medium" style={{ borderRadius:3, background: lbl.bg, color: lbl.fg }}>
@@ -2342,7 +2374,7 @@ export default function App() {
                 ← Applicaties
               </button>
               <span className="text-gray-300">›</span>
-              <h2 className="font-semibold truncate" style={{ color:"#0C2340" }}>{selApp.name}</h2>
+              <h2 className="font-semibold truncate" style={{ color:"#0C2340" }}>{displayName(selApp)}</h2>
             </div>
 
             {/* Step tabs */}
@@ -2593,7 +2625,7 @@ export default function App() {
     const barData = visibleCompare.map(a => {
       const s = calcScores(a.scores);
       return {
-        name: a.name.substring(0, 16),
+        name: dName(a).substring(0, 16),
         Autonomiescore: s.autonomyScore ? +s.autonomyScore.toFixed(1) : 0,
         "DICTU x2": s.dictuAvg ? +(s.dictuAvg * 2).toFixed(1) : 0
       };
@@ -2630,7 +2662,7 @@ export default function App() {
                         textDecoration:hidden?"line-through":"none"
                       }}>
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:hidden?"#d1d5db":col }}/>
-                      {a.name.substring(0,20)} {hidden?"＋":"✕"}
+                      {displayName(a).substring(0,20)} {hidden?"＋":"✕"}
                     </button>
                   );
                 })}
@@ -2740,7 +2772,7 @@ export default function App() {
                   return (
                     <tr key={a.id} style={{ borderBottom:"1px solid #EBF3FF", cursor:"pointer" }}
                       onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}>
-                      <td className="py-2 px-2 font-medium" style={{ color:"#0C2340" }}>{a.name}</td>
+                      <td className="py-2 px-2 font-medium" style={{ color:"#0C2340" }}>{displayName(a)}</td>
                       <td className="py-2 px-2 text-gray-500">{a.supplier}</td>
                       <td className="py-2 px-2">
                         <span className="px-2 py-0.5 font-semibold text-xs" style={{ borderRadius:3, background:lbl.bg, color:lbl.fg }}>
@@ -2834,6 +2866,20 @@ export default function App() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {apps.some(a => !a.nameSecondary) && (
+                <button onClick={() => {
+                  let counter = 1;
+                  setApps(p => p.map(a => ({
+                    ...a,
+                    nameSecondary: a.nameSecondary || `Dummie ${counter++}`
+                  })));
+                }}
+                className="text-xs px-3 py-1.5 font-medium"
+                style={{ border:"1px solid #fde68a", color:"#92400e", background:"#fffbeb", borderRadius:4 }}
+                title="Wijs 'Dummie 1, 2...' toe als secundaire naam voor apps zonder secundaire naam">
+                🏷 Dummie namen toewijzen
+                </button>
+              )}
               <button onClick={() => setShowChangelog(true)}
                 className="text-xs px-3 py-1.5 font-medium"
                 style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
@@ -2867,6 +2913,12 @@ export default function App() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h3 className="font-bold" style={{ color:"#0C2340" }}>{a.name}</h3>
+                          {a.nameSecondary && (
+                            <span className="text-xs px-2 py-0.5 font-medium"
+                              style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e", borderRadius:3 }}>
+                              🏷 {a.nameSecondary}
+                            </span>
+                          )}
                           {a.supplier && <span className="text-xs text-gray-400">· {a.supplier}</span>}
                           {a.cat && <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#EBF3FF", color:"#1A56A0" }}>{a.cat}</span>}
                         </div>
@@ -2889,7 +2941,7 @@ export default function App() {
                         <button
                           onClick={() => {
                             setEditAppId(a.id);
-                            setEditForm({ name:a.name, cat:a.cat, supplier:a.supplier, owner:a.owner, appNotes:a.appNotes });
+                            setEditForm({ name:a.name, nameSecondary:a.nameSecondary||"", cat:a.cat, supplier:a.supplier, owner:a.owner, appNotes:a.appNotes });
                           }}
                           className="text-xs px-3 py-1.5 font-medium"
                           style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#fff" }}>
@@ -2897,7 +2949,7 @@ export default function App() {
                         </button>
                         <button
                           onClick={() => {
-                            if (confirm(`"${a.name}" definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`)) {
+                            if (confirm(`"${displayName(a)}" definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`)) {
                               setApps(p => p.filter(x => x.id !== a.id));
                               if (selId === a.id) setSelId(null);
                             }
@@ -3006,18 +3058,21 @@ export default function App() {
               <div className="p-6">
                 <div className="space-y-3">
                   {[
-                    { k:"name",     l:"Applicatienaam *" },
-                    { k:"supplier", l:"Leverancier" },
-                    { k:"cat",      l:"Categorie" },
-                    { k:"owner",    l:"Applicatie-eigenaar" },
+                    { k:"name",          l:"Primaire naam *",      hint:"De officiële applicatienaam (bijv. Microsoft Teams)" },
+                    { k:"nameSecondary", l:"Secundaire naam",       hint:"Alternatieve weergavenaam (bijv. Samenwerkingsplatform)" },
+                    { k:"supplier",      l:"Leverancier",           hint:"" },
+                    { k:"cat",           l:"Categorie",             hint:"" },
+                    { k:"owner",         l:"Applicatie-eigenaar",   hint:"" },
                   ].map(f => (
                     <div key={f.k}>
-                      <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>{f.l}</label>
+                      <label className="text-xs font-semibold block mb-0.5" style={{ color:"#0C2340" }}>{f.l}</label>
+                      {f.hint && <p className="text-xs mb-1" style={{ color:"#9ca3af" }}>{f.hint}</p>}
                       <input
                         value={editForm[f.k] || ""}
                         onChange={e => setEditForm(p => ({ ...p, [f.k]: e.target.value }))}
                         className="w-full border px-3 py-2 text-sm focus:outline-none"
-                        style={{ borderColor:"#D0E4F7", borderRadius:4 }}
+                        style={{ borderColor: f.k==="nameSecondary" ? "#D0E4F7" : "#D0E4F7", borderRadius:4,
+                                 background: f.k==="nameSecondary" ? "#fffbeb" : "white" }}
                         onFocus={e => e.target.style.borderColor="#1A56A0"}
                         onBlur={e => e.target.style.borderColor="#D0E4F7"}
                       />
@@ -3043,7 +3098,7 @@ export default function App() {
                     disabled={!editForm.name?.trim()}
                     onClick={() => {
                       setApps(p => p.map(a => a.id === editAppId
-                        ? { ...a, name:editForm.name, cat:editForm.cat, supplier:editForm.supplier, owner:editForm.owner, appNotes:editForm.appNotes }
+                        ? { ...a, name:editForm.name, nameSecondary:editForm.nameSecondary||"", cat:editForm.cat, supplier:editForm.supplier, owner:editForm.owner, appNotes:editForm.appNotes }
                         : a
                       ));
                       setEditAppId(null);
@@ -3441,6 +3496,19 @@ export default function App() {
               ✓ Gesynchroniseerd
             </span>
           )}
+          {/* Naamweergave schakelaar */}
+          {apps.some(a => a.nameSecondary) && (
+            <button onClick={() => setUseSecondaryName(p => !p)}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 font-medium transition-all"
+              style={{
+                background: useSecondaryName ? "rgba(232,119,34,0.25)" : "rgba(255,255,255,0.12)",
+                color: useSecondaryName ? "#f8b87a" : "#cbd5e1",
+                borderRadius: 4, border: `1px solid ${useSecondaryName ? "rgba(232,119,34,0.5)" : "rgba(255,255,255,0.15)"}`,
+              }}
+              title={useSecondaryName ? "Klik om primaire namen te tonen" : "Klik om secundaire namen te tonen"}>
+              {useSecondaryName ? "🏷 Secundaire namen" : "🏷 Primaire namen"}
+            </button>
+          )}
           <button onClick={exportXlsx} disabled={apps.length === 0}
             className="flex items-center gap-2 text-white text-xs px-4 py-2 font-medium transition-all"
             style={{
@@ -3500,17 +3568,19 @@ export default function App() {
             <div className="p-6">
               <div className="space-y-3">
                 {[
-                  { k:"name",     l:"Applicatienaam *", p:"bijv. Microsoft 365" },
-                  { k:"supplier", l:"Leverancier",       p:"bijv. Microsoft" },
-                  { k:"cat",      l:"Categorie",          p:"bijv. Productiviteit, ERP, SIS" },
-                  { k:"owner",    l:"Applicatie-eigenaar",p:"bijv. Functioneel beheerder" },
+                  { k:"name",          l:"Primaire naam *",       p:"bijv. Microsoft 365",         hint:"De officiële applicatienaam" },
+                  { k:"nameSecondary", l:"Secundaire naam",        p:"bijv. Productiviteitsplatform", hint:"Alternatieve weergavenaam (optioneel)", bg:"#fffbeb" },
+                  { k:"supplier",      l:"Leverancier",            p:"bijv. Microsoft",              hint:"" },
+                  { k:"cat",           l:"Categorie",              p:"bijv. Productiviteit, ERP, SIS",hint:"" },
+                  { k:"owner",         l:"Applicatie-eigenaar",    p:"bijv. Functioneel beheerder",  hint:"" },
                 ].map(f => (
                   <div key={f.k}>
-                    <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>{f.l}</label>
-                    <input value={form[f.k]} onChange={e => setForm(p => ({ ...p, [f.k]: e.target.value }))}
+                    <label className="text-xs font-semibold block mb-0.5" style={{ color:"#0C2340" }}>{f.l}</label>
+                    {f.hint && <p className="text-xs mb-1" style={{ color:"#9ca3af" }}>{f.hint}</p>}
+                    <input value={form[f.k] || ""} onChange={e => setForm(p => ({ ...p, [f.k]: e.target.value }))}
                       placeholder={f.p}
                       className="w-full border px-3 py-2 text-sm focus:outline-none"
-                      style={{ borderColor:"#D0E4F7", borderRadius:4 }}
+                      style={{ borderColor:"#D0E4F7", borderRadius:4, background: f.bg || "white" }}
                       onFocus={e => e.target.style.borderColor="#1A56A0"}
                       onBlur={e => e.target.style.borderColor="#D0E4F7"}
                     />
