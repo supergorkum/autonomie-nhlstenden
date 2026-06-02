@@ -1127,19 +1127,14 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick }) {
 }
 
 function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondaryName = false, appName = "", appNameSecondary = "" }) {
-  // Preview: toon hoe de motivatietekst eruitziet met de andere naam
-  // De opgeslagen tekst bevat altijd de primaire naam.
-  // Als toggle op Primair: preview toont hoe het eruitziet MET secundaire naam.
-  // Als toggle op Secundair: de tekst bevat al de primaire naam — toon preview met secundaire naam.
-  const previewNote = React.useMemo(() => {
-    if (!note || !appName || !appNameSecondary || appName === appNameSecondary) return "";
-    // Vervang altijd de primaire naam door de secundaire naam voor de preview
-    const replaced = note.replace(
-      new RegExp(appName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'),
-      appNameSecondary
-    );
-    return replaced !== note ? replaced : "";
-  }, [note, appName, appNameSecondary]);
+  // Bereken de weergavenaam op basis van de toggle
+  const displayedNote = React.useMemo(() => {
+    if (!note || !appName || !appNameSecondary || appName === appNameSecondary) return note;
+    if (useSecondaryName) {
+      return note.replace(new RegExp(appName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), appNameSecondary);
+    }
+    return note;
+  }, [note, useSecondaryName, appName, appNameSecondary]);
   return (
     <div className="mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7", borderRadius:4, padding:16 }}>
       <div className="flex items-start gap-2 mb-3">
@@ -1177,10 +1172,23 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
       <div className="mt-3">
         <label style={{ fontSize:10, color:"#6b7280", fontWeight:600, display:"block", marginBottom:3 }}>
           Motivatie / toelichting score <span style={{ fontWeight:400 }}>(optioneel)</span>
+          {useSecondaryName && appNameSecondary && appName !== appNameSecondary && (
+            <span style={{ marginLeft:6, fontSize:9, color:"#E87722", fontWeight:600 }}>
+              🏷 Weergave: secundaire naam
+            </span>
+          )}
         </label>
         <textarea
-          value={note || ""}
-          onChange={e => onNoteChange && onNoteChange(e.target.value)}
+          value={displayedNote || ""}
+          onChange={e => {
+            if (!onNoteChange) return;
+            // Sla altijd op met de primaire naam — zet secundaire terug als die actief is
+            let tekst = e.target.value;
+            if (useSecondaryName && appNameSecondary && appName && appName !== appNameSecondary) {
+              tekst = tekst.replace(new RegExp(appNameSecondary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), appName);
+            }
+            onNoteChange(tekst);
+          }}
           placeholder="Waarom kies je voor deze score? Voeg context toe voor toekomstig gebruik..."
           rows={2}
           style={{
@@ -1196,18 +1204,6 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
         />
         {note && (
           <p style={{ fontSize:9, color:"#16a34a", marginTop:2 }}>✓ Motivatie opgeslagen</p>
-        )}
-        {/* Preview: toont hoe tekst eruitziet met de secundaire naam */}
-        {previewNote && (
-          <div className="mt-2 rounded px-3 py-2"
-            style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
-            <p style={{ fontSize:9, fontWeight:600, color:"#92400e", marginBottom:2 }}>
-              👁 Weergave met secundaire naam ({appNameSecondary}):
-            </p>
-            <p style={{ fontSize:10, color:"#78350f", lineHeight:1.5, fontStyle:"italic" }}>
-              "{previewNote}"
-            </p>
-          </div>
         )}
       </div>
     </div>
