@@ -1278,6 +1278,7 @@ export default function App() {
   const [saving,     setSaving]    = useState(false);
   const [saveError,  setSaveError] = useState(false);
   const [view,       setView]      = useState("about");
+  const [aboutTab,   setAboutTab]  = useState("over");
   const [selId,      setSelId]     = useState(null);
   const [step,       setStep]      = useState(0);
   const [showModal,  setShowModal] = useState(false);
@@ -3939,7 +3940,6 @@ export default function App() {
   }
 
   function About() {
-    const [aboutTab, setAboutTab] = React.useState("over");
 
     const ABOUT_TABS = [
       { k:"over",    icon:"🏠", label:"Over de tool"      },
