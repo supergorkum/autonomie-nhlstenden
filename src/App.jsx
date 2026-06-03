@@ -2703,29 +2703,29 @@ ${(function(){
   let html2 = '';
   html2 += '<div style="page-break-before:always">';
   html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
-  html2 += '<div style="padding:24px 48px">';
-  html2 += '<h2>Portfoliostatus — Samenvatting</h2>';
-  html2 += '<div class="section-intro">Een compact overzicht van de huidige stand van het portfolio digitale soevereiniteit van NHL Stenden, op basis van de beoordeelde applicaties.</div>';
+  html2 += '<div style="padding:14px 48px 20px">';
+  html2 += '<h2 style="font-family:Arial;font-size:14px;color:#0C2340;padding-bottom:4px;margin:0 0 6px;font-weight:700;border-bottom:2px solid #1A56A0">Portfoliostatus — Samenvatting</h2>';
+  html2 += '<div style="font-size:10px;line-height:1.5;color:#374151;margin-bottom:10px;border-left:3px solid #D0E4F7;padding-left:10px;font-family:Arial">Overzicht portfoliostatus digitale soevereiniteit NHL Stenden per ' + datum + '.</div>';
 
   // Oordeel + kerngetallen
-  html2 += '<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px">';
-  html2 += '<div style="border:2px solid ' + oordeel2.border + ';border-radius:4px;padding:14px 16px;font-family:Arial">';
+  html2 += '<div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px">';
+  html2 += '<div style="border:2px solid ' + oordeel2.border + ';border-radius:4px;padding:10px 12px;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Waar staat NHL Stenden</div>';
   html2 += '<div style="background:' + oordeel2.bg + ';border:1px solid ' + oordeel2.border + ';border-radius:3px;padding:10px 12px;margin-bottom:10px">';
   html2 += '<div style="font-size:11px;font-weight:600;color:' + oordeel2.kleur + ';line-height:1.5">' + oordeel2.tekst + '</div></div>';
-  html2 += '<div style="font-size:10px;color:#374151;line-height:1.6;margin-bottom:12px">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?'s':'') + ' in scope genomen voor de portfolioanalyse digitale soevereiniteit. ' + (sc2.length < visible.length ? 'Van ' + (visible.length-sc2.length) + ' applicatie' + (visible.length-sc2.length!==1?'s':'') + ' is het assessment nog niet volledig ingevuld. ' : '') + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU soevereiniteitscheck.</div>';
-  html2 += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">';
-  html2 += '<div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:8px 10px;border-radius:0 3px 3px 0;font-family:Arial">';
+  html2 += '<div style="font-size:9.5px;color:#374151;line-height:1.5;margin-bottom:8px">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?'s':'') + ' in scope genomen voor de portfolioanalyse digitale soevereiniteit. ' + (sc2.length < visible.length ? 'Van ' + (visible.length-sc2.length) + ' applicatie' + (visible.length-sc2.length!==1?'s':'') + ' is het assessment nog niet volledig ingevuld. ' : '') + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU soevereiniteitscheck.</div>';
+  html2 += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">';
+  html2 += '<div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:6px 8px;border-radius:0 3px 3px 0;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#1A56A0;margin-bottom:4px">Aanleiding</div>';
   html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Digitale soevereiniteit staat breed op de agenda in het hoger onderwijs. NHL Stenden brengt systematisch in kaart hoe afhankelijk de instelling is van externe leveranciers en welke risico\'s dat met zich meebrengt.</div>';
   html2 += '</div>';
-  html2 += '<div style="background:#f0f9f9;border-left:3px solid #26B5AE;padding:8px 10px;border-radius:0 3px 3px 0;font-family:Arial">';
+  html2 += '<div style="background:#f0f9f9;border-left:3px solid #26B5AE;padding:6px 8px;border-radius:0 3px 3px 0;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#26B5AE;margin-bottom:4px">Methodiek</div>';
   html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Twee erkende frameworks: <strong>DAAF</strong> (Utrecht University) beoordeelt autonomie op risico, mitigatie en belang. <strong>DICTU</strong> (Rijksoverheid) toetst technische soevereiniteit op vier dimensies.</div>';
   html2 += '</div>';
-  html2 += '<div style="background:#fff8f0;border-left:3px solid #E87722;padding:8px 10px;border-radius:0 3px 3px 0;font-family:Arial">';
+  html2 += '<div style="background:#fff8f0;border-left:3px solid #E87722;padding:6px 8px;border-radius:0 3px 3px 0;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#E87722;margin-bottom:4px">Wat betekent de score?</div>';
-  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Score 1–10: hoe lager, hoe urgenter de aandacht. Onder 5 is actie gewenst. Boven 7 is de situatie acceptabel. De score combineert risico, weerbaarheid en strategisch belang.</div>';
+  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Score 1–10: hoe lager, hoe urgenter. Onder 5 actie gewenst, boven 7 acceptabel. Combineert risico, weerbaarheid en belang.</div>';
   html2 += '</div>';
   html2 += '</div>';
   html2 += '</div>';
@@ -2734,9 +2734,9 @@ ${(function(){
   html2 += '<div style="display:flex;flex-direction:column;gap:8px">';
   [[avg2 ? avg2.toFixed(1) : "–", "/10", "Gem. autonomiescore", avg2], [avgD2 ? avgD2.toFixed(1) : "–", "/5", "Gem. DICTU-score", avgD2 ? avgD2*2 : null]].forEach(function(k) {
     const c = !k[3] ? "#9ca3af" : k[3]>=7 ? "#16a34a" : k[3]>=5 ? "#ca8a04" : k[3]>=3 ? "#ea580c" : "#dc2626";
-    html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:10px;text-align:center;font-family:Arial;background:white">';
+    html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:7px;text-align:center;font-family:Arial;background:white">';
     html2 += '<div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">' + k[2] + '</div>';
-    html2 += '<div style="font-size:24px;font-weight:700;color:' + c + ';line-height:1">' + k[0] + '<span style="font-size:12px;color:#9ca3af">' + k[1] + '</span></div>';
+    html2 += '<div style="font-size:20px;font-weight:700;color:' + c + ';line-height:1">' + k[0] + '<span style="font-size:11px;color:#9ca3af">' + k[1] + '</span></div>';
     html2 += '</div>';
   });
   // Verdeling
@@ -2750,16 +2750,16 @@ ${(function(){
   html2 += '</div></div></div>';
 
   // Horizontale balkgrafiek
-  html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:14px 16px;font-family:Arial;margin-bottom:16px">';
+  html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:10px 12px;font-family:Arial;margin-bottom:8px">';
   html2 += '<div style="font-size:11px;font-weight:700;color:#0C2340;margin-bottom:4px">Autonomiescore per applicatie</div>';
   html2 += '<div style="font-size:9px;color:#9ca3af;margin-bottom:10px">Gesorteerd van laagste naar hoogste · Gele lijn = grens acceptabel (5) · Groene lijn = grens goed (7)</div>';
   sorted2.forEach(function(a) {
     const s = a.sc.autonomyScore || 0;
     const klr = s >= 7 ? "#16a34a" : s >= 5 ? "#ca8a04" : s >= 3 ? "#ea580c" : "#dc2626";
     const naam = dName(a).substring(0,24);
-    html2 += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">';
+    html2 += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">';
     html2 += '<div style="width:140px;text-align:right;font-size:9px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + dName(a) + '">' + naam + '</div>';
-    html2 += '<div style="flex:1;background:#f1f5f9;border-radius:3px;height:16px;position:relative">';
+    html2 += '<div style="flex:1;background:#f1f5f9;border-radius:3px;height:13px;position:relative">';
     html2 += '<div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:#fbbf24;opacity:0.8"></div>';
     html2 += '<div style="position:absolute;left:70%;top:0;bottom:0;width:1px;background:#4ade80;opacity:0.8"></div>';
     html2 += '<div style="position:absolute;left:0;top:2px;bottom:2px;width:' + ((s/10)*100).toFixed(0) + '%;background:' + klr + ';border-radius:2px;min-width:' + (s>0?3:0) + 'px"></div>';
@@ -2776,7 +2776,7 @@ ${(function(){
   }).slice(0,3);
 
   if (top3pdf.length > 0) {
-    html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:14px 16px;font-family:Arial">';
+    html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:10px 12px;font-family:Arial">';
     html2 += '<div style="font-size:11px;font-weight:700;color:#0C2340;margin-bottom:4px">Top 3 aandachtspunten</div>';
     html2 += '<div style="font-size:9px;color:#9ca3af;margin-bottom:10px">Geselecteerd op combinatie van laagste score en hoogste strategisch belang</div>';
     const mKleur = ["#b91c1c","#c2410c","#a16207"];
@@ -2786,7 +2786,7 @@ ${(function(){
       const klr = sc>=7?"#16a34a":sc>=5?"#ca8a04":sc>=3?"#ea580c":"#dc2626";
       const lbl = sc>=7?"Goed":sc>=5?"Acceptabel":sc>=3?"Zorgwekkend":"Kritiek";
       const lblBg= sc>=7?"#dcfce7":sc>=5?"#fef9c3":sc>=3?"#ffedd5":"#fee2e2";
-      html2 += '<div style="display:flex;gap:10px;padding:10px;background:#f8fafc;border-radius:4px;border-left:3px solid ' + klr + ';margin-bottom:8px;page-break-inside:avoid">';
+      html2 += '<div style="display:flex;gap:8px;padding:7px 10px;background:#f8fafc;border-radius:4px;border-left:3px solid ' + klr + ';margin-bottom:6px;page-break-inside:avoid">';
       html2 += '<div style="width:22px;height:22px;background:' + mKleur[i] + ';color:white;font-weight:700;font-size:11px;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (i+1) + '</div>';
       html2 += '<div style="flex:1">';
       html2 += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">';
@@ -2796,8 +2796,8 @@ ${(function(){
       html2 += '<span style="font-size:10px;font-weight:700;color:' + klr + '">Score: ' + sc.toFixed(1) + '/10</span></div>';
       html2 += '<div style="display:flex;gap:8px">';
       [["Risico",s.risico,"#dc2626"],["Mitigatie",s.mitigatie,"#26B5AE"],["Belang",s.belang,"#E87722"],["DICTU",s.dictuAvg,"#6d28d9"]].forEach(function(d){
-        html2 += '<div style="text-align:center;background:white;border:1px solid #e5e7eb;border-radius:3px;padding:4px 8px;min-width:50px">';
-        html2 += '<div style="font-size:12px;font-weight:700;color:' + (d[1]?d[2]:"#d1d5db") + '">' + (d[1]?d[1].toFixed(1):"–") + '</div>';
+        html2 += '<div style="text-align:center;background:white;border:1px solid #e5e7eb;border-radius:3px;padding:3px 6px;min-width:44px">';
+        html2 += '<div style="font-size:11px;font-weight:700;color:' + (d[1]?d[2]:"#d1d5db") + '">' + (d[1]?d[1].toFixed(1):"–") + '</div>';
         html2 += '<div style="font-size:8px;color:#9ca3af">' + d[0] + '</div></div>';
       });
       html2 += '</div></div></div>';
@@ -5383,15 +5383,7 @@ ${(function(){
               </span>
             </button>
           )}
-          <button onClick={exportXlsx} disabled={apps.length === 0}
-            className="flex items-center gap-2 text-white text-xs px-4 py-2 font-medium transition-all"
-            style={{
-              background: apps.length === 0 ? "rgba(255,255,255,0.1)" : "#26B5AE",
-              opacity: apps.length === 0 ? 0.5 : 1,
-              borderRadius: 4
-            }}>
-            📥 Exporteer Excel
-          </button>
+
         </div>
       </header>
 
