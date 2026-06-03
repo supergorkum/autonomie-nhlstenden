@@ -2703,8 +2703,9 @@ ${(function(){
     : { kleur:"#15803d", bg:"#dcfce7", border:"#86efac", tekst:"Het portfolio is grotendeels op orde. De meeste applicaties zijn acceptabel tot goed beoordeeld. Periodieke monitoring volstaat." };
 
   let html2 = '';
+  html2 += '<div class="page-break">';
   html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
-  html2 += '<div class="page-break" style="padding:24px 48px">';
+  html2 += '<div style="padding:24px 48px">';
   html2 += '<h2>Portfoliostatus — Samenvatting</h2>';
   html2 += '<div class="section-intro">Een compact overzicht van de huidige stand van het portfolio digitale soevereiniteit van NHL Stenden, op basis van de beoordeelde applicaties.</div>';
 
@@ -2714,7 +2715,21 @@ ${(function(){
   html2 += '<div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Waar staat NHL Stenden</div>';
   html2 += '<div style="background:' + oordeel2.bg + ';border:1px solid ' + oordeel2.border + ';border-radius:3px;padding:10px 12px;margin-bottom:10px">';
   html2 += '<div style="font-size:11px;font-weight:600;color:' + oordeel2.kleur + ';line-height:1.5">' + oordeel2.tekst + '</div></div>';
-  html2 += '<div style="font-size:10px;color:#374151;line-height:1.6">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?"s":"") + ' in scope genomen. ' + (sc2.length < visible.length ? "Van " + (visible.length-sc2.length) + " applicatie" + (visible.length-sc2.length!==1?"s":"") + " is het assessment nog niet volledig ingevuld. " : "") + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU soevereiniteitscheck.</div>';
+  html2 += '<div style="font-size:10px;color:#374151;line-height:1.6;margin-bottom:12px">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?'s':'') + ' in scope genomen voor de portfolioanalyse digitale soevereiniteit. ' + (sc2.length < visible.length ? 'Van ' + (visible.length-sc2.length) + ' applicatie' + (visible.length-sc2.length!==1?'s':'') + ' is het assessment nog niet volledig ingevuld. ' : '') + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU soevereiniteitscheck.</div>';
+  html2 += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px">';
+  html2 += '<div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:8px 10px;border-radius:0 3px 3px 0;font-family:Arial">';
+  html2 += '<div style="font-size:9px;font-weight:700;color:#1A56A0;margin-bottom:4px">Aanleiding</div>';
+  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Digitale soevereiniteit staat breed op de agenda in het hoger onderwijs. NHL Stenden brengt systematisch in kaart hoe afhankelijk de instelling is van externe leveranciers en welke risico\'s dat met zich meebrengt.</div>';
+  html2 += '</div>';
+  html2 += '<div style="background:#f0f9f9;border-left:3px solid #26B5AE;padding:8px 10px;border-radius:0 3px 3px 0;font-family:Arial">';
+  html2 += '<div style="font-size:9px;font-weight:700;color:#26B5AE;margin-bottom:4px">Methodiek</div>';
+  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Twee erkende frameworks: <strong>DAAF</strong> (Utrecht University) beoordeelt autonomie op risico, mitigatie en belang. <strong>DICTU</strong> (Rijksoverheid) toetst technische soevereiniteit op vier dimensies.</div>';
+  html2 += '</div>';
+  html2 += '<div style="background:#fff8f0;border-left:3px solid #E87722;padding:8px 10px;border-radius:0 3px 3px 0;font-family:Arial">';
+  html2 += '<div style="font-size:9px;font-weight:700;color:#E87722;margin-bottom:4px">Wat betekent de score?</div>';
+  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Score 1–10: hoe lager, hoe urgenter de aandacht. Onder 5 is actie gewenst. Boven 7 is de situatie acceptabel. De score combineert risico, weerbaarheid en strategisch belang.</div>';
+  html2 += '</div>';
+  html2 += '</div>';
   html2 += '</div>';
 
   // Kerngetallen rechts
@@ -2792,6 +2807,7 @@ ${(function(){
     html2 += '</div>';
   }
 
+  html2 += '</div>';
   html2 += '</div>';
   return html2;
 })()}
