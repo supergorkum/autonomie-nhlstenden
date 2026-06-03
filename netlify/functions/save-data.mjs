@@ -21,7 +21,7 @@ export default async (request) => {
     if (!Array.isArray(data)) {
       return new Response(JSON.stringify({ error: "Invalid payload: expected array" }), { status: 400 });
     }
-    const store = getStore("nhl-sov-data");
+    const store = getStore("nhl-assessment");
     await store.setJSON("apps", data);
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,

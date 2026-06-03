@@ -17,7 +17,7 @@ export default async (request) => {
   }
 
   try {
-    const store = getStore("nhl-sov-data");
+    const store = getStore("nhl-assessment");
     const data = await store.get("apps", { type: "json" });
     return new Response(JSON.stringify(data ?? []), {
       status: 200,
