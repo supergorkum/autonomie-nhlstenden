@@ -51,6 +51,8 @@ const CHANGELOG = [
       "'Over & uitleg' pagina volledig omgebouwd met vier tabbladen: Over de tool, Aan de slag, Scores & grafieken, Tips & beheer",
       "Volgorde logischer: tool-uitleg en frameworks eerst, daarna stap-voor-stap, dan grafieken, dan beheer",
       "Nieuw tabblad 'Bestuur' toegevoegd: bestuurssamenvatting met portfoliostatus, risicografiek en top 3 aandachtspunten",
+      "Nieuw tabblad 'Transparantie' toegevoegd: DAAF-beoordeling van de eigen technische stack (Netlify, Anthropic, GitHub, React)",
+      "Transparantiepagina toont jurisdictie, datalocatie, beveiliging en gegevensstroom per component",
     ]
   },
   {
@@ -3940,6 +3942,255 @@ export default function App() {
     );
   }
 
+  // ── TRANSPARANTIE ─────────────────────────────────────────
+  function Transparantie() {
+
+    const STACK = [
+      {
+        naam: "Netlify",
+        rol: "Hosting, serverless functies en opslag",
+        type: "Hosting & opslag",
+        jurisdictie: "Verenigde Staten",
+        vestiging: "San Francisco, CA — VS",
+        daafA1: 3,
+        daafA1toe: "Adequaatheidsbesluit EU-VS Data Privacy Framework (2023) van kracht, maar CLOUD Act en FISA 702 zijn ongewijzigd. Buitenlandse overheidsinstanties houden potentieel toegang tot data op Amerikaanse servers.",
+        daafA3: 3,
+        daafA3toe: "Netlify Blobs (de opslag van deze applicatie) staat in één primaire regio. Netlify publiceert de exacte regio niet. Op basis van standaard Netlify-configuratie is dit vermoedelijk een Amerikaanse regio (AWS us-east-1 of vergelijkbaar). Geen EU-datalocatiegarantie.",
+        beveiliging: "TLS 1.2+ en AES-256 voor data in transit en at rest. Gratis HTTPS via Let's Encrypt. GDPR-DPA beschikbaar. SOC 2 Type II gecertificeerd.",
+        opmerking: "De assessment-data (scores, applicatienamen, motivaties) wordt opgeslagen in Netlify Blobs. Aanbeveling: exporteer regelmatig naar Excel als lokale back-up.",
+        url: "https://www.netlify.com/security/",
+      },
+      {
+        naam: "Anthropic / Claude API",
+        rol: "AI-model voor tekstverwerking (niet actief in deze app)",
+        type: "AI-dienst",
+        jurisdictie: "Verenigde Staten",
+        vestiging: "San Francisco, CA — VS",
+        daafA1: 4,
+        daafA1toe: "Anthropic is een Amerikaans bedrijf (PBC). Geen EU-adequaatheidsbesluit specifiek voor de API. Standaard contractuele clausules (SCCs) van toepassing. CLOUD Act is van toepassing op data verwerkt via de API.",
+        daafA3: 4,
+        daafA3toe: "API-verwerking vindt primair plaats in VS-datacenters. Anthropic heeft per juni 2026 een datacenter in Memphis (TN) operationeel. Geen EU-regiokeuze beschikbaar voor de standaard API.",
+        beveiliging: "Data die via de API wordt verstuurd wordt versleuteld (TLS). Anthropic slaat geen API-prompts op voor modeltraining zonder expliciete toestemming.",
+        opmerking: "De Claude API wordt in deze applicatie NIET gebruikt voor het verwerken van assessment-data. De app werkt volledig client-side. De Claude API is uitsluitend gebruikt bij de ontwikkeling (code genereren). Er is geen actieve API-verbinding tijdens gebruik.",
+        url: "https://www.anthropic.com/privacy",
+      },
+      {
+        naam: "GitHub",
+        rol: "Versiebeheer en broncode-opslag",
+        type: "Broncode",
+        jurisdictie: "Verenigde Staten",
+        vestiging: "San Francisco, CA — VS (dochter van Microsoft)",
+        daafA1: 3,
+        daafA1toe: "GitHub is een dochteronderneming van Microsoft (VS). EU-VS Data Privacy Framework van toepassing. CLOUD Act-risico aanwezig maar beperkt: de broncode bevat geen persoonsgegevens van gebruikers.",
+        daafA3: 3,
+        daafA3toe: "Broncode wordt opgeslagen op GitHub-servers in de VS. De opgeslagen data betreft uitsluitend applicatiecode, geen gebruikersdata of assessment-scores.",
+        beveiliging: "HTTPS/TLS, tweefactorauthenticatie beschikbaar, repository kan privé worden ingesteld. Microsoft/GitHub SOC 2 gecertificeerd.",
+        opmerking: "De repository supergorkum/stamboom (momenteel privé, te ovewegen: public als open source) bevat uitsluitend de broncode van de applicatie. Geen gebruikersdata.",
+        url: "https://github.com/security",
+      },
+      {
+        naam: "React / Vite (open source)",
+        rol: "Frontend-framework en buildsysteem",
+        type: "Open source software",
+        jurisdictie: "Geen jurisdictie — open source licentie",
+        vestiging: "React: Meta Platforms (VS) — open source onder MIT-licentie. Vite: community open source (MIT).",
+        daafA1: 1,
+        daafA1toe: "Open source software zonder leveranciersrelatie. Geen data-uitwisseling met de ontwikkelende organisatie. Code is publiek verifieerbaar.",
+        daafA3: 1,
+        daafA3toe: "Code wordt lokaal gebundeld tijdens de build en als statische bestanden geserveerd. Geen runtime-verbinding met externe servers van React of Vite.",
+        beveiliging: "Publiek auditeerbare code. Actief onderhouden met regelmatige beveiligingsupdates. NPM-pakketbeheer met bekende kwetsbaarheidsscanners.",
+        opmerking: "Geen afhankelijkheidsrisico richting een commercieel bedrijf. Vervanging door alternatief open source framework is technisch haalbaar.",
+        url: "https://react.dev",
+      },
+    ];
+
+    const daafKleur = (s) => {
+      if (!s) return "#9ca3af";
+      if (s <= 2) return "#16a34a";
+      if (s <= 3) return "#ca8a04";
+      if (s <= 4) return "#ea580c";
+      return "#dc2626";
+    };
+    const daafLabel = (s) => {
+      if (!s) return "–";
+      if (s <= 1) return "1 — EU/EER volledig";
+      if (s <= 2) return "2 — EU/EER beperkt";
+      if (s === 3) return "3 — Adequaat + risico";
+      if (s === 4) return "4 — SCCs, geen adequaat";
+      return "5 — Geen waarborgen";
+    };
+
+    const typeKleur = { "Hosting & opslag":"#1A56A0", "AI-dienst":"#6d28d9", "Broncode":"#374151", "Open source software":"#15803d" };
+
+    return (
+      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+        <div className="p-5 max-w-4xl mx-auto">
+
+          {/* Header */}
+          <div className="rounded p-5 mb-5 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
+                <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
+              </div>
+              <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+              <div>
+                <h1 className="font-bold" style={{ fontSize:17 }}>Transparantie over deze applicatie</h1>
+                <p style={{ fontSize:12, color:"#7DD3D0" }}>Digitale soevereiniteit van het instrument zelf</p>
+              </div>
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
+              Deze pagina beschrijft welke software en diensten ten grondslag liggen aan de Portfolioanalyse Digitale Soevereiniteit,
+              waar die partijen zijn gevestigd, hoe de beveiliging is geregeld en waar de data wordt opgeslagen.
+              Voor elk component zijn de DAAF-indicatoren A1 (jurisdictie) en A3 (datalocatie) beoordeeld
+              op dezelfde schaal die we voor andere applicaties hanteren.
+            </p>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="rounded p-3 mb-5 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
+            <strong>Let op:</strong> De DAAF-scores op deze pagina zijn een eigen inschatting op basis van publiek beschikbare informatie.
+            Voor een formele beoordeling zijn verwerkersovereenkomsten, DPA's en contractuele clausules nodig.
+            De scores voor A1 en A3 zijn weergegeven; de overige DAAF-dimensies (mitigatie, belang) zijn niet beoordeeld
+            omdat dit een interne ontwikkeltool is zonder persoonsgegevens van studenten of medewerkers.
+          </div>
+
+          {/* Stack-kaarten */}
+          <div className="space-y-4 mb-5">
+            {STACK.map((s, i) => (
+              <div key={i} className="rounded" style={{ background:"#fff", border:"1px solid #D0E4F7", overflow:"hidden" }}>
+                {/* Koptekst */}
+                <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom:"1px solid #f1f5f9" }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                      style={{ background:"#0C2340", borderRadius:4 }}>{i+1}</div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>{s.naam}</h3>
+                        <span className="text-xs px-2 py-0.5 rounded font-medium"
+                          style={{ background: typeKleur[s.type] + "18", color: typeKleur[s.type], border:`1px solid ${typeKleur[s.type]}44` }}>
+                          {s.type}
+                        </span>
+                      </div>
+                      <p className="text-xs" style={{ color:"#6b7280" }}>{s.rol}</p>
+                    </div>
+                  </div>
+                  <a href={s.url} target="_blank" rel="noopener noreferrer"
+                    className="text-xs font-medium" style={{ color:"#1A56A0", textDecoration:"none", flexShrink:0 }}>
+                    ↗ Meer info
+                  </a>
+                </div>
+
+                <div className="p-4">
+                  <div className="grid grid-cols-3 gap-4">
+
+                    {/* Vestiging & jurisdictie */}
+                    <div>
+                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Vestiging & jurisdictie</p>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color:"#0C2340" }}>{s.jurisdictie}</p>
+                      <p className="text-xs" style={{ color:"#6b7280" }}>{s.vestiging}</p>
+                    </div>
+
+                    {/* DAAF A1 */}
+                    <div>
+                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A1 — Jurisdictie leverancier</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA1) }}>{s.daafA1}/5</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: daafKleur(s.daafA1) + "18", color: daafKleur(s.daafA1) }}>
+                          {daafLabel(s.daafA1)}
+                        </span>
+                      </div>
+                      <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{s.daafA1toe}</p>
+                    </div>
+
+                    {/* DAAF A3 */}
+                    <div>
+                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A3 — Hosting & datalocatie</p>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA3) }}>{s.daafA3}/5</span>
+                        <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: daafKleur(s.daafA3) + "18", color: daafKleur(s.daafA3) }}>
+                          {daafLabel(s.daafA3)}
+                        </span>
+                      </div>
+                      <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{s.daafA3toe}</p>
+                    </div>
+                  </div>
+
+                  {/* Beveiliging + opmerking */}
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div className="rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                      <p className="text-xs font-bold mb-1" style={{ color:"#0C2340" }}>🔒 Beveiliging</p>
+                      <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{s.beveiliging}</p>
+                    </div>
+                    <div className="rounded p-2.5" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+                      <p className="text-xs font-bold mb-1" style={{ color:"#92400e" }}>📌 Opmerking</p>
+                      <p className="text-xs leading-relaxed" style={{ color:"#78350f" }}>{s.opmerking}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Gegevensstroomoverzicht */}
+          <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Gegevensstroom — wat gaat waarheen</h3>
+            <div className="space-y-2">
+              {[
+                { van:"Gebruiker (browser)", naar:"Netlify Blobs (VS)", data:"Assessment-scores, applicatienamen, motivaties", actie:"Opslaan bij elke wijziging", kleur:"#ea580c" },
+                { van:"Netlify Blobs (VS)", naar:"Gebruiker (browser)", data:"Dezelfde data terug bij laden van de pagina", actie:"Laden bij inloggen", kleur:"#ea580c" },
+                { van:"Gebruiker (browser)", naar:"Lokale download", data:"Excel-exportbestand, PDF-rapport", actie:"Op verzoek van gebruiker", kleur:"#16a34a" },
+                { van:"Broncode (GitHub, VS)", naar:"Netlify (VS)", data:"Applicatiecode — geen gebruikersdata", actie:"Bij elke git push (deploy)", kleur:"#ca8a04" },
+                { van:"Claude API (Anthropic, VS)", naar:"–", data:"Niet actief tijdens gebruik", actie:"Alleen gebruikt bij ontwikkeling", kleur:"#9ca3af" },
+              ].map((r, i) => (
+                <div key={i} className="flex items-start gap-3 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                  <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background:r.kleur }}/>
+                  <div className="flex-1 grid grid-cols-4 gap-2 text-xs">
+                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Van:</span> <span style={{ color:"#374151" }}>{r.van}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Naar:</span> <span style={{ color:"#374151" }}>{r.naar}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Data:</span> <span style={{ color:"#374151" }}>{r.data}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Wanneer:</span> <span style={{ color:"#374151" }}>{r.actie}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Conclusie */}
+          <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"2px solid #E87722" }}>
+            <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Conclusie — soevereiniteitsrisico van dit instrument</h3>
+            <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+              De applicatie draait volledig op Amerikaanse infrastructuur (Netlify, GitHub). De assessment-data van NHL Stenden
+              wordt opgeslagen in Netlify Blobs zonder gegarandeerde EU-datalocatie.
+              Dit is een bewuste pragmatische keuze voor een intern instrument. De data bevat geen persoonsgegevens
+              van studenten of medewerkers — het betreft uitsluitend scores en omschrijvingen van softwareapplicaties.
+            </p>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { titel:"Wat dit betekent", tekst:"Data over het applicatielandschap van NHL Stenden staat op Amerikaanse servers. Bij een juridische vordering onder de CLOUD Act is toegang door Amerikaanse autoriteiten niet uit te sluiten.", kleur:"#ea580c", bg:"#ffedd5" },
+                { titel:"Mitigerende factoren", tekst:"Geen persoonsgegevens. Data is niet bedrijfskritisch in de zin van DPIA. Regelmatige Excel-export biedt lokale back-up. De broncode is volledig inzichtelijk.", kleur:"#ca8a04", bg:"#fef9c3" },
+                { titel:"Aanbeveling", tekst:"Overweeg bij doorontwikkeling migratie naar een EU-hostingpartij (bijv. Cloudflare Pages EU-regio, Hetzner of een Nederlandse aanbieder) en gebruik van een Europese blob-storage dienst.", kleur:"#15803d", bg:"#dcfce7" },
+              ].map(k => (
+                <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
+                  <p className="text-xs font-bold mb-1" style={{ color:k.kleur }}>{k.titel}</p>
+                  <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{k.tekst}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <p className="text-xs" style={{ color:"#9ca3af" }}>
+              NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
+              <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: netlify.com/security, anthropic.com/privacy, github.com/security
+            </p>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   // ── BESTUUR ────────────────────────────────────────────────
   function Bestuur() {
     const scored = apps
@@ -4658,6 +4909,7 @@ export default function App() {
             { k:"compare",   label:"Vergelijking" },
             { k:"bestuur",   label:"📋 Bestuur" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
+            { k:"transparantie", label:"🔍 Transparantie" },
             { k:"admin",     label:"🔐 Beheer" },
           ].map(t => (
             <button key={t.k} onClick={() => setView(t.k)}
@@ -4679,6 +4931,7 @@ export default function App() {
         {view === "compare"   && Compare()}
         {view === "bestuur"   && Bestuur()}
         {view === "about"     && About()}
+        {view === "transparantie" && Transparantie()}
         {view === "admin"     && Admin()}
       </main>
 
