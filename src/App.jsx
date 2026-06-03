@@ -2184,7 +2184,7 @@ export default function App() {
   .cover-disclaimer{font-size:9px;color:#6b7280;font-family:Arial;line-height:1.5;border-top:1px solid #e5e7eb;padding-top:12px;margin-top:auto}
 
   /* ── Inhoudsopgave ── */
-  .toc-page{page-break-before:always;page-break-after:always;padding:32px 48px}
+  .toc-page{page-break-after:always;padding:32px 48px}
   .toc-title{font-size:18px;font-weight:700;font-family:Arial;color:#0C2340;margin-bottom:4px}
   .toc-bar{height:3px;background:#26B5AE;width:48px;margin-bottom:24px}
   .toc-section{margin-bottom:6px;display:flex;align-items:baseline;gap:6px;font-family:Arial}
@@ -2679,6 +2679,143 @@ export default function App() {
     <div class="doc-footer">
     NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · 
     ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
+  </div>
+</div>
+
+${(function(){
+  // ── Portfoliostatus pagina (alleen bij meerdere apps) ────────
+  if (visible.length <= 1) return "";
+
+  const sc2  = visible.map(a => ({ ...a, sc: calcScores(a.scores || {}) })).filter(a => a.sc.autonomyScore);
+  const avg2 = sc2.length ? sc2.reduce((s,a) => s + a.sc.autonomyScore, 0) / sc2.length : null;
+  const avgD2= sc2.filter(a=>a.sc.dictuAvg).length ? sc2.filter(a=>a.sc.dictuAvg).reduce((s,a)=>s+a.sc.dictuAvg,0)/sc2.filter(a=>a.sc.dictuAvg).length : null;
+  const sorted2 = [...sc2].sort((a,b) => (a.sc.autonomyScore||10)-(b.sc.autonomyScore||10));
+  const kritiek2   = sc2.filter(a => a.sc.autonomyScore < 3).length;
+  const zorg2      = sc2.filter(a => a.sc.autonomyScore >= 3 && a.sc.autonomyScore < 5).length;
+  const acceptabel2= sc2.filter(a => a.sc.autonomyScore >= 5 && a.sc.autonomyScore < 7).length;
+  const goed2      = sc2.filter(a => a.sc.autonomyScore >= 7).length;
+
+  const oordeel2 = !sc2.length ? { kleur:"#6b7280", bg:"#f3f4f6", border:"#e5e7eb", tekst:"Nog geen applicaties beoordeeld." }
+    : kritiek2 >= 3 || (kritiek2 > 0 && kritiek2/sc2.length > 0.3)
+    ? { kleur:"#b91c1c", bg:"#fee2e2", border:"#fca5a5", tekst:"Het portfolio bevat " + kritiek2 + " kritieke applicatie" + (kritiek2!==1?"s":"") + " met een hoog autonomierisico en onvoldoende weerbaarheid. Directe besluitvorming is noodzakelijk." }
+    : zorg2 > 0
+    ? { kleur:"#c2410c", bg:"#ffedd5", border:"#fed7aa", tekst:"Het portfolio vraagt aandacht: " + (zorg2+kritiek2) + " applicatie" + ((zorg2+kritiek2)!==1?"s":"") + " scoren onder de acceptabele grens. Gerichte maatregelen zijn gewenst." }
+    : { kleur:"#15803d", bg:"#dcfce7", border:"#86efac", tekst:"Het portfolio is grotendeels op orde. De meeste applicaties zijn acceptabel tot goed beoordeeld. Periodieke monitoring volstaat." };
+
+  let html2 = '';
+  html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
+  html2 += '<div class="page-break" style="padding:24px 48px">';
+  html2 += '<h2>Portfoliostatus — Samenvatting</h2>';
+  html2 += '<div class="section-intro">Een compact overzicht van de huidige stand van het portfolio digitale soevereiniteit van NHL Stenden, op basis van de beoordeelde applicaties.</div>';
+
+  // Oordeel + kerngetallen
+  html2 += '<div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px">';
+  html2 += '<div style="border:2px solid ' + oordeel2.border + ';border-radius:4px;padding:14px 16px;font-family:Arial">';
+  html2 += '<div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Waar staat NHL Stenden</div>';
+  html2 += '<div style="background:' + oordeel2.bg + ';border:1px solid ' + oordeel2.border + ';border-radius:3px;padding:10px 12px;margin-bottom:10px">';
+  html2 += '<div style="font-size:11px;font-weight:600;color:' + oordeel2.kleur + ';line-height:1.5">' + oordeel2.tekst + '</div></div>';
+  html2 += '<div style="font-size:10px;color:#374151;line-height:1.6">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?"s":"") + ' in scope genomen. ' + (sc2.length < visible.length ? "Van " + (visible.length-sc2.length) + " applicatie" + (visible.length-sc2.length!==1?"s":"") + " is het assessment nog niet volledig ingevuld. " : "") + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU soevereiniteitscheck.</div>';
+  html2 += '</div>';
+
+  // Kerngetallen rechts
+  html2 += '<div style="display:flex;flex-direction:column;gap:8px">';
+  [[avg2 ? avg2.toFixed(1) : "–", "/10", "Gem. autonomiescore", avg2], [avgD2 ? avgD2.toFixed(1) : "–", "/5", "Gem. DICTU-score", avgD2 ? avgD2*2 : null]].forEach(function(k) {
+    const c = !k[3] ? "#9ca3af" : k[3]>=7 ? "#16a34a" : k[3]>=5 ? "#ca8a04" : k[3]>=3 ? "#ea580c" : "#dc2626";
+    html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:10px;text-align:center;font-family:Arial;background:white">';
+    html2 += '<div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">' + k[2] + '</div>';
+    html2 += '<div style="font-size:24px;font-weight:700;color:' + c + ';line-height:1">' + k[0] + '<span style="font-size:12px;color:#9ca3af">' + k[1] + '</span></div>';
+    html2 += '</div>';
+  });
+  // Verdeling
+  html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:10px;font-family:Arial;background:white">';
+  html2 += '<div style="font-size:9px;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Verdeling</div>';
+  [["Kritiek", kritiek2, "#fee2e2","#b91c1c","#dc2626"],["Zorgwekkend",zorg2,"#ffedd5","#c2410c","#ea580c"],["Acceptabel",acceptabel2,"#fef9c3","#a16207","#ca8a04"],["Goed",goed2,"#dcfce7","#15803d","#16a34a"]].forEach(function(r){
+    html2 += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">';
+    html2 += '<div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:' + r[4] + '"></div><span style="font-size:10px;color:' + r[3] + ';font-weight:600">' + r[0] + '</span></div>';
+    html2 += '<span style="font-size:10px;font-weight:700;background:' + r[2] + ';color:' + r[3] + ';padding:1px 8px;border-radius:2px">' + r[1] + '</span></div>';
+  });
+  html2 += '</div></div></div>';
+
+  // Horizontale balkgrafiek
+  html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:14px 16px;font-family:Arial;margin-bottom:16px">';
+  html2 += '<div style="font-size:11px;font-weight:700;color:#0C2340;margin-bottom:4px">Autonomiescore per applicatie</div>';
+  html2 += '<div style="font-size:9px;color:#9ca3af;margin-bottom:10px">Gesorteerd van laagste naar hoogste · Gele lijn = grens acceptabel (5) · Groene lijn = grens goed (7)</div>';
+  sorted2.forEach(function(a) {
+    const s = a.sc.autonomyScore || 0;
+    const klr = s >= 7 ? "#16a34a" : s >= 5 ? "#ca8a04" : s >= 3 ? "#ea580c" : "#dc2626";
+    const naam = dName(a).substring(0,24);
+    html2 += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">';
+    html2 += '<div style="width:140px;text-align:right;font-size:9px;color:#374151;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="' + dName(a) + '">' + naam + '</div>';
+    html2 += '<div style="flex:1;background:#f1f5f9;border-radius:3px;height:16px;position:relative">';
+    html2 += '<div style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:#fbbf24;opacity:0.8"></div>';
+    html2 += '<div style="position:absolute;left:70%;top:0;bottom:0;width:1px;background:#4ade80;opacity:0.8"></div>';
+    html2 += '<div style="position:absolute;left:0;top:2px;bottom:2px;width:' + ((s/10)*100).toFixed(0) + '%;background:' + klr + ';border-radius:2px;min-width:' + (s>0?3:0) + 'px"></div>';
+    html2 += '</div>';
+    html2 += '<div style="width:28px;text-align:right;font-size:9px;font-weight:700;color:' + klr + '">' + s.toFixed(1) + '</div></div>';
+  });
+  html2 += '</div>';
+
+  // Top 3
+  const top3pdf = [...sc2].filter(a=>a.sc.autonomyScore<7).sort((a,b)=>{
+    const uA=(10-(a.sc.autonomyScore||10))+(a.sc.belang||0);
+    const uB=(10-(b.sc.autonomyScore||10))+(b.sc.belang||0);
+    return uB-uA;
+  }).slice(0,3);
+
+  if (top3pdf.length > 0) {
+    html2 += '<div style="border:1px solid #D0E4F7;border-radius:4px;padding:14px 16px;font-family:Arial">';
+    html2 += '<div style="font-size:11px;font-weight:700;color:#0C2340;margin-bottom:4px">Top 3 aandachtspunten</div>';
+    html2 += '<div style="font-size:9px;color:#9ca3af;margin-bottom:10px">Geselecteerd op combinatie van laagste score en hoogste strategisch belang</div>';
+    const mKleur = ["#b91c1c","#c2410c","#a16207"];
+    top3pdf.forEach(function(a, i) {
+      const s = a.sc;
+      const sc = s.autonomyScore || 0;
+      const klr = sc>=7?"#16a34a":sc>=5?"#ca8a04":sc>=3?"#ea580c":"#dc2626";
+      const lbl = sc>=7?"Goed":sc>=5?"Acceptabel":sc>=3?"Zorgwekkend":"Kritiek";
+      const lblBg= sc>=7?"#dcfce7":sc>=5?"#fef9c3":sc>=3?"#ffedd5":"#fee2e2";
+      html2 += '<div style="display:flex;gap:10px;padding:10px;background:#f8fafc;border-radius:4px;border-left:3px solid ' + klr + ';margin-bottom:8px;page-break-inside:avoid">';
+      html2 += '<div style="width:22px;height:22px;background:' + mKleur[i] + ';color:white;font-weight:700;font-size:11px;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (i+1) + '</div>';
+      html2 += '<div style="flex:1">';
+      html2 += '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">';
+      html2 += '<span style="font-size:11px;font-weight:700;color:#0C2340">' + dName(a) + '</span>';
+      if (a.supplier) html2 += '<span style="font-size:9px;color:#9ca3af">' + a.supplier + '</span>';
+      html2 += '<span style="font-size:9px;font-weight:600;background:' + lblBg + ';color:' + klr + ';padding:1px 6px;border-radius:2px">' + lbl + '</span>';
+      html2 += '<span style="font-size:10px;font-weight:700;color:' + klr + '">Score: ' + sc.toFixed(1) + '/10</span></div>';
+      html2 += '<div style="display:flex;gap:8px">';
+      [["Risico",s.risico,"#dc2626"],["Mitigatie",s.mitigatie,"#26B5AE"],["Belang",s.belang,"#E87722"],["DICTU",s.dictuAvg,"#6d28d9"]].forEach(function(d){
+        html2 += '<div style="text-align:center;background:white;border:1px solid #e5e7eb;border-radius:3px;padding:4px 8px;min-width:50px">';
+        html2 += '<div style="font-size:12px;font-weight:700;color:' + (d[1]?d[2]:"#d1d5db") + '">' + (d[1]?d[1].toFixed(1):"–") + '</div>';
+        html2 += '<div style="font-size:8px;color:#9ca3af">' + d[0] + '</div></div>';
+      });
+      html2 += '</div></div></div>';
+    });
+    html2 += '</div>';
+  }
+
+  html2 += '</div>';
+  return html2;
+})()}
+
+<!-- ════ EINDPAGINA ════ -->
+<div class="page-header">
+  <div class="logo">NHL<br/>STENDEN</div>
+  <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
+  <div><div class="header-title">${visible.length === 1 ? "Assessment Digitale Soevereiniteit — " + dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit"}</div>
+  <div class="header-sub">NHL Stenden Hogeschool · ${datum} · ${VERSION}</div></div>
+  <div class="header-right">${naamModus}</div>
+</div>
+<div style="page-break-before:always;min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">
+  <div style="width:60px;height:4px;background:#26B5AE;border-radius:2px;margin-bottom:32px"></div>
+  <div style="font-size:9px;color:#9ca3af;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px">Einde rapport</div>
+  <div style="font-size:22px;font-weight:700;color:#0C2340;margin-bottom:8px">
+    ${visible.length === 1 ? dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit"}
+  </div>
+  <div style="font-size:11px;color:#6b7280;margin-bottom:32px">NHL Stenden Hogeschool · ${datum} · ${VERSION}</div>
+  <div style="width:60px;height:4px;background:#1A56A0;border-radius:2px;margin-bottom:40px"></div>
+  <div style="font-size:10px;color:#9ca3af;line-height:1.7;max-width:400px">
+    Dit document is vertrouwelijk en bestemd voor intern gebruik binnen NHL Stenden Hogeschool.<br/>
+    Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit<br/>
+    Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
   </div>
 </div>
 </body>
