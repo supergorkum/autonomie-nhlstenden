@@ -2278,12 +2278,14 @@ export default function App() {
     </div>
     <div style="height:2px;background:rgba(255,255,255,0.15);margin-bottom:28px"></div>
     <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">AUTOMATISCH GEGENEREERDE ANALYSE</div>
-    <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">
-      ${visible.length === 1 ? "Assessment Digitale Soevereiniteit" : "Portfolioanalyse<br/>Digitale Soevereiniteit"}
-    </div>
-    <div style="font-family:Arial;font-size:13px;color:#7DD3D0">
-      ${visible.length === 1 ? (dName(visible[0]) + (visible[0].supplier ? " · " + visible[0].supplier : "") + " · NHL Stenden") : "Applicatielandschap NHL Stenden"} · ${datum}
-    </div>
+    ${visible.length === 1 ? `
+    <div style="font-family:Arial;font-size:13px;font-weight:400;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.02em">Assessment Digitale Soevereiniteit</div>
+    <div style="font-family:Arial;font-size:34px;font-weight:700;color:white;line-height:1.1;margin-bottom:6px">` + dName(visible[0]) + `</div>
+    <div style="font-family:Arial;font-size:13px;color:#7DD3D0;margin-bottom:4px">` + (visible[0].supplier ? visible[0].supplier + " · " : "") + `NHL Stenden Hogeschool · ` + datum + `</div>
+    ` : `
+    <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">Portfolioanalyse<br/>Digitale Soevereiniteit</div>
+    <div style="font-family:Arial;font-size:13px;color:#7DD3D0">Applicatielandschap NHL Stenden · ` + datum + `</div>
+    `}
   </div>
   <div class="cover-teal-bar"></div>
   <div class="cover-body">
@@ -2672,15 +2674,11 @@ export default function App() {
       De kern van de analyse en de aanbevelingen staan in de voorgaande hoofdstukken.
     </div>
     ${kwRows}
-  </div>
-
-
-
     <div class="doc-footer">
-    NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · 
-    ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
+      NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit ·
+      ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
+    </div>
   </div>
-</div>
 
 ${(function(){
   // ── Portfoliostatus pagina (alleen bij meerdere apps) ────────
@@ -2812,30 +2810,24 @@ ${(function(){
   return html2;
 })()}
 
-<!-- ════ EINDPAGINA ════ -->
-<div style="page-break-before:always">
-<div class="page-header">
-  <div class="logo">NHL<br/>STENDEN</div>
-  <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
-  <div><div class="header-title">${visible.length === 1 ? "Assessment Digitale Soevereiniteit — " + dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit"}</div>
-  <div class="header-sub">NHL Stenden Hogeschool · ${datum} · ${VERSION}</div></div>
-  <div class="header-right">${naamModus}</div>
-</div>
-<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">
-  <div style="width:60px;height:4px;background:#26B5AE;border-radius:2px;margin-bottom:32px"></div>
-  <div style="font-size:9px;color:#9ca3af;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px">Einde rapport</div>
-  <div style="font-size:22px;font-weight:700;color:#0C2340;margin-bottom:8px">
-    ${visible.length === 1 ? dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit"}
-  </div>
-  <div style="font-size:11px;color:#6b7280;margin-bottom:32px">NHL Stenden Hogeschool · ${datum} · ${VERSION}</div>
-  <div style="width:60px;height:4px;background:#1A56A0;border-radius:2px;margin-bottom:40px"></div>
-  <div style="font-size:10px;color:#9ca3af;line-height:1.7;max-width:400px">
-    Dit document is vertrouwelijk en bestemd voor intern gebruik binnen NHL Stenden Hogeschool.<br/>
-    Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit<br/>
-    Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
-  </div>
-</div>
-</div>
+${(function(){
+  const appNaam = visible.length === 1 ? dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit";
+  const appSub  = visible.length === 1 ? (visible[0].supplier ? visible[0].supplier + " - " : "") + "NHL Stenden Hogeschool" : "NHL Stenden Hogeschool";
+  const hdrTitel = visible.length === 1 ? "Assessment Digitale Soevereiniteit - " + dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit";
+  let ep = "";
+  ep += '<div style="page-break-before:always">';
+  ep += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">' + hdrTitel + '</div><div class="header-sub">NHL Stenden Hogeschool - ' + datum + ' - ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
+  ep += '<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">';
+  ep += '<div style="width:60px;height:4px;background:#26B5AE;border-radius:2px;margin-bottom:32px"></div>';
+  ep += '<div style="font-size:9px;color:#9ca3af;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px">Einde rapport</div>';
+  ep += '<div style="font-size:24px;font-weight:700;color:#0C2340;margin-bottom:6px;line-height:1.2">' + appNaam + '</div>';
+  ep += '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">' + appSub + '</div>';
+  ep += '<div style="font-size:10px;color:#9ca3af;margin-bottom:32px">' + datum + ' - ' + VERSION + '</div>';
+  ep += '<div style="width:60px;height:4px;background:#1A56A0;border-radius:2px;margin-bottom:40px"></div>';
+  ep += '<div style="font-size:10px;color:#9ca3af;line-height:1.7;max-width:400px">Dit document is vertrouwelijk en bestemd voor intern gebruik binnen NHL Stenden Hogeschool.<br/>Programma Digitale Samenhang - Ambassadeurslijn Digitale Soevereiniteit<br/>Kwartiermaker: E. van Gorkum - Ambassadeurs: J. Haije - E. Rolf - J. Blom</div>';
+  ep += '</div></div>';
+  return ep;
+})()}
 </body>
 </html>`;
 
