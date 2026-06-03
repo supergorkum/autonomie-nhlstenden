@@ -2172,19 +2172,19 @@ export default function App() {
 
   /* ── Voorblad ── */
   .cover{min-height:100vh;display:flex;flex-direction:column;page-break-after:always}
-  .cover-top{background:#0C2340;padding:40px 48px 32px;flex:0}
+  .cover-top{background:#0C2340;padding:40px 48px 32px;flex:0;color:white}
   .cover-teal-bar{height:5px;background:#26B5AE}
-  .cover-body{padding:48px 48px 32px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+  .cover-body{padding:40px 48px 32px;flex:1;display:flex;flex-direction:column;justify-content:space-between;background:white;color:#1a1a1a}
   .cover-title{font-size:28px;font-weight:700;font-family:Arial;color:#0C2340;line-height:1.2;margin-bottom:8px}
   .cover-subtitle{font-size:15px;font-family:Arial;color:#1A56A0;margin-bottom:32px}
   .cover-meta-block{background:#EBF3FF;border-left:4px solid #1A56A0;padding:16px 20px;border-radius:0 4px 4px 0;margin-bottom:24px}
   .cover-meta-row{display:flex;gap:8px;margin-bottom:5px;font-family:Arial;font-size:10px}
   .cover-meta-label{color:#6b7280;width:120px;flex-shrink:0}
   .cover-meta-value{color:#0C2340;font-weight:600}
-  .cover-disclaimer{font-size:9px;color:#9ca3af;font-family:Arial;line-height:1.5;border-top:1px solid #e5e7eb;padding-top:12px;margin-top:auto}
+  .cover-disclaimer{font-size:9px;color:#6b7280;font-family:Arial;line-height:1.5;border-top:1px solid #e5e7eb;padding-top:12px;margin-top:auto}
 
   /* ── Inhoudsopgave ── */
-  .toc-page{page-break-after:always;padding:32px 48px}
+  .toc-page{page-break-before:always;page-break-after:always;padding:32px 48px}
   .toc-title{font-size:18px;font-weight:700;font-family:Arial;color:#0C2340;margin-bottom:4px}
   .toc-bar{height:3px;background:#26B5AE;width:48px;margin-bottom:24px}
   .toc-section{margin-bottom:6px;display:flex;align-items:baseline;gap:6px;font-family:Arial}
@@ -2197,12 +2197,12 @@ export default function App() {
   .toc-pg{font-size:10px;color:#1A56A0;font-weight:600;width:20px;text-align:right;flex-shrink:0}
 
   /* ── Pagina inhoud ── */
-  .content{padding:28px 48px}
-  .page-break{page-break-before:always;padding-top:4px}
+  .content{padding:16px 48px 24px}
+  .page-break{page-break-before:always}
   .meta{color:#6b7280;font-size:9px;margin-bottom:16px;font-family:Arial}
 
   /* ── Typografie ── */
-  h2{font-family:Arial;font-size:15px;color:#0C2340;padding-bottom:5px;margin:28px 0 6px;font-weight:700;
+  h2{font-family:Arial;font-size:15px;color:#0C2340;padding-bottom:5px;margin:8px 0 6px;font-weight:700;
      border-bottom:2px solid #1A56A0}
   h3{font-family:Arial;font-size:12px;color:#0C2340;margin:16px 0 5px;font-weight:700;page-break-after:avoid}
   .section-intro{font-size:10.5px;line-height:1.7;color:#374151;margin-bottom:14px;
@@ -2247,6 +2247,7 @@ export default function App() {
     font-size:9px;color:#9ca3af;text-align:center;font-family:Arial}
 
   @media print{
+    @page{margin:0}
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .page-break{page-break-before:always}
     .app-section{page-break-inside:avoid}
@@ -2254,6 +2255,7 @@ export default function App() {
     .chart-wrap{page-break-inside:avoid}
     .framework-grid{page-break-inside:avoid}
   }
+  @page{margin:0}
 </style>
 </head>
 <body>
@@ -2282,6 +2284,7 @@ export default function App() {
     <div style="font-family:Arial;font-size:13px;color:#7DD3D0">
       ${visible.length === 1 ? (dName(visible[0]) + (visible[0].supplier ? " · " + visible[0].supplier : "") + " · NHL Stenden") : "Applicatielandschap NHL Stenden"} · ${datum}
     </div>
+  </div>
   <div class="cover-teal-bar"></div>
   <div class="cover-body">
     <div>
