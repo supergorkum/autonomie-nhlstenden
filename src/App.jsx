@@ -2195,13 +2195,11 @@ export default function App() {
     <div style="height:2px;background:rgba(255,255,255,0.15);margin-bottom:28px"></div>
     <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">AUTOMATISCH GEGENEREERDE ANALYSE</div>
     <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">
-      ${visible.length === 1 ? \`Assessment Digitale Soevereiniteit\` : \`Portfolioanalyse<br/>Digitale Soevereiniteit\`}
+      ${visible.length === 1 ? "Assessment Digitale Soevereiniteit" : "Portfolioanalyse<br/>Digitale Soevereiniteit"}
     </div>
-    <div style="font-family:Arial;font-size:${r"\${visible.length === 1 ? `18` : `13`}"}px;font-weight:${r"\${visible.length === 1 ? `700` : `400`}"};color:#7DD3D0;margin-bottom:${r"\${visible.length === 1 ? `4` : `0`}"}px">
-      ${r"${visible.length === 1 ? dName(visible[0]) : `Applicatielandschap NHL Stenden · ${datum}`}"}
+    <div style="font-family:Arial;font-size:13px;color:#7DD3D0">
+      ${visible.length === 1 ? (dName(visible[0]) + (visible[0].supplier ? " · " + visible[0].supplier : "") + " · NHL Stenden") : "Applicatielandschap NHL Stenden"} · ${datum}
     </div>
-    ${r"${visible.length === 1 ? `<div style="font-family:Arial;font-size:11px;color:#7DD3D0">${visible[0].supplier ? visible[0].supplier + " · " : ""}NHL Stenden · ${datum}</div>` : ""}"}
-  </div>
   <div class="cover-teal-bar"></div>
   <div class="cover-body">
     <div>
