@@ -2368,7 +2368,7 @@ export default function App() {
   <div class="header-sub">Applicatielandschap NHL Stenden · ${datum} · ${VERSION}</div></div>
   <div class="header-right">${naamModus}</div>
 </div>
-<div class="content">
+<div style="padding:16px 48px 24px">
 
   <h2>1. Inleiding en kader</h2>
   <div class="section-intro">
@@ -2679,6 +2679,7 @@ export default function App() {
       ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
     </div>
   </div>
+</div>
 
 ${(function(){
   // ── Portfoliostatus pagina (alleen bij meerdere apps) ────────
