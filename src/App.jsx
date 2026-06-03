@@ -48,6 +48,8 @@ const CHANGELOG = [
     wijzigingen: [
       "Tekst 'Over & uitleg' gecorrigeerd: verouderde verwijzing naar localStorage verwijderd uit de Data opslaan tip",
       "Stap 6 (Excel exporteren) bijgewerkt: beschrijft nu vijf tabbladen (inclusief Motivaties)",
+      "'Over & uitleg' pagina volledig omgebouwd met vier tabbladen: Over de tool, Aan de slag, Scores & grafieken, Tips & beheer",
+      "Volgorde logischer: tool-uitleg en frameworks eerst, daarna stap-voor-stap, dan grafieken, dan beheer",
     ]
   },
   {
@@ -3937,12 +3939,21 @@ export default function App() {
   }
 
   function About() {
+    const [aboutTab, setAboutTab] = React.useState("over");
+
+    const ABOUT_TABS = [
+      { k:"over",    icon:"🏠", label:"Over de tool"      },
+      { k:"starten", icon:"🚀", label:"Aan de slag"        },
+      { k:"scores",  icon:"📊", label:"Scores & grafieken" },
+      { k:"tips",    icon:"💡", label:"Tips & beheer"      },
+    ];
+
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
         <div className="p-5 max-w-4xl mx-auto">
 
-          {/* Hero */}
-          <div className="rounded p-6 mb-6 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
+          {/* Hero — altijd zichtbaar */}
+          <div className="rounded p-5 mb-4 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
             <div className="flex items-center gap-3 mb-3">
               <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
                 <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
@@ -3954,253 +3965,349 @@ export default function App() {
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
-              De <strong>Portfolioanalyse Digitale Soevereiniteit</strong> is een levend instrument 
-              voor NHL Stenden Hogeschool om per applicatie te beoordelen hoe urgent het 
-              autonomieprobleem is. Geen statisch rapport, maar een realtime tool die continu 
-              actueel blijft naarmate contracten wijzigen of nieuwe inzichten beschikbaar komen. 
-              De tool combineert twee erkende frameworks: <strong>DAAF</strong> (Universiteit Utrecht) 
-              en <strong>DICTU</strong> (Rijksoverheid), en genereert automatisch scores, 
-              aanbevelingen en een volledige rapportage.
+              Een levend instrument voor NHL Stenden Hogeschool om per applicatie te beoordelen hoe urgent het
+              autonomieprobleem is. Combinatie van <strong>DAAF</strong> (Universiteit Utrecht) en <strong>DICTU</strong> (Rijksoverheid).
+              Gebruik de tabbladen hieronder om meer te leren over de tool.
             </p>
           </div>
 
-          {/* Frameworks */}
-          <Section title="Gebruikte frameworks en wat ze meten">
-            <div className="grid grid-cols-2 gap-3 mb-2">
-              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                  <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Digital Autonomy Assessment Framework</span>
-                </div>
-                <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
-                  Ontwikkeld door de Universiteit Utrecht. Het DAAF Framework beoordeelt de digitale autonomie
-                  van een organisatie ten opzichte van haar leveranciers. Het werkt met drie niveaus:
+          {/* Tab-navigatie */}
+          <div className="flex gap-1 mb-5 rounded p-1" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            {ABOUT_TABS.map(t => (
+              <button key={t.k} onClick={() => setAboutTab(t.k)}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-all"
+                style={{
+                  borderRadius: 4,
+                  background: aboutTab === t.k ? "#1A56A0" : "transparent",
+                  color:       aboutTab === t.k ? "#fff"    : "#6b7280",
+                }}>
+                <span>{t.icon}</span>
+                <span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* ── Tab 1: Over de tool ── */}
+          {aboutTab === "over" && <>
+            <Section title="Wat doet deze tool?">
+              <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-sm leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  De <strong>Portfolioanalyse Digitale Soevereiniteit</strong> helpt NHL Stenden om per applicatie
+                  te beoordelen hoe afhankelijk de instelling is van externe leveranciers, en hoe urgent het is
+                  om actie te ondernemen. Geen statisch rapport, maar een realtime tool die je samen invult en
+                  die direct resultaat laat zien.
                 </p>
-                <div className="space-y-1">
+                <div className="grid grid-cols-3 gap-3">
                   {[
-                    { lv:"Niveau 1 · Risico (A, B)",      txt:"Hoe groot is het externe risico — jurisdictie leverancier (A1), hosting & datalocatie (A3) en vendor concentratie (B1)?", c:"#dc2626" },
-                    { lv:"Niveau 2 · Mitigatie (C, D, E)",txt:"Hoe goed kan NHL Stenden risico's beheersen — alternatieven, kennis, contracten?", c:"#26B5AE" },
-                    { lv:"Niveau 3 · Belang (F, G, H)",   txt:"Hoe kritiek is de applicatie — operationeel, data en strategisch belang?",         c:"#E87722" },
-                  ].map(r => (
-                    <div key={r.lv} className="flex gap-2 text-xs">
-                      <span className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background:r.c }}/>
-                      <div><strong style={{ color:r.c }}>{r.lv}:</strong> {r.txt}</div>
+                    { icon:"📋", titel:"Beoordelen",  txt:"Vul per applicatie een assessment in met vragen over jurisdictie, datalocatie, contracten en strategisch belang." },
+                    { icon:"📊", titel:"Vergelijken", txt:"Het dashboard en de vergelijkingspagina tonen alle applicaties naast elkaar. Je ziet direct welke urgent zijn." },
+                    { icon:"📥", titel:"Rapporteren", txt:"Exporteer het volledige overzicht als Excel of genereer een PDF per applicatie voor besluitvorming." },
+                  ].map(k => (
+                    <div key={k.titel} className="rounded p-3 text-center" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                      <div style={{ fontSize:24, marginBottom:6 }}>{k.icon}</div>
+                      <p className="text-xs font-bold mb-1" style={{ color:"#0C2340" }}>{k.titel}</p>
+                      <p className="text-xs" style={{ color:"#6b7280", lineHeight:1.5 }}>{k.txt}</p>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs mt-2 italic" style={{ color:"#9ca3af" }}>Elke dimensie scoort 1–5. De autonomiescore (1–10) volgt uit de formule Mitigatie ÷ (Risico × Belang).</p>
               </div>
+            </Section>
 
-              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #26B5AE44" }}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                  <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Dienst ICT Uitvoering</span>
+            <Section title="Gebruikte frameworks">
+              <div className="grid grid-cols-2 gap-3 mb-2">
+                <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                    <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Digital Autonomy Assessment Framework</span>
+                  </div>
+                  <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
+                    Ontwikkeld door de Universiteit Utrecht. Beoordeelt digitale autonomie ten opzichte van leveranciers in drie niveaus:
+                  </p>
+                  <div className="space-y-1">
+                    {[
+                      { lv:"Niveau 1 · Risico (A, B)",       txt:"Jurisdictie leverancier, hosting & datalocatie, vendor concentratie.",   c:"#dc2626" },
+                      { lv:"Niveau 2 · Mitigatie (C, D, E)", txt:"Alternatieven beschikbaar, kennis in huis, contractuele bescherming.",   c:"#26B5AE" },
+                      { lv:"Niveau 3 · Belang (F, G, H)",    txt:"Operationeel, data-gevoeligheid en academisch belang van de applicatie.", c:"#E87722" },
+                    ].map(r => (
+                      <div key={r.lv} className="flex gap-2 text-xs">
+                        <span className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background:r.c }}/>
+                        <div><strong style={{ color:r.c }}>{r.lv}:</strong> {r.txt}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs mt-2 italic" style={{ color:"#9ca3af" }}>Elke dimensie scoort 1–5. Autonomiescore (1–10) = Mitigatie ÷ (Risico × Belang), logaritmisch genormaliseerd.</p>
                 </div>
-                <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
-                  Framework van het Ministerie van EZK (Rijksoverheid) voor digitale soevereiniteit van clouddiensten.
-                  Vier vragen beoordelen juridische en technische bescherming van klantdata:
+                <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #26B5AE44" }}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
+                    <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Dienst ICT Uitvoering</span>
+                  </div>
+                  <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
+                    Framework van het Ministerie van EZK (Rijksoverheid). Vier vragen over juridische en technische bescherming van klantdata:
+                  </p>
+                  <div className="space-y-1">
+                    {[
+                      { k:"2.1", lbl:"Dataresidency",         txt:"Staat alle data (incl. back-ups) uitsluitend in de EU?" },
+                      { k:"2.2", lbl:"Technische beveiliging", txt:"Zijn er verifieerbare garanties dat niemand de data kan inzien?" },
+                      { k:"2.3", lbl:"Juridische bescherming", txt:"Verzet de aanbieder zich actief tegen niet-EU dataverzoeken?" },
+                      { k:"4.1", lbl:"EU-infrastructuur",      txt:"Bevindt ook de control plane zich volledig in de EU?" },
+                    ].map(r => (
+                      <div key={r.k} className="flex gap-2 text-xs">
+                        <span className="font-bold flex-shrink-0" style={{ color:"#26B5AE", minWidth:28 }}>{r.k}</span>
+                        <div><strong>{r.lbl}:</strong> {r.txt}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs mt-2 italic" style={{ color:"#9ca3af" }}>Score 1–5 per vraag. Gemiddelde = soevereiniteitsscore op de kleurenbalk (rood → groen).</p>
+                </div>
+              </div>
+            </Section>
+          </>}
+
+          {/* ── Tab 2: Aan de slag ── */}
+          {aboutTab === "starten" && <>
+            <Section title="In vier stappen aan de slag">
+              <div className="rounded p-3 mb-4" style={{ background:"#fff", border:"2px solid #1A56A0" }}>
+                <p className="text-xs" style={{ color:"#374151" }}>
+                  <strong>Nieuw hier?</strong> Volg de stappen hieronder. Je kunt op elk moment stoppen en later verdergaan.
+                  Alle data wordt automatisch opgeslagen.
                 </p>
-                <div className="space-y-1">
-                  {[
-                    { k:"2.1 Dataresidency",               txt:"Staat alle data (incl. back-ups) uitsluitend in de EU?" },
-                    { k:"2.2 Technische beveiliging",       txt:"Zijn er verifieerbare garanties dat niemand — ook de aanbieder niet — de data kan inzien?" },
-                    { k:"2.3 Juridische bescherming",       txt:"Verzet de aanbieder zich actief tegen niet-EU dataverzoeken en meldt hij dit?" },
-                    { k:"4.1 EU-infrastructuur",            txt:"Bevindt ook de control plane (beheer van de clouddienst) zich volledig in de EU?" },
-                  ].map(r => (
-                    <div key={r.k} className="flex gap-2 text-xs">
-                      <span className="font-bold flex-shrink-0" style={{ color:"#26B5AE", minWidth:32 }}>{r.k.split(" ")[0]}</span>
-                      <div><strong>{r.k.split(" ").slice(1).join(" ")}:</strong> {r.txt}</div>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs mt-2 italic" style={{ color:"#9ca3af" }}>Score 1–5 per vraag. Gemiddelde = soevereiniteitsscore op de kleurenbalk (rood → groen).</p>
               </div>
-            </div>
-          </Section>
-
-          {/* Wat zegt de score */}
-          <Section title="Hoe lees je het dimensieprofiel?" accent="#1A56A0">
-            <div className="rounded p-4 mb-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
-              <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-                Het dimensieprofiel vervangt het traditionele spindiagram omdat een spindiagram semantisch misleidend is:
-                "een hoge score" betekent niet overal hetzelfde. In het dimensieprofiel heeft elke balk een eigen richting,
-                zodat de kleurovergang direct de kwaliteit aangeeft. Hover over een punt voor applicatienaam en exacte waarde.
-              </p>
-              {/* Groep uitleg */}
-              <div className="grid grid-cols-3 gap-3 mb-3">
+              <div className="space-y-2">
                 {[
-                  { letter:"A, B", naam:"Risico-assen", kleur:"#dc2626", bg:"#fee2e2",
-                    uitleg:"Geopolitiek risico (A) en Leveranciersafhankelijkheid (B). De balk loopt van groen (1, laag risico) naar rood (5, hoog risico). Een punt links in de balk is beter. Hoge scores hier vragen mitigatie of een bewuste keuze." },
-                  { letter:"C, D, E", naam:"Mitigatie-assen", kleur:"#16a34a", bg:"#dcfce7",
-                    uitleg:"Technische (C), Organisatorische (D) en Contractuele (E) weerbaarheid. De balk loopt van rood (1, weinig weerbaarheid) naar groen (5, sterke weerbaarheid). Een punt rechts in de balk is beter." },
-                  { letter:"F, G, H", naam:"Belang-assen", kleur:"#d97706", bg:"#ffedd5",
-                    uitleg:"Organisatorisch belang (F), Data-gevoeligheid (G) en Academische impact (H). De balk loopt van licht naar donkeroranje. Hoge belang-scores zijn niet per se slecht, maar ze verhogen de urgentie van risico- en mitigatiescores." },
-                ].map(g => (
-                  <div key={g.letter} className="rounded p-3" style={{ background:g.bg, border:`1px solid ${g.kleur}44` }}>
-                    <div className="flex items-center gap-1.5 mb-1.5">
-                      <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background:g.kleur, color:"#fff", fontSize:9 }}>{g.letter}</span>
-                      <span className="text-xs font-bold" style={{ color:g.kleur }}>{g.naam}</span>
-                    </div>
-                    <p style={{ fontSize:9.5, color:"#374151", lineHeight:1.5 }}>{g.uitleg}</p>
-                  </div>
-                ))}
-              </div>
-              {/* Schaal + kleuruitleg */}
-              <div className="rounded p-3 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Hoe werkt de kleurovergang?</p>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { titel:"Risico-assen (A, B)", gradient:"linear-gradient(to right,#dcfce7,#fef9c3,#fca5a5,#dc2626)", tekst:"Groen = laag risico (goed). Rood = hoog risico. Een punt helemaal links (score 1) is ideaal." },
-                    { titel:"Mitigatie-assen (C, D, E)", gradient:"linear-gradient(to right,#dc2626,#fca5a5,#fde68a,#86efac,#16a34a)", tekst:"Rood = weinig weerbaarheid. Groen = sterk weerbaar. Een punt helemaal rechts (score 5) is ideaal." },
-                  ].map(g => (
-                    <div key={g.titel}>
-                      <p style={{ fontSize:10, fontWeight:600, color:"#0C2340", marginBottom:4 }}>{g.titel}</p>
-                      <div style={{ height:18, borderRadius:3, background:g.gradient, marginBottom:4 }} />
-                      <p style={{ fontSize:9, color:"#6b7280" }}>{g.tekst}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              {/* Vergelijken */}
-              <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Applicaties vergelijken</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { titel:"Punten dicht bij elkaar", tekst:"Als punten van meerdere applicaties op dezelfde positie staan, hebben ze een vergelijkbaar profiel op die dimensie. Zo ontdek je snel gemeenschappelijke risico's." },
-                    { titel:"Punten ver uit elkaar", tekst:"Grote spreiding op één as betekent dat applicaties fundamenteel verschillen op die dimensie. Bijv. goede vs. slechte contractuele bescherming — prioriteer de applicatie met het slechtste punt." },
-                    { titel:"Risico hoog + mitigatie laag", tekst:"Als een applicatie een punt rechts in een risico-balk heeft én een punt links in een mitigatie-balk, combineer je een hoog risico met een lage weerbaarheid — dit vraagt directe actie." },
-                    { titel:"Belang hoog + risico/mitigatie zwak", tekst:"Een hoge belang-score maakt een slechte risico- of mitigatiescore urgenter. Gebruik dit inzicht voor prioritering in het actieplan." },
-                  ].map(t => (
-                    <div key={t.titel} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
-                      <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:3 }}>📌 {t.titel}</p>
-                      <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.5 }}>{t.tekst}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Section>
-          <Section title="Wat zegt de score? — De urgentie van het autonomieprobleem" accent="#E87722">
-            <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"2px solid #E87722" }}>
-              <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>
-                De autonomiescore is géén maat voor "hoe digitaal autonoom is deze applicatie" —
-                maar voor <em>"hoe urgent is het autonomieprobleem?"</em>
-              </p>
-              <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-                De score combineert drie dingen: hoe groot is het risico, hoe goed kun je het beheersen, en hoe belangrijk is de applicatie.
-                Twee applicaties met dezelfde score kunnen een heel verschillende situatie beschrijven.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded p-3" style={{ background:"#dcfce7", border:"1px solid #86efac" }}>
-                  <p className="text-xs font-bold mb-1" style={{ color:"#15803d" }}>✓ Hoge score (7+) — geen acute actie</p>
-                  <p className="text-xs" style={{ color:"#166534" }}>
-                    Kan twee dingen betekenen: de risico's zijn goed gemitigeerd (alternatieven beschikbaar,
-                    sterke contracten, kennis in huis), óf de applicatie heeft weinig strategisch belang.
-                    Beide situaties zijn positief: er is geen acute actie nodig. Monitor periodiek.
-                  </p>
-                </div>
-                <div className="rounded p-3" style={{ background:"#fee2e2", border:"1px solid #fca5a5" }}>
-                  <p className="text-xs font-bold mb-1" style={{ color:"#b91c1c" }}>✗ Lage score (&lt;5) — actie vereist</p>
-                  <p className="text-xs" style={{ color:"#7f1d1d" }}>
-                    Er is een combinatie van hoog risico, zwakke mitigatie en/of hoog strategisch belang.
-                    Kies één van drie acties: <strong>migreren</strong> (lagere risicoleverancier),
-                    <strong> mitigeren</strong> (weerbaarheid opbouwen) of <strong>bewust accepteren</strong> met besluitvorming.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <Tip label="Waar zit de verbetermarge?" color="#1A56A0" bg="#EBF3FF">
-              Strategisch belang (Niveau 3) ligt grotendeels vast — een applicatie wordt niet minder belangrijk.
-              Verbeteringen zitten in Risico-exposure verlagen (Niveau 1, bijv. migreren naar EU-aanbieder)
-              en Mitigatie-capaciteit verhogen (Niveau 2, bijv. alternatieven ontwikkelen, contracten versterken, kennis opbouwen).
-              Gebruik de drie niveauscores apart in het dashboard om te bepalen waar de grootste winst te behalen is.
-            </Tip>
-          </Section>
-
-          {/* Hoe werkt de applicatie */}
-          <Section title="Hoe werkt de applicatie — stap voor stap">
-            <div className="space-y-2">
-              {[
-                { n:"1", title:"Applicatie toevoegen", icon:"➕",
-                  txt:'Klik op "+ Applicatie toevoegen" in het dashboard of via het tabblad Applicaties. Vul naam, leverancier, categorie en eigenaar in. De applicatie wordt direct opgeslagen.' },
-                { n:"2", title:"Assessment invullen — DAAF Quick Scan", icon:"📋",
-                  txt:'Ga naar het tabblad van de applicatie. Stap 1 toont de 8 DAAF-vragen verdeeld over drie niveaus. Klik op de gewenste score (1–5) per vraag. De live sidebar rechtsboven toont direct hoe de scores uitpakken.' },
-                { n:"3", title:"Assessment invullen — DICTU Soevereiniteitscheck", icon:"🔍",
-                  txt:'Stap 2 toont de 4 DICTU-vragen over datasoevereiniteit. Per vraag staat de norm vermeld (wat is het minimale vereiste niveau). Scores worden direct verwerkt in de kleurenbalk.' },
-                { n:"4", title:"Dashboard lezen", icon:"📊",
-                  txt:'Het dashboard toont per applicatie de autonomiescore (snelheidsmeter, DAAF) en soevereiniteitsscore (kleurenbalk, DICTU). Het spindiagram vergelijkt alle applicaties per DAAF-dimensie. Het kwadrant plaatst applicaties op de assen Risico×Belang vs. Mitigatie.' },
-                { n:"5", title:"Vergelijken", icon:"🔎",
-                  txt:'Het tabblad Vergelijking toont een staafdiagram en tabel met alle applicaties naast elkaar. Klik op een rij om direct naar het assessment te gaan.' },
-                { n:"6", title:"Excel exporteren", icon:"📥",
-                  txt:'Klik op "Exporteer Excel" in de header. Het bestand bevat vijf tabbladen: Overzicht (alle scores), DAAF scores, DICTU scores, de volledige vragenlijst met normen en een Motivaties overzicht.' },
-                { n:"7", title:"Beheer", icon:"🔐",
-                  txt:'Via het tabblad Beheer (pincode vereist) kun je applicatiegegevens aanpassen, applicaties verwijderen en een volledig overzicht per applicatie bekijken inclusief alle ingevulde scores.' },
-              ].map(s => (
-                <div key={s.n} className="flex gap-3 rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                  <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
-                    style={{ background:"#1A56A0", borderRadius:4 }}>{s.n}</div>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>{s.icon} {s.title}</p>
-                    <p className="text-xs leading-relaxed mt-0.5" style={{ color:"#6b7280" }}>{s.txt}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          {/* Berekening */}
-          <Section title="De berekening in vier stappen" accent="#26B5AE">
-            <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="grid grid-cols-4 gap-3 mb-3">
-                {[
-                  { n:"1", lbl:"Dimensiescore", txt:"Per dimensie (A t/m H): gemiddelde van de ingevulde indicatorscores (1–5).", c:"#1A56A0" },
-                  { n:"2", lbl:"Niveauscore",   txt:"Per niveau (Risico, Mitigatie, Belang): gemiddelde van de bijbehorende dimensiescores.", c:"#26B5AE" },
-                  { n:"3", lbl:"Ruwe score",    txt:"Mitigatie ÷ (Risico × Belang). Bereik: 0,04 (slechtst) tot 5,0 (best).", c:"#E87722" },
-                  { n:"4", lbl:"Normalisatie",  txt:"Logaritmische schaal zet de ruwe score om naar 1–10, zodat verschillen zichtbaar en vergelijkbaar zijn.", c:"#6d28d9" },
+                  { n:"1", icon:"➕", title:"Applicatie toevoegen",
+                    txt:'Klik op "+ Applicatie toevoegen" in het dashboard of het tabblad Applicaties. Vul naam, leverancier, categorie en eigenaar in. De applicatie wordt direct opgeslagen en verschijnt in het overzicht.',
+                    tip:"Begin met de applicaties die je het meest kritisch acht — je kunt er altijd meer toevoegen." },
+                  { n:"2", icon:"📋", title:"DAAF Quick Scan invullen",
+                    txt:'Open de applicatie en ga naar Stap 1. Je ziet 8 vragen verdeeld over drie niveaus: Risico, Mitigatie en Belang. Klik op de score (1–5) die het best past. Per vraag staat een uitgebreide toelichting en omschrijving per score.',
+                    tip:"De live sidebar rechtsboven toont direct hoe je scores uitpakken in de einduitkomst." },
+                  { n:"3", icon:"🔍", title:"DICTU Soevereiniteitscheck invullen",
+                    txt:'Ga naar Stap 2 van het assessment. Vier vragen over dataresidency, technische beveiliging, juridische bescherming en EU-infrastructuur. Scores worden direct zichtbaar in de kleurenbalk op het dashboard.',
+                    tip:"Voeg per vraag een motivatietekst toe — die wordt meegenomen in de Excel en PDF export." },
+                  { n:"4", icon:"📊", title:"Dashboard en vergelijking lezen",
+                    txt:'Na het invullen van meerdere applicaties toont het dashboard het volledige portfolio. Het autonomiekwadrant laat zien welke applicaties urgente aandacht vragen. Het tabblad Vergelijking plaatst alle applicaties naast elkaar.',
+                    tip:"Klik op een punt in het kwadrant om direct naar het assessment van die applicatie te gaan." },
                 ].map(s => (
-                  <div key={s.n} className="text-center rounded p-3" style={{ background:"#f8fafc", border:`2px solid ${s.c}33` }}>
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold mx-auto mb-2"
-                      style={{ background:s.c }}>{s.n}</div>
-                    <p className="text-xs font-bold mb-1" style={{ color:s.c }}>{s.lbl}</p>
-                    <p className="text-xs" style={{ color:"#6b7280" }}>{s.txt}</p>
+                  <div key={s.n} className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                    <div className="flex gap-3">
+                      <div className="w-9 h-9 flex items-center justify-center flex-shrink-0 text-white font-bold"
+                        style={{ background:"#1A56A0", borderRadius:4, fontSize:15 }}>{s.n}</div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold mb-1" style={{ color:"#0C2340" }}>{s.icon} {s.title}</p>
+                        <p className="text-xs leading-relaxed" style={{ color:"#6b7280" }}>{s.txt}</p>
+                        <div className="mt-2 rounded px-2 py-1.5 text-xs" style={{ background:"#EBF3FF", color:"#1A56A0" }}>
+                          💡 {s.tip}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="rounded p-2 text-xs" style={{ background:"#EBF3FF", color:"#374151" }}>
-                <strong>Waarom logaritmisch?</strong> De formule deelt Mitigatie (max 5) door Risico×Belang (max 25).
-                Daardoor liggen de meeste ruwe scores tussen 0,1 en 0,5. Zonder correctie zou 90% van de applicaties
-                een eindscore tussen 1 en 3 krijgen — onbruikbaar voor vergelijking.
-                De logaritmische schaal spreidt scores uit over het volledige bereik van 1 tot 10.
+            </Section>
+
+            <Section title="Exporteren" accent="#26B5AE">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                  <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>📥 Excel exporteren</p>
+                  <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
+                    Klik op "Exporteer Excel" in de header. Het bestand bevat vijf tabbladen:
+                  </p>
+                  {["Overzicht — alle scores per applicatie", "DAAF scores — per indicator inclusief motivatie", "DICTU scores — per vraag inclusief motivatie", "Vragenlijst — alle vragen met normen", "Motivaties — volledig overzicht toelichtingen"].map(t => (
+                    <div key={t} className="flex gap-2 text-xs mb-1">
+                      <span style={{ color:"#26B5AE", fontWeight:700 }}>→</span>
+                      <span style={{ color:"#374151" }}>{t}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                  <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>📄 PDF exporteren</p>
+                  <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
+                    Klik op de PDF-knop in het dashboard (per applicatie) of boven het kwadrant (volledig portfolio). De PDF bevat:
+                  </p>
+                  {["Voorblad met naam, datum en versie", "Inhoudsopgave", "Frameworkuitleg (DAAF + DICTU)", "Scores, kwadrantpositie en aanbevelingen per app"].map(t => (
+                    <div key={t} className="flex gap-2 text-xs mb-1">
+                      <span style={{ color:"#E87722", fontWeight:700 }}>→</span>
+                      <span style={{ color:"#374151" }}>{t}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          </Section>
+            </Section>
+          </>}
 
-          {/* Praktische tips */}
-          <Section title="Praktische tips voor het team">
-            <div className="grid grid-cols-2 gap-3">
-              <Tip label="💾 Data opslaan" color="#1A56A0" bg="#EBF3FF">
-                Alle data wordt automatisch opgeslagen op de server (Netlify Blobs). Iedereen die inlogt ziet dezelfde data, ongeacht browser of apparaat. Je kunt het venster sluiten en later verdergaan.
-                Exporteer regelmatig een Excel-backup als extra back-up.
+          {/* ── Tab 3: Scores & grafieken ── */}
+          {aboutTab === "scores" && <>
+            <Section title="Wat betekent de autonomiescore?" accent="#E87722">
+              <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"2px solid #E87722" }}>
+                <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>
+                  De score meet <em>de urgentie van het autonomieprobleem</em>, niet hoe autonoom een applicatie is.
+                </p>
+                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  De score combineert risico, mitigatie en belang. Twee applicaties met dezelfde eindscore kunnen
+                  een heel verschillende situatie beschrijven. Kijk altijd ook naar de drie niveauscores apart.
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded p-3" style={{ background:"#dcfce7", border:"1px solid #86efac" }}>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#15803d" }}>✓ Hoge score (7+) — geen acute actie</p>
+                    <p className="text-xs" style={{ color:"#166534" }}>
+                      Risico's zijn goed gemitigeerd (alternatieven beschikbaar, sterke contracten, kennis aanwezig),
+                      óf de applicatie heeft weinig strategisch belang. Monitor periodiek.
+                    </p>
+                  </div>
+                  <div className="rounded p-3" style={{ background:"#fee2e2", border:"1px solid #fca5a5" }}>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#b91c1c" }}>✗ Lage score (&lt;5) — actie vereist</p>
+                    <p className="text-xs" style={{ color:"#7f1d1d" }}>
+                      Combinatie van hoog risico, zwakke mitigatie en/of hoog belang.
+                      Kies: <strong>migreren</strong>, <strong>mitigeren</strong> of <strong>bewust accepteren</strong> met besluitvorming.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <Tip label="Waar zit de verbetermarge?" color="#1A56A0" bg="#EBF3FF">
+                Strategisch belang (Niveau 3) ligt grotendeels vast. Verbeteringen zitten in Risico verlagen
+                (bijv. migreren naar EU-aanbieder) en Mitigatie verhogen (alternatieven ontwikkelen, contracten
+                versterken, kennis opbouwen). Gebruik de drie niveauscores om te bepalen waar de grootste winst zit.
               </Tip>
-              <Tip label="👥 Meerdere beoordelaars" color="#26B5AE" bg="#E6F7F7">
-                Laat elke beoordelaar het assessment onafhankelijk invullen. Exporteer afzonderlijk naar Excel en
-                vergelijk de scores. Bespreek grote afwijkingen in het team — die geven vaak de meest waardevolle inzichten.
-              </Tip>
-              <Tip label="📋 Welke vragen gebruik je?" color="#E87722" bg="#fff8e1">
-                Deze tool gebruikt een selectie van het volledige DAAF en DICTU framework: de DAAF Quick Scan
-                (8 kernindicatoren, één per dimensie) en 4 relevante DICTU-vragen voor soevereiniteit.
-                Voor een volledig DAAF assessment met wegingen raadpleeg de Utrecht University tool.
-              </Tip>
-              <Tip label="🎯 Wat doe je met de uitkomst?" color="#6d28d9" bg="#faf5ff">
-                Bespreek het kwadrant in het team. Applicaties rechtsonder (KRITIEK) vragen urgente actie.
-                Bepaal per applicatie: migreren, mitigeren of bewust accepteren. Leg de keuze vast met een besluitdocument.
-                Herhaal het assessment na significante contractwijzigingen of leveranciersveranderingen.
-              </Tip>
-            </div>
-          </Section>
+            </Section>
 
-          {/* Footer */}
-          <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <Section title="Hoe lees je het dimensieprofiel?" accent="#1A56A0">
+              <div className="rounded p-4 mb-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  Het dimensieprofiel toont per as een gekleurde balk. Anders dan een spindiagram heeft elke balk
+                  een eigen richting: "hoge score" betekent niet overal hetzelfde. Hover over een punt voor de exacte waarde.
+                </p>
+                <div className="grid grid-cols-3 gap-3 mb-3">
+                  {[
+                    { letter:"A, B", naam:"Risico-assen", kleur:"#dc2626", bg:"#fee2e2",
+                      uitleg:"Geopolitiek risico (A) en Leveranciersafhankelijkheid (B). Groen = laag risico, rood = hoog risico. Links is beter." },
+                    { letter:"C, D, E", naam:"Mitigatie-assen", kleur:"#16a34a", bg:"#dcfce7",
+                      uitleg:"Technische (C), Organisatorische (D) en Contractuele (E) weerbaarheid. Rood = weinig weerbaarheid, groen = sterk. Rechts is beter." },
+                    { letter:"F, G, H", naam:"Belang-assen", kleur:"#d97706", bg:"#ffedd5",
+                      uitleg:"Operationeel (F), Data (G) en Academisch belang (H). Hoge scores zijn niet slecht, maar verhogen de urgentie van risico en mitigatie." },
+                  ].map(g => (
+                    <div key={g.letter} className="rounded p-3" style={{ background:g.bg, border:`1px solid ${g.kleur}44` }}>
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <span className="text-xs font-bold px-1.5 py-0.5 rounded" style={{ background:g.kleur, color:"#fff", fontSize:9 }}>{g.letter}</span>
+                        <span className="text-xs font-bold" style={{ color:g.kleur }}>{g.naam}</span>
+                      </div>
+                      <p style={{ fontSize:9.5, color:"#374151", lineHeight:1.5 }}>{g.uitleg}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded p-3 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                  <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Kleurovergang per type as</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { titel:"Risico-assen (A, B)", gradient:"linear-gradient(to right,#dcfce7,#fef9c3,#fca5a5,#dc2626)", tekst:"Groen links = laag risico (goed). Rood rechts = hoog risico." },
+                      { titel:"Mitigatie-assen (C, D, E)", gradient:"linear-gradient(to right,#dc2626,#fca5a5,#fde68a,#86efac,#16a34a)", tekst:"Rood links = weinig weerbaarheid. Groen rechts = sterk weerbaar." },
+                    ].map(g => (
+                      <div key={g.titel}>
+                        <p style={{ fontSize:10, fontWeight:600, color:"#0C2340", marginBottom:4 }}>{g.titel}</p>
+                        <div style={{ height:16, borderRadius:3, background:g.gradient, marginBottom:4 }} />
+                        <p style={{ fontSize:9, color:"#6b7280" }}>{g.tekst}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                  <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Patronen om op te letten</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { titel:"Punten dicht bij elkaar", tekst:"Vergelijkbaar profiel op die dimensie — gemeenschappelijk risico voor meerdere applicaties." },
+                      { titel:"Punten ver uit elkaar",   tekst:"Fundamenteel verschil tussen applicaties — prioriteer de applicatie met het slechtste punt." },
+                      { titel:"Risico hoog + mitigatie laag", tekst:"Hoog risico gecombineerd met lage weerbaarheid — dit vraagt directe actie." },
+                      { titel:"Belang hoog + risico zwak",    tekst:"Hoge belang-score maakt een slechte risico- of mitigatiescore urgenter." },
+                    ].map(t => (
+                      <div key={t.titel} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                        <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:3 }}>📌 {t.titel}</p>
+                        <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.5 }}>{t.tekst}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Section>
+
+            <Section title="De berekening in vier stappen" accent="#26B5AE">
+              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <div className="grid grid-cols-4 gap-3 mb-3">
+                  {[
+                    { n:"1", lbl:"Dimensiescore", txt:"Per dimensie (A t/m H): gemiddelde van de ingevulde indicatorscores (1–5).", c:"#1A56A0" },
+                    { n:"2", lbl:"Niveauscore",   txt:"Per niveau (Risico, Mitigatie, Belang): gemiddelde van de dimensiescores.", c:"#26B5AE" },
+                    { n:"3", lbl:"Ruwe score",    txt:"Mitigatie ÷ (Risico × Belang). Bereik: 0,04 (slechtst) tot 5,0 (best).", c:"#E87722" },
+                    { n:"4", lbl:"Normalisatie",  txt:"Logaritmische schaal zet de ruwe score om naar 1–10, zodat scores goed vergelijkbaar zijn.", c:"#6d28d9" },
+                  ].map(s => (
+                    <div key={s.n} className="text-center rounded p-3" style={{ background:"#f8fafc", border:`2px solid ${s.c}33` }}>
+                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold mx-auto mb-2"
+                        style={{ background:s.c }}>{s.n}</div>
+                      <p className="text-xs font-bold mb-1" style={{ color:s.c }}>{s.lbl}</p>
+                      <p className="text-xs" style={{ color:"#6b7280" }}>{s.txt}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded p-2 text-xs" style={{ background:"#EBF3FF", color:"#374151" }}>
+                  <strong>Waarom logaritmisch?</strong> De formule deelt Mitigatie (max 5) door Risico×Belang (max 25).
+                  Daardoor liggen de meeste ruwe scores tussen 0,1 en 0,5. Zonder correctie zou 90% van de applicaties
+                  een score tussen 1 en 3 krijgen. De logaritmische schaal spreidt scores uit over het volledige bereik 1–10.
+                </div>
+              </div>
+            </Section>
+          </>}
+
+          {/* ── Tab 4: Tips & beheer ── */}
+          {aboutTab === "tips" && <>
+            <Section title="Praktische tips voor het team">
+              <div className="grid grid-cols-2 gap-3">
+                <Tip label="💾 Data opslaan" color="#1A56A0" bg="#EBF3FF">
+                  Alle data wordt automatisch opgeslagen op de server (Netlify Blobs). Iedereen die inlogt ziet
+                  dezelfde data, ongeacht browser of apparaat. Je kunt het venster sluiten en later verdergaan.
+                  Exporteer regelmatig een Excel-bestand als extra back-up.
+                </Tip>
+                <Tip label="👥 Meerdere beoordelaars" color="#26B5AE" bg="#E6F7F7">
+                  Laat beoordelaars het assessment onafhankelijk invullen en exporteer afzonderlijk naar Excel.
+                  Bespreek grote afwijkingen in het team — die leveren vaak de meest waardevolle inzichten op.
+                </Tip>
+                <Tip label="📋 Welke vragen gebruik je?" color="#E87722" bg="#fff8e1">
+                  Deze tool gebruikt een selectie: de DAAF Quick Scan (8 kernindicatoren, één per dimensie) en
+                  4 relevante DICTU-vragen. Voor een volledig DAAF assessment met wegingen raadpleeg de Utrecht University tool.
+                </Tip>
+                <Tip label="🎯 Wat doe je met de uitkomst?" color="#6d28d9" bg="#faf5ff">
+                  Bespreek het kwadrant. Applicaties rechtsonder (KRITIEK) vragen urgente actie.
+                  Kies per applicatie: migreren, mitigeren of bewust accepteren. Leg de keuze vast.
+                  Herhaal het assessment na contractwijzigingen of leveranciersveranderingen.
+                </Tip>
+              </div>
+            </Section>
+
+            <Section title="Beheeromgeving" accent="#0C2340">
+              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  Via het tabblad <strong>🔐 Beheer</strong> (pincode vereist) kun je:
+                </p>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {[
+                    { icon:"✏️", txt:"Applicatiegegevens aanpassen (naam, leverancier, categorie, eigenaar)" },
+                    { icon:"🗑️", txt:"Applicaties verwijderen uit het portfolio" },
+                    { icon:"👁️", txt:"Volledig overzicht per applicatie bekijken inclusief alle scores en motivaties" },
+                    { icon:"🏷️", txt:"Secundaire (anonieme) namen toewijzen voor gebruik in presentaties" },
+                  ].map(t => (
+                    <div key={t.txt} className="flex gap-2 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                      <span style={{ fontSize:14, flexShrink:0 }}>{t.icon}</span>
+                      <p className="text-xs" style={{ color:"#374151", lineHeight:1.5 }}>{t.txt}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="rounded p-2.5 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
+                  <strong>Secundaire namen:</strong> gebruik de toggle in de header om te wisselen tussen primaire
+                  (echte) en secundaire (anonieme) namen. Handig voor presentaties aan externen. De toggle is
+                  alleen zichtbaar als er secundaire namen zijn toegewezen in de beheeromgeving.
+                </div>
+              </div>
+            </Section>
+          </>}
+
+          {/* Footer — altijd zichtbaar */}
+          <div className="rounded p-3 text-center mt-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit
               <br/>Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · {VERSION}
