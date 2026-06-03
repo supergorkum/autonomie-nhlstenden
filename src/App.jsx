@@ -2072,11 +2072,93 @@ export default function App() {
       ? `Secundaire namen actief`
       : `Primaire namen actief`;
 
+
+    // ── Verbeteracties HTML (berekend vóór de PDF template) ────────────────
+    function buildVerbeteractiesHTML(a) {
+      const sc = calcScores(a.scores || {});
+      const lbl = !sc.autonomyScore ? "Onvolledig"
+        : sc.autonomyScore >= 7 ? "Goed"
+        : sc.autonomyScore >= 5 ? "Acceptabel"
+        : sc.autonomyScore >= 3 ? "Zorgwekkend"
+        : "Kritiek";
+      const kleur = !sc.autonomyScore ? "#9ca3af"
+        : sc.autonomyScore >= 7 ? "#15803d"
+        : sc.autonomyScore >= 5 ? "#a16207"
+        : sc.autonomyScore >= 3 ? "#c2410c"
+        : "#b91c1c";
+      const scoreBg = !sc.autonomyScore ? "#f3f4f6"
+        : sc.autonomyScore >= 7 ? "#dcfce7"
+        : sc.autonomyScore >= 5 ? "#fef9c3"
+        : sc.autonomyScore >= 3 ? "#ffedd5"
+        : "#fee2e2";
+
+      const acties = [];
+      if (sc.risico > 3.5)
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A — Geopolitiek", actie:"Inventariseer Europese alternatieven voor deze leverancier. Vraag offertes op bij minimaal twee EU-gevestigde aanbieders.", tip:"Begin met een marktverkenning van 1-2 dagdelen. SURF publiceert regelmatig overzichten van EU-conforme alternatieven per categorie.", kleur:"#b91c1c", bg:"#fee2e2" });
+      if ((a.scores||{})["A3"] >= 4)
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A3 — Datalocatie", actie:"Verzoek de leverancier schriftelijk te bevestigen in welke regio data wordt opgeslagen (incl. back-ups en metadata). Leg dit vast in het contract.", tip:"Vraag ook naar de locatie van de control plane — het beheerpaneel van de dienst.", kleur:"#b91c1c", bg:"#fee2e2" });
+      if ((a.scores||{})["B1"] >= 4)
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"B — Leverancier", actie:"Breng de concentratie in kaart: hoeveel kritieke processen zijn afhankelijk van deze leverancier? Stel een maximum vast.", tip:"Gebruik de tool om vergelijkbare applicaties van dezelfde leverancier bij elkaar te zoeken.", kleur:"#ea580c", bg:"#ffedd5" });
+      if ((a.scores||{})["C1"] <= 2)
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C — Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen voor de eerste 4 uur is al waardevol.", kleur:"#1A56A0", bg:"#EBF3FF" });
+      if ((a.scores||{})["D1"] <= 2)
+        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D — Organisatorisch", actie:"Leg de kennis over configuratie en beheer vast bij minimaal twee medewerkers.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint.", kleur:"#1A56A0", bg:"#EBF3FF" });
+      if ((a.scores||{})["E1"] <= 2)
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, dataportabiliteitsgarantie en opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een data return plan: wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1A56A0", bg:"#EBF3FF" });
+      if (sc.dictuAvg && sc.dictuAvg < 3)
+        acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Soevereiniteit", actie:"Vraag de leverancier schriftelijk naar datalocatie, garantie geen leverancierstoegang, verzet tegen niet-EU dataverzoeken en locatie control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier.", kleur:"#6d28d9", bg:"#faf5ff" });
+      if (sc.belang >= 4 && sc.risico >= 3)
+        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico bewust aanvaard? Maak een korte risicoafweging en leg de beslissing vast inclusief een herzieningsdatum.", tip:"Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E87722", bg:"#fff8e1" });
+      if (acties.length === 0)
+        acties.push({ niveau:"Onderhoud", prio:"Laag", dim:"Algemeen", actie:"Alle scores zijn acceptabel of goed. Plan een hercontrole bij de eerstvolgende contractverlenging.", tip:"Stel een terugkerende herinnering in op de einddatum van het contract.", kleur:"#15803d", bg:"#dcfce7" });
+
+      const supplierStr = a.supplier ? " — " + a.supplier : "";
+      const naam = dName(a);
+
+      let html = "";
+      html += '<div style="background:' + scoreBg + ';border:1px solid ' + kleur + '44;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:Arial;font-size:10px;page-break-inside:avoid">';
+      html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">';
+      html += '<div style="font-weight:700;color:#0C2340;font-size:12px">' + naam + (a.supplier ? ' <span style="font-weight:400;color:#9ca3af;font-size:10px">— ' + a.supplier + "</span>" : "") + "</div>";
+      html += '<span style="background:' + kleur + ';color:white;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">' + lbl + "</span>";
+      if (sc.autonomyScore) html += '<span style="font-size:10px;font-weight:700;color:' + kleur + '">Score: ' + sc.autonomyScore.toFixed(1) + "/10</span>";
+      html += "</div>";
+      html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:8px">';
+      [["Risico", sc.risico, "#dc2626"], ["Mitigatie", sc.mitigatie, "#26B5AE"], ["Belang", sc.belang, "#E87722"], ["DICTU", sc.dictuAvg, "#6d28d9"]].forEach(function(s) {
+        html += '<div style="text-align:center;background:white;border-radius:3px;padding:6px 4px;border:1px solid #e5e7eb">';
+        html += '<div style="font-size:14px;font-weight:700;color:' + (s[1] ? s[2] : "#d1d5db") + '">' + (s[1] ? s[1].toFixed(1) : "–") + "</div>";
+        html += '<div style="font-size:8px;color:#9ca3af">' + s[0] + "</div></div>";
+      });
+      html += "</div></div>";
+
+      html += '<table style="width:100%;border-collapse:collapse;font-family:Arial;font-size:9.5px;margin-bottom:16px">';
+      html += '<tr style="background:#0C2340;color:white"><th style="padding:7px 10px;text-align:left;width:10%">Niveau</th><th style="padding:7px 10px;text-align:left;width:8%">Prioriteit</th><th style="padding:7px 10px;text-align:left;width:15%">Dimensie</th><th style="padding:7px 10px;text-align:left;width:5%">Afgevinkt</th><th style="padding:7px 10px;text-align:left;width:37%">Actie</th><th style="padding:7px 10px;text-align:left;width:25%">Tip</th></tr>';
+      acties.forEach(function(ac, i) {
+        const prioBg = ac.prio === "Hoog" ? "#fee2e2" : ac.prio === "Middel" ? "#fef9c3" : "#dcfce7";
+        const prioFg = ac.prio === "Hoog" ? "#b91c1c" : ac.prio === "Middel" ? "#a16207" : "#15803d";
+        html += '<tr style="background:' + (i % 2 === 0 ? "#f8fafc" : "white") + ';border-bottom:1px solid #f1f5f9;page-break-inside:avoid">';
+        html += '<td style="padding:8px 10px;vertical-align:top"><span style="background:' + ac.kleur + ';color:white;padding:2px 6px;border-radius:2px;font-size:8px;font-weight:700">' + ac.niveau + "</span></td>";
+        html += '<td style="padding:8px 10px;vertical-align:top"><span style="background:' + prioBg + ';color:' + prioFg + ';padding:2px 6px;border-radius:2px;font-size:8px;font-weight:600">' + ac.prio + "</span></td>";
+        html += '<td style="padding:8px 10px;vertical-align:top;color:#374151">' + ac.dim + "</td>";
+        html += '<td style="padding:8px 10px;vertical-align:top;text-align:center"><div style="width:14px;height:14px;border:1.5px solid #D0E4F7;border-radius:2px;display:inline-block"></div></td>';
+        html += '<td style="padding:8px 10px;vertical-align:top;color:#0C2340;font-weight:500;line-height:1.5">' + ac.actie + "</td>";
+        html += '<td style="padding:8px 10px;vertical-align:top;color:#6b7280;line-height:1.5;font-style:italic">' + ac.tip + "</td>";
+        html += "</tr>";
+      });
+      html += "</table>";
+
+      html += '<div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;font-family:Arial;font-size:9.5px">';
+      html += '<div style="font-weight:700;color:#0C2340;margin-bottom:6px">Aanbevolen aanpak</div>';
+      html += '<div style="color:#374151;line-height:1.7">Bespreek deze actielijst met de applicatie-eigenaar, contract-eigenaar en functioneel beheerder. Zij beschikken over de operationele kennis die nodig is om de acties te prioriteren en uit te voeren. Leg de gemaakte afspraken vast — ook bewuste keuzes om een actie niet op te pakken zijn waardevolle informatie voor de strategische besluitvorming van NHL Stenden.</div>';
+      html += "</div>";
+      return html;
+    }
+    const verbeteractiesHTML = visible.length === 1 ? buildVerbeteractiesHTML(visible[0]) : "";
+
     const html = `<!DOCTYPE html>
 <html lang="nl">
 <head>
 <meta charset="UTF-8"/>
-<title>${visible.length === 1 ? `Assessment ${dName(visible[0])} — Digitale Soevereiniteit NHL Stenden ${datum}` : `Portfolioanalyse Digitale Soevereiniteit — NHL Stenden ${datum}`}</title>
+<title>${visible.length === 1 ? "Assessment " + dName(visible[0]) + " — Digitale Soevereiniteit NHL Stenden " + datum : "Portfolioanalyse Digitale Soevereiniteit — NHL Stenden " + datum}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.7}
@@ -2533,101 +2615,7 @@ export default function App() {
       Gebruik deze lijst als werkdocument voor gesprekken met de applicatie-eigenaar, contract-eigenaar
       en leverancier.
     </div>
-    ${(function(){
-      const a = visible[0];
-      const sc = calcScores(a.scores || {});
-      const lbl = sc.autonomyScore ? (sc.autonomyScore >= 7 ? "Goed" : sc.autonomyScore >= 5 ? "Acceptabel" : sc.autonomyScore >= 3 ? "Zorgwekkend" : "Kritiek") : "Onvolledig";
-      const kleur = sc.autonomyScore ? (sc.autonomyScore >= 7 ? "#15803d" : sc.autonomyScore >= 5 ? "#a16207" : sc.autonomyScore >= 3 ? "#c2410c" : "#b91c1c") : "#9ca3af";
-      const bg    = sc.autonomyScore ? (sc.autonomyScore >= 7 ? "#dcfce7" : sc.autonomyScore >= 5 ? "#fef9c3" : sc.autonomyScore >= 3 ? "#ffedd5" : "#fee2e2") : "#f3f4f6";
-
-      // Bouw acties-tabel op basis van scores
-      const acties = [];
-
-      // RISICO-acties
-      if (sc.risico > 3.5) {
-        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A — Geopolitiek", actie:"Inventariseer Europese alternatieven voor deze leverancier. Vraag offertes op bij minimaal twee EU-gevestigde aanbieders.", tip:"Begin met een marktverkenning van 1-2 dagdelen. SURF publiceert regelmatig overzichten van EU-conforme alternatieven per categorie.", kleur:"#b91c1c", bg:"#fee2e2" });
-      }
-      if ((a.scores || {})["A3"] >= 4) {
-        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A3 — Datalocatie", actie:"Verzoek de leverancier schriftelijk te bevestigen in welke regio data wordt opgeslagen (incl. back-ups en metadata). Leg dit vast in het contract.", tip:"Vraag ook naar de locatie van de 'control plane' — het beheerpaneel van de dienst. Die staat soms in de VS terwijl de data in de EU staat.", kleur:"#b91c1c", bg:"#fee2e2" });
-      }
-      if ((a.scores || {})["B1"] >= 4) {
-        acties.push({ niveau:"Risico", prio:"Hoog", dim:"B — Leverancier", actie:"Breng de concentratie in kaart: hoeveel kritieke processen zijn afhankelijk van deze leverancier? Stel een maximum vast.", tip:"Gebruik de tool om vergelijkbare applicaties van dezelfde leverancier bij elkaar te zoeken — zo zie je de totale concentratie in één oogopslag.", kleur:"#ea580c", bg:"#ffedd5" });
-      }
-
-      // MITIGATIE-acties
-      if ((a.scores || {})["C1"] <= 2) {
-        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C — Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt. Leg vast welke processen stoppen en hoe ze handmatig of tijdelijk worden overgenomen.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen 'wat doen we de eerste 4 uur' is al waardevol.", kleur:"#1A56A0", bg:"#EBF3FF" });
-      }
-      if ((a.scores || {})["D1"] <= 2) {
-        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D — Organisatorisch", actie:"Leg de kennis over configuratie, beheer en afhankelijkheden van deze applicatie vast bij minimaal twee medewerkers. Verminder afhankelijkheid van sleutelpersonen.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint — niet in iemands hoofd.", kleur:"#1A56A0", bg:"#EBF3FF" });
-      }
-      if ((a.scores || {})["E1"] <= 2) {
-        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, een dataportabiliteitsgarantie (formaat en termijn) en een opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een 'data return plan': wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1A56A0", bg:"#EBF3FF" });
-      }
-
-      // DICTU-acties
-      if (sc.dictuAvg && sc.dictuAvg < 3) {
-        acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Soevereiniteit", actie:"Vraag de leverancier schriftelijk naar: (1) datalocatie incl. back-ups, (2) garantie dat leverancier zelf geen toegang heeft, (3) verzet tegen niet-EU dataverzoeken, (4) locatie van de control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier. Stuur hem mee als bijlage bij de contractverlenging.", kleur:"#6d28d9", bg:"#faf5ff" });
-      }
-
-      // BELANG-actie
-      if (sc.belang >= 4 && sc.risico >= 3) {
-        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico van deze applicatie bewust aanvaard? Maak een korte risicoafweging en leg de beslissing schriftelijk vast inclusief een herzieningsdatum.", tip:"Dit hoeft geen groot document te zijn. Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E87722", bg:"#fff8e1" });
-      }
-
-      // Fallback als alles goed is
-      if (acties.length === 0) {
-        acties.push({ niveau:"Onderhoud", prio:"Laag", dim:"Algemeen", actie:"Alle scores zijn acceptabel of goed. Plan een hercontrole bij de eerstvolgende contractverlenging of bij significante leverancierswijzigingen.", tip:"Stel een terugkerende herinnering in op de einddatum van het contract om tijdig te herassessen.", kleur:"#15803d", bg:"#dcfce7" });
-      }
-
-      return \`
-      <div style="background:\${bg};border:1px solid \${kleur}44;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:Arial;font-size:10px;page-break-inside:avoid">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-          <div style="font-weight:700;color:#0C2340;font-size:12px">\${dName(a)}\${a.supplier ? \` <span style="font-weight:400;color:#9ca3af;font-size:10px">— \${a.supplier}</span>\` : ""}</div>
-          <span style="background:\${kleur};color:white;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">\${lbl}</span>
-          \${sc.autonomyScore ? \`<span style="font-size:10px;font-weight:700;color:\${kleur}">Score: \${sc.autonomyScore.toFixed(1)}/10</span>\` : ""}
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:8px">
-          \${[{l:"Risico",v:sc.risico,c:"#dc2626"},{l:"Mitigatie",v:sc.mitigatie,c:"#26B5AE"},{l:"Belang",v:sc.belang,c:"#E87722"},{l:"DICTU",v:sc.dictuAvg,max:5,c:"#6d28d9"}].map(s=>\`
-          <div style="text-align:center;background:white;border-radius:3px;padding:6px 4px;border:1px solid #e5e7eb">
-            <div style="font-size:14px;font-weight:700;color:\${s.v ? s.c : "#d1d5db"}">\${s.v ? s.v.toFixed(1) : "–"}</div>
-            <div style="font-size:8px;color:#9ca3af">\${s.l}</div>
-          </div>\`).join("")}
-        </div>
-      </div>
-
-      <table style="width:100%;border-collapse:collapse;font-family:Arial;font-size:9.5px;margin-bottom:16px">
-        <tr style="background:#0C2340;color:white">
-          <th style="padding:7px 10px;text-align:left;width:10%">Niveau</th>
-          <th style="padding:7px 10px;text-align:left;width:8%">Prioriteit</th>
-          <th style="padding:7px 10px;text-align:left;width:15%">Dimensie</th>
-          <th style="padding:7px 10px;text-align:left;width:5%">Afgevinkt</th>
-          <th style="padding:7px 10px;text-align:left;width:37%">Actie</th>
-          <th style="padding:7px 10px;text-align:left;width:25%">Tip</th>
-        </tr>
-        \${acties.map((ac,i)=>\`
-        <tr style="background:\${i%2===0?"#f8fafc":"white"};border-bottom:1px solid #f1f5f9;page-break-inside:avoid">
-          <td style="padding:8px 10px;vertical-align:top"><span style="background:\${ac.kleur};color:white;padding:2px 6px;border-radius:2px;font-size:8px;font-weight:700">\${ac.niveau}</span></td>
-          <td style="padding:8px 10px;vertical-align:top"><span style="background:\${ac.prio==="Hoog"?"#fee2e2":ac.prio==="Middel"?"#fef9c3":"#dcfce7"};color:\${ac.prio==="Hoog"?"#b91c1c":ac.prio==="Middel"?"#a16207":"#15803d"};padding:2px 6px;border-radius:2px;font-size:8px;font-weight:600">\${ac.prio}</span></td>
-          <td style="padding:8px 10px;vertical-align:top;color:#374151">\${ac.dim}</td>
-          <td style="padding:8px 10px;vertical-align:top;text-align:center">
-            <div style="width:14px;height:14px;border:1.5px solid #D0E4F7;border-radius:2px;display:inline-block"></div>
-          </td>
-          <td style="padding:8px 10px;vertical-align:top;color:#0C2340;font-weight:500;line-height:1.5">\${ac.actie}</td>
-          <td style="padding:8px 10px;vertical-align:top;color:#6b7280;line-height:1.5;font-style:italic">\${ac.tip}</td>
-        </tr>\`).join("")}
-      </table>
-
-      <div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;font-family:Arial;font-size:9.5px">
-        <div style="font-weight:700;color:#0C2340;margin-bottom:6px">Aanbevolen aanpak</div>
-        <div style="color:#374151;line-height:1.7">
-          Bespreek deze actielijst met de applicatie-eigenaar, contract-eigenaar en functioneel beheerder.
-          Zij beschikken over de operationele kennis die nodig is om de acties te prioriteren en uit te voeren.
-          Leg de gemaakte afspraken vast — ook bewuste keuzes om een actie niet op te pakken zijn
-          waardevolle informatie voor de strategische besluitvorming van NHL Stenden.
-        </div>
-      </div>\`;
-    })()}
+    ${verbeteractiesHTML}
     ` : `
     <h2>7. Vervolgstappen — Review door applicatie-eigenaren</h2>
     <div class="section-intro">
@@ -2693,11 +2681,23 @@ export default function App() {
 </body>
 </html>`;
 
+    // ── Bestandsnaam voor "Opslaan als PDF" ─────────────────────
+    const now = new Date();
+    const ts  = now.getFullYear().toString()
+      + String(now.getMonth()+1).padStart(2,"0")
+      + String(now.getDate()).padStart(2,"0")
+      + "_" + String(now.getHours()).padStart(2,"0")
+      + String(now.getMinutes()).padStart(2,"0");
+    const pdfNaam = visible.length === 1
+      ? "Assessment_" + dName(visible[0]).replace(/[^a-zA-Z0-9]/g, "_").replace(/_+/g,"_") + "_" + ts
+      : "NHL_Stenden_Portfolioanalyse_Soevereiniteit_" + ts;
+
     const win = window.open("", "_blank");
     win.document.write(html);
     win.document.close();
+    win.document.title = pdfNaam;
     win.focus();
-    setTimeout(() => win.print(), 600);
+    setTimeout(() => { win.document.title = pdfNaam; win.print(); }, 600);
   }
 
   // ── VIEWS ──────────────────────────────────────────────────
