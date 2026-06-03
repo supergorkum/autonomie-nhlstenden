@@ -1,32 +1,31 @@
-// netlify/functions/load-data.js
-const { getStore } = require("@netlify/blobs");
+// netlify/functions/load-data.mjs
+import { getStore } from "@netlify/blobs";
 
-exports.handler = async (event) => {
-  // ── Server-side tokencheck ────────────────────────────────
+export default async (request) => {
   const expectedToken = process.env.APP_API_TOKEN;
-  const receivedToken = event.headers["x-api-token"];
+  const receivedToken = request.headers.get("x-api-token");
 
   if (!expectedToken) {
-    return { statusCode: 500, body: JSON.stringify({ error: "Server misconfigured: APP_API_TOKEN not set" }) };
+    return new Response(JSON.stringify({ error: "Server misconfigured: APP_API_TOKEN not set" }), { status: 500 });
   }
   if (!receivedToken || receivedToken !== expectedToken) {
-    return { statusCode: 401, body: JSON.stringify({ error: "Unauthorized" }) };
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  // ── Alleen GET accepteren ─────────────────────────────────
-  if (event.httpMethod !== "GET") {
-    return { statusCode: 405, body: JSON.stringify({ error: "Method not allowed" }) };
+  if (request.method !== "GET") {
+    return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405 });
   }
 
   try {
     const store = getStore("nhl-sov-data");
-    const data  = await store.get("apps", { type: "json" });
-    return {
-      statusCode: 200,
+    const data = await store.get("apps", { type: "json" });
+    return new Response(JSON.stringify(data ?? []), {
+      status: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data ?? []),
-    };
+    });
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 };
+
+export const config = { path: "/api/load-data" };
