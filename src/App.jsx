@@ -2703,7 +2703,7 @@ ${(function(){
     : { kleur:"#15803d", bg:"#dcfce7", border:"#86efac", tekst:"Het portfolio is grotendeels op orde. De meeste applicaties zijn acceptabel tot goed beoordeeld. Periodieke monitoring volstaat." };
 
   let html2 = '';
-  html2 += '<div class="page-break">';
+  html2 += '<div style="page-break-before:always">';
   html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
   html2 += '<div style="padding:24px 48px">';
   html2 += '<h2>Portfoliostatus — Samenvatting</h2>';
@@ -2813,6 +2813,7 @@ ${(function(){
 })()}
 
 <!-- ════ EINDPAGINA ════ -->
+<div style="page-break-before:always">
 <div class="page-header">
   <div class="logo">NHL<br/>STENDEN</div>
   <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
@@ -2820,7 +2821,7 @@ ${(function(){
   <div class="header-sub">NHL Stenden Hogeschool · ${datum} · ${VERSION}</div></div>
   <div class="header-right">${naamModus}</div>
 </div>
-<div style="page-break-before:always;min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">
+<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">
   <div style="width:60px;height:4px;background:#26B5AE;border-radius:2px;margin-bottom:32px"></div>
   <div style="font-size:9px;color:#9ca3af;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px">Einde rapport</div>
   <div style="font-size:22px;font-weight:700;color:#0C2340;margin-bottom:8px">
@@ -2833,6 +2834,7 @@ ${(function(){
     Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit<br/>
     Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
   </div>
+</div>
 </div>
 </body>
 </html>`;
