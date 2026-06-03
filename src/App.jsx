@@ -2171,7 +2171,7 @@ export default function App() {
   .header-right{margin-left:auto;font-family:Arial;font-size:9px;color:#7DD3D0;text-align:right}
 
   /* ── Voorblad ── */
-  .cover{min-height:100vh;display:flex;flex-direction:column;page-break-after:always}
+  .cover{display:flex;flex-direction:column;page-break-after:always}
   .cover-top{background:#0C2340;padding:40px 48px 32px;flex:0;color:white}
   .cover-teal-bar{height:5px;background:#26B5AE}
   .cover-body{padding:40px 48px 32px;flex:1;display:flex;flex-direction:column;justify-content:space-between;background:white;color:#1a1a1a}
@@ -2246,8 +2246,8 @@ export default function App() {
   .doc-footer{margin-top:32px;padding-top:12px;border-top:1px solid #e5e7eb;
     font-size:9px;color:#9ca3af;text-align:center;font-family:Arial}
 
+  @page{size:A4;margin:12mm 15mm 12mm 15mm}
   @media print{
-    @page{margin:0}
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
     .page-break{page-break-before:always}
     .app-section{page-break-inside:avoid}
@@ -2255,7 +2255,6 @@ export default function App() {
     .chart-wrap{page-break-inside:avoid}
     .framework-grid{page-break-inside:avoid}
   }
-  @page{margin:0}
 </style>
 </head>
 <body>
@@ -2818,7 +2817,7 @@ ${(function(){
   let ep = "";
   ep += '<div style="page-break-before:always">';
   ep += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">' + hdrTitel + '</div><div class="header-sub">NHL Stenden Hogeschool - ' + datum + ' - ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
-  ep += '<div style="min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">';
+  ep += '<div style="height:calc(100vh - 80px);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial;text-align:center;padding:48px">';
   ep += '<div style="width:60px;height:4px;background:#26B5AE;border-radius:2px;margin-bottom:32px"></div>';
   ep += '<div style="font-size:9px;color:#9ca3af;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:16px">Einde rapport</div>';
   ep += '<div style="font-size:24px;font-weight:700;color:#0C2340;margin-bottom:6px;line-height:1.2">' + appNaam + '</div>';
