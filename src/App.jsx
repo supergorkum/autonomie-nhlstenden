@@ -50,6 +50,7 @@ const CHANGELOG = [
       "Stap 6 (Excel exporteren) bijgewerkt: beschrijft nu vijf tabbladen (inclusief Motivaties)",
       "'Over & uitleg' pagina volledig omgebouwd met vier tabbladen: Over de tool, Aan de slag, Scores & grafieken, Tips & beheer",
       "Volgorde logischer: tool-uitleg en frameworks eerst, daarna stap-voor-stap, dan grafieken, dan beheer",
+      "Nieuw tabblad 'Bestuur' toegevoegd: bestuurssamenvatting met portfoliostatus, risicografiek en top 3 aandachtspunten",
     ]
   },
   {
@@ -3939,6 +3940,240 @@ export default function App() {
     );
   }
 
+  // ── BESTUUR ────────────────────────────────────────────────
+  function Bestuur() {
+    const scored = apps
+      .map(a => ({ ...a, sc: calcScores(a.scores) }))
+      .filter(a => a.sc.autonomyScore);
+
+    const sorted     = [...scored].sort((a, b) => (a.sc.autonomyScore||10) - (b.sc.autonomyScore||10));
+    const kritiek    = sorted.filter(a => a.sc.autonomyScore < 3);
+    const zorg       = sorted.filter(a => a.sc.autonomyScore >= 3 && a.sc.autonomyScore < 5);
+    const acceptabel = sorted.filter(a => a.sc.autonomyScore >= 5 && a.sc.autonomyScore < 7);
+    const goed       = sorted.filter(a => a.sc.autonomyScore >= 7);
+    const avg        = scored.length
+      ? scored.reduce((s, a) => s + (a.sc.autonomyScore || 0), 0) / scored.length
+      : null;
+    const avgDictu   = scored.filter(a => a.sc.dictuAvg).length
+      ? scored.filter(a => a.sc.dictuAvg).reduce((s, a) => s + a.sc.dictuAvg, 0) / scored.filter(a => a.sc.dictuAvg).length
+      : null;
+
+    const oordeel = !scored.length
+      ? { kleur:"#6b7280", bg:"#f3f4f6", border:"#e5e7eb",
+          tekst:"Nog geen applicaties beoordeeld." }
+      : kritiek.length >= 3 || (kritiek.length > 0 && kritiek.length / scored.length > 0.3)
+      ? { kleur:"#b91c1c", bg:"#fee2e2", border:"#fca5a5",
+          tekst:`Het portfolio bevat ${kritiek.length} kritieke ${kritiek.length === 1 ? "applicatie" : "applicaties"} met een hoog autonomierisico en onvoldoende weerbaarheid. Directe besluitvorming is noodzakelijk.` }
+      : zorg.length > 0
+      ? { kleur:"#c2410c", bg:"#ffedd5", border:"#fed7aa",
+          tekst:`Het portfolio vraagt aandacht: ${zorg.length + kritiek.length} ${zorg.length + kritiek.length === 1 ? "applicatie" : "applicaties"} scoren onder de acceptabele grens. Gerichte maatregelen zijn gewenst.` }
+      : { kleur:"#15803d", bg:"#dcfce7", border:"#86efac",
+          tekst:"Het portfolio is grotendeels op orde. De meeste applicaties zijn acceptabel tot goed beoordeeld. Periodieke monitoring volstaat." };
+
+    const top3 = [...scored]
+      .filter(a => a.sc.autonomyScore < 7)
+      .sort((a, b) => {
+        const urgA = (10 - (a.sc.autonomyScore || 10)) + (a.sc.belang || 0);
+        const urgB = (10 - (b.sc.autonomyScore || 10)) + (b.sc.belang || 0);
+        return urgB - urgA;
+      })
+      .slice(0, 3);
+
+    const grafiekData = sorted.slice(0, 12).map(a => ({
+      naam:  displayName(a).substring(0, 22),
+      score: a.sc.autonomyScore ? +a.sc.autonomyScore.toFixed(1) : 0,
+      kleur: scoreColor(a.sc.autonomyScore),
+    }));
+
+    const vandaag = new Date().toLocaleDateString("nl-NL", { day:"numeric", month:"long", year:"numeric" });
+
+    function adviesTekst(a) {
+      const s = a.sc;
+      if (!s.risico || !s.mitigatie) return "Vul het assessment verder in voor een specifiek advies.";
+      if (s.risico > 3.5 && s.mitigatie < 2.5)
+        return "Hoog risico en lage weerbaarheid. Prioriteit: migreer naar een Europese aanbieder of versterk contractuele exit-clausules.";
+      if (s.risico > 3.5)
+        return "Hoog risico bij een leverancier buiten de EU. Aanbevolen: bouw alternatieven en versterk de contractuele positie.";
+      if (s.mitigatie < 2.5)
+        return "Beperkte weerbaarheid. Aanbevolen: ontwikkel intern alternatief, leg kennis vast en voeg exit-clausules toe.";
+      if (s.belang > 3.5)
+        return "Hoog strategisch belang maakt het risico urgenter. Monitor actief bij contractverlenging en leverancierswijzigingen.";
+      return "Aandacht gewenst. Bespreek in het team of actie of bewuste acceptatie de juiste keuze is.";
+    }
+
+    return (
+      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+        <div className="p-5 max-w-4xl mx-auto">
+
+          {/* Header */}
+          <div className="rounded p-5 mb-5 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
+                  <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
+                </div>
+                <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+                <div>
+                  <h1 className="font-bold" style={{ fontSize:17 }}>Bestuurssamenvatting Digitale Soevereiniteit</h1>
+                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Soevereiniteit · {vandaag}</p>
+                </div>
+              </div>
+              <span className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
+                {scored.length} van {apps.length} apps beoordeeld
+              </span>
+            </div>
+          </div>
+
+          {scored.length === 0 ? (
+            <div className="rounded p-10 text-center" style={{ background:"#fff", border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
+              Nog geen applicaties volledig beoordeeld. Vul eerst assessments in via het tabblad Applicaties.
+            </div>
+          ) : (<>
+
+          {/* ── Rij 1: Stand van zaken + Kerngetallen ── */}
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="col-span-2 rounded p-4" style={{ background:"#fff", border:`2px solid ${oordeel.border}` }}>
+              <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Stand van zaken</p>
+              <div className="rounded p-3 mb-3" style={{ background:oordeel.bg, border:`1px solid ${oordeel.border}` }}>
+                <p className="text-sm font-semibold leading-relaxed" style={{ color:oordeel.kleur }}>{oordeel.tekst}</p>
+              </div>
+              <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                NHL Stenden heeft {apps.length} kernapp{apps.length !== 1 ? "licaties" : "licatie"} in scope genomen
+                voor de portfolioanalyse digitale soevereiniteit.
+                {scored.length < apps.length && ` Van ${apps.length - scored.length} ${apps.length - scored.length === 1 ? "applicatie" : "applicaties"} is het assessment nog niet volledig ingevuld.`}
+                {" "}De beoordeling combineert het DAAF-framework (autonomiescore 1-10) en de DICTU soevereiniteitscheck.
+              </p>
+            </div>
+            <div className="space-y-2">
+              {[
+                { lbl:"Gem. autonomiescore", val: avg ? avg.toFixed(1) : "–", sub:"/10", kleur: scoreColor(avg) },
+                { lbl:"Gem. DICTU-score",    val: avgDictu ? avgDictu.toFixed(1) : "–", sub:"/5",  kleur: scoreColor(avgDictu, 5) },
+              ].map(k => (
+                <div key={k.lbl} className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                  <p style={{ fontSize:9, color:"#9ca3af", marginBottom:4, textTransform:"uppercase", letterSpacing:"0.05em" }}>{k.lbl}</p>
+                  <p className="font-bold" style={{ fontSize:26, color:k.kleur, lineHeight:1 }}>
+                    {k.val}<span style={{ fontSize:13, color:"#9ca3af" }}>{k.sub}</span>
+                  </p>
+                </div>
+              ))}
+              <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p style={{ fontSize:9, color:"#9ca3af", marginBottom:6, textTransform:"uppercase", letterSpacing:"0.05em" }}>Verdeling portfolio</p>
+                {[
+                  { lbl:"Kritiek",     n:kritiek.length,    bg:"#fee2e2", fg:"#b91c1c", dot:"#dc2626" },
+                  { lbl:"Zorgwekkend", n:zorg.length,       bg:"#ffedd5", fg:"#c2410c", dot:"#ea580c" },
+                  { lbl:"Acceptabel",  n:acceptabel.length, bg:"#fef9c3", fg:"#a16207", dot:"#ca8a04" },
+                  { lbl:"Goed",        n:goed.length,       bg:"#dcfce7", fg:"#15803d", dot:"#16a34a" },
+                ].map(r => (
+                  <div key={r.lbl} className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-1.5">
+                      <span style={{ width:8, height:8, borderRadius:"50%", background:r.dot, display:"inline-block" }}/>
+                      <span style={{ fontSize:10, color:r.fg, fontWeight:600 }}>{r.lbl}</span>
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-xs font-bold" style={{ background:r.bg, color:r.fg }}>{r.n}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Rij 2: Risicografiek ── */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Autonomiescore per applicatie</h3>
+                <p className="text-xs" style={{ color:"#9ca3af" }}>Gesorteerd van laagste naar hoogste score · Gele lijn = grens acceptabel (5) · Groene lijn = grens goed (7)</p>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              {grafiekData.map((d, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <div className="text-xs text-right flex-shrink-0" style={{ width:150, color:"#374151", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}
+                    title={d.naam}>{d.naam}</div>
+                  <div className="flex-1 rounded" style={{ background:"#f1f5f9", height:22, position:"relative" }}>
+                    <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:1, background:"#fbbf24", opacity:0.7 }}/>
+                    <div style={{ position:"absolute", left:"70%", top:0, bottom:0, width:1, background:"#4ade80", opacity:0.7 }}/>
+                    <div style={{
+                      position:"absolute", left:0, top:2, bottom:2,
+                      width:`${(d.score / 10) * 100}%`,
+                      background:d.kleur, borderRadius:3,
+                      minWidth: d.score > 0 ? 4 : 0,
+                    }}/>
+                  </div>
+                  <div className="text-xs font-bold flex-shrink-0" style={{ width:30, color:d.kleur, textAlign:"right" }}>{d.score}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Rij 3: Top 3 aandachtspunten ── */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <h3 className="font-bold text-sm mb-1" style={{ color:"#0C2340" }}>Top 3 aandachtspunten voor NHL Stenden</h3>
+            <p className="text-xs mb-4" style={{ color:"#9ca3af" }}>
+              Geselecteerd op basis van de combinatie van laagste autonomiescore en hoogste strategisch belang.
+            </p>
+            {top3.length === 0 ? (
+              <div className="rounded p-4 text-center text-xs" style={{ background:"#dcfce7", border:"1px solid #86efac", color:"#15803d" }}>
+                Alle beoordeelde applicaties scoren acceptabel of goed. Geen acute aandachtspunten.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {top3.map((a, i) => {
+                  const lbl = scoreLabel(a.sc.autonomyScore);
+                  const medals = ["1", "2", "3"];
+                  const medalColors = ["#b91c1c","#c2410c","#a16207"];
+                  return (
+                    <div key={a.id} className="rounded p-4" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", borderLeft:`4px solid ${scoreColor(a.sc.autonomyScore)}` }}>
+                      <div className="flex items-start gap-3">
+                        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold rounded"
+                          style={{ background:medalColors[i], fontSize:13 }}>{medals[i]}</div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                            <h4 className="font-bold text-sm" style={{ color:"#0C2340" }}>{displayName(a)}</h4>
+                            {a.supplier && <span className="text-xs" style={{ color:"#9ca3af" }}>{a.supplier}</span>}
+                            <span className="text-xs px-2 py-0.5 font-semibold rounded" style={{ background:lbl.bg, color:lbl.fg }}>{lbl.text}</span>
+                            <span className="text-xs font-bold" style={{ color:scoreColor(a.sc.autonomyScore) }}>
+                              Score {a.sc.autonomyScore?.toFixed(1)}/10
+                            </span>
+                          </div>
+                          <div className="flex gap-3 mb-2 flex-wrap">
+                            {[
+                              { lbl:"Risico",    val:a.sc.risico,    c:"#dc2626" },
+                              { lbl:"Mitigatie", val:a.sc.mitigatie, c:"#26B5AE" },
+                              { lbl:"Belang",    val:a.sc.belang,    c:"#E87722" },
+                              { lbl:"DICTU",     val:a.sc.dictuAvg,  c:"#6d28d9" },
+                            ].map(s => (
+                              <div key={s.lbl} className="text-center rounded px-2 py-1" style={{ background:"#fff", border:"1px solid #e5e7eb", minWidth:52 }}>
+                                <div style={{ fontSize:13, fontWeight:700, color:s.val ? s.c : "#d1d5db" }}>{s.val ? s.val.toFixed(1) : "–"}</div>
+                                <div style={{ fontSize:9, color:"#9ca3af" }}>{s.lbl}</div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="rounded px-3 py-2 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#78350f" }}>
+                            <strong>Advies:</strong> {adviesTekst(a)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <p className="text-xs" style={{ color:"#9ca3af" }}>
+              NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION} · {vandaag}
+              <br/>Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum
+            </p>
+          </div>
+
+          </>)}
+        </div>
+      </div>
+    );
+  }
+
   function About() {
 
     const ABOUT_TABS = [
@@ -4421,6 +4656,7 @@ export default function App() {
             { k:"apps",      label:"Applicaties" },
             ...(selApp ? [{ k:"assess", label:displayName(selApp).substring(0,20) }] : []),
             { k:"compare",   label:"Vergelijking" },
+            { k:"bestuur",   label:"📋 Bestuur" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
             { k:"admin",     label:"🔐 Beheer" },
           ].map(t => (
@@ -4441,6 +4677,7 @@ export default function App() {
         {view === "apps"      && AppsList()}
         {view === "assess"    && Assess()}
         {view === "compare"   && Compare()}
+        {view === "bestuur"   && Bestuur()}
         {view === "about"     && About()}
         {view === "admin"     && Admin()}
       </main>
