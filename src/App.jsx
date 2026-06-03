@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.9";
+const VERSION = "v2.0";
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -42,6 +42,16 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.0",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Database export: volledig JSON-bestand met alle apps, scores en motivaties, bestandsnaam met datum en tijd",
+      "Database import: selectief importeren van applicaties uit een exportbestand, overzicht toont nieuw vs overschrijven",
+      "Import-modal: alles/niets selecteren plus per applicatie aanvinken, ook verwijderde apps terugzetten",
+      "Over & uitleg Tips-tabblad uitgebreid met export/import handleiding en stap-voor-stap uitleg",
+    ]
+  },
   {
     versie: "v1.9",
     datum: "Juni 2026",
@@ -1327,6 +1337,9 @@ export default function App() {
   const [adminPinError, setAdminPinError] = useState(false);
   const [editAppId,     setEditAppId]     = useState(null);
   const [editForm,      setEditForm]      = useState({});
+  const [importData,    setImportData]    = useState(null);   // parsed import JSON
+  const [importSel,     setImportSel]     = useState(new Set()); // geselecteerde app-IDs uit import
+  const [showImport,    setShowImport]    = useState(false);
   const ADMIN_PIN = "nhl2026";
 
   // Ref voor scroll-naar-boven bij stapwissel in Assess
@@ -1488,6 +1501,78 @@ export default function App() {
     if (!confirm("Applicatie verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
     setApps(p => p.filter(a => a.id !== id));
     if (selId === id) { setSelId(null); setView("dashboard"); }
+  }
+
+  // ── Database export ─────────────────────────────────────────────────────────
+  function exportDatabase() {
+    const now   = new Date();
+    const ts    = now.getFullYear().toString()
+      + String(now.getMonth()+1).padStart(2,"0")
+      + String(now.getDate()).padStart(2,"0")
+      + "_" + String(now.getHours()).padStart(2,"0")
+      + String(now.getMinutes()).padStart(2,"0");
+    const payload = {
+      exportedAt:  now.toISOString(),
+      exportedBy:  "NHL Stenden Portfolioanalyse Digitale Soevereiniteit",
+      version:     VERSION,
+      appCount:    apps.length,
+      apps:        apps,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url  = URL.createObjectURL(blob);
+    const el   = document.createElement("a");
+    el.href = url;
+    el.download = `NHL_Sov_Database_${ts}.json`;
+    el.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Database import verwerken ────────────────────────────────────────────────
+  function handleImportFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        if (!parsed.apps || !Array.isArray(parsed.apps)) {
+          alert("Ongeldig exportbestand. Selecteer een NHL_Sov_Database_*.json bestand.");
+          return;
+        }
+        setImportData(parsed);
+        // Standaard alles geselecteerd
+        setImportSel(new Set(parsed.apps.map(a => a.id)));
+        setShowImport(true);
+      } catch {
+        alert("Fout bij het lezen van het bestand. Controleer of het een geldig JSON-exportbestand is.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ""; // reset input
+  }
+
+  // ── Import uitvoeren ─────────────────────────────────────────────────────────
+  function executeImport() {
+    if (!importData) return;
+    const toImport = importData.apps.filter(a => importSel.has(a.id));
+    const existingIds = new Set(apps.map(a => a.id));
+    let added = 0, updated = 0;
+    const newApps = [...apps];
+    toImport.forEach(imp => {
+      const idx = newApps.findIndex(a => a.id === imp.id);
+      if (idx >= 0) {
+        newApps[idx] = imp; // overschrijf bestaande
+        updated++;
+      } else {
+        newApps.push(imp); // voeg nieuwe toe
+        added++;
+      }
+    });
+    setApps(newApps);
+    setShowImport(false);
+    setImportData(null);
+    setImportSel(new Set());
+    alert(`Import voltooid: ${added} applicatie${added !== 1 ? "s" : ""} toegevoegd, ${updated} bijgewerkt.`);
   }
 
   function exportXlsx() {
@@ -3800,6 +3885,21 @@ ${(function(){
                 🏷 Dummie namen toewijzen
                 </button>
               )}
+              {/* Verborgen file input voor import */}
+              <input type="file" accept=".json" id="db-import-input"
+                style={{ display:"none" }} onChange={handleImportFile}/>
+
+              <button onClick={exportDatabase} disabled={apps.length === 0}
+                className="text-xs px-3 py-1.5 font-medium"
+                style={{ border:"1px solid #86efac", borderRadius:4, color:"#15803d", background:"#f0fdf4",
+                         opacity: apps.length === 0 ? 0.5 : 1 }}>
+                ⬇ Exporteer database
+              </button>
+              <button onClick={() => document.getElementById("db-import-input").click()}
+                className="text-xs px-3 py-1.5 font-medium"
+                style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
+                ⬆ Importeer database
+              </button>
               <button onClick={() => setShowChangelog(true)}
                 className="text-xs px-3 py-1.5 font-medium"
                 style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
@@ -4156,6 +4256,137 @@ ${(function(){
             </div>
           </div>
         )}
+
+          {/* ── IMPORT MODAL ────────────────────────────────────────── */}
+          {showImport && importData && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center"
+              style={{ background:"rgba(12,35,64,0.6)" }}>
+              <div className="bg-white rounded shadow-xl w-full max-w-2xl mx-4"
+                style={{ border:"1px solid #D0E4F7", maxHeight:"85vh", display:"flex", flexDirection:"column" }}>
+
+                {/* Modal header */}
+                <div className="flex items-center justify-between px-5 py-4"
+                  style={{ borderBottom:"1px solid #EBF3FF" }}>
+                  <div>
+                    <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Database importeren</h3>
+                    <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
+                      Geëxporteerd op {new Date(importData.exportedAt).toLocaleString("nl-NL")} &nbsp;·&nbsp;
+                      {importData.appCount} applicatie{importData.appCount !== 1 ? "s" : ""} in bestand &nbsp;·&nbsp;
+                      versie {importData.version}
+                    </p>
+                  </div>
+                  <button onClick={() => { setShowImport(false); setImportData(null); setImportSel(new Set()); }}
+                    className="text-xs px-3 py-1.5" style={{ color:"#6b7280" }}>✕ Sluiten</button>
+                </div>
+
+                {/* Selectie-acties */}
+                <div className="flex items-center gap-3 px-5 py-3"
+                  style={{ borderBottom:"1px solid #EBF3FF", background:"#f8fafc" }}>
+                  <span className="text-xs font-semibold" style={{ color:"#374151" }}>
+                    {importSel.size} van {importData.apps.length} geselecteerd
+                  </span>
+                  <button onClick={() => setImportSel(new Set(importData.apps.map(a => a.id)))}
+                    className="text-xs px-2.5 py-1 font-medium"
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF" }}>
+                    Alles selecteren
+                  </button>
+                  <button onClick={() => setImportSel(new Set())}
+                    className="text-xs px-2.5 py-1 font-medium"
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#6b7280", background:"#fff" }}>
+                    Niets selecteren
+                  </button>
+                  <span className="text-xs" style={{ color:"#9ca3af", marginLeft:"auto" }}>
+                    Bestaande applicaties met hetzelfde ID worden overschreven
+                  </span>
+                </div>
+
+                {/* Applicatielijst */}
+                <div className="overflow-y-auto flex-1 px-5 py-3 space-y-2">
+                  {importData.apps.map(a => {
+                    const sel = importSel.has(a.id);
+                    const exists = apps.some(x => x.id === a.id);
+                    const sc = calcScores(a.scores || {});
+                    const lbl = scoreLabel(sc.autonomyScore);
+                    return (
+                      <div key={a.id}
+                        onClick={() => setImportSel(p => {
+                          const n = new Set(p);
+                          n.has(a.id) ? n.delete(a.id) : n.add(a.id);
+                          return n;
+                        })}
+                        className="flex items-center gap-3 rounded p-3 cursor-pointer transition-all"
+                        style={{ border:"2px solid " + (sel ? "#1A56A0" : "#e5e7eb"),
+                                 background: sel ? "#EBF3FF" : "#fff" }}>
+                        <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
+                          style={{ background: sel ? "#1A56A0" : "#f3f4f6",
+                                   border:"2px solid " + (sel ? "#1A56A0" : "#d1d5db") }}>
+                          {sel && <span style={{ color:"white", fontSize:11, fontWeight:700 }}>✓</span>}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>{a.name}</span>
+                            {a.supplier && <span className="text-xs" style={{ color:"#9ca3af" }}>{a.supplier}</span>}
+                            {sc.autonomyScore && (
+                              <span className="text-xs px-2 py-0.5 font-semibold rounded"
+                                style={{ background:lbl.bg, color:lbl.fg }}>{lbl.text}</span>
+                            )}
+                            {exists && (
+                              <span className="text-xs px-2 py-0.5 rounded font-medium"
+                                style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
+                                overschrijft bestaande
+                              </span>
+                            )}
+                            {!exists && (
+                              <span className="text-xs px-2 py-0.5 rounded font-medium"
+                                style={{ background:"#f0fdf4", border:"1px solid #86efac", color:"#15803d" }}>
+                                nieuw
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex gap-3 mt-1 flex-wrap">
+                            {a.cat && <span className="text-xs" style={{ color:"#6b7280" }}>{a.cat}</span>}
+                            {a.owner && <span className="text-xs" style={{ color:"#6b7280" }}>👤 {a.owner}</span>}
+                            {sc.autonomyScore && (
+                              <span className="text-xs font-semibold" style={{ color: scoreColor(sc.autonomyScore) }}>
+                                Score: {sc.autonomyScore.toFixed(1)}/10
+                              </span>
+                            )}
+                            <span className="text-xs" style={{ color:"#9ca3af" }}>{sc.completeness}% ingevuld</span>
+                            <span className="text-xs" style={{ color:"#9ca3af" }}>
+                              Aangemaakt: {new Date(a.createdAt).toLocaleDateString("nl-NL")}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Modal footer */}
+                <div className="flex items-center justify-between px-5 py-4"
+                  style={{ borderTop:"1px solid #EBF3FF" }}>
+                  <p className="text-xs" style={{ color:"#9ca3af" }}>
+                    Klik op een applicatie om te selecteren of deselecteren
+                  </p>
+                  <div className="flex gap-2">
+                    <button onClick={() => { setShowImport(false); setImportData(null); setImportSel(new Set()); }}
+                      className="text-xs px-4 py-2"
+                      style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280" }}>
+                      Annuleren
+                    </button>
+                    <button onClick={executeImport} disabled={importSel.size === 0}
+                      className="text-xs px-4 py-2 font-semibold text-white"
+                      style={{ background: importSel.size === 0 ? "#9ca3af" : "#15803d",
+                               borderRadius:4, cursor: importSel.size === 0 ? "not-allowed" : "pointer" }}>
+                      {importSel.size === 0 ? "Geen selectie"
+                        : importSel.size + " applicatie" + (importSel.size !== 1 ? "s" : "") + " importeren"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
       </div>
     );
   }
@@ -5262,7 +5493,7 @@ ${(function(){
             </Section>
 
             <Section title="Beheeromgeving" accent="#0C2340">
-              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
                   Via het tabblad <strong>🔐 Beheer</strong> (pincode vereist) kun je:
                 </p>
@@ -5283,6 +5514,54 @@ ${(function(){
                   <strong>Secundaire namen:</strong> gebruik de toggle in de header om te wisselen tussen primaire
                   (echte) en secundaire (anonieme) namen. Handig voor presentaties aan externen. De toggle is
                   alleen zichtbaar als er secundaire namen zijn toegewezen in de beheeromgeving.
+                </div>
+              </div>
+
+              {/* Import/Export sectie */}
+              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-xs font-bold mb-3" style={{ color:"#0C2340" }}>📦 Database export en import</p>
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="rounded p-3" style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#15803d" }}>⬇ Database exporteren</p>
+                    <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>
+                      Klik op <strong>"Exporteer database"</strong> in de beheeromgeving. Er wordt een
+                      JSON-bestand gedownload met <em>alle</em> applicaties inclusief scores, motivaties,
+                      aanmaakdatum en metadata. Het bestand heeft altijd een datum en tijd in de naam, 
+                      bijvoorbeeld <code style={{ background:"#dcfce7", padding:"0 3px", borderRadius:2 }}>NHL_Sov_Database_20260603_1423.json</code>.
+                    </p>
+                    <p className="text-xs" style={{ color:"#16a34a", fontWeight:600 }}>
+                      Sla dit bestand op een veilige locatie op als back-up.
+                    </p>
+                  </div>
+                  <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#1A56A0" }}>⬆ Database importeren</p>
+                    <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                      Klik op <strong>"Importeer database"</strong> en selecteer een eerder geëxporteerd
+                      JSON-bestand. Er verschijnt een overzicht van alle applicaties in het bestand.
+                      Per applicatie zie je of het een nieuwe toevoeging is of een bestaande die wordt overschreven.
+                    </p>
+                  </div>
+                </div>
+                <div className="rounded p-3 mb-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                  <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Selectief importeren</p>
+                  <div className="space-y-1.5">
+                    {[
+                      { stap:"1", txt:"Open het importvenster via de knop in de beheeromgeving." },
+                      { stap:"2", txt:"Je ziet alle applicaties uit het exportbestand, elk met scores en status (nieuw of overschrijft bestaande)." },
+                      { stap:"3", txt:'Gebruik "Alles selecteren" voor een volledige herstel, of klik individuele applicaties aan voor een selectieve import.' },
+                      { stap:"4", txt:"Klik op de groene importknop. Nieuwe applicaties worden toegevoegd, bestaande worden overschreven met de importdata." },
+                    ].map(s => (
+                      <div key={s.stap} className="flex gap-2 text-xs">
+                        <div className="w-4 h-4 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                          style={{ background:"#1A56A0", fontSize:9 }}>{s.stap}</div>
+                        <span style={{ color:"#374151", lineHeight:1.5 }}>{s.txt}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded p-2.5 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
+                  <strong>Per ongeluk verwijderd?</strong> Importeer het meest recente exportbestand en selecteer
+                  alleen de verwijderde applicatie. De rest van het portfolio blijft ongewijzigd.
                 </div>
               </div>
             </Section>
