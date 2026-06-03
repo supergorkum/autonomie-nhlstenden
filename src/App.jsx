@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.8";
+const VERSION = "v1.9";
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -42,6 +42,17 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v1.9",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "PDF: kernapplicatietabel (hoofdstuk 7.2) verwijderd uit het rapport",
+      "PDF: bij enkelvoudige selectie verschijnt nu hoofdstuk 7 'Verbeteracties' met een concrete actielijst en afvinkbare tabel per DAAF-dimensie",
+      "PDF: bij meervoudige selectie blijft hoofdstuk 7 de vervolgstappen voor eigenaren (zonder vaste kernapplicatietabel)",
+      "PDF: voorblad en titel passen zich aan bij enkelvoudige export (naam applicatie prominent zichtbaar)",
+      "Alle verwijzingen naar 'bestuur', 'bestuurlijk' en 'CvB' vervangen door NHL Stenden organisatienaamgeving",
+    ]
+  },
   {
     versie: "v1.8",
     datum: "Juni 2026",
@@ -119,11 +130,11 @@ const CHANGELOG = [
     datum: "Mei 2026",
     wijzigingen: [
       "Spindiagram vervangen door DivergingChart voor DAAF — semantisch correcte assen (richting heeft betekenis)",
-      "Opdrachtskaart toegevoegd bovenaan dashboard met centrale CvB-vraagstelling",
+      "Opdrachtskaart toegevoegd bovenaan dashboard met centrale vraagstelling NHL Stenden",
       "Heatmap verwijderd (onleesbaar bij veel applicaties)",
       "Tekst afbreking Quick win en Strategische aanbeveling opgelost — volledige tekst zichtbaar",
       "Label 'Strategisch' hernoemd naar 'Strategische aanbeveling'",
-      "Term 'bestuurlijk' volledig verwijderd uit de applicatie",
+      "Term 'bestuurlijk' en 'CvB' vervangen door NHL Stenden organisatienaamgeving",
       "PDF typografie verbeterd — lopende tekst met koppen en alinea's",
       "PDF dimensieprofiel: spindiagram vervangen door horizontale balkengrafiek",
     ]
@@ -2065,7 +2076,7 @@ export default function App() {
 <html lang="nl">
 <head>
 <meta charset="UTF-8"/>
-<title>Portfolioanalyse Digitale Soevereiniteit — NHL Stenden ${datum}</title>
+<title>${visible.length === 1 ? `Assessment ${dName(visible[0])} — Digitale Soevereiniteit NHL Stenden ${datum}` : `Portfolioanalyse Digitale Soevereiniteit — NHL Stenden ${datum}`}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.7}
@@ -2184,11 +2195,12 @@ export default function App() {
     <div style="height:2px;background:rgba(255,255,255,0.15);margin-bottom:28px"></div>
     <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">AUTOMATISCH GEGENEREERDE ANALYSE</div>
     <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">
-      Portfolioanalyse<br/>Digitale Soevereiniteit
+      ${visible.length === 1 ? \`Assessment Digitale Soevereiniteit\` : \`Portfolioanalyse<br/>Digitale Soevereiniteit\`}
     </div>
-    <div style="font-family:Arial;font-size:13px;color:#7DD3D0">
-      Applicatielandschap NHL Stenden · ${datum}
+    <div style="font-family:Arial;font-size:${r"\${visible.length === 1 ? `18` : `13`}"}px;font-weight:${r"\${visible.length === 1 ? `700` : `400`}"};color:#7DD3D0;margin-bottom:${r"\${visible.length === 1 ? `4` : `0`}"}px">
+      ${r"${visible.length === 1 ? dName(visible[0]) : `Applicatielandschap NHL Stenden · ${datum}`}"}
     </div>
+    ${r"${visible.length === 1 ? `<div style="font-family:Arial;font-size:11px;color:#7DD3D0">${visible[0].supplier ? visible[0].supplier + " · " : ""}NHL Stenden · ${datum}</div>` : ""}"}
   </div>
   <div class="cover-teal-bar"></div>
   <div class="cover-body">
@@ -2204,7 +2216,7 @@ export default function App() {
       <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:12px">
         Deze analyse is automatisch gegenereerd door de <strong style="color:#0C2340">Digitale Soevereiniteitsassessment Tool</strong> 
         van NHL Stenden Hogeschool. De tool is ontwikkeld door <strong>kwartiermaker E. van Gorkum</strong> samen met de <strong>Ambassadeurs J. Haije, E. Rolf en J. Blom</strong>, 
-        als antwoord op de centrale bestuursvraag: <em>"Waar zetten we onze data neer en waar 
+        als antwoord op de centrale vraagstelling voor NHL Stenden: <em>"Waar zetten we onze data neer en waar 
         liggen de potentiële problemen?"</em>
       </div>
       <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:16px">
@@ -2255,7 +2267,7 @@ export default function App() {
   <div class="toc-sub"><span class="toc-nr">5.3</span><span class="toc-lbl">Dimensiescores tabel</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
 
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Slotbevindingen — aandachtspunten, quick wins en advies</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Vervolgacties Fase 2 — Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>
+  ${visible.length === 1 ? `<div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Verbeteracties — ${dName(visible[0])}</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>` : `<div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Vervolgstappen — Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>`}
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">8.</span><span class="toc-lbl">Bijlage — Detailscores per applicatie</span><span class="toc-dots"></span><span class="toc-pg">8+</span></div>
   ${visible.map((a,i) => `<div class="toc-sub"><span class="toc-nr">${i+1}.</span><span class="toc-lbl">${dName(a)}${a.supplier?` <span style="color:#9ca3af;font-weight:400">— ${a.supplier}</span>`:""}</span><span class="toc-dots"></span><span class="toc-pg">${6+i}</span></div>`).join("")}
 
@@ -2286,7 +2298,7 @@ export default function App() {
     géén statisch rapport. Assessments worden bijgehouden en bijgewerkt naarmate contracten wijzigen, 
     leveranciers hun beleid aanpassen of nieuwe inzichten beschikbaar komen. Dit rapport is een momentopname; 
     de tool zelf biedt altijd de meest actuele stand.</p>
-    <p>De analyse geeft antwoord op de centrale bestuursvraag: 
+    <p>De analyse geeft antwoord op de centrale vraagstelling voor NHL Stenden: 
     <em>"Waar zetten we onze data neer en waar liggen de potentiële problemen?"</em> 
     Voor deze analyse zijn <strong>${visible.length} applicatie${visible.length!==1?"s":""}</strong> beoordeeld 
     uit het kern-applicatielandschap. De tool is opgezet rondom <strong>23 kernsystemen</strong>, 
@@ -2343,8 +2355,7 @@ export default function App() {
   <h3>1.3 Organisatorische context</h3>
   <div class="narrative">
     <p>In december 2025 heeft het kernteam Digitale Soevereiniteit een adviesopdracht aangeboden 
-    aan het College van Bestuur. Het CvB heeft het thema strategisch belangrijk bevonden en groen 
-    licht gegeven om Digitale Soevereiniteit te verankeren als ambassadeurslijn binnen het 
+    NHL Stenden heeft digitale soevereiniteit verankerd als ambassadeurslijn binnen het 
     Programma Digitale Samenhang — geen apart project, maar een 
     <strong>ordenend perspectief</strong> dat bestaande initiatieven verbindt en richting geeft.</p>
   </div>
@@ -2364,7 +2375,7 @@ export default function App() {
       <div style="background:white;border-left:3px solid #E87722;padding:8px 10px;border-radius:0 3px 3px 0">
         <div style="font-weight:700;color:#E87722;font-size:9px">FASE 3 · Juni</div>
         <div style="font-weight:600;color:#0C2340;margin:2px 0">Advies &amp; Besluitvorming</div>
-        <div style="color:#6b7280;font-size:9px">Onderbouwd eindadvies en implementatie-roadmap aan het CvB</div>
+        <div style="color:#6b7280;font-size:9px">Onderbouwd eindadvies en implementatie-roadmap voor NHL Stenden</div>
       </div>
     </div>
   </div>
@@ -2512,117 +2523,157 @@ export default function App() {
 
   ${slotHTML}
 
-  <!-- FASE 2 PAGINA: Eigenaren review -->
+  <!-- HOOFDSTUK 7: conditieel ─────────────────────────────────
+       Bij 1 app: verbeteracties-checklist
+       Bij meerdere: vervolgstappen eigenaren (zonder kernapplicatietabel) -->
   <div class="page-break">
-    <h2>7. Vervolgacties Fase 2 — Review door applicatie-eigenaren</h2>
+    ${visible.length === 1 ? `
+    <h2>7. Verbeteracties — ${dName(visible[0])}</h2>
     <div class="section-intro">
-      Deze pagina beschrijft de context van de huidige scores, de beoogde vervolgstap 
-      met applicatie-eigenaren en de concrete acties voor Fase 2 van het traject.
+      Dit hoofdstuk vertaalt de assessmentscores van <strong>${dName(visible[0])}</strong> naar concrete,
+      uitvoerbare verbeteracties. De acties zijn ingedeeld per DAAF-niveau en gesorteerd op urgentie.
+      Gebruik deze lijst als werkdocument voor gesprekken met de applicatie-eigenaar, contract-eigenaar
+      en leverancier.
+    </div>
+    ${(function(){
+      const a = visible[0];
+      const sc = calcScores(a.scores || {});
+      const lbl = sc.autonomyScore ? (sc.autonomyScore >= 7 ? "Goed" : sc.autonomyScore >= 5 ? "Acceptabel" : sc.autonomyScore >= 3 ? "Zorgwekkend" : "Kritiek") : "Onvolledig";
+      const kleur = sc.autonomyScore ? (sc.autonomyScore >= 7 ? "#15803d" : sc.autonomyScore >= 5 ? "#a16207" : sc.autonomyScore >= 3 ? "#c2410c" : "#b91c1c") : "#9ca3af";
+      const bg    = sc.autonomyScore ? (sc.autonomyScore >= 7 ? "#dcfce7" : sc.autonomyScore >= 5 ? "#fef9c3" : sc.autonomyScore >= 3 ? "#ffedd5" : "#fee2e2") : "#f3f4f6";
+
+      // Bouw acties-tabel op basis van scores
+      const acties = [];
+
+      // RISICO-acties
+      if (sc.risico > 3.5) {
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A — Geopolitiek", actie:"Inventariseer Europese alternatieven voor deze leverancier. Vraag offertes op bij minimaal twee EU-gevestigde aanbieders.", tip:"Begin met een marktverkenning van 1-2 dagdelen. SURF publiceert regelmatig overzichten van EU-conforme alternatieven per categorie.", kleur:"#b91c1c", bg:"#fee2e2" });
+      }
+      if ((a.scores || {})["A3"] >= 4) {
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A3 — Datalocatie", actie:"Verzoek de leverancier schriftelijk te bevestigen in welke regio data wordt opgeslagen (incl. back-ups en metadata). Leg dit vast in het contract.", tip:"Vraag ook naar de locatie van de 'control plane' — het beheerpaneel van de dienst. Die staat soms in de VS terwijl de data in de EU staat.", kleur:"#b91c1c", bg:"#fee2e2" });
+      }
+      if ((a.scores || {})["B1"] >= 4) {
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"B — Leverancier", actie:"Breng de concentratie in kaart: hoeveel kritieke processen zijn afhankelijk van deze leverancier? Stel een maximum vast.", tip:"Gebruik de tool om vergelijkbare applicaties van dezelfde leverancier bij elkaar te zoeken — zo zie je de totale concentratie in één oogopslag.", kleur:"#ea580c", bg:"#ffedd5" });
+      }
+
+      // MITIGATIE-acties
+      if ((a.scores || {})["C1"] <= 2) {
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C — Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt. Leg vast welke processen stoppen en hoe ze handmatig of tijdelijk worden overgenomen.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen 'wat doen we de eerste 4 uur' is al waardevol.", kleur:"#1A56A0", bg:"#EBF3FF" });
+      }
+      if ((a.scores || {})["D1"] <= 2) {
+        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D — Organisatorisch", actie:"Leg de kennis over configuratie, beheer en afhankelijkheden van deze applicatie vast bij minimaal twee medewerkers. Verminder afhankelijkheid van sleutelpersonen.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint — niet in iemands hoofd.", kleur:"#1A56A0", bg:"#EBF3FF" });
+      }
+      if ((a.scores || {})["E1"] <= 2) {
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, een dataportabiliteitsgarantie (formaat en termijn) en een opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een 'data return plan': wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1A56A0", bg:"#EBF3FF" });
+      }
+
+      // DICTU-acties
+      if (sc.dictuAvg && sc.dictuAvg < 3) {
+        acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Soevereiniteit", actie:"Vraag de leverancier schriftelijk naar: (1) datalocatie incl. back-ups, (2) garantie dat leverancier zelf geen toegang heeft, (3) verzet tegen niet-EU dataverzoeken, (4) locatie van de control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier. Stuur hem mee als bijlage bij de contractverlenging.", kleur:"#6d28d9", bg:"#faf5ff" });
+      }
+
+      // BELANG-actie
+      if (sc.belang >= 4 && sc.risico >= 3) {
+        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico van deze applicatie bewust aanvaard? Maak een korte risicoafweging en leg de beslissing schriftelijk vast inclusief een herzieningsdatum.", tip:"Dit hoeft geen groot document te zijn. Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E87722", bg:"#fff8e1" });
+      }
+
+      // Fallback als alles goed is
+      if (acties.length === 0) {
+        acties.push({ niveau:"Onderhoud", prio:"Laag", dim:"Algemeen", actie:"Alle scores zijn acceptabel of goed. Plan een hercontrole bij de eerstvolgende contractverlenging of bij significante leverancierswijzigingen.", tip:"Stel een terugkerende herinnering in op de einddatum van het contract om tijdig te herassessen.", kleur:"#15803d", bg:"#dcfce7" });
+      }
+
+      return \`
+      <div style="background:\${bg};border:1px solid \${kleur}44;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:Arial;font-size:10px;page-break-inside:avoid">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div style="font-weight:700;color:#0C2340;font-size:12px">\${dName(a)}\${a.supplier ? \` <span style="font-weight:400;color:#9ca3af;font-size:10px">— \${a.supplier}</span>\` : ""}</div>
+          <span style="background:\${kleur};color:white;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">\${lbl}</span>
+          \${sc.autonomyScore ? \`<span style="font-size:10px;font-weight:700;color:\${kleur}">Score: \${sc.autonomyScore.toFixed(1)}/10</span>\` : ""}
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:8px">
+          \${[{l:"Risico",v:sc.risico,c:"#dc2626"},{l:"Mitigatie",v:sc.mitigatie,c:"#26B5AE"},{l:"Belang",v:sc.belang,c:"#E87722"},{l:"DICTU",v:sc.dictuAvg,max:5,c:"#6d28d9"}].map(s=>\`
+          <div style="text-align:center;background:white;border-radius:3px;padding:6px 4px;border:1px solid #e5e7eb">
+            <div style="font-size:14px;font-weight:700;color:\${s.v ? s.c : "#d1d5db"}">\${s.v ? s.v.toFixed(1) : "–"}</div>
+            <div style="font-size:8px;color:#9ca3af">\${s.l}</div>
+          </div>\`).join("")}
+        </div>
+      </div>
+
+      <table style="width:100%;border-collapse:collapse;font-family:Arial;font-size:9.5px;margin-bottom:16px">
+        <tr style="background:#0C2340;color:white">
+          <th style="padding:7px 10px;text-align:left;width:10%">Niveau</th>
+          <th style="padding:7px 10px;text-align:left;width:8%">Prioriteit</th>
+          <th style="padding:7px 10px;text-align:left;width:15%">Dimensie</th>
+          <th style="padding:7px 10px;text-align:left;width:5%">Afgevinkt</th>
+          <th style="padding:7px 10px;text-align:left;width:37%">Actie</th>
+          <th style="padding:7px 10px;text-align:left;width:25%">Tip</th>
+        </tr>
+        \${acties.map((ac,i)=>\`
+        <tr style="background:\${i%2===0?"#f8fafc":"white"};border-bottom:1px solid #f1f5f9;page-break-inside:avoid">
+          <td style="padding:8px 10px;vertical-align:top"><span style="background:\${ac.kleur};color:white;padding:2px 6px;border-radius:2px;font-size:8px;font-weight:700">\${ac.niveau}</span></td>
+          <td style="padding:8px 10px;vertical-align:top"><span style="background:\${ac.prio==="Hoog"?"#fee2e2":ac.prio==="Middel"?"#fef9c3":"#dcfce7"};color:\${ac.prio==="Hoog"?"#b91c1c":ac.prio==="Middel"?"#a16207":"#15803d"};padding:2px 6px;border-radius:2px;font-size:8px;font-weight:600">\${ac.prio}</span></td>
+          <td style="padding:8px 10px;vertical-align:top;color:#374151">\${ac.dim}</td>
+          <td style="padding:8px 10px;vertical-align:top;text-align:center">
+            <div style="width:14px;height:14px;border:1.5px solid #D0E4F7;border-radius:2px;display:inline-block"></div>
+          </td>
+          <td style="padding:8px 10px;vertical-align:top;color:#0C2340;font-weight:500;line-height:1.5">\${ac.actie}</td>
+          <td style="padding:8px 10px;vertical-align:top;color:#6b7280;line-height:1.5;font-style:italic">\${ac.tip}</td>
+        </tr>\`).join("")}
+      </table>
+
+      <div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;font-family:Arial;font-size:9.5px">
+        <div style="font-weight:700;color:#0C2340;margin-bottom:6px">Aanbevolen aanpak</div>
+        <div style="color:#374151;line-height:1.7">
+          Bespreek deze actielijst met de applicatie-eigenaar, contract-eigenaar en functioneel beheerder.
+          Zij beschikken over de operationele kennis die nodig is om de acties te prioriteren en uit te voeren.
+          Leg de gemaakte afspraken vast — ook bewuste keuzes om een actie niet op te pakken zijn
+          waardevolle informatie voor de strategische besluitvorming van NHL Stenden.
+        </div>
+      </div>\`;
+    })()}
+    ` : `
+    <h2>7. Vervolgstappen — Review door applicatie-eigenaren</h2>
+    <div class="section-intro">
+      Dit hoofdstuk beschrijft de aanbevolen vervolgstappen voor de review van assessmentscores
+      met applicatie-eigenaren en geeft concrete acties voor het verdere traject.
     </div>
 
     <h3>7.1 Context van de huidige scores</h3>
     <div class="narrative">
-      <p>De scores in dit rapport zijn in eerste instantie ingevuld door het 
-      <strong>Expertiseteam Digitale Soevereiniteit</strong> op basis van 
-      beschikbare contractgegevens, publieke documentatie en interne kennis. 
-      Dit is een bewuste methodische keuze: door eerst een nulmeting te doen 
-      op basis van contractinformatie, ontstaat een objectief startpunt dat 
+      <p>De scores in dit rapport zijn ingevuld op basis van beschikbare contractgegevens,
+      publieke documentatie en interne kennis van het
+      <strong>Expertiseteam Digitale Soevereiniteit</strong>.
+      Dit is een bewuste methodische keuze: door eerst een nulmeting te doen
+      op basis van contractinformatie, ontstaat een objectief startpunt dat
       onafhankelijk is van subjectieve perceptie.</p>
-      <p>Deze aanpak heeft echter een inherente beperking: contractdocumentatie 
-      beschrijft niet altijd de volledige operationele realiteit. 
-      <strong>Applicatie-eigenaren, contract-eigenaren en functioneel beheerders</strong> 
-      beschikken over praktijkkennis die de scores kan nuanceren, verbeteren of 
-      corrigeren. Scores kunnen daardoor nog wijzigen — en dat is niet alleen 
-      acceptabel, het is nadrukkelijk de bedoeling.</p>
-      <p>Dit past precies in de opzet van de tool: de 
-      <strong>Digitale Soevereiniteitsassessment Tool is geen statisch rapport 
-      maar een levend instrument</strong>. Scores worden bijgehouden en bijgewerkt 
-      naarmate nieuwe informatie beschikbaar komt, contracten wijzigen of 
-      leveranciers hun beleid aanpassen.</p>
+      <p><strong>Applicatie-eigenaren, contract-eigenaren en functioneel beheerders</strong>
+      beschikken over praktijkkennis die de scores kan nuanceren, verbeteren of
+      corrigeren. Scores kunnen daardoor nog wijzigen — en dat is nadrukkelijk de bedoeling.
+      De tool is een levend instrument, geen statisch rapport.</p>
     </div>
 
-    <h3>7.2 Overzicht kernapplicaties</h3>
-    <div style="font-size:10px;line-height:1.6;color:#374151;border-left:3px solid #D0E4F7;padding-left:12px;margin-bottom:8px;font-family:Arial">
-      Onderstaande tabel toont de 23 kernapplicaties met leverancier en contractstatus. 
-      De kolom <strong>Gegevensbescherming</strong> geeft aan of er een 
-      <strong>Verwerkersovereenkomst (VOK)</strong> beschikbaar is — een juridisch document 
-      waarin is vastgelegd hoe de leverancier omgaat met persoonsgegevens van NHL Stenden, 
-      conform de AVG. Een ontbrekende of verouderde VOK is een aandachtspunt voor Fase 2.
-    </div>
-    <table style="font-size:9.5px;margin-top:0">
-      <tr>
-        <th style="width:28%">Applicatie</th>
-        <th style="width:30%">Leverancier</th>
-        <th style="width:42%">Contractstatus &amp; Gegevensbescherming</th>
-      </tr>
-      <tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">M365 / Microsoft 365</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">✓ Contract actief via SURF · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Blackboard</td><td style="color:#374151">Blackboard International BV</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">PROGRESS</td><td style="color:#374151">Progress</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Microsoft Dynamics / IGO</td><td style="color:#374151">SURF bv / BEND (Axelio)</td><td style="color:#16a34a;font-size:9px">⚠ Contract actief · Verwerkersovereenkomst deels beschikbaar</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Intranet (SharePoint)</td><td style="color:#374151">SURF bv / Microsoft</td><td style="color:#16a34a;font-size:9px">✓ Contract actief via SURF · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">RAET Youforce</td><td style="color:#374151">RAET / Visma</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Xedule</td><td style="color:#374151">Xedule</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">AFAS</td><td style="color:#374151">Afas Software B.V.</td><td style="color:#16a34a;font-size:9px">⚠ Contract actief · Verwerkersovereenkomst via klantportal (2016, controleer actualiteit)</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">GBS — Gebouwbeheersysteem</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">SALTO / OMNI</td><td style="color:#374151">Salto / Omni</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">YOS Studiecoachmonitor</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">ANS — Toetsapplicatie</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">DOCCENTER</td><td style="color:#374151">Canon</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">RICOH</td><td style="color:#374151">Ricoh</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Online Event Tools</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">✗ Geen actief contract — vorig contract vervallen december 2025</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Website & Hosting</td><td style="color:#374151">Netvlies</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via Marketing &amp; Communicatie</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">TOPdesk</td><td style="color:#374151">TOPdesk</td><td style="color:#16a34a;font-size:9px">✓ Contract actief · Verwerkersovereenkomst aanwezig</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">JOIN</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">ProctorExam</td><td style="color:#374151">—</td><td style="color:#dc2626;font-size:9px">? Niet aangetroffen in het contractarchief — eigenaar te raadplegen</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">MySchoolsNetwork</td><td style="color:#374151">Bhosted</td><td style="color:#dc2626;font-size:9px">✗ Geen contract — alleen crediteur bekend in de financiële administratie</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">OfficeBooking</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via FLWO</td></tr>
-<tr style="background:white"><td style="font-weight:600;color:#0C2340">Arbo Dienstverlening</td><td style="color:#374151">—</td><td style="color:#6b7280;font-size:9px">~ Contract wordt beheerd via HRM</td></tr>
-<tr style="background:#f8fafc"><td style="font-weight:600;color:#0C2340">Innovation Lab</td><td style="color:#374151">MySchoolsNetwork</td><td style="color:#6b7280;font-size:9px">~ Zie MySchoolsNetwork (onderdeel van hetzelfde platform)</td></tr>
-</table>
-
-    <h3>7.3 Concrete acties Fase 2</h3>
-    <div class="narrative">
-      <p>In Fase 2 (Strategische Verkenning, april–mei 2026) worden de assessments 
-      verfijnd op basis van input van applicatie-eigenaren. Elk van de vier acties 
-      hieronder is een stap in dat proces. <strong>Bij vragen over de inhoud, 
-      aanpak of focus van de review: raadpleeg altijd de Multidisciplinaire 
-      Expertisegroep</strong> — die is er specifiek voor samengesteld om 
-      applicatie-eigenaren te ondersteunen vanuit de disciplines Beleid &amp; Juridisch, 
-      Techniek &amp; Beheer en Onderwijs &amp; Onderzoek.</p>
-    </div>
-
+    <h3>7.2 Concrete acties</h3>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;page-break-inside:avoid">
       <div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
         <div style="font-weight:700;color:#1A56A0;margin-bottom:4px">① Uitnodiging applicatie-eigenaren</div>
-        <div style="color:#374151;line-height:1.6">Elke contactpersoon uit bovenstaande lijst ontvangt een gerichte uitnodiging van het Expertiseteam. Zij worden gevraagd de scores voor hun applicatie(s) te reviewen en — waar nodig — te corrigeren of aan te vullen met contractuele en operationele kennis.</div>
+        <div style="color:#374151;line-height:1.6">Elke contactpersoon ontvangt een uitnodiging van het Expertiseteam. Zij worden gevraagd de scores voor hun applicatie(s) te reviewen en aan te vullen met contractuele en operationele kennis.</div>
       </div>
       <div style="background:#E6F7F7;border-left:3px solid #26B5AE;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
         <div style="font-weight:700;color:#26B5AE;margin-bottom:4px">② Begeleide review sessies</div>
-        <div style="color:#374151;line-height:1.6">Een medewerker met Digitale Soevereiniteit in de portefeuille begeleidt de review. Per applicatie wordt een korte werksessie gepland met eigenaar, contract-eigenaar en functioneel beheerder. Het Expertiseteam faciliteert en zorgt voor een gestructureerde aanpak.</div>
+        <div style="color:#374151;line-height:1.6">Per applicatie wordt een werksessie gepland met eigenaar, contract-eigenaar en functioneel beheerder. Het Expertiseteam faciliteert en zorgt voor een gestructureerde aanpak.</div>
       </div>
       <div style="background:#fff8f0;border-left:3px solid #E87722;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
         <div style="font-weight:700;color:#E87722;margin-bottom:4px">③ Bijwerken in de tool</div>
-        <div style="color:#374151;line-height:1.6">Na elke review worden de scores bijgewerkt in de Digitale Soevereiniteitsassessment Tool. Motivatieteksten worden aangevuld of gecorrigeerd. De tool genereert automatisch een bijgewerkte rapportage die de actuele stand weerspiegelt.</div>
+        <div style="color:#374151;line-height:1.6">Na elke review worden de scores bijgewerkt. Motivatieteksten worden aangevuld of gecorrigeerd. De tool genereert automatisch een bijgewerkte rapportage.</div>
       </div>
       <div style="background:#f0fdf4;border-left:3px solid #22c55e;padding:10px 14px;border-radius:0 4px 4px 0;font-family:Arial;font-size:10px">
-        <div style="font-weight:700;color:#166534;margin-bottom:4px">④ Input voor scenario's en advies</div>
-        <div style="color:#374151;line-height:1.6">De herziene scores en praktijkinzichten van eigenaren vormen directe input voor de producten van Fase 2: de strategische dilemma's (Product 3) en de scenario's met kosten-batenanalyse (Product 4), als voorbereiding op het eindadvies aan het CvB.</div>
+        <div style="font-weight:700;color:#166534;margin-bottom:4px">④ Input voor strategie en besluitvorming</div>
+        <div style="color:#374151;line-height:1.6">De herziene scores en praktijkinzichten vormen directe input voor strategische dilemma's en scenario's met kosten-batenanalyse, als voorbereiding op de strategische besluitvorming van NHL Stenden.</div>
       </div>
     </div>
-
-    <div style="margin-top:20px;padding:14px 18px;background:#f8fafc;border:1px solid #D0E4F7;border-radius:4px;font-family:Arial;font-size:10px;page-break-inside:avoid">
-      <div style="font-weight:700;color:#0C2340;margin-bottom:6px">Noot over de scores in dit rapport</div>
-      <div style="color:#374151;line-height:1.7">
-        De scores in dit rapport zijn een <strong>nulmeting op basis van contractgegevens</strong> 
-        en vormen een objectief vertrekpunt. Ze zijn niet definitief. Na de review door 
-        applicatie-eigenaren in Fase 2 wordt een herziene versie van dit rapport gegenereerd 
-        met bijgewerkte scores en aanvullende motivaties. Dat herziene rapport vormt de 
-        feitelijke grondslag voor de strategische besluitvorming in Fase 3.
-      </div>
-    </div>
+    `}
   </div>
 
-  <!-- PAGINA 4+: Detail per applicatie -->
+    <!-- PAGINA 4+: Detail per applicatie -->
   <div class="page-break">
     <h2>8. Detailscores en aanbevelingen per applicatie — Bijlage</h2>
     <div class="section-intro">
@@ -4396,7 +4447,7 @@ export default function App() {
       if (s.dictuAvg && s.dictuAvg < 3)
         acties.push("Vraag de leverancier schriftelijk naar de datalocatie en of zij zich actief verzetten tegen niet-EU dataverzoeken (DICTU 2.3).");
       if (s.belang > 3.5 && s.risico > 3)
-        acties.push("Agenderen voor bestuurlijk besluit: is het risico van deze applicatie bewust aanvaard? Leg dit formeel vast.");
+        acties.push("Formeel vastleggen: is het risico van deze applicatie bewust aanvaard door NHL Stenden? Leg de afweging schriftelijk vast.");
       // Fallback als niets specifiek
       if (acties.length === 0) {
         acties.push("Herassessment plannen bij eerstvolgende contractverlenging.");
