@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.7";
+const VERSION = "v1.8";
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -42,6 +42,15 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v1.8",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Beveiliging niveau 1: server-side API-tokencheck in Netlify Functions (x-api-token header, HTTP 401 bij ongeldig verzoek)",
+      "App.jsx: apiToken wordt meegestuurd bij alle API-aanroepen naar save-data en load-data",
+      "Over dit product: uitgebreide beveiligingssectie toegevoegd met versleuteling, toegangsbeveiliging, bekende beperkingen en niveaus van advies",
+    ]
+  },
   {
     versie: "v1.7",
     datum: "Juni 2026",
@@ -1255,6 +1264,9 @@ export default function App() {
   const [loginInput, setLoginInput] = useState("");
   const [loginError, setLoginError] = useState(false);
   const LOGIN_CODE = "Geheim";
+  // API-token: hetzelfde als het inlogwachtwoord — wordt meegestuurd als request-header
+  // zodat de Netlify Functions server-side kunnen controleren of het verzoek geldig is.
+  const apiToken = sessionStorage.getItem("nhl_api_token") || "";
 
   // ── App state ────────────────────────────────────────────────
   const [apps,       setApps]      = useState([]);
@@ -1314,7 +1326,7 @@ export default function App() {
     if (!loggedIn) return;
     async function load() {
       try {
-        const r = await fetch("/api/load-data");
+        const r = await fetch("/api/load-data", { headers: { "x-api-token": apiToken } });
         if (r.ok) {
           const data = await r.json();
           if (Array.isArray(data)) setApps(data);
@@ -1340,7 +1352,7 @@ export default function App() {
       try {
         const r = await fetch("/api/save-data", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-api-token": apiToken },
           body: JSON.stringify(apps)
         });
         if (!r.ok) throw new Error("save failed");
@@ -1361,6 +1373,7 @@ export default function App() {
   function handleLogin() {
     if (loginInput === LOGIN_CODE) {
       sessionStorage.setItem("nhl_auth", "ok");
+      sessionStorage.setItem("nhl_api_token", loginInput);
       setLoggedIn(true);
       setLoginError(false);
     } else {
@@ -4161,13 +4174,103 @@ export default function App() {
             </div>
           </div>
 
-          {/* Conclusie */}
+          {/* Beveiliging */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Beveiliging van deze applicatie</h3>
+
+            {/* Versleuteling */}
+            <div className="mb-3">
+              <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Versleuteling</p>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { icon:"🔒", titel:"Data in transit (TLS)", status:"Actief", kleur:"#15803d", bg:"#dcfce7",
+                    tekst:"Alle communicatie tussen de browser en de Netlify-servers verloopt via HTTPS met TLS 1.2 of hoger. Data kan onderweg niet worden onderschept of gewijzigd." },
+                  { icon:"💾", titel:"Data at rest (Netlify Blobs)", status:"Platformniveau", kleur:"#ca8a04", bg:"#fef9c3",
+                    tekst:"Netlify versleutelt opgeslagen data op schijfniveau (AES-256) als onderdeel van hun infrastructuur. Er is geen applicatieniveau-encryptie: de data is leesbaar voor Netlify zelf en voor iedereen met toegang tot het Netlify-account van NHL Stenden." },
+                ].map(k => (
+                  <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span>{k.icon}</span>
+                      <span className="text-xs font-bold" style={{ color:k.kleur }}>{k.titel}</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded font-medium ml-auto" style={{ background:k.kleur+"22", color:k.kleur }}>{k.status}</span>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{k.tekst}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Toegangsbeveiliging */}
+            <div className="mb-3">
+              <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Toegangsbeveiliging</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { icon:"🖥️", titel:"Inlogscherm (UI)", status:"Wachtwoord", kleur:"#1A56A0", bg:"#EBF3FF",
+                    tekst:"De applicatie toont een inlogscherm dat toegang blokkeert zonder het juiste wachtwoord. De sessie wordt opgeslagen in sessionStorage van de browser en vervalt automatisch wanneer het tabblad of venster wordt gesloten." },
+                  { icon:"🔑", titel:"API-tokencheck (server)", status:"Actief v1.7+", kleur:"#15803d", bg:"#dcfce7",
+                    tekst:"Vanaf versie 1.7 stuurt de browser bij elke API-aanroep een token mee als request-header (x-api-token). De Netlify Function valideert dit token server-side tegen een omgevingsvariabele (APP_API_TOKEN). Verzoeken zonder geldig token worden geweigerd met HTTP 401." },
+                  { icon:"🔐", titel:"Beheerpincode", status:"Afzonderlijk", kleur:"#6d28d9", bg:"#faf5ff",
+                    tekst:"Naast het inlogwachtwoord is er een aparte beheerpincode voor de beheerfuncties (aanpassen, verwijderen). Dit beperkt de impact als het algemene wachtwoord breed wordt gedeeld." },
+                ].map(k => (
+                  <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span>{k.icon}</span>
+                      <span className="text-xs font-bold" style={{ color:k.kleur }}>{k.titel}</span>
+                    </div>
+                    <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background:k.kleur+"22", color:k.kleur }}>{k.status}</span>
+                    <p className="text-xs leading-relaxed mt-1.5" style={{ color:"#374151" }}>{k.tekst}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bekende beperkingen */}
+            <div className="rounded p-3 mb-3" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+              <p className="text-xs font-bold mb-2" style={{ color:"#92400e" }}>⚠️ Bekende beperkingen — transparant benoemd</p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { tekst:"Het inlogwachtwoord staat als platte tekst in de JavaScript-broncode die naar de browser wordt gestuurd. Iedereen die de browser-devtools opent kan het wachtwoord inzien. De server-side tokencheck (v1.7+) beperkt de schade, maar vervangt geen echte authenticatie." },
+                  { tekst:"Er is geen rate limiting of lockout na foutieve inlogpogingen. Geautomatiseerde aanvallen op het inlogscherm zijn technisch mogelijk." },
+                  { tekst:"Er is geen logging van wie wanneer heeft ingelogd of data heeft gewijzigd. Bij een incident is er geen audit trail." },
+                  { tekst:"De data staat zonder applicatieniveau-encryptie in Netlify Blobs. NHL Stenden heeft geen zicht op wie binnen Netlify toegang heeft tot de ruwe opgeslagen data." },
+                ].map((b, i) => (
+                  <div key={i} className="flex gap-2 text-xs">
+                    <span className="flex-shrink-0 font-bold" style={{ color:"#ea580c" }}>!</span>
+                    <span style={{ color:"#78350f", lineHeight:1.5 }}>{b.tekst}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Advies doorontwikkeling */}
+            <div>
+              <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Advies bij doorontwikkeling</p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { n:"1", titel:"Niveau 1 — Gedaan (v1.7)", tekst:"Server-side API-tokencheck in Netlify Functions. Verzoeken zonder token worden geweigerd met HTTP 401. Minimale inspanning, directe verbetering.", kleur:"#15803d", bg:"#dcfce7" },
+                  { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door Netlify Identity of SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1A56A0", bg:"#EBF3FF" },
+                  { n:"3", titel:"Niveau 3 — Bij institutionele uitrol", tekst:"Migreer naar EU-hosting (Hetzner, Cloudflare EU, Nederlandse aanbieder), voeg applicatieniveau-encryptie toe aan de opgeslagen data, en integreer logging en audit trail.", kleur:"#6d28d9", bg:"#faf5ff" },
+                ].map(k => (
+                  <div key={k.n} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
+                        style={{ background:k.kleur, fontSize:10 }}>{k.n}</div>
+                      <span className="text-xs font-bold" style={{ color:k.kleur }}>{k.titel}</span>
+                    </div>
+                    <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{k.tekst}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Conclusie soevereiniteit */}
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"2px solid #E87722" }}>
             <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Conclusie — soevereiniteitsrisico van dit instrument</h3>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
               De applicatie draait volledig op Amerikaanse infrastructuur (Netlify, GitHub). De assessment-data van NHL Stenden
               wordt opgeslagen in Netlify Blobs zonder gegarandeerde EU-datalocatie.
-              Dit is een bewuste pragmatische keuze voor een intern instrument. De data bevat geen persoonsgegevens
+              Dit is een bewuste pragmatische keuze voor een intern prototype. De data bevat geen persoonsgegevens
               van studenten of medewerkers — het betreft uitsluitend scores en omschrijvingen van softwareapplicaties.
             </p>
             <div className="grid grid-cols-3 gap-3">
