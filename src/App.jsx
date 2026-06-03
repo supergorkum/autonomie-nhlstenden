@@ -32,7 +32,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v1.6";
+const VERSION = "v1.7";
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -42,6 +42,14 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v1.7",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Tekst 'Over & uitleg' gecorrigeerd: verouderde verwijzing naar localStorage verwijderd uit de Data opslaan tip",
+      "Stap 6 (Excel exporteren) bijgewerkt: beschrijft nu vijf tabbladen (inclusief Motivaties)",
+    ]
+  },
   {
     versie: "v1.6",
     datum: "Juni 2026",
@@ -4124,9 +4132,9 @@ export default function App() {
                 { n:"5", title:"Vergelijken", icon:"🔎",
                   txt:'Het tabblad Vergelijking toont een staafdiagram en tabel met alle applicaties naast elkaar. Klik op een rij om direct naar het assessment te gaan.' },
                 { n:"6", title:"Excel exporteren", icon:"📥",
-                  txt:'Klik op "Exporteer Excel" in de header. Het bestand bevat vier tabbladen: Overzicht (alle scores), DAAF scores, DICTU scores en de volledige vragenlijst met normen.' },
+                  txt:'Klik op "Exporteer Excel" in de header. Het bestand bevat vijf tabbladen: Overzicht (alle scores), DAAF scores, DICTU scores, de volledige vragenlijst met normen en een Motivaties overzicht.' },
                 { n:"7", title:"Beheer", icon:"🔐",
-                  txt:'Via het tabblad Beheer (pincode vereist) kun je applicatiegegevens aanpassen, applicaties verwijderen en een volledig overzicht per applicatie bekijken inclusief alle ingevulde scores. Data wordt opgeslagen in de browser (localStorage).' },
+                  txt:'Via het tabblad Beheer (pincode vereist) kun je applicatiegegevens aanpassen, applicaties verwijderen en een volledig overzicht per applicatie bekijken inclusief alle ingevulde scores.' },
               ].map(s => (
                 <div key={s.n} className="flex gap-3 rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                   <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-white text-sm font-bold"
@@ -4171,8 +4179,8 @@ export default function App() {
           <Section title="Praktische tips voor het team">
             <div className="grid grid-cols-2 gap-3">
               <Tip label="💾 Data opslaan" color="#1A56A0" bg="#EBF3FF">
-                Alle data wordt automatisch opgeslagen in de browser (localStorage). Je kunt het venster sluiten en later verdergaan.
-                Exporteer regelmatig een Excel-backup. Let op: data is browsergebonden — gebruik altijd dezelfde browser op hetzelfde apparaat.
+                Alle data wordt automatisch opgeslagen op de server (Netlify Blobs). Iedereen die inlogt ziet dezelfde data, ongeacht browser of apparaat. Je kunt het venster sluiten en later verdergaan.
+                Exporteer regelmatig een Excel-backup als extra back-up.
               </Tip>
               <Tip label="👥 Meerdere beoordelaars" color="#26B5AE" bg="#E6F7F7">
                 Laat elke beoordelaar het assessment onafhankelijk invullen. Exporteer afzonderlijk naar Excel en
