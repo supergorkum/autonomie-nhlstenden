@@ -1282,6 +1282,12 @@ export default function App() {
   const [saveError,  setSaveError] = useState(false);
   const [view,       setView]      = useState("about");
   const [aboutTab,   setAboutTab]  = useState("over");
+  const [snapshots,  setSnapshots] = useState(() => {
+    try {
+      const raw = localStorage.getItem("nhl_sov_snapshots");
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
   const [selId,      setSelId]     = useState(null);
   const [step,       setStep]      = useState(0);
   const [showModal,  setShowModal] = useState(false);
@@ -4191,7 +4197,7 @@ export default function App() {
     );
   }
 
-  // ── BESTUUR ────────────────────────────────────────────────
+  // ── BESTUUR (Portfolio) ─────────────────────────────────────
   function Bestuur() {
     const scored = apps
       .map(a => ({ ...a, sc: calcScores(a.scores) }))
@@ -4209,9 +4215,29 @@ export default function App() {
       ? scored.filter(a => a.sc.dictuAvg).reduce((s, a) => s + a.sc.dictuAvg, 0) / scored.filter(a => a.sc.dictuAvg).length
       : null;
 
+    // ── Snapshot opslaan (1 per dag) ─────────────────────────
+    if (avg !== null && scored.length > 0) {
+      const vandaagStr = new Date().toISOString().slice(0,10);
+      const bestaatVandaag = snapshots.some(s => s.datum === vandaagStr);
+      if (!bestaatVandaag) {
+        const nieuweSnap = {
+          datum: vandaagStr,
+          avg: +avg.toFixed(2),
+          avgDictu: avgDictu ? +avgDictu.toFixed(2) : null,
+          totaal: scored.length,
+          kritiek: kritiek.length,
+          zorg: zorg.length,
+          acceptabel: acceptabel.length,
+          goed: goed.length,
+        };
+        const updated = [...snapshots, nieuweSnap].slice(-90);
+        setSnapshots(updated);
+        try { localStorage.setItem("nhl_sov_snapshots", JSON.stringify(updated)); } catch {}
+      }
+    }
+
     const oordeel = !scored.length
-      ? { kleur:"#6b7280", bg:"#f3f4f6", border:"#e5e7eb",
-          tekst:"Nog geen applicaties beoordeeld." }
+      ? { kleur:"#6b7280", bg:"#f3f4f6", border:"#e5e7eb", tekst:"Nog geen applicaties beoordeeld." }
       : kritiek.length >= 3 || (kritiek.length > 0 && kritiek.length / scored.length > 0.3)
       ? { kleur:"#b91c1c", bg:"#fee2e2", border:"#fca5a5",
           tekst:`Het portfolio bevat ${kritiek.length} kritieke ${kritiek.length === 1 ? "applicatie" : "applicaties"} met een hoog autonomierisico en onvoldoende weerbaarheid. Directe besluitvorming is noodzakelijk.` }
@@ -4252,6 +4278,143 @@ export default function App() {
       return "Aandacht gewenst. Bespreek in het team of actie of bewuste acceptatie de juiste keuze is.";
     }
 
+    // ── Top 3 concrete acties per aandachtspunt ───────────────
+    function top3Acties(a) {
+      const s = a.sc;
+      const acties = [];
+      if (s.risico > 3.5)
+        acties.push("Verken een Europese alternatieven voor deze leverancier (inventariseer markt, voer een orienterend gesprek).");
+      if (s.mitigatie < 2.5 && s.dimScores?.C < 2)
+        acties.push("Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt of niet meer toegankelijk is.");
+      if (s.mitigatie < 2.5 && s.dimScores?.D < 2)
+        acties.push("Leg de kennis over deze applicatie vast bij minimaal twee medewerkers. Verminder de afhankelijkheid van individuele sleutelpersonen.");
+      if (s.mitigatie < 2.5 && s.dimScores?.E < 2)
+        acties.push("Voeg bij de volgende contractverlenging een exit-clausule en een dataportabiliteitsgarantie toe.");
+      if (s.dictuAvg && s.dictuAvg < 3)
+        acties.push("Vraag de leverancier schriftelijk naar de datalocatie en of zij zich actief verzetten tegen niet-EU dataverzoeken (DICTU 2.3).");
+      if (s.belang > 3.5 && s.risico > 3)
+        acties.push("Agenderen voor bestuurlijk besluit: is het risico van deze applicatie bewust aanvaard? Leg dit formeel vast.");
+      // Fallback als niets specifiek
+      if (acties.length === 0) {
+        acties.push("Herassessment plannen bij eerstvolgende contractverlenging.");
+        acties.push("Controleer of de gekozen scores nog actueel zijn na evt. leverancierswijzigingen.");
+        acties.push("Bespreek de positie van deze applicatie in het kwadrant met de applicatie-eigenaar.");
+      }
+      return acties.slice(0, 3);
+    }
+
+    // ── SVG grafiek helper ────────────────────────────────────
+    function VoortgangsGrafiek({ snaps }) {
+      if (snaps.length < 2) return (
+        <div className="rounded p-6 text-center" style={{ background:"#f8fafc", border:"1px dashed #D0E4F7" }}>
+          <p className="text-xs" style={{ color:"#9ca3af" }}>
+            De grafiek verschijnt zodra er op meerdere dagen data is vastgelegd.
+            Kom morgen terug voor het eerste verloop.
+          </p>
+          <p className="text-xs mt-1" style={{ color:"#D0E4F7" }}>
+            {snaps.length === 1 ? `Eerste meting: ${snaps[0].datum}` : "Nog geen metingen"}
+          </p>
+        </div>
+      );
+
+      const W = 680, H = 200, PAD = { t:20, r:20, b:40, l:45 };
+      const iW = W - PAD.l - PAD.r;
+      const iH = H - PAD.t - PAD.b;
+
+      const toX = i => PAD.l + (i / (snaps.length - 1)) * iW;
+      const toY = v => PAD.t + iH - ((v - 0) / 10) * iH;
+
+      // Lijn voor avg
+      const avgPath = snaps.map((s, i) => `${i === 0 ? "M" : "L"}${toX(i).toFixed(1)},${toY(s.avg).toFixed(1)}`).join(" ");
+      // Lijn voor dictu (schaal 0-5 omgezet naar 0-10)
+      const dictuPath = snaps
+        .filter(s => s.avgDictu)
+        .map((s, i) => {
+          const origIdx = snaps.indexOf(s);
+          return `${i === 0 ? "M" : "L"}${toX(origIdx).toFixed(1)},${toY(s.avgDictu * 2).toFixed(1)}`;
+        }).join(" ");
+
+      // Referentielijnen
+      const refLines = [
+        { y: 7, label: "Goed (7)", color: "#16a34a" },
+        { y: 5, label: "Acceptabel (5)", color: "#ca8a04" },
+        { y: 3, label: "Zorg (3)", color: "#ea580c" },
+      ];
+
+      // X-as labels: toon max 6 labels
+      const xLabels = snaps.length <= 6
+        ? snaps.map((s, i) => ({ i, label: s.datum.slice(5) }))
+        : [0, Math.floor(snaps.length*0.25), Math.floor(snaps.length*0.5), Math.floor(snaps.length*0.75), snaps.length-1]
+            .filter((v,i,a) => a.indexOf(v) === i)
+            .map(i => ({ i, label: snaps[i].datum.slice(5) }));
+
+      return (
+        <div>
+          <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto" }}>
+            <defs>
+              <linearGradient id="avgGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#1A56A0" stopOpacity="0.15"/>
+                <stop offset="100%" stopColor="#1A56A0" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+
+            {/* Referentielijnen */}
+            {refLines.map(r => (
+              <g key={r.y}>
+                <line x1={PAD.l} y1={toY(r.y)} x2={W-PAD.r} y2={toY(r.y)}
+                  stroke={r.color} strokeWidth="1" strokeDasharray="4,3" opacity="0.5"/>
+                <text x={PAD.l - 4} y={toY(r.y)+3} textAnchor="end" fontSize="8" fill={r.color} opacity="0.8">{r.y}</text>
+              </g>
+            ))}
+
+            {/* Y-as */}
+            <line x1={PAD.l} y1={PAD.t} x2={PAD.l} y2={PAD.t+iH} stroke="#e5e7eb" strokeWidth="1"/>
+
+            {/* Vlakke vulling onder avg-lijn */}
+            <path d={`${avgPath} L${toX(snaps.length-1).toFixed(1)},${PAD.t+iH} L${PAD.l},${PAD.t+iH} Z`}
+              fill="url(#avgGrad)"/>
+
+            {/* DICTU lijn */}
+            {dictuPath && <path d={dictuPath} fill="none" stroke="#26B5AE" strokeWidth="1.5" strokeDasharray="5,3" opacity="0.7"/>}
+
+            {/* AVG lijn */}
+            <path d={avgPath} fill="none" stroke="#1A56A0" strokeWidth="2.5"/>
+
+            {/* Datapunten avg */}
+            {snaps.map((s, i) => (
+              <circle key={i} cx={toX(i)} cy={toY(s.avg)} r="3.5"
+                fill="#fff" stroke="#1A56A0" strokeWidth="2"/>
+            ))}
+
+            {/* Laatste punt waarde label */}
+            {snaps.length > 0 && (
+              <text x={toX(snaps.length-1)+6} y={toY(snaps[snaps.length-1].avg)+4}
+                fontSize="10" fontWeight="bold" fill="#1A56A0">
+                {snaps[snaps.length-1].avg}
+              </text>
+            )}
+
+            {/* X-as labels */}
+            {xLabels.map(({ i, label }) => (
+              <text key={i} x={toX(i)} y={H-8} textAnchor="middle" fontSize="8" fill="#9ca3af">{label}</text>
+            ))}
+          </svg>
+
+          {/* Legenda */}
+          <div className="flex gap-4 justify-center mt-1">
+            <div className="flex items-center gap-1.5 text-xs" style={{ color:"#6b7280" }}>
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#1A56A0" strokeWidth="2.5"/></svg>
+              Gem. autonomiescore (DAAF)
+            </div>
+            <div className="flex items-center gap-1.5 text-xs" style={{ color:"#6b7280" }}>
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#26B5AE" strokeWidth="1.5" strokeDasharray="5,3"/></svg>
+              Gem. DICTU-score (x2 voor schaal)
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
         <div className="p-5 max-w-4xl mx-auto">
@@ -4265,7 +4428,7 @@ export default function App() {
                 </div>
                 <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
                 <div>
-                  <h1 className="font-bold" style={{ fontSize:17 }}>Bestuurssamenvatting Digitale Soevereiniteit</h1>
+                  <h1 className="font-bold" style={{ fontSize:17 }}>Portfoliostatus Digitale Soevereiniteit</h1>
                   <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Soevereiniteit · {vandaag}</p>
                 </div>
               </div>
@@ -4284,7 +4447,7 @@ export default function App() {
           {/* ── Rij 1: Stand van zaken + Kerngetallen ── */}
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="col-span-2 rounded p-4" style={{ background:"#fff", border:`2px solid ${oordeel.border}` }}>
-              <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Stand van zaken</p>
+              <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Waar staan we</p>
               <div className="rounded p-3 mb-3" style={{ background:oordeel.bg, border:`1px solid ${oordeel.border}` }}>
                 <p className="text-sm font-semibold leading-relaxed" style={{ color:oordeel.kleur }}>{oordeel.tekst}</p>
               </div>
@@ -4332,7 +4495,7 @@ export default function App() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Autonomiescore per applicatie</h3>
-                <p className="text-xs" style={{ color:"#9ca3af" }}>Gesorteerd van laagste naar hoogste score · Gele lijn = grens acceptabel (5) · Groene lijn = grens goed (7)</p>
+                <p className="text-xs" style={{ color:"#9ca3af" }}>Gesorteerd van laagste naar hoogste · Gele lijn = grens acceptabel (5) · Groene lijn = grens goed (7)</p>
               </div>
             </div>
             <div className="space-y-1.5">
@@ -4343,12 +4506,7 @@ export default function App() {
                   <div className="flex-1 rounded" style={{ background:"#f1f5f9", height:22, position:"relative" }}>
                     <div style={{ position:"absolute", left:"50%", top:0, bottom:0, width:1, background:"#fbbf24", opacity:0.7 }}/>
                     <div style={{ position:"absolute", left:"70%", top:0, bottom:0, width:1, background:"#4ade80", opacity:0.7 }}/>
-                    <div style={{
-                      position:"absolute", left:0, top:2, bottom:2,
-                      width:`${(d.score / 10) * 100}%`,
-                      background:d.kleur, borderRadius:3,
-                      minWidth: d.score > 0 ? 4 : 0,
-                    }}/>
+                    <div style={{ position:"absolute", left:0, top:2, bottom:2, width:`${(d.score/10)*100}%`, background:d.kleur, borderRadius:3, minWidth:d.score>0?4:0 }}/>
                   </div>
                   <div className="text-xs font-bold flex-shrink-0" style={{ width:30, color:d.kleur, textAlign:"right" }}>{d.score}</div>
                 </div>
@@ -4356,51 +4514,64 @@ export default function App() {
             </div>
           </div>
 
-          {/* ── Rij 3: Top 3 aandachtspunten ── */}
+          {/* ── Rij 3: Top 3 aandachtspunten met concrete acties ── */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-1" style={{ color:"#0C2340" }}>Top 3 aandachtspunten voor NHL Stenden</h3>
+            <h3 className="font-bold text-sm mb-1" style={{ color:"#0C2340" }}>Top 3 aandachtspunten — inclusief concrete acties</h3>
             <p className="text-xs mb-4" style={{ color:"#9ca3af" }}>
-              Geselecteerd op basis van de combinatie van laagste autonomiescore en hoogste strategisch belang.
+              Geselecteerd op combinatie van laagste autonomiescore en hoogste strategisch belang. Per applicatie drie concrete vervolgstappen.
             </p>
             {top3.length === 0 ? (
               <div className="rounded p-4 text-center text-xs" style={{ background:"#dcfce7", border:"1px solid #86efac", color:"#15803d" }}>
                 Alle beoordeelde applicaties scoren acceptabel of goed. Geen acute aandachtspunten.
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {top3.map((a, i) => {
                   const lbl = scoreLabel(a.sc.autonomyScore);
-                  const medals = ["1", "2", "3"];
                   const medalColors = ["#b91c1c","#c2410c","#a16207"];
+                  const acties = top3Acties(a);
                   return (
-                    <div key={a.id} className="rounded p-4" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", borderLeft:`4px solid ${scoreColor(a.sc.autonomyScore)}` }}>
-                      <div className="flex items-start gap-3">
-                        <div className="w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold rounded"
-                          style={{ background:medalColors[i], fontSize:13 }}>{medals[i]}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                            <h4 className="font-bold text-sm" style={{ color:"#0C2340" }}>{displayName(a)}</h4>
-                            {a.supplier && <span className="text-xs" style={{ color:"#9ca3af" }}>{a.supplier}</span>}
-                            <span className="text-xs px-2 py-0.5 font-semibold rounded" style={{ background:lbl.bg, color:lbl.fg }}>{lbl.text}</span>
-                            <span className="text-xs font-bold" style={{ color:scoreColor(a.sc.autonomyScore) }}>
-                              Score {a.sc.autonomyScore?.toFixed(1)}/10
-                            </span>
-                          </div>
-                          <div className="flex gap-3 mb-2 flex-wrap">
+                    <div key={a.id} className="rounded" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", borderLeft:`4px solid ${scoreColor(a.sc.autonomyScore)}`, overflow:"hidden" }}>
+                      {/* Applicatie-header */}
+                      <div className="px-4 py-3 flex items-center gap-3" style={{ borderBottom:"1px solid #f1f5f9" }}>
+                        <div className="w-7 h-7 flex items-center justify-center flex-shrink-0 text-white font-bold rounded text-xs"
+                          style={{ background:medalColors[i] }}>{i+1}</div>
+                        <div className="flex-1 flex items-center gap-2 flex-wrap">
+                          <h4 className="font-bold text-sm" style={{ color:"#0C2340" }}>{displayName(a)}</h4>
+                          {a.supplier && <span className="text-xs" style={{ color:"#9ca3af" }}>{a.supplier}</span>}
+                          <span className="text-xs px-2 py-0.5 font-semibold rounded" style={{ background:lbl.bg, color:lbl.fg }}>{lbl.text}</span>
+                          <span className="text-xs font-bold" style={{ color:scoreColor(a.sc.autonomyScore) }}>Score {a.sc.autonomyScore?.toFixed(1)}/10</span>
+                        </div>
+                      </div>
+                      <div className="px-4 py-3 grid grid-cols-2 gap-4">
+                        {/* Scores */}
+                        <div>
+                          <p className="text-xs font-bold mb-2" style={{ color:"#9ca3af" }}>SCORES</p>
+                          <div className="flex gap-2 flex-wrap">
                             {[
                               { lbl:"Risico",    val:a.sc.risico,    c:"#dc2626" },
                               { lbl:"Mitigatie", val:a.sc.mitigatie, c:"#26B5AE" },
                               { lbl:"Belang",    val:a.sc.belang,    c:"#E87722" },
                               { lbl:"DICTU",     val:a.sc.dictuAvg,  c:"#6d28d9" },
                             ].map(s => (
-                              <div key={s.lbl} className="text-center rounded px-2 py-1" style={{ background:"#fff", border:"1px solid #e5e7eb", minWidth:52 }}>
+                              <div key={s.lbl} className="text-center rounded px-2 py-1" style={{ background:"#fff", border:"1px solid #e5e7eb", minWidth:54 }}>
                                 <div style={{ fontSize:13, fontWeight:700, color:s.val ? s.c : "#d1d5db" }}>{s.val ? s.val.toFixed(1) : "–"}</div>
                                 <div style={{ fontSize:9, color:"#9ca3af" }}>{s.lbl}</div>
                               </div>
                             ))}
                           </div>
-                          <div className="rounded px-3 py-2 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#78350f" }}>
-                            <strong>Advies:</strong> {adviesTekst(a)}
+                        </div>
+                        {/* Acties */}
+                        <div>
+                          <p className="text-xs font-bold mb-2" style={{ color:"#9ca3af" }}>TOP 3 ACTIES</p>
+                          <div className="space-y-1.5">
+                            {acties.map((actie, ai) => (
+                              <div key={ai} className="flex gap-2 text-xs">
+                                <span className="flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center text-white font-bold"
+                                  style={{ background:medalColors[ai] || "#6b7280", fontSize:9 }}>{ai+1}</span>
+                                <span style={{ color:"#374151", lineHeight:1.4 }}>{actie}</span>
+                              </div>
+                            ))}
                           </div>
                         </div>
                       </div>
@@ -4409,6 +4580,29 @@ export default function App() {
                 })}
               </div>
             )}
+          </div>
+
+          {/* ── Voortgangsgrafiek (gimmick, onderaan) ── */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Verloop gemiddelde scores in de tijd</h3>
+                <p className="text-xs" style={{ color:"#9ca3af" }}>
+                  Één meting per dag, lokaal opgeslagen. Laat zien hoe het portfolio zich ontwikkelt naarmate meer assessments worden ingevuld of bijgewerkt.
+                </p>
+              </div>
+              <button onClick={() => {
+                if (window.confirm("Wil je de meethistorie wissen?")) {
+                  localStorage.removeItem("nhl_sov_snapshots");
+                  setSnapshots([]);
+                }
+              }} className="text-xs px-2 py-1 rounded" style={{ background:"#f3f4f6", color:"#9ca3af", border:"1px solid #e5e7eb" }}>
+                Wissen
+              </button>
+            </div>
+            <div className="mt-3">
+              <VoortgangsGrafiek snaps={snapshots} />
+            </div>
           </div>
 
           {/* Footer */}
@@ -4907,9 +5101,9 @@ export default function App() {
             { k:"apps",      label:"Applicaties" },
             ...(selApp ? [{ k:"assess", label:displayName(selApp).substring(0,20) }] : []),
             { k:"compare",   label:"Vergelijking" },
-            { k:"bestuur",   label:"📋 Bestuur" },
+            { k:"bestuur",   label:"📊 Portfolio" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
-            { k:"transparantie", label:"🔍 Transparantie" },
+            { k:"transparantie", label:"🔍 Over dit product" },
             { k:"admin",     label:"🔐 Beheer" },
           ].map(t => (
             <button key={t.k} onClick={() => setView(t.k)}
