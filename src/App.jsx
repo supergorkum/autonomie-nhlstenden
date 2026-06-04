@@ -1280,7 +1280,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 // APP
 // ──────────────────────────────────────────────────────────────
 
-export default // ── WorldMapD3 — echte wereldkaart via D3 Natural Earth projectie ─────────────
+// ── WorldMapD3 — echte wereldkaart via D3 Natural Earth projectie ─────────────
 function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId,
                       geoTooltip, setGeoTooltip, risicoKleur, displayName, REGIO_COORDS }) {
   const safeJuris = jurisGroups || {};
@@ -6244,3 +6244,5 @@ ${(function(){
     </div>
   );
 }
+
+export default App;
