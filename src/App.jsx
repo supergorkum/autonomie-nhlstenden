@@ -3129,6 +3129,32 @@ ${(function(){
 
             {/* App-kaarten rechts — 2 kolommen */}
             <div>
+              {/* Leeswijzer bovenaan app-kaarten */}
+              <div className="grid grid-cols-2 gap-2 mb-3">
+                <div className="rounded p-2" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                    <span style={{ fontSize:10, fontWeight:600, color:"#0C2340" }}>Snelheidsmeter (1–10)</span>
+                  </div>
+                  <div className="flex gap-1 flex-wrap">
+                    {[{t:"≥7 Goed",bg:"#dcfce7",fg:"#15803d"},{t:"5–7 OK",bg:"#fef9c3",fg:"#a16207"},{t:"3–5 Let op",bg:"#ffedd5",fg:"#c2410c"},{t:"<3 Kritiek",bg:"#fee2e2",fg:"#b91c1c"}].map(s=>(
+                      <span key={s.t} style={{ fontSize:9, background:s.bg, color:s.fg, borderRadius:2, padding:"1px 5px", fontWeight:600 }}>{s.t}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="rounded p-2" style={{ background:"#E6F7F7", border:"1px solid #26B5AE44" }}>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
+                    <span style={{ fontSize:10, fontWeight:600, color:"#0C2340" }}>Kleurenbalk (1–5)</span>
+                  </div>
+                  <div className="flex gap-1 flex-wrap">
+                    {[{t:"1–2 Afhankelijk",bg:"#fee2e2",fg:"#b91c1c"},{t:"3 Deels",bg:"#fef9c3",fg:"#a16207"},{t:"4–5 Soeverein",bg:"#dcfce7",fg:"#15803d"}].map(s=>(
+                      <span key={s.t} style={{ fontSize:9, background:s.bg, color:s.fg, borderRadius:2, padding:"1px 5px", fontWeight:600 }}>{s.t}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({visibleApps.length})</h3>
                 <div className="flex gap-2">
@@ -3160,7 +3186,10 @@ ${(function(){
                       onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(26,86,160,0.15)"}
                       onMouseLeave={e=>e.currentTarget.style.boxShadow="none"}>
                       <div className="flex items-start gap-2 mb-2">
-                        <Gauge score={a.sc.autonomyScore} size={58} />
+                        <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+                          <Gauge score={a.sc.autonomyScore} size={58} />
+                          <span style={{ fontSize:8, fontWeight:700, color:"#9ca3af", letterSpacing:"0.04em" }}>DAAF</span>
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-bold text-xs truncate" style={{ color:"#0C2340" }}>{displayName(a)}</h3>
                           {a.supplier && <p style={{ fontSize:10, color:"#9ca3af" }}>{a.supplier}</p>}
@@ -3169,8 +3198,14 @@ ${(function(){
                         </div>
                       </div>
                       <div className="mb-2">
-                        <div className="flex justify-between" style={{ fontSize:9, color:"#9ca3af", marginBottom:2 }}>
-                          <span>DICTU</span><span>{a.sc.dictuAvg ? a.sc.dictuAvg.toFixed(1)+"/5" : "–"}</span>
+                        <div className="flex justify-between items-center" style={{ fontSize:9, marginBottom:2 }}>
+                          <div className="flex items-center gap-1">
+                            <span style={{ fontSize:8, fontWeight:700, padding:"0 4px", background:"#26B5AE", color:"#fff", borderRadius:2 }}>DICTU</span>
+                            <span style={{ color:"#9ca3af" }}>Soevereiniteit</span>
+                          </div>
+                          <span style={{ color: a.sc.dictuAvg ? (a.sc.dictuAvg >= 4 ? "#15803d" : a.sc.dictuAvg >= 3 ? "#a16207" : "#b91c1c") : "#9ca3af", fontWeight:600 }}>
+                            {a.sc.dictuAvg ? a.sc.dictuAvg.toFixed(1)+"/5" : "–"}
+                          </span>
                         </div>
                         <SovBar score5={a.sc.dictuAvg} />
                       </div>
@@ -3207,27 +3242,7 @@ ${(function(){
                 })}
               </div>
 
-              {/* Leeswijzer compact onderaan */}
-              <div className="grid grid-cols-2 gap-2 mt-3">
-                <div className="rounded p-2.5" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-xs font-bold px-1.5 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3, fontSize:9 }}>DAAF</span>
-                    <span className="font-semibold" style={{ fontSize:10, color:"#0C2340" }}>Snelheidsmeter (1–10)</span>
-                  </div>
-                  <div className="flex gap-1.5 flex-wrap">
-                    {[{t:"≥7 Goed",bg:"#dcfce7",fg:"#15803d"},{t:"5-7 OK",bg:"#fef9c3",fg:"#a16207"},{t:"3-5 ⚠️",bg:"#ffedd5",fg:"#c2410c"},{t:"<3 🔴",bg:"#fee2e2",fg:"#b91c1c"}].map(s=>(
-                      <span key={s.t} style={{ fontSize:9, background:s.bg, color:s.fg, borderRadius:2, padding:"1px 4px", fontWeight:600 }}>{s.t}</span>
-                    ))}
-                  </div>
-                </div>
-                <div className="rounded p-2.5" style={{ background:"#E6F7F7", border:"1px solid #26B5AE44" }}>
-                  <div className="flex items-center gap-1.5 mb-1">
-                    <span className="text-xs font-bold px-1.5 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3, fontSize:9 }}>DICTU</span>
-                    <span className="font-semibold" style={{ fontSize:10, color:"#0C2340" }}>Kleurenbalk (1–5)</span>
-                  </div>
-                  <p style={{ fontSize:9, color:"#6b7280" }}>Rood = afhankelijk → groen = soeverein. Gem. van 2.1, 2.2, 2.3 en 4.1.</p>
-                </div>
-              </div>
+
             </div>
           </div>
 
