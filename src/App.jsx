@@ -1385,12 +1385,12 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
       {/* Landen — alleen kleur, geen rand */}
       {countries.map(function(c) {
         return <path key={c.id} d={pathGen(c)}
-          fill={c.isEU ? "#bfdbfe" : "#e8edf4"}
-          stroke="#c8d4e0" strokeWidth="0.3"/>;
+          fill={c.isEU ? "#dbeafe" : "#f0f4f8"}
+          stroke="#d1dde8" strokeWidth="0.25"/>;
       })}
       {/* EU outline subtiel */}
       {countries.filter(function(c) { return c.isEU; }).map(function(c) {
-        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#bfdbfe" stroke="#60a5fa" strokeWidth="0.6" opacity="0.9"/>;
+        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#93c5fd" strokeWidth="0.4" opacity="0.7"/>;
       })}
 
       {/* Jurisdictie = kleine gevulde cirkel in app-kleur */}
@@ -1407,7 +1407,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cy = pt[1] + Math.sin(angle) * spread - 2;
           return (
             <g key={a.id+"_j"}>
-              <circle cx={cx} cy={cy} r="4" fill={a.appKleur} stroke="white" strokeWidth="1.2"/>
+              <circle cx={cx} cy={cy} r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
             </g>
           );
         });
@@ -1427,7 +1427,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cy = pt[1] + Math.sin(angle) * spread + 4;
           return (
             <g key={a.id+"_d"}>
-              <circle cx={cx} cy={cy} r="4" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="2"/>
+              <circle cx={cx} cy={cy} r="3.5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="1.8"/>
             </g>
           );
         });
@@ -5899,14 +5899,14 @@ ${(function(){
               function regioA1(sc) {
                 if (sc <= 0)  return "Niet ingevuld";
                 if (sc <= 2)  return "EU / EER";
-                if (sc <= 3)  return "VS (adequaat)";
-                if (sc <= 4)  return "VS (risico)";
+                if (sc <= 3)  return "VS";
+                if (sc <= 4)  return "Deels buiten EU";
                 return "Buiten EU";
               }
               function regioA3(sc) {
                 if (sc <= 0)  return "Niet ingevuld";
                 if (sc <= 3)  return "EU / EER";   // score 1,2,3 = data in EU/EER
-                if (sc <= 4)  return "VS (risico)"; // score 4 = deels buiten EU
+                if (sc <= 4)  return "Deels buiten EU"; // score 4 = deels buiten EU
                 return "Buiten EU";                  // score 5 = buiten EU
               }
               function regio(sc) { return regioA1(sc); } // default voor A1
@@ -5932,18 +5932,18 @@ ${(function(){
             });
 
             // Groepeer per regio
-            const REGIO_ORDER = ["EU / EER","VS (adequaat)","VS (risico)","Buiten EU","Niet ingevuld"];
+            const REGIO_ORDER = ["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"];
             const REGIO_LON_LAT = {
               "EU / EER":     [10, 52],
-              "VS (adequaat)":[-95, 38],
-              "VS (risico)":  [-95, 38],
+              "VS":[-95, 38],
+              "Deels buiten EU":  [-95, 38],
               "Buiten EU":    [100, 25],
               "Niet ingevuld":[0, 0],
             };
             const REGIO_KLEUR = {
               "EU / EER":     "#16a34a",
-              "VS (adequaat)":"#ca8a04",
-              "VS (risico)":  "#ea580c",
+              "VS":"#ca8a04",
+              "Deels buiten EU":  "#ea580c",
               "Buiten EU":    "#dc2626",
               "Niet ingevuld":"#9ca3af",
             };
@@ -5975,26 +5975,29 @@ ${(function(){
                     <MiniGeoKaart geoApps={geoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
                     {/* Legenda onder kaart */}
                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                      {/* App-kleur legenda */}
-                      {geoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
-                        return (
-                          <div key={a.id} className="flex items-center gap-1">
-                            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:a.appKleur }}/>
-                            <span style={{ fontSize:9, color:"#6b7280" }}>{displayName(a)}</span>
-                          </div>
-                        );
-                      })}
-                      <div className="flex items-center gap-1 mt-1">
-                        <svg width="10" height="10" style={{flexShrink:0}}>
-                          <circle cx="5" cy="5" r="4.5" fill="#6b7280"/>
-                        </svg>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie leverancier</span>
+                                            {/* Legenda: app-kleuren + vorm-uitleg */}
+                      <div className="flex flex-wrap gap-x-4 gap-y-1">
+                        {geoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
+                          return (
+                            <div key={a.id} className="flex items-center gap-1.5">
+                              <svg width="20" height="10" style={{flexShrink:0}}>
+                                <circle cx="5"  cy="5" r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
+                                <circle cx="15" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="1.8"/>
+                              </svg>
+                              <span style={{ fontSize:9, color:"#6b7280" }}>{displayName(a)}</span>
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <svg width="10" height="10" style={{flexShrink:0}}>
-                          <circle cx="5" cy="5" r="3.5" fill="white" stroke="#6b7280" strokeWidth="2"/>
-                        </svg>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Ring = datalocatie servers</span>
+                      <div className="flex gap-4 mt-1.5 pt-1.5" style={{ borderTop:"1px solid #f1f5f9" }}>
+                        <div className="flex items-center gap-1">
+                          <svg width="10" height="10" style={{flexShrink:0}}><circle cx="5" cy="5" r="3.5" fill="#9ca3af" stroke="white" strokeWidth="1"/></svg>
+                          <span style={{ fontSize:9, color:"#9ca3af" }}>Gevuld = jurisdictie</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <svg width="10" height="10" style={{flexShrink:0}}><circle cx="5" cy="5" r="3.5" fill="white" stroke="#9ca3af" strokeWidth="1.8"/></svg>
+                          <span style={{ fontSize:9, color:"#9ca3af" }}>Ring = datalocatie</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -6044,7 +6047,7 @@ ${(function(){
                     {/* Applicatie badges per regio */}
                     <div className="mt-3 pt-3" style={{ borderTop:"1px solid #EBF3FF" }}>
                       <p className="text-xs font-semibold mb-2" style={{ color:"#6b7280" }}>Applicaties per regio:</p>
-                      {["EU / EER","VS (adequaat)","VS (risico)","Buiten EU","Niet ingevuld"].map(function(regio) {
+                      {["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"].map(function(regio) {
                         const appsInRegio = geoApps.filter(function(a) {
                           return a.jRegio === regio || a.dRegio === regio;
                         });
