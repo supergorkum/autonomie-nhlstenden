@@ -1387,8 +1387,29 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
   const a1lbl = ["","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
   const a3lbl = ["","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
 
+  function resetZoom() {
+    setTransform({ k:1, x:0, y:0 });
+    if (svgRef.current) {
+      const zb = d3.zoom().scaleExtent([1,8]).translateExtent([[0,0],[W,H]])
+        .on("zoom", function(ev) { setTransform({ k:ev.transform.k, x:ev.transform.x, y:ev.transform.y }); });
+      d3.select(svgRef.current).call(zb.transform, d3.zoomIdentity);
+    }
+  }
+
   return (
     <div style={{ position:"relative", background:"#bfdbfe" }}>
+      {!loading && transform.k > 1 && (
+        <div style={{ position:"absolute", top:8, right:8, zIndex:10, display:"flex", gap:6, alignItems:"center" }}>
+          <span style={{ fontSize:10, background:"rgba(255,255,255,0.88)", padding:"2px 8px", borderRadius:3, color:"#6b7280" }}>
+            {Math.round(transform.k * 100)}%
+          </span>
+          <button onClick={resetZoom}
+            style={{ fontSize:10, background:"white", border:"1px solid #D0E4F7", borderRadius:4,
+                     padding:"3px 10px", color:"#1A56A0", cursor:"pointer", fontWeight:600 }}>
+            ↺ Reset
+          </button>
+        </div>
+      )}
       {loading && (
         <div style={{ padding:40, textAlign:"center", color:"#9ca3af", fontSize:12 }}>
           Kaart laden...
@@ -1590,6 +1611,7 @@ function App() {
   const [showImport,    setShowImport]    = useState(false);
   const [geoHoverId,    setGeoHoverId]    = useState(null);
   const [geoTooltip,    setGeoTooltip]    = useState(null);
+  const [geoHidden,     setGeoHidden]     = useState(new Set()); // verborgen apps op de kaart
   const ADMIN_PIN = "nhl2026";
 
   // Ref voor scroll-naar-boven bij stapwissel in Assess
@@ -3882,7 +3904,9 @@ ${(function(){
       return "#dc2626";
     }
 
-    const scored = apps.map(function(a) {
+    const visibleAppsGeo = apps.filter(function(a) { return !geoHidden.has(a.id); });
+
+    const scored = visibleAppsGeo.map(function(a) {
       const a1 = a.scores["A1"] || 0;
       const a3 = a.scores["A3"] || 0;
       const sc = calcScores(a.scores);
@@ -3890,7 +3914,7 @@ ${(function(){
       return Object.assign({}, a, { a1, a3, sc, jurisRegio: regio.jurisRegio, dataRegio: regio.dataRegio });
     }).filter(function(a) { return a.a1 > 0 || a.a3 > 0; });
 
-    const incomplete = apps.filter(function(a) { return !a.scores["A1"] && !a.scores["A3"]; });
+    const incomplete = visibleAppsGeo.filter(function(a) { return !a.scores["A1"] && !a.scores["A3"]; });
 
     const jurisGroups = {};
     const dataGroups  = {};
@@ -3907,6 +3931,7 @@ ${(function(){
     const sortedApps = [...apps].sort(function(a, b) {
       return Math.max(b.scores["A1"]||0, b.scores["A3"]||0) - Math.max(a.scores["A1"]||0, a.scores["A3"]||0);
     });
+    const visibleSortedApps = sortedApps.filter(function(a) { return !geoHidden.has(a.id); });
 
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
@@ -3982,6 +4007,59 @@ ${(function(){
             </div>
           </div>
 
+          {/* Applicatie-filter */}
+          {apps.length > 0 && (
+            <div className="rounded p-3 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold" style={{ color:"#0C2340" }}>
+                  Applicaties op de kaart ({apps.length - geoHidden.size} van {apps.length} zichtbaar)
+                </p>
+                <div className="flex gap-2">
+                  <button onClick={() => setGeoHidden(new Set())}
+                    className="text-xs px-2.5 py-1 font-medium"
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF",
+                             opacity: geoHidden.size === 0 ? 0.4 : 1 }}>
+                    Alles tonen
+                  </button>
+                  <button onClick={() => setGeoHidden(new Set(apps.map(a => a.id)))}
+                    className="text-xs px-2.5 py-1 font-medium"
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#6b7280", background:"#f8fafc",
+                             opacity: geoHidden.size === apps.length ? 0.4 : 1 }}>
+                    Alles verbergen
+                  </button>
+                </div>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {apps.map(a => {
+                  const sc = calcScores(a.scores || {});
+                  const col = scoreColor(sc.autonomyScore);
+                  const hidden = geoHidden.has(a.id);
+                  return (
+                    <button key={a.id}
+                      onClick={() => setGeoHidden(p => {
+                        const n = new Set(p);
+                        n.has(a.id) ? n.delete(a.id) : n.add(a.id);
+                        return n;
+                      })}
+                      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium transition-all"
+                      style={{
+                        borderRadius:4,
+                        border: hidden ? "2px solid #e5e7eb" : "2px solid " + col,
+                        background: hidden ? "#f9fafb" : col + "18",
+                        color: hidden ? "#9ca3af" : col,
+                        textDecoration: hidden ? "line-through" : "none",
+                      }}>
+                      <span className="w-2 h-2 rounded-full flex-shrink-0"
+                        style={{ background: hidden ? "#d1d5db" : col }}/>
+                      {displayName(a).substring(0,22)}
+                      <span style={{ fontSize:10, marginLeft:2, opacity:0.7 }}>{hidden ? "＋" : "✕"}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Kaart */}
           {apps.length === 0 ? (
             <div className="rounded p-10 text-center" style={{ background:"#fff", border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
@@ -3989,31 +4067,11 @@ ${(function(){
             </div>
           ) : (
             <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7", overflow:"hidden" }}>
-              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
-                  <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
-                    Gebaseerd op DAAF-scores A1 en A3 · scroll of pinch om in te zoomen · sleep om te verschuiven
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  {transform.k > 1 && (
-                    <button
-                      onClick={() => {
-                        setTransform({ k:1, x:0, y:0 });
-                        if (svgRef.current) d3.select(svgRef.current).call(
-                          d3.zoom().transform, d3.zoomIdentity
-                        );
-                      }}
-                      className="text-xs px-2.5 py-1 font-medium"
-                      style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
-                      ↺ Reset zoom
-                    </button>
-                  )}
-                  <span className="text-xs px-2 py-1 rounded" style={{ background:"#f1f5f9", color:"#9ca3af" }}>
-                    {transform.k > 1 ? Math.round(transform.k * 100) + "%" : "Scroll = zoom"}
-                  </span>
-                </div>
+              <div className="px-4 pt-4 pb-2">
+                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
+                <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
+                  Gebaseerd op DAAF-scores A1 en A3 · scroll om in te zoomen · sleep om te verschuiven
+                </p>
               </div>
               <WorldMapD3
                 scored={scored}
@@ -4043,7 +4101,7 @@ ${(function(){
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedApps.map(function(a, i) {
+                  {visibleSortedApps.map(function(a, i) {
                     const a1 = a.scores["A1"] || 0;
                     const a3 = a.scores["A3"] || 0;
                     const maxScore = Math.max(a1, a3);
