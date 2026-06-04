@@ -1312,41 +1312,40 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
   const countries = React.useMemo(() => {
     if (!worldData) return [];
     try {
-      // Gebruik d3's ingebouwde topojson support via dynamic import
-      // world-atlas levert TopoJSON — we laden topojson-client dynamisch
-      if (typeof d3.geoPath !== "undefined" && worldData._converted) {
-        return worldData._converted;
-      }
-      // Inline TopoJSON decode (vereenvoudigd voor countries-110m)
-      // Gebruik fetch met een pre-geconverteerde GeoJSON als fallback
       const obj = worldData.objects.countries;
       if (!obj) return [];
-      // Bouw arcs op
+      const sc = worldData.transform ? worldData.transform.scale : [1,1];
+      const tr = worldData.transform ? worldData.transform.translate : [0,0];
       const arcs = worldData.arcs;
-      function decodeArc(i) {
-        let arc = arcs[i < 0 ? ~i : i];
-        let pts = arc.map(([dx,dy]) => [dx,dy]);
-        // Delta decode
-        let x=0,y=0;
-        pts = arc.map(p => { x+=p[0]; y+=p[1]; return [x,y]; });
-        if (i < 0) pts.reverse();
+
+      function decodeArcSafe(idx) {
+        const neg = idx < 0;
+        const arc = arcs[neg ? (idx * -1) - 1 : idx];
+        let x = 0; let y = 0;
+        const pts = arc.map(function(p) { x += p[0]; y += p[1]; return [x, y]; });
+        if (neg) pts.reverse();
         return pts;
       }
-      function toRing(ring) {
-        return ring.flatMap(i => decodeArc(i));
+      function toCoordSafe(p) {
+        return [p[0] * sc[0] + tr[0], p[1] * sc[1] + tr[1]];
       }
-      const scale = worldData.transform?.scale || [1,1];
-      const translate = worldData.transform?.translate || [0,0];
-      function toCoord([x,y]) {
-        return [x * scale[0] + translate[0], y * scale[1] + translate[1]];
+      function ringToCoords(ring) {
+        const pts = [];
+        ring.forEach(function(i) {
+          decodeArcSafe(i).forEach(function(p) { pts.push(toCoordSafe(p)); });
+        });
+        return pts;
       }
-      const features = obj.geometries.map(g => {
+
+      return obj.geometries.map(function(g) {
         let coords;
         if (g.type === "Polygon") {
-          coords = [toRing(g.arcs[0]).map(toCoord)];
+          coords = g.arcs.map(function(ring) { return ringToCoords(ring); });
         } else if (g.type === "MultiPolygon") {
-          coords = g.arcs.map(poly => [toRing(poly[0]).map(toCoord)]);
-        } else return null;
+          coords = g.arcs.map(function(poly) {
+            return poly.map(function(ring) { return ringToCoords(ring); });
+          });
+        } else { return null; }
         return {
           type: "Feature",
           id: g.id,
@@ -1354,7 +1353,6 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           geometry: { type: g.type, coordinates: coords }
         };
       }).filter(Boolean);
-      return features;
     } catch(e) { console.error(e); return []; }
   }, [worldData]);
 
@@ -3828,11 +3826,9 @@ ${(function(){
 
   // ── GEOKAART ───────────────────────────────────────────────────────────────
   function GeoKaart() {
+    const vandaag = new Date().toLocaleDateString("nl-NL", { day:"numeric", month:"long", year:"numeric" });
 
-    // ── Regio-mapping op basis van A1 (jurisdictie) en A3 (datalocatie) ──────
-    // Kaartcoördinaten zijn percentages van SVG viewBox (0 0 1000 500)
     const REGIO_COORDS = {
-      // lon/lat voor D3 Natural Earth projectie
       "EU-West":   { lon:  10, lat: 51, label: "EU West"             },
       "EU-Noord":  { lon:  15, lat: 56, label: "EU Noord"            },
       "EU-Oost":   { lon:  22, lat: 49, label: "EU Oost"             },
@@ -3850,37 +3846,12 @@ ${(function(){
       "Onbekend":  { lon:   0, lat:  0, label: "Onbekend"            },
     };
 
-    // ── Leid regio af uit A1 en A3 scores ────────────────────────────────────
     function regioVanScore(a1, a3) {
-      // Jurisdictie regio (A1)
-      let jurisRegio = "Onbekend";
-      if (a1 <= 2) jurisRegio = "EU-West";
-      else if (a1 === 3) jurisRegio = "VS";
-      else if (a1 === 4) jurisRegio = "VS";
-      else if (a1 >= 5) jurisRegio = "VS";
-
-      // Data regio (A3)
-      let dataRegio = "Onbekend";
-      if (a3 <= 2) dataRegio = "EU-West";
-      else if (a3 === 3) dataRegio = "EU-West";
-      else if (a3 === 4) dataRegio = "VS";
-      else if (a3 >= 5) dataRegio = "VS";
-
+      let jurisRegio = a1 <= 2 ? "EU-West" : a1 === 3 ? "VS" : a1 >= 4 ? "VS" : "Onbekend";
+      let dataRegio  = a3 <= 2 ? "EU-West" : a3 === 3 ? "EU-West" : a3 >= 4 ? "VS" : "Onbekend";
       return { jurisRegio, dataRegio };
     }
 
-    // ── Bouw stippendata op uit apps ─────────────────────────────────────────
-    const scored = apps.map(a => {
-      const a1 = a.scores["A1"] || 0;
-      const a3 = a.scores["A3"] || 0;
-      const sc = calcScores(a.scores);
-      const { jurisRegio, dataRegio } = regioVanScore(a1, a3);
-      return { ...a, a1, a3, sc, jurisRegio, dataRegio };
-    }).filter(a => a.a1 > 0 || a.a3 > 0);
-
-    const incomplete = apps.filter(a => !a.scores["A1"] && !a.scores["A3"]);
-
-    // ── Kleur op basis van jurisdictie-score ──────────────────────────────────
     function risicoKleur(score) {
       if (!score) return "#9ca3af";
       if (score <= 2) return "#16a34a";
@@ -3889,41 +3860,118 @@ ${(function(){
       return "#dc2626";
     }
 
-    // ── Groepeer stippen op locatie voor overlap ──────────────────────────────
-    function groupByRegio(type) {
-      const grouped = {};
-      scored.forEach(a => {
-        const regio = type === "juris" ? a.jurisRegio : a.dataRegio;
-        const score = type === "juris" ? a.a1 : a.a3;
-        if (!grouped[regio]) grouped[regio] = [];
-        grouped[regio].push({ ...a, score });
-      });
-      return grouped;
-    }
+    const scored = apps.map(function(a) {
+      const a1 = a.scores["A1"] || 0;
+      const a3 = a.scores["A3"] || 0;
+      const sc = calcScores(a.scores);
+      const regio = regioVanScore(a1, a3);
+      return Object.assign({}, a, { a1, a3, sc, jurisRegio: regio.jurisRegio, dataRegio: regio.dataRegio });
+    }).filter(function(a) { return a.a1 > 0 || a.a3 > 0; });
 
-    const jurisGroups = groupByRegio("juris");
-    const dataGroups  = groupByRegio("data");
+    const incomplete = apps.filter(function(a) { return !a.scores["A1"] && !a.scores["A3"]; });
 
-    const vandaag = new Date().toLocaleDateString("nl-NL", { day:"numeric", month:"long", year:"numeric" });
+    const jurisGroups = {};
+    const dataGroups  = {};
+    scored.forEach(function(a) {
+      if (!jurisGroups[a.jurisRegio]) jurisGroups[a.jurisRegio] = [];
+      jurisGroups[a.jurisRegio].push(Object.assign({}, a, { score: a.a1 }));
+      if (!dataGroups[a.dataRegio]) dataGroups[a.dataRegio] = [];
+      dataGroups[a.dataRegio].push(Object.assign({}, a, { score: a.a3 }));
+    });
 
-    // ── D3 Wereldkaart state ─────────────────────────────────────────────────
-    // geoWorld en geoPathFn worden inline berekend via useRef + useEffect
+    const a1lbl = ["","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
+    const a3lbl = ["","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
 
+    const sortedApps = [...apps].sort(function(a, b) {
+      return Math.max(b.scores["A1"]||0, b.scores["A3"]||0) - Math.max(a.scores["A1"]||0, a.scores["A3"]||0);
+    });
 
-          {/* ── D3 Wereldkaart component ── */}
+    return (
+      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+        <div className="p-5 max-w-5xl mx-auto">
+
+          {/* Header */}
+          <div className="rounded p-5 mb-5 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
+                  <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
+                </div>
+                <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+                <div>
+                  <h1 className="font-bold" style={{ fontSize:17 }}>Geopolitiek Landschap</h1>
+                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Jurisdictie en datalocatie van het applicatieportfolio · {vandaag}</p>
+                </div>
+              </div>
+              <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
+                {scored.length} van {apps.length} apps in kaart
+              </span>
+            </div>
+          </div>
+
+          {/* Uitleg */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Hoe lees je deze kaart?</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  De kaart toont twee geopolitieke posities per applicatie, gebaseerd op de DAAF-scores
+                  A1 (jurisdictie leverancier) en A3 (hosting en datalocatie):
+                </p>
+                <div className="space-y-2">
+                  <div className="flex gap-2 items-start">
+                    <div className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5"
+                      style={{ background:"#1A56A0", border:"2px solid white", boxShadow:"0 0 0 2px #1A56A0" }}/>
+                    <p className="text-xs" style={{ color:"#374151" }}>
+                      <strong style={{ color:"#1A56A0" }}>Gevulde cirkel</strong> = Jurisdictie leverancier (A1): onder welk rechtssysteem valt de leverancier?
+                    </p>
+                  </div>
+                  <div className="flex gap-2 items-start">
+                    <div className="w-4 h-4 rounded flex-shrink-0 mt-0.5"
+                      style={{ background:"white", border:"2.5px solid #1A56A0" }}/>
+                    <p className="text-xs" style={{ color:"#374151" }}>
+                      <strong style={{ color:"#1A56A0" }}>Omrand vierkant</strong> = Datalocatie (A3): waar staat de data fysiek opgeslagen?
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold mb-2" style={{ color:"#374151" }}>Kleurschaal:</p>
+                <div className="space-y-1.5">
+                  {[
+                    { score:"1-2", label:"EU / EER",          kleur:"#16a34a", bg:"#dcfce7", tekst:"Volledig Europees. Laagste risico." },
+                    { score:"3",   label:"Adequaat + risico",  kleur:"#ca8a04", bg:"#fef9c3", tekst:"VS met adequaatheidsbesluit. CLOUD Act van toepassing." },
+                    { score:"4",   label:"SCCs, geen adequaat",kleur:"#ea580c", bg:"#ffedd5", tekst:"Contractuele waarborgen. Verhoogd risico." },
+                    { score:"5",   label:"Geen waarborgen",    kleur:"#dc2626", bg:"#fee2e2", tekst:"Buiten EU, geen waarborgen." },
+                    { score:"0",   label:"Niet ingevuld",      kleur:"#9ca3af", bg:"#f3f4f6", tekst:"Score nog niet ingevuld." },
+                  ].map(function(r) {
+                    return (
+                      <div key={r.score} className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:r.kleur }}/>
+                        <span className="text-xs px-1.5 py-0.5 rounded font-semibold flex-shrink-0"
+                          style={{ background:r.bg, color:r.kleur }}>{r.score}</span>
+                        <span className="text-xs font-semibold flex-shrink-0" style={{ color:r.kleur }}>{r.label}</span>
+                        <span className="text-xs" style={{ color:"#9ca3af" }}>{r.tekst}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Kaart */}
           {apps.length === 0 ? (
             <div className="rounded p-10 text-center" style={{ background:"#fff", border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
-              Nog geen applicaties. Voeg applicaties toe en vul de A1 en A3 scores in om ze op de kaart te zien.
+              Nog geen applicaties. Voeg applicaties toe en vul A1 en A3 scores in.
             </div>
           ) : (
             <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7", overflow:"hidden" }}>
-              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
-                  <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
-                    Gebaseerd op DAAF-scores A1 (jurisdictie) en A3 (datalocatie) · hover over een stip voor details
-                  </p>
-                </div>
+              <div className="px-4 pt-4 pb-2">
+                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
+                <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
+                  Gebaseerd op DAAF-scores A1 en A3 · hover over een stip voor details
+                </p>
               </div>
               <WorldMapD3
                 scored={scored}
@@ -3940,73 +3988,62 @@ ${(function(){
             </div>
           )}
 
-                    {/* ── Tabel onder de kaart ── */}
+          {/* Tabel */}
           {scored.length > 0 && (
             <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Overzicht per applicatie — jurisdictie en datalocatie</h3>
-              <div className="overflow-x-auto">
-                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
-                  <thead>
-                    <tr style={{ background:"#0C2340", color:"white" }}>
-                      {["Applicatie","Leverancier","A1 Jurisdictie","A3 Datalocatie","Risico-oordeel"].map(h => (
-                        <th key={h} style={{ padding:"7px 10px", textAlign:"left", fontSize:10, fontWeight:600 }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...apps].sort((a,b) => {
-                      const aMax = Math.max(a.scores["A1"]||0, a.scores["A3"]||0);
-                      const bMax = Math.max(b.scores["A1"]||0, b.scores["A3"]||0);
-                      return bMax - aMax;
-                    }).map((a, i) => {
-                      const a1 = a.scores["A1"] || 0;
-                      const a3 = a.scores["A3"] || 0;
-                      const a1lbl = ["Niet ingevuld","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
-                      const a3lbl = ["Niet ingevuld","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
-                      const maxScore = Math.max(a1, a3);
-                      const oordeel = !maxScore ? { t:"Niet beoordeeld", fg:"#9ca3af", bg:"#f3f4f6" }
-                        : maxScore <= 2 ? { t:"EU-conform", fg:"#15803d", bg:"#dcfce7" }
-                        : maxScore === 3 ? { t:"Acceptabel", fg:"#a16207", bg:"#fef9c3" }
-                        : maxScore === 4 ? { t:"Aandacht", fg:"#c2410c", bg:"#ffedd5" }
-                        : { t:"Kritiek", fg:"#b91c1c", bg:"#fee2e2" };
-                      return (
-                        <tr key={a.id} style={{ background: i%2===0 ? "#f8fafc" : "white", borderBottom:"1px solid #f1f5f9" }}>
-                          <td style={{ padding:"8px 10px", fontWeight:600, color:"#0C2340" }}>{displayName(a)}</td>
-                          <td style={{ padding:"8px 10px", color:"#6b7280" }}>{a.supplier || "–"}</td>
-                          <td style={{ padding:"8px 10px" }}>
-                            <div className="flex items-center gap-1.5">
-                              <span style={{ display:"inline-block", width:10, height:10, borderRadius:"50%",
-                                background:risicoKleur(a1), flexShrink:0 }}/>
-                              <span style={{ color:"#374151" }}>{a1lbl[a1] || "–"}</span>
-                              {a1 > 0 && <span style={{ fontSize:10, fontWeight:700, color:risicoKleur(a1) }}>({a1}/5)</span>}
-                            </div>
-                          </td>
-                          <td style={{ padding:"8px 10px" }}>
-                            <div className="flex items-center gap-1.5">
-                              <span style={{ display:"inline-block", width:10, height:10, borderRadius:2,
-                                background:"white", border:`2px solid ${risicoKleur(a3)}`, flexShrink:0 }}/>
-                              <span style={{ color:"#374151" }}>{a3lbl[a3] || "–"}</span>
-                              {a3 > 0 && <span style={{ fontSize:10, fontWeight:700, color:risicoKleur(a3) }}>({a3}/5)</span>}
-                            </div>
-                          </td>
-                          <td style={{ padding:"8px 10px" }}>
-                            <span style={{ fontSize:10, fontWeight:600, padding:"2px 8px", borderRadius:3,
-                              background:oordeel.bg, color:oordeel.fg }}>{oordeel.t}</span>
-                          </td>
-                        </tr>
-                      );
+              <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                <thead>
+                  <tr style={{ background:"#0C2340", color:"white" }}>
+                    {["Applicatie","Leverancier","A1 Jurisdictie","A3 Datalocatie","Oordeel"].map(function(h) {
+                      return <th key={h} style={{ padding:"7px 10px", textAlign:"left", fontSize:10 }}>{h}</th>;
                     })}
-                  </tbody>
-                </table>
-              </div>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedApps.map(function(a, i) {
+                    const a1 = a.scores["A1"] || 0;
+                    const a3 = a.scores["A3"] || 0;
+                    const maxScore = Math.max(a1, a3);
+                    const oordeel = maxScore === 0 ? { t:"Niet beoordeeld", fg:"#9ca3af", bg:"#f3f4f6" }
+                      : maxScore <= 2 ? { t:"EU-conform",  fg:"#15803d", bg:"#dcfce7" }
+                      : maxScore === 3 ? { t:"Acceptabel",  fg:"#a16207", bg:"#fef9c3" }
+                      : maxScore === 4 ? { t:"Aandacht",    fg:"#c2410c", bg:"#ffedd5" }
+                      : { t:"Kritiek", fg:"#b91c1c", bg:"#fee2e2" };
+                    return (
+                      <tr key={a.id} style={{ background: i%2===0 ? "#f8fafc" : "white", borderBottom:"1px solid #f1f5f9" }}>
+                        <td style={{ padding:"8px 10px", fontWeight:600, color:"#0C2340" }}>{displayName(a)}</td>
+                        <td style={{ padding:"8px 10px", color:"#6b7280" }}>{a.supplier || "–"}</td>
+                        <td style={{ padding:"8px 10px" }}>
+                          <div className="flex items-center gap-1.5">
+                            <span style={{ width:10, height:10, borderRadius:"50%", background:risicoKleur(a1), display:"inline-block", flexShrink:0 }}/>
+                            <span style={{ color:"#374151" }}>{a1lbl[a1] || "–"}</span>
+                            {a1 > 0 && <span style={{ fontSize:10, fontWeight:700, color:risicoKleur(a1) }}>({a1}/5)</span>}
+                          </div>
+                        </td>
+                        <td style={{ padding:"8px 10px" }}>
+                          <div className="flex items-center gap-1.5">
+                            <span style={{ width:10, height:10, borderRadius:2, background:"white", border:"2px solid " + risicoKleur(a3), display:"inline-block", flexShrink:0 }}/>
+                            <span style={{ color:"#374151" }}>{a3lbl[a3] || "–"}</span>
+                            {a3 > 0 && <span style={{ fontSize:10, fontWeight:700, color:risicoKleur(a3) }}>({a3}/5)</span>}
+                          </div>
+                        </td>
+                        <td style={{ padding:"8px 10px" }}>
+                          <span style={{ fontSize:10, fontWeight:600, padding:"2px 8px", borderRadius:3, background:oordeel.bg, color:oordeel.fg }}>{oordeel.t}</span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
 
-          {/* ── Niet ingevuld melding ── */}
+          {/* Niet ingevuld */}
           {incomplete.length > 0 && (
             <div className="rounded p-3 mb-4 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
-              <strong>{incomplete.length} applicatie{incomplete.length !== 1 ? "s" : ""} nog niet beoordeeld op locatie:</strong>{" "}
-              {incomplete.map(a => displayName(a)).join(", ")}. Vul scores A1 en A3 in via het assessment.
+              <strong>{incomplete.length} applicatie{incomplete.length !== 1 ? "s" : ""} nog niet beoordeeld op locatie:</strong>
+              {" "}{incomplete.map(function(a) { return displayName(a); }).join(", ")}. Vul scores A1 en A3 in via het assessment.
             </div>
           )}
 
@@ -4014,7 +4051,6 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION} · {vandaag}
-              <br/>Gebaseerd op DAAF-indicatoren A1 (jurisdictie leverancier) en A3 (hosting en datalocatie)
             </p>
           </div>
 
