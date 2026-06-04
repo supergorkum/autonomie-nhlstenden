@@ -1393,7 +1393,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#93c5fd" strokeWidth="0.5" opacity="0.8"/>;
       })}
 
-      {/* Jurisdictie stippen — alleen gekleurde cirkel + naam */}
+      {/* Jurisdictie = kleine gevulde cirkel */}
       {Object.entries(jurisPerRegio).map(function([regio, items]) {
         const ll = REGIO_LON_LAT[regio];
         if (!ll) return null;
@@ -1402,23 +1402,20 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return items.map(function(a, idx) {
           const total = items.length;
           const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const r = total <= 1 ? 0 : 18;
-          const cx = pt[0] + Math.cos(angle) * r;
-          const cy = pt[1] + Math.sin(angle) * r - 6;
+          const spread = total <= 1 ? 0 : 14;
+          const cx = pt[0] + Math.cos(angle) * spread - 4;
+          const cy = pt[1] + Math.sin(angle) * spread - 4;
           const kleur = REGIO_KLEUR[regio];
           return (
             <g key={a.id+"_j"}>
-              <circle cx={cx} cy={cy} r="9" fill={kleur} stroke="white" strokeWidth="2" opacity="0.95"/>
-              <text x={cx} y={cy+3} textAnchor="middle" fontSize="5.5" fill="white" fontWeight="700"
-                style={{pointerEvents:"none", fontFamily:"Arial"}}>
-                {displayName(a).substring(0,3).toUpperCase()}
-              </text>
+              {/* Gevulde cirkel = jurisdictie */}
+              <circle cx={cx} cy={cy} r="6" fill={kleur} stroke="white" strokeWidth="1.5"/>
             </g>
           );
         });
       })}
 
-      {/* Datalocatie stippen — idem maar iets verschoven, ook alleen cirkel */}
+      {/* Datalocatie = ring (holle cirkel met dikke gekleurde rand) */}
       {Object.entries(dataPerRegio).map(function([regio, items]) {
         const ll = REGIO_LON_LAT[regio];
         if (!ll) return null;
@@ -1427,17 +1424,14 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return items.map(function(a, idx) {
           const total = items.length;
           const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const r = total <= 1 ? 0 : 18;
-          const cx = pt[0] + Math.cos(angle) * r + 10;
-          const cy = pt[1] + Math.sin(angle) * r + 14;
+          const spread = total <= 1 ? 0 : 14;
+          const cx = pt[0] + Math.cos(angle) * spread + 5;
+          const cy = pt[1] + Math.sin(angle) * spread + 6;
           const kleur = REGIO_KLEUR[regio];
           return (
             <g key={a.id+"_d"}>
-              <circle cx={cx} cy={cy} r="9" fill={kleur} stroke="white" strokeWidth="2" opacity="0.75"/>
-              <text x={cx} y={cy+3} textAnchor="middle" fontSize="5.5" fill="white" fontWeight="700"
-                style={{pointerEvents:"none", fontFamily:"Arial"}}>
-                {displayName(a).substring(0,3).toUpperCase()}
-              </text>
+              {/* Ring = datalocatie: transparant binnenste, gekleurde rand */}
+              <circle cx={cx} cy={cy} r="6" fill="white" fillOpacity="0.85" stroke={kleur} strokeWidth="2.5"/>
             </g>
           );
         });
@@ -5965,12 +5959,12 @@ ${(function(){
                         </div>;
                       })}
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:"#1A56A0", border:"2px solid white", boxShadow:"0 0 0 1px #1A56A0" }}/>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie (A1)</span>
+                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background:"#1A56A0", border:"1.5px solid white" }}/>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevulde cirkel = jurisdictie leverancier (A1)</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:"#1A56A0", opacity:0.5, border:"2px solid white" }}/>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Half transparant = datalocatie (A3)</span>
+                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background:"white", border:"2.5px solid #1A56A0" }}/>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Ring = datalocatie servers (A3)</span>
                       </div>
                     </div>
                   </div>
