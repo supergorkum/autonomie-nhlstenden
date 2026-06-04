@@ -1322,11 +1322,49 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
     } catch(e) { return []; }
   }, [worldData]);
 
+  // Bereken de bounding box van alle stippen om op in te zoomen
+  // met padding eromheen zodat stippen nooit aan de rand zitten
+  const PADDING = 60; // pixels padding rondom de stippen
+
+  const allPts = React.useMemo(function() {
+    const pts = [];
+    geoApps.forEach(function(a) {
+      if (a.a1 > 0) {
+        const ll = REGIO_LON_LAT[a.jRegio];
+        if (ll) { const p = proj(ll); if (p) pts.push(p); }
+      }
+      if (a.a3 > 0) {
+        const ll = REGIO_LON_LAT[a.dRegio];
+        if (ll) { const p = proj(ll); if (p) pts.push(p); }
+      }
+    });
+    return pts;
+  }, [geoApps, proj, REGIO_LON_LAT]);
+
+  // Bereken viewBox op basis van stippen-bounding box
+  const viewBox = React.useMemo(function() {
+    if (allPts.length === 0) return "0 0 " + W + " " + H;
+    const xs = allPts.map(function(p) { return p[0]; });
+    const ys = allPts.map(function(p) { return p[1]; });
+    const minX = Math.max(0, Math.min.apply(null, xs) - PADDING);
+    const maxX = Math.min(W, Math.max.apply(null, xs) + PADDING);
+    const minY = Math.max(0, Math.min.apply(null, ys) - PADDING);
+    const maxY = Math.min(H, Math.max.apply(null, ys) + PADDING);
+    const vw = maxX - minX;
+    const vh = maxY - minY;
+    // Zorg voor minimale grootte en behoud aspect ratio
+    const minSize = 120;
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const fw = Math.max(vw, minSize);
+    const fh = Math.max(vh, minSize);
+    return (cx - fw/2) + " " + (cy - fh/2) + " " + fw + " " + fh;
+  }, [allPts, W, H]);
+
   const pathGen = React.useMemo(function() { return d3.geoPath().projection(proj); }, [proj]);
   const sphere  = { type:"Sphere" };
-  const graticule = React.useMemo(function() { return d3.geoGraticule()(); }, []);
 
-  // Groepeer stippen per regio-combinatie voor overlap
+  // Groepeer stippen
   const jurisPerRegio = {};
   const dataPerRegio  = {};
   geoApps.forEach(function(a) {
@@ -1341,20 +1379,21 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
   });
 
   return (
-    <svg viewBox={"0 0 " + W + " " + H} style={{ width:"100%", height:"auto", display:"block", borderRadius:4 }}>
-      <rect width={W} height={H} fill="#bfdbfe" rx="4"/>
+    <svg viewBox={viewBox} style={{ width:"100%", height:"auto", display:"block", borderRadius:4, background:"#bfdbfe" }}>
+      {/* Achtergrond oceaan */}
       <path d={pathGen(sphere)} fill="#bfdbfe"/>
-      <path d={pathGen(graticule)} fill="none" stroke="#94a3b8" strokeWidth="0.4" opacity="0.4"/>
+      {/* Landen — alleen kleur, geen rand */}
       {countries.map(function(c) {
         return <path key={c.id} d={pathGen(c)}
-          fill={c.isEU ? "#dbeafe" : "#e5e9f0"}
-          stroke="#94a3b8" strokeWidth="0.4" opacity="0.95"/>;
+          fill={c.isEU ? "#dbeafe" : "#e8edf4"}
+          stroke="#c8d4e0" strokeWidth="0.3"/>;
       })}
+      {/* EU outline subtiel */}
       {countries.filter(function(c) { return c.isEU; }).map(function(c) {
-        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#3b82f6" strokeWidth="0.5" opacity="0.7"/>;
+        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#93c5fd" strokeWidth="0.5" opacity="0.8"/>;
       })}
 
-      {/* Jurisdictie stippen (gevuld) */}
+      {/* Jurisdictie stippen — alleen gekleurde cirkel + naam */}
       {Object.entries(jurisPerRegio).map(function([regio, items]) {
         const ll = REGIO_LON_LAT[regio];
         if (!ll) return null;
@@ -1362,14 +1401,16 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         if (!pt) return null;
         return items.map(function(a, idx) {
           const total = items.length;
-          const angle = total <= 1 ? 0 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const r = total <= 1 ? 0 : 12;
+          const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
+          const r = total <= 1 ? 0 : 18;
           const cx = pt[0] + Math.cos(angle) * r;
-          const cy = pt[1] + Math.sin(angle) * r - 5;
+          const cy = pt[1] + Math.sin(angle) * r - 6;
+          const kleur = REGIO_KLEUR[regio];
           return (
             <g key={a.id+"_j"}>
-              <circle cx={cx} cy={cy} r="7" fill={REGIO_KLEUR[regio]} stroke="white" strokeWidth="1.5" opacity="0.92"/>
-              <text x={cx} y={cy+2.5} textAnchor="middle" fontSize="5" fill="white" fontWeight="700" style={{pointerEvents:"none"}}>
+              <circle cx={cx} cy={cy} r="9" fill={kleur} stroke="white" strokeWidth="2" opacity="0.95"/>
+              <text x={cx} y={cy+3} textAnchor="middle" fontSize="5.5" fill="white" fontWeight="700"
+                style={{pointerEvents:"none", fontFamily:"Arial"}}>
                 {displayName(a).substring(0,3).toUpperCase()}
               </text>
             </g>
@@ -1377,7 +1418,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         });
       })}
 
-      {/* Data stippen (omrand vierkant) */}
+      {/* Datalocatie stippen — idem maar iets verschoven, ook alleen cirkel */}
       {Object.entries(dataPerRegio).map(function([regio, items]) {
         const ll = REGIO_LON_LAT[regio];
         if (!ll) return null;
@@ -1385,14 +1426,16 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         if (!pt) return null;
         return items.map(function(a, idx) {
           const total = items.length;
-          const angle = total <= 1 ? 0 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const r = total <= 1 ? 0 : 12;
-          const cx = pt[0] + Math.cos(angle) * r + 8;
-          const cy = pt[1] + Math.sin(angle) * r + 10;
+          const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
+          const r = total <= 1 ? 0 : 18;
+          const cx = pt[0] + Math.cos(angle) * r + 10;
+          const cy = pt[1] + Math.sin(angle) * r + 14;
+          const kleur = REGIO_KLEUR[regio];
           return (
             <g key={a.id+"_d"}>
-              <rect x={cx-6} y={cy-6} width="12" height="12" fill="white" stroke={REGIO_KLEUR[regio]} strokeWidth="2" rx="1.5" opacity="0.95"/>
-              <text x={cx} y={cy+2} textAnchor="middle" fontSize="4.5" fill={REGIO_KLEUR[regio]} fontWeight="700" style={{pointerEvents:"none"}}>
+              <circle cx={cx} cy={cy} r="9" fill={kleur} stroke="white" strokeWidth="2" opacity="0.75"/>
+              <text x={cx} y={cy+3} textAnchor="middle" fontSize="5.5" fill="white" fontWeight="700"
+                style={{pointerEvents:"none", fontFamily:"Arial"}}>
                 {displayName(a).substring(0,3).toUpperCase()}
               </text>
             </g>
@@ -1400,8 +1443,8 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         });
       })}
 
-      {/* EU label */}
-      {(() => { const pt = proj([10, 55]); return pt ? <text x={pt[0]} y={pt[1]} textAnchor="middle" fontSize="7" fill="#1d4ed8" opacity="0.8" fontStyle="italic">EU</text> : null; })()}
+      {/* EU label op geprojecteerde positie */}
+      {(() => { const pt = proj([10, 55]); return pt ? <text x={pt[0]} y={pt[1]} textAnchor="middle" fontSize="8" fill="#1d4ed8" opacity="0.7" fontStyle="italic" fontFamily="Arial">EU</text> : null; })()}
     </svg>
   );
 }
@@ -5926,8 +5969,8 @@ ${(function(){
                         <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie (A1)</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-2.5 h-2.5 flex-shrink-0" style={{ background:"white", border:"2px solid #1A56A0" }}/>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Omrand = datalocatie (A3)</span>
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:"#1A56A0", opacity:0.5, border:"2px solid white" }}/>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Half transparant = datalocatie (A3)</span>
                       </div>
                     </div>
                   </div>
@@ -5970,9 +6013,45 @@ ${(function(){
                     </table>
                     {geoApps.some(function(a) { return a.a1 === 0 && a.a3 === 0; }) && (
                       <p className="text-xs mt-2" style={{ color:"#9ca3af" }}>
-                        * Applicaties zonder A1/A3-score zijn niet meegenomen. Vul scores in via het assessment.
+                        * Applicaties zonder A1/A3-score zijn niet meegenomen.
                       </p>
                     )}
+
+                    {/* Applicatie badges per regio */}
+                    <div className="mt-3 pt-3" style={{ borderTop:"1px solid #EBF3FF" }}>
+                      <p className="text-xs font-semibold mb-2" style={{ color:"#6b7280" }}>Applicaties per regio:</p>
+                      {["EU / EER","VS (adequaat)","VS (risico)","Buiten EU","Niet ingevuld"].map(function(regio) {
+                        const appsInRegio = geoApps.filter(function(a) {
+                          return a.jRegio === regio || a.dRegio === regio;
+                        });
+                        if (appsInRegio.length === 0) return null;
+                        const k = REGIO_KLEUR[regio];
+                        return (
+                          <div key={regio} className="mb-2">
+                            <div className="flex items-center gap-1 mb-1">
+                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
+                              <span style={{ fontSize:10, color:k, fontWeight:700 }}>{regio}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 pl-3">
+                              {appsInRegio.map(function(a) {
+                                const isJuris = a.jRegio === regio;
+                                const isData  = a.dRegio === regio;
+                                return (
+                                  <div key={a.id} className="flex items-center gap-1 px-2 py-1 rounded"
+                                    style={{ background:k+"18", border:"1.5px solid "+k+"44" }}>
+                                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k, opacity: isJuris ? 1 : 0.4 }}/>
+                                    <span style={{ fontSize:10, color:"#0C2340", fontWeight:600 }}>{displayName(a)}</span>
+                                    <span style={{ fontSize:9, color:k, opacity:0.8 }}>
+                                      {isJuris && isData ? "A1+A3" : isJuris ? "A1" : "A3"}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
