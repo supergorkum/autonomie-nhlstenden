@@ -1287,20 +1287,29 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
   const safeData  = dataGroups  || {};
   const [worldData, setWorldData] = React.useState(null);
   const [loading,   setLoading]   = React.useState(true);
+  const [transform, setTransform] = React.useState({ k:1, x:0, y:0 });
+  const svgRef = React.useRef(null);
   const W = 960, H = 500;
 
   React.useEffect(() => {
-    // Natural Earth 110m landen via CDN
     fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
       .then(r => r.json())
-      .then(topo => {
-        // Converteer TopoJSON naar GeoJSON features
-        const countries = d3.geoPath();
-        setWorldData(topo);
-        setLoading(false);
-      })
+      .then(topo => { setWorldData(topo); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  // D3 zoom instellen
+  React.useEffect(() => {
+    if (!svgRef.current) return;
+    const zoom = d3.zoom()
+      .scaleExtent([1, 8])
+      .translateExtent([[0,0],[W,H]])
+      .on("zoom", function(event) {
+        setTransform({ k: event.transform.k, x: event.transform.x, y: event.transform.y });
+      });
+    d3.select(svgRef.current).call(zoom);
+    return () => d3.select(svgRef.current).on(".zoom", null);
+  }, [loading]);
 
   const projection = React.useMemo(() =>
     d3.geoNaturalEarth1()
@@ -1386,8 +1395,12 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
         </div>
       )}
       {!loading && (
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block" }}>
-          {/* Oceaan */}
+        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`}
+          style={{ width:"100%", height:"auto", display:"block", cursor: transform.k > 1 ? "grab" : "default" }}>
+          {/* Oceaan achtergrond buiten zoom */}
+          <rect width={W} height={H} fill="#bfdbfe"/>
+          <g transform={`translate(${transform.x},${transform.y}) scale(${transform.k})`}>
+          {/* Oceaan sphere */}
           <path d={pathGen(sphere)} fill="#bfdbfe"/>
           {/* Graticule */}
           <path d={pathGen(graticule)} fill="none" stroke="#94a3b8" strokeWidth="0.3" opacity="0.5"/>
@@ -1463,8 +1476,11 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           {/* ── Tooltip ── */}
           {geoTooltip && (() => {
             const { cx, cy, a, type } = geoTooltip;
-            const tx  = Math.min(cx + 14, W - 240);
-            const ty  = Math.max(cy - 75, 5);
+            // Corrigeer voor zoom-transform
+            const rawX = cx * transform.k + transform.x;
+            const rawY = cy * transform.k + transform.y;
+            const tx  = Math.min(rawX + 14, W - 240);
+            const ty  = Math.max(rawY - 75, 5);
             const score = type === "juris" ? a.a1 : a.a3;
             const lbl   = type === "juris" ? (a1lbl[score]||"–") : (a3lbl[score]||"–");
             const kleur = risicoKleur(score);
@@ -1483,7 +1499,11 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
             );
           })()}
 
-          {/* Kaart legenda */}
+          {/* EU label in Europa */}
+          <text x="490" y="175" textAnchor="middle" fontSize={9/transform.k} fill="#1d4ed8" opacity="0.8" fontStyle="italic">EU</text>
+
+          </g>{/* einde zoom-g */}
+          {/* Kaart legenda — buiten zoom */}
           <g transform={`translate(${W-270}, ${H-72})`}>
             <rect width="262" height="66" rx="4" fill="white" opacity="0.93" stroke="#e2e8f0" strokeWidth="1"/>
             <text x="10" y="15" fontSize="9" fontWeight="700" fill="#0C2340">Legenda</text>
@@ -1500,7 +1520,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           </g>
 
           {/* EU label */}
-          <text x="490" y="212" textAnchor="middle" fontSize="9" fill="#1d4ed8" opacity="0.8" fontStyle="italic">EU</text>
+
         </svg>
       )}
     </div>
@@ -3969,11 +3989,31 @@ ${(function(){
             </div>
           ) : (
             <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7", overflow:"hidden" }}>
-              <div className="px-4 pt-4 pb-2">
-                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
-                <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
-                  Gebaseerd op DAAF-scores A1 en A3 · hover over een stip voor details
-                </p>
+              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
+                  <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
+                    Gebaseerd op DAAF-scores A1 en A3 · scroll of pinch om in te zoomen · sleep om te verschuiven
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {transform.k > 1 && (
+                    <button
+                      onClick={() => {
+                        setTransform({ k:1, x:0, y:0 });
+                        if (svgRef.current) d3.select(svgRef.current).call(
+                          d3.zoom().transform, d3.zoomIdentity
+                        );
+                      }}
+                      className="text-xs px-2.5 py-1 font-medium"
+                      style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
+                      ↺ Reset zoom
+                    </button>
+                  )}
+                  <span className="text-xs px-2 py-1 rounded" style={{ background:"#f1f5f9", color:"#9ca3af" }}>
+                    {transform.k > 1 ? Math.round(transform.k * 100) + "%" : "Scroll = zoom"}
+                  </span>
+                </div>
               </div>
               <WorldMapD3
                 scored={scored}
