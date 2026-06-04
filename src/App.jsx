@@ -1283,6 +1283,8 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 export default // ── WorldMapD3 — echte wereldkaart via D3 Natural Earth projectie ─────────────
 function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId,
                       geoTooltip, setGeoTooltip, risicoKleur, displayName, REGIO_COORDS }) {
+  const safeJuris = jurisGroups || {};
+  const safeData  = dataGroups  || {};
   const [worldData, setWorldData] = React.useState(null);
   const [loading,   setLoading]   = React.useState(true);
   const W = 960, H = 500;
@@ -1310,7 +1312,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
   const pathGen = React.useMemo(() => d3.geoPath().projection(projection), [projection]);
 
   const countries = React.useMemo(() => {
-    if (!worldData) return [];
+    if (!worldData || !worldData.objects) return [];
     try {
       const obj = worldData.objects.countries;
       if (!obj) return [];
@@ -1403,7 +1405,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           ))}
 
           {/* ── Jurisdictie stippen (gevulde cirkel) ── */}
-          {Object.entries(jurisGroups).map(([regio, items]) => {
+          {Object.entries(safeJuris).map(([regio, items]) => {
             const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
             // Projecteer vanuit lon/lat naar SVG-pixels
             const [px, py] = projection([rc.lon, rc.lat]);
@@ -1431,7 +1433,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           })}
 
           {/* ── Data-locatie stippen (omrand vierkant) ── */}
-          {Object.entries(dataGroups).map(([regio, items]) => {
+          {Object.entries(safeData).map(([regio, items]) => {
             const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
             const [px, py] = projection([rc.lon, rc.lat]);
             return items.map((a, idx) => {
