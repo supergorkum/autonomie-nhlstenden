@@ -1280,6 +1280,132 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 // APP
 // ──────────────────────────────────────────────────────────────
 
+// ── MiniGeoKaart — compacte wereldkaart voor Portfolio-pagina ────────────────
+function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR }) {
+  const [worldData, setWorldData] = React.useState(null);
+
+  React.useEffect(function() {
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+      .then(function(r) { return r.json(); })
+      .then(function(topo) { setWorldData(topo); })
+      .catch(function() {});
+  }, []);
+
+  const countries = React.useMemo(function() {
+    if (!worldData || !worldData.objects) return [];
+    try {
+      const sc = worldData.transform ? worldData.transform.scale : [1,1];
+      const tr = worldData.transform ? worldData.transform.translate : [0,0];
+      const arcs = worldData.arcs;
+      function decodeArc(idx) {
+        const neg = idx < 0;
+        const arc = arcs[neg ? (idx * -1) - 1 : idx];
+        let x = 0; let y = 0;
+        const pts = arc.map(function(p) { x += p[0]; y += p[1]; return [x, y]; });
+        if (neg) pts.reverse();
+        return pts;
+      }
+      function toCoord(p) { return [p[0]*sc[0]+tr[0], p[1]*sc[1]+tr[1]]; }
+      function ringToCoords(ring) {
+        const pts = [];
+        ring.forEach(function(i) { decodeArc(i).forEach(function(p) { pts.push(toCoord(p)); }); });
+        return pts;
+      }
+      const EU_CODES = new Set([40,56,100,191,196,203,208,233,246,250,276,300,348,372,380,428,440,442,470,528,616,620,642,703,705,724,752,826]);
+      return worldData.objects.countries.geometries.map(function(g) {
+        let coords;
+        if (g.type === "Polygon") coords = g.arcs.map(function(ring) { return ringToCoords(ring); });
+        else if (g.type === "MultiPolygon") coords = g.arcs.map(function(poly) { return poly.map(function(ring) { return ringToCoords(ring); }); });
+        else return null;
+        return { type:"Feature", id:g.id, isEU: EU_CODES.has(parseInt(g.id)), geometry:{ type:g.type, coordinates:coords } };
+      }).filter(Boolean);
+    } catch(e) { return []; }
+  }, [worldData]);
+
+  const pathGen = React.useMemo(function() { return d3.geoPath().projection(proj); }, [proj]);
+  const sphere  = { type:"Sphere" };
+  const graticule = React.useMemo(function() { return d3.geoGraticule()(); }, []);
+
+  // Groepeer stippen per regio-combinatie voor overlap
+  const jurisPerRegio = {};
+  const dataPerRegio  = {};
+  geoApps.forEach(function(a) {
+    if (a.a1 > 0) {
+      if (!jurisPerRegio[a.jRegio]) jurisPerRegio[a.jRegio] = [];
+      jurisPerRegio[a.jRegio].push(a);
+    }
+    if (a.a3 > 0) {
+      if (!dataPerRegio[a.dRegio]) dataPerRegio[a.dRegio] = [];
+      dataPerRegio[a.dRegio].push(a);
+    }
+  });
+
+  return (
+    <svg viewBox={"0 0 " + W + " " + H} style={{ width:"100%", height:"auto", display:"block", borderRadius:4 }}>
+      <rect width={W} height={H} fill="#bfdbfe" rx="4"/>
+      <path d={pathGen(sphere)} fill="#bfdbfe"/>
+      <path d={pathGen(graticule)} fill="none" stroke="#94a3b8" strokeWidth="0.4" opacity="0.4"/>
+      {countries.map(function(c) {
+        return <path key={c.id} d={pathGen(c)}
+          fill={c.isEU ? "#dbeafe" : "#e5e9f0"}
+          stroke="#94a3b8" strokeWidth="0.4" opacity="0.95"/>;
+      })}
+      {countries.filter(function(c) { return c.isEU; }).map(function(c) {
+        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#3b82f6" strokeWidth="0.5" opacity="0.7"/>;
+      })}
+
+      {/* Jurisdictie stippen (gevuld) */}
+      {Object.entries(jurisPerRegio).map(function([regio, items]) {
+        const ll = REGIO_LON_LAT[regio];
+        if (!ll) return null;
+        const pt = proj(ll);
+        if (!pt) return null;
+        return items.map(function(a, idx) {
+          const total = items.length;
+          const angle = total <= 1 ? 0 : (idx * 2 * Math.PI / total) - Math.PI/2;
+          const r = total <= 1 ? 0 : 12;
+          const cx = pt[0] + Math.cos(angle) * r;
+          const cy = pt[1] + Math.sin(angle) * r - 5;
+          return (
+            <g key={a.id+"_j"}>
+              <circle cx={cx} cy={cy} r="7" fill={REGIO_KLEUR[regio]} stroke="white" strokeWidth="1.5" opacity="0.92"/>
+              <text x={cx} y={cy+2.5} textAnchor="middle" fontSize="5" fill="white" fontWeight="700" style={{pointerEvents:"none"}}>
+                {displayName(a).substring(0,3).toUpperCase()}
+              </text>
+            </g>
+          );
+        });
+      })}
+
+      {/* Data stippen (omrand vierkant) */}
+      {Object.entries(dataPerRegio).map(function([regio, items]) {
+        const ll = REGIO_LON_LAT[regio];
+        if (!ll) return null;
+        const pt = proj(ll);
+        if (!pt) return null;
+        return items.map(function(a, idx) {
+          const total = items.length;
+          const angle = total <= 1 ? 0 : (idx * 2 * Math.PI / total) - Math.PI/2;
+          const r = total <= 1 ? 0 : 12;
+          const cx = pt[0] + Math.cos(angle) * r + 8;
+          const cy = pt[1] + Math.sin(angle) * r + 10;
+          return (
+            <g key={a.id+"_d"}>
+              <rect x={cx-6} y={cy-6} width="12" height="12" fill="white" stroke={REGIO_KLEUR[regio]} strokeWidth="2" rx="1.5" opacity="0.95"/>
+              <text x={cx} y={cy+2} textAnchor="middle" fontSize="4.5" fill={REGIO_KLEUR[regio]} fontWeight="700" style={{pointerEvents:"none"}}>
+                {displayName(a).substring(0,3).toUpperCase()}
+              </text>
+            </g>
+          );
+        });
+      })}
+
+      {/* EU label */}
+      {(() => { const pt = proj([10, 55]); return pt ? <text x={pt[0]} y={pt[1]} textAnchor="middle" fontSize="7" fill="#1d4ed8" opacity="0.8" fontStyle="italic">EU</text> : null; })()}
+    </svg>
+  );
+}
+
 // ── WorldMapD3 — echte wereldkaart via D3 Natural Earth projectie ─────────────
 function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId,
                       geoTooltip, setGeoTooltip, risicoKleur, displayName, REGIO_COORDS }) {
@@ -5722,6 +5848,137 @@ ${(function(){
             </div>
           </div>
 
+          {/* ── Geopolitiek overzicht compact ── */}
+          {apps.length > 0 && (() => {
+            // Bouw geo-data op
+            const geoApps = apps.map(function(a) {
+              const a1 = a.scores["A1"] || 0;
+              const a3 = a.scores["A3"] || 0;
+              function regio(sc) {
+                if (sc <= 0)  return "Niet ingevuld";
+                if (sc <= 2)  return "EU / EER";
+                if (sc <= 3)  return "VS (adequaat)";
+                if (sc <= 4)  return "VS (risico)";
+                return "Buiten EU";
+              }
+              function kleur(sc) {
+                if (sc <= 0)  return "#9ca3af";
+                if (sc <= 2)  return "#16a34a";
+                if (sc <= 3)  return "#ca8a04";
+                if (sc <= 4)  return "#ea580c";
+                return "#dc2626";
+              }
+              return { ...a, a1, a3, jRegio: regio(a1), dRegio: regio(a3), jKleur: kleur(a1), dKleur: kleur(a3) };
+            });
+
+            // Groepeer per regio
+            const REGIO_ORDER = ["EU / EER","VS (adequaat)","VS (risico)","Buiten EU","Niet ingevuld"];
+            const REGIO_LON_LAT = {
+              "EU / EER":     [10, 52],
+              "VS (adequaat)":[-95, 38],
+              "VS (risico)":  [-95, 38],
+              "Buiten EU":    [100, 25],
+              "Niet ingevuld":[0, 0],
+            };
+            const REGIO_KLEUR = {
+              "EU / EER":     "#16a34a",
+              "VS (adequaat)":"#ca8a04",
+              "VS (risico)":  "#ea580c",
+              "Buiten EU":    "#dc2626",
+              "Niet ingevuld":"#9ca3af",
+            };
+
+            // Tel per regio
+            const jTelling = {}; const dTelling = {};
+            geoApps.forEach(function(a) {
+              jTelling[a.jRegio] = (jTelling[a.jRegio]||0) + 1;
+              dTelling[a.dRegio] = (dTelling[a.dRegio]||0) + 1;
+            });
+
+            // Mini SVG kaart met Natural Earth-achtige positionering
+            // Gebruik de WorldMapD3 component maar mini
+            const W = 600, H = 300;
+            const proj = d3.geoNaturalEarth1().scale(90).translate([W/2, H/2]);
+
+            return (
+              <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Geopolitieke positie — applicatielandschap</h3>
+                    <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>Jurisdictie leverancier (A1) en datalocatie servers (A3) per regio</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
+                  {/* Mini kaart */}
+                  <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
+                    <MiniGeoKaart geoApps={geoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR}/>
+                    {/* Legenda onder kaart */}
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+                      {[["#16a34a","EU / EER"],["#ca8a04","VS (adequaat)"],["#ea580c","VS (risico)"],["#dc2626","Buiten EU"],["#9ca3af","Niet ingevuld"]].map(function([k,l]) {
+                        return <div key={l} className="flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
+                          <span style={{ fontSize:9, color:"#6b7280" }}>{l}</span>
+                        </div>;
+                      })}
+                      <div className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:"#1A56A0", border:"2px solid white", boxShadow:"0 0 0 1px #1A56A0" }}/>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie (A1)</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span className="w-2.5 h-2.5 flex-shrink-0" style={{ background:"white", border:"2px solid #1A56A0" }}/>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Omrand = datalocatie (A3)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tabel */}
+                  <div style={{ padding:"8px 12px" }}>
+                    <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                      <thead>
+                        <tr style={{ background:"#0C2340", color:"white" }}>
+                          <th style={{ padding:"5px 8px", textAlign:"left", fontSize:10 }}>Regio</th>
+                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Jurisdictie (A1)</th>
+                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Datalocatie (A3)</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {REGIO_ORDER.filter(function(r) { return jTelling[r] || dTelling[r]; }).map(function(r, i) {
+                          const k = REGIO_KLEUR[r];
+                          return (
+                            <tr key={r} style={{ background: i%2===0 ? "#f8fafc" : "white", borderBottom:"1px solid #f1f5f9" }}>
+                              <td style={{ padding:"5px 8px" }}>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
+                                  <span style={{ fontSize:11, color:"#374151", fontWeight:600 }}>{r}</span>
+                                </div>
+                              </td>
+                              <td style={{ padding:"5px 8px", textAlign:"center" }}>
+                                {jTelling[r] ? (
+                                  <span style={{ fontSize:12, fontWeight:700, color:k }}>{jTelling[r]}</span>
+                                ) : <span style={{ color:"#d1d5db" }}>–</span>}
+                              </td>
+                              <td style={{ padding:"5px 8px", textAlign:"center" }}>
+                                {dTelling[r] ? (
+                                  <span style={{ fontSize:12, fontWeight:700, color:k }}>{dTelling[r]}</span>
+                                ) : <span style={{ color:"#d1d5db" }}>–</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    {geoApps.some(function(a) { return a.a1 === 0 && a.a3 === 0; }) && (
+                      <p className="text-xs mt-2" style={{ color:"#9ca3af" }}>
+                        * Applicaties zonder A1/A3-score zijn niet meegenomen. Vul scores in via het assessment.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {/* Footer */}
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
@@ -6258,7 +6515,6 @@ ${(function(){
             { k:"apps",      label:"Applicaties" },
             ...(selApp ? [{ k:"assess", label:displayName(selApp).substring(0,20) }] : []),
             { k:"compare",   label:"Vergelijking" },
-            { k:"geokaart",  label:"🌍 Geopolitiek" },
             { k:"bestuur",   label:"📊 Portfolio" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
             { k:"transparantie", label:"🔍 Over dit product" },
@@ -6281,7 +6537,6 @@ ${(function(){
         {view === "apps"      && AppsList()}
         {view === "assess"    && Assess()}
         {view === "compare"   && Compare()}
-        {view === "geokaart"  && GeoKaart()}
         {view === "bestuur"   && Bestuur()}
         {view === "about"     && About()}
         {view === "transparantie" && Transparantie()}
