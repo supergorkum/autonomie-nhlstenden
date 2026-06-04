@@ -1311,7 +1311,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         ring.forEach(function(i) { decodeArc(i).forEach(function(p) { pts.push(toCoord(p)); }); });
         return pts;
       }
-      const EU_CODES = new Set([40,56,100,191,196,203,208,233,246,250,276,300,348,372,380,428,440,442,470,528,616,620,642,703,705,724,752,826]);
+      const EU_CODES = new Set([40,56,100,191,196,203,208,233,246,250,276,300,348,372,380,428,440,442,470,528,616,620,642,703,705,724,752]); // 826=VK bewust weggelaten
       return worldData.objects.countries.geometries.map(function(g) {
         let coords;
         if (g.type === "Polygon") coords = g.arcs.map(function(ring) { return ringToCoords(ring); });
@@ -5892,13 +5892,24 @@ ${(function(){
             const geoApps = apps.map(function(a, i) {
               const a1 = a.scores["A1"] || 0;
               const a3 = a.scores["A3"] || 0;
-              function regio(sc) {
+              // A1: score 1-2=EU, 3=VS+adequaat, 4=VS+SCCs, 5=buiten EU
+              // A3: score 1-3=EU/EER (met variaties), 4=deels buiten EU, 5=buiten EU
+              // We gebruiken A1 voor jurisdictie-regio en A3 voor data-regio
+              // maar de weergave-regio moet per dimensie anders worden bepaald
+              function regioA1(sc) {
                 if (sc <= 0)  return "Niet ingevuld";
                 if (sc <= 2)  return "EU / EER";
                 if (sc <= 3)  return "VS (adequaat)";
                 if (sc <= 4)  return "VS (risico)";
                 return "Buiten EU";
               }
+              function regioA3(sc) {
+                if (sc <= 0)  return "Niet ingevuld";
+                if (sc <= 3)  return "EU / EER";   // score 1,2,3 = data in EU/EER
+                if (sc <= 4)  return "VS (risico)"; // score 4 = deels buiten EU
+                return "Buiten EU";                  // score 5 = buiten EU
+              }
+              function regio(sc) { return regioA1(sc); } // default voor A1
               function regioKleur(sc) {
                 if (sc <= 0)  return "#9ca3af";
                 if (sc <= 2)  return "#16a34a";
@@ -5906,10 +5917,16 @@ ${(function(){
                 if (sc <= 4)  return "#ea580c";
                 return "#dc2626";
               }
+              function regioKleurA3(sc) {
+                if (sc <= 0)  return "#9ca3af";
+                if (sc <= 3)  return "#16a34a";   // score 1-3 = groen (EU)
+                if (sc <= 4)  return "#ea580c";   // score 4 = oranje
+                return "#dc2626";
+              }
               const appKleur = APP_PALETTE[i % APP_PALETTE.length];
               return { ...a, a1, a3,
-                jRegio: regio(a1), dRegio: regio(a3),
-                jKleur: regioKleur(a1), dKleur: regioKleur(a3),
+                jRegio: regioA1(a1), dRegio: regioA3(a3),
+                jKleur: regioKleur(a1), dKleur: regioKleurA3(a3),
                 appKleur
               };
             });
