@@ -1385,12 +1385,12 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
       {/* Landen — alleen kleur, geen rand */}
       {countries.map(function(c) {
         return <path key={c.id} d={pathGen(c)}
-          fill={c.isEU ? "#dbeafe" : "#e8edf4"}
+          fill={c.isEU ? "#bfdbfe" : "#e8edf4"}
           stroke="#c8d4e0" strokeWidth="0.3"/>;
       })}
       {/* EU outline subtiel */}
       {countries.filter(function(c) { return c.isEU; }).map(function(c) {
-        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#93c5fd" strokeWidth="0.5" opacity="0.8"/>;
+        return <path key={"eu_"+c.id} d={pathGen(c)} fill="#bfdbfe" stroke="#60a5fa" strokeWidth="0.6" opacity="0.9"/>;
       })}
 
       {/* Jurisdictie = kleine gevulde cirkel in app-kleur */}
@@ -1402,12 +1402,12 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return items.map(function(a, idx) {
           const total = items.length;
           const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const spread = total <= 1 ? 0 : 12;
-          const cx = pt[0] + Math.cos(angle) * spread - 3;
-          const cy = pt[1] + Math.sin(angle) * spread - 3;
+          const spread = total <= 1 ? 0 : 10;
+          const cx = pt[0] + Math.cos(angle) * spread - 2;
+          const cy = pt[1] + Math.sin(angle) * spread - 2;
           return (
             <g key={a.id+"_j"}>
-              <circle cx={cx} cy={cy} r="5" fill={a.appKleur} stroke="white" strokeWidth="1.5"/>
+              <circle cx={cx} cy={cy} r="4" fill={a.appKleur} stroke="white" strokeWidth="1.2"/>
             </g>
           );
         });
@@ -1422,19 +1422,18 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return items.map(function(a, idx) {
           const total = items.length;
           const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const spread = total <= 1 ? 0 : 12;
-          const cx = pt[0] + Math.cos(angle) * spread + 4;
-          const cy = pt[1] + Math.sin(angle) * spread + 5;
+          const spread = total <= 1 ? 0 : 10;
+          const cx = pt[0] + Math.cos(angle) * spread + 3;
+          const cy = pt[1] + Math.sin(angle) * spread + 4;
           return (
             <g key={a.id+"_d"}>
-              <circle cx={cx} cy={cy} r="5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="2.2"/>
+              <circle cx={cx} cy={cy} r="4" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="2"/>
             </g>
           );
         });
       })}
 
-      {/* EU label op geprojecteerde positie */}
-      {(() => { const pt = proj([10, 55]); return pt ? <text x={pt[0]} y={pt[1]} textAnchor="middle" fontSize="8" fill="#1d4ed8" opacity="0.7" fontStyle="italic" fontFamily="Arial">EU</text> : null; })()}
+
     </svg>
   );
 }
@@ -5949,7 +5948,7 @@ ${(function(){
                 <div className="px-4 pt-3 pb-1 flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Geopolitieke positie — applicatielandschap</h3>
-                    <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>Jurisdictie leverancier (A1) en datalocatie servers (A3) per regio</p>
+                    <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>Jurisdictie leverancier en datalocatie servers per regio</p>
                   </div>
                 </div>
 
@@ -5972,13 +5971,13 @@ ${(function(){
                         <svg width="10" height="10" style={{flexShrink:0}}>
                           <circle cx="5" cy="5" r="4.5" fill="#6b7280"/>
                         </svg>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie (A1)</span>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie leverancier</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <svg width="10" height="10" style={{flexShrink:0}}>
                           <circle cx="5" cy="5" r="3.5" fill="white" stroke="#6b7280" strokeWidth="2"/>
                         </svg>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Ring = datalocatie (A3)</span>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Ring = datalocatie servers</span>
                       </div>
                     </div>
                   </div>
@@ -5989,8 +5988,8 @@ ${(function(){
                       <thead>
                         <tr style={{ background:"#0C2340", color:"white" }}>
                           <th style={{ padding:"5px 8px", textAlign:"left", fontSize:10 }}>Regio</th>
-                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Jurisdictie (A1)</th>
-                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Datalocatie (A3)</th>
+                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Jurisdictie</th>
+                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Datalocatie</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -6065,7 +6064,7 @@ ${(function(){
                                     )}
                                     <span style={{ fontSize:10, color:"#0C2340", fontWeight:600 }}>{displayName(a)}</span>
                                     <span style={{ fontSize:9, color:a.appKleur, opacity:0.85 }}>
-                                      {isJuris && isData ? "A1+A3" : isJuris ? "A1" : "A3"}
+                                      {isJuris && isData ? "juris.+data" : isJuris ? "juris." : "data"}
                                     </span>
                                   </div>
                                 );
