@@ -1444,10 +1444,11 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
             // Projecteer vanuit lon/lat naar SVG-pixels
             const [px, py] = projection([rc.lon, rc.lat]);
             return items.map((a, idx) => {
-              const col  = idx % 4;
-              const row  = Math.floor(idx / 4);
-              const cx   = px + (col - 1.5) * 16;
-              const cy   = py + row * 18 - 10;
+              const totalItems = items.length;
+              const angle  = totalItems <= 1 ? 0 : (idx * 2 * Math.PI / totalItems) - Math.PI/2;
+              const radius = totalItems <= 1 ? 0 : Math.min(14 + totalItems * 3, 28);
+              const cx = px + Math.cos(angle) * radius;
+              const cy = py + Math.sin(angle) * radius - 8;
               const kleur = risicoKleur(a.score);
               const isH  = geoHoverId === a.id + "_j";
               return (
@@ -1471,10 +1472,11 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
             const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
             const [px, py] = projection([rc.lon, rc.lat]);
             return items.map((a, idx) => {
-              const col  = idx % 4;
-              const row  = Math.floor(idx / 4);
-              const cx   = px + (col - 1.5) * 16 + 8;
-              const cy   = py + row * 18 + 10;
+              const totalItems = items.length;
+              const angle  = totalItems <= 1 ? 0 : (idx * 2 * Math.PI / totalItems) - Math.PI/2;
+              const radius = totalItems <= 1 ? 0 : Math.min(14 + totalItems * 3, 28);
+              const cx = px + Math.cos(angle) * radius + 10;
+              const cy = py + Math.sin(angle) * radius + 14;
               const sz   = geoHoverId === a.id+"_d" ? 10 : 8;
               const kleur = risicoKleur(a.score);
               const isH  = geoHoverId === a.id+"_d";
@@ -1520,8 +1522,14 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
             );
           })()}
 
-          {/* EU label in Europa */}
-          <text x="490" y="175" textAnchor="middle" fontSize={9/transform.k} fill="#1d4ed8" opacity="0.8" fontStyle="italic">EU</text>
+          {/* EU label in Europa — geprojecteerde positie voor lon=10, lat=54 */}
+          {(() => {
+            const euPt = projection([10, 54]);
+            if (!euPt) return null;
+            return <text x={euPt[0]} y={euPt[1]}
+              textAnchor="middle" fontSize={10/transform.k} fill="#1d4ed8" opacity="0.85"
+              fontStyle="italic" fontWeight="600">EU</text>;
+          })()}
 
           </g>{/* einde zoom-g */}
           {/* Kaart legenda — buiten zoom */}
@@ -1539,8 +1547,6 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
               </g>
             ))}
           </g>
-
-          {/* EU label */}
 
         </svg>
       )}
