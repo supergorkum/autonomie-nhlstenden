@@ -1281,7 +1281,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 // ──────────────────────────────────────────────────────────────
 
 // ── MiniGeoKaart — compacte wereldkaart voor Portfolio-pagina ────────────────
-function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR }) {
+function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, displayName }) {
   const [worldData, setWorldData] = React.useState(null);
 
   React.useEffect(function() {
@@ -5912,7 +5912,7 @@ ${(function(){
                 <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
                   {/* Mini kaart */}
                   <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
-                    <MiniGeoKaart geoApps={geoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR}/>
+                    <MiniGeoKaart geoApps={geoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
                     {/* Legenda onder kaart */}
                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
                       {[["#16a34a","EU / EER"],["#ca8a04","VS (adequaat)"],["#ea580c","VS (risico)"],["#dc2626","Buiten EU"],["#9ca3af","Niet ingevuld"]].map(function([k,l]) {
