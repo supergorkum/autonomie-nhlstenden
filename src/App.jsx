@@ -1393,7 +1393,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return <path key={"eu_"+c.id} d={pathGen(c)} fill="#dbeafe" stroke="#93c5fd" strokeWidth="0.5" opacity="0.8"/>;
       })}
 
-      {/* Jurisdictie = kleine gevulde cirkel */}
+      {/* Jurisdictie = kleine gevulde cirkel in app-kleur */}
       {Object.entries(jurisPerRegio).map(function([regio, items]) {
         const ll = REGIO_LON_LAT[regio];
         if (!ll) return null;
@@ -1402,20 +1402,18 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return items.map(function(a, idx) {
           const total = items.length;
           const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const spread = total <= 1 ? 0 : 14;
-          const cx = pt[0] + Math.cos(angle) * spread - 4;
-          const cy = pt[1] + Math.sin(angle) * spread - 4;
-          const kleur = REGIO_KLEUR[regio];
+          const spread = total <= 1 ? 0 : 12;
+          const cx = pt[0] + Math.cos(angle) * spread - 3;
+          const cy = pt[1] + Math.sin(angle) * spread - 3;
           return (
             <g key={a.id+"_j"}>
-              {/* Gevulde cirkel = jurisdictie */}
-              <circle cx={cx} cy={cy} r="6" fill={kleur} stroke="white" strokeWidth="1.5"/>
+              <circle cx={cx} cy={cy} r="5" fill={a.appKleur} stroke="white" strokeWidth="1.5"/>
             </g>
           );
         });
       })}
 
-      {/* Datalocatie = ring (holle cirkel met dikke gekleurde rand) */}
+      {/* Datalocatie = ring in app-kleur */}
       {Object.entries(dataPerRegio).map(function([regio, items]) {
         const ll = REGIO_LON_LAT[regio];
         if (!ll) return null;
@@ -1424,14 +1422,12 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
         return items.map(function(a, idx) {
           const total = items.length;
           const angle = total <= 1 ? -Math.PI/2 : (idx * 2 * Math.PI / total) - Math.PI/2;
-          const spread = total <= 1 ? 0 : 14;
-          const cx = pt[0] + Math.cos(angle) * spread + 5;
-          const cy = pt[1] + Math.sin(angle) * spread + 6;
-          const kleur = REGIO_KLEUR[regio];
+          const spread = total <= 1 ? 0 : 12;
+          const cx = pt[0] + Math.cos(angle) * spread + 4;
+          const cy = pt[1] + Math.sin(angle) * spread + 5;
           return (
             <g key={a.id+"_d"}>
-              {/* Ring = datalocatie: transparant binnenste, gekleurde rand */}
-              <circle cx={cx} cy={cy} r="6" fill="white" fillOpacity="0.85" stroke={kleur} strokeWidth="2.5"/>
+              <circle cx={cx} cy={cy} r="5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="2.2"/>
             </g>
           );
         });
@@ -5887,8 +5883,14 @@ ${(function(){
 
           {/* ── Geopolitiek overzicht compact ── */}
           {apps.length > 0 && (() => {
+            // Vaste app-kleuren palette — elke app krijgt eigen kleur
+            const APP_PALETTE = [
+              "#6d28d9","#0891b2","#be185d","#15803d","#b45309",
+              "#1d4ed8","#dc2626","#7c3aed","#0f766e","#c2410c",
+            ];
+
             // Bouw geo-data op
-            const geoApps = apps.map(function(a) {
+            const geoApps = apps.map(function(a, i) {
               const a1 = a.scores["A1"] || 0;
               const a3 = a.scores["A3"] || 0;
               function regio(sc) {
@@ -5898,14 +5900,19 @@ ${(function(){
                 if (sc <= 4)  return "VS (risico)";
                 return "Buiten EU";
               }
-              function kleur(sc) {
+              function regioKleur(sc) {
                 if (sc <= 0)  return "#9ca3af";
                 if (sc <= 2)  return "#16a34a";
                 if (sc <= 3)  return "#ca8a04";
                 if (sc <= 4)  return "#ea580c";
                 return "#dc2626";
               }
-              return { ...a, a1, a3, jRegio: regio(a1), dRegio: regio(a3), jKleur: kleur(a1), dKleur: kleur(a3) };
+              const appKleur = APP_PALETTE[i % APP_PALETTE.length];
+              return { ...a, a1, a3,
+                jRegio: regio(a1), dRegio: regio(a3),
+                jKleur: regioKleur(a1), dKleur: regioKleur(a3),
+                appKleur
+              };
             });
 
             // Groepeer per regio
@@ -5952,19 +5959,26 @@ ${(function(){
                     <MiniGeoKaart geoApps={geoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
                     {/* Legenda onder kaart */}
                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                      {[["#16a34a","EU / EER"],["#ca8a04","VS (adequaat)"],["#ea580c","VS (risico)"],["#dc2626","Buiten EU"],["#9ca3af","Niet ingevuld"]].map(function([k,l]) {
-                        return <div key={l} className="flex items-center gap-1">
-                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
-                          <span style={{ fontSize:9, color:"#6b7280" }}>{l}</span>
-                        </div>;
+                      {/* App-kleur legenda */}
+                      {geoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
+                        return (
+                          <div key={a.id} className="flex items-center gap-1">
+                            <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background:a.appKleur }}/>
+                            <span style={{ fontSize:9, color:"#6b7280" }}>{displayName(a)}</span>
+                          </div>
+                        );
                       })}
-                      <div className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background:"#1A56A0", border:"1.5px solid white" }}/>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevulde cirkel = jurisdictie leverancier (A1)</span>
+                      <div className="flex items-center gap-1 mt-1">
+                        <svg width="10" height="10" style={{flexShrink:0}}>
+                          <circle cx="5" cy="5" r="4.5" fill="#6b7280"/>
+                        </svg>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Gevuld = jurisdictie (A1)</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background:"white", border:"2.5px solid #1A56A0" }}/>
-                        <span style={{ fontSize:9, color:"#6b7280" }}>Ring = datalocatie servers (A3)</span>
+                        <svg width="10" height="10" style={{flexShrink:0}}>
+                          <circle cx="5" cy="5" r="3.5" fill="white" stroke="#6b7280" strokeWidth="2"/>
+                        </svg>
+                        <span style={{ fontSize:9, color:"#6b7280" }}>Ring = datalocatie (A3)</span>
                       </div>
                     </div>
                   </div>
@@ -6032,10 +6046,25 @@ ${(function(){
                                 const isData  = a.dRegio === regio;
                                 return (
                                   <div key={a.id} className="flex items-center gap-1 px-2 py-1 rounded"
-                                    style={{ background:k+"18", border:"1.5px solid "+k+"44" }}>
-                                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k, opacity: isJuris ? 1 : 0.4 }}/>
+                                    style={{ background:a.appKleur+"14", border:"1.5px solid "+a.appKleur+"55" }}>
+                                    {/* Gevulde cirkel (jurisdictie) of ring (datalocatie) als mini-icoon */}
+                                    {isJuris && (
+                                      <svg width="10" height="10" style={{flexShrink:0}}>
+                                        <circle cx="5" cy="5" r="4.5" fill={a.appKleur}/>
+                                      </svg>
+                                    )}
+                                    {isData && !isJuris && (
+                                      <svg width="10" height="10" style={{flexShrink:0}}>
+                                        <circle cx="5" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="2"/>
+                                      </svg>
+                                    )}
+                                    {isJuris && isData && (
+                                      <svg width="10" height="10" style={{flexShrink:0, marginLeft:2}}>
+                                        <circle cx="5" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="2"/>
+                                      </svg>
+                                    )}
                                     <span style={{ fontSize:10, color:"#0C2340", fontWeight:600 }}>{displayName(a)}</span>
-                                    <span style={{ fontSize:9, color:k, opacity:0.8 }}>
+                                    <span style={{ fontSize:9, color:a.appKleur, opacity:0.85 }}>
                                       {isJuris && isData ? "A1+A3" : isJuris ? "A1" : "A3"}
                                     </span>
                                   </div>
