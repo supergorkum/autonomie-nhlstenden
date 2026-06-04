@@ -3596,6 +3596,424 @@ ${(function(){
     );
   }
 
+  // ── GEOKAART ───────────────────────────────────────────────────────────────
+  function GeoKaart() {
+    const [hoverId, setHoverId] = React.useState(null);
+    const [tooltip, setTooltip] = React.useState(null);
+
+    // ── Regio-mapping op basis van A1 (jurisdictie) en A3 (datalocatie) ──────
+    // Kaartcoördinaten zijn percentages van SVG viewBox (0 0 1000 500)
+    const REGIO_COORDS = {
+      // Score 1-2: EU/EER regio's
+      "EU-West":      { x: 480, y: 155, label: "EU West",          vlag: "🇪🇺" },
+      "EU-Noord":     { x: 490, y: 120, label: "EU Noord",         vlag: "🇪🇺" },
+      "EU-Oost":      { x: 520, y: 150, label: "EU Oost",          vlag: "🇪🇺" },
+      "NL":           { x: 474, y: 138, label: "Nederland",        vlag: "🇳🇱" },
+      // Score 3: VS (adequaatheidsbesluit)
+      "VS-Oost":      { x: 225, y: 160, label: "VS Oost",          vlag: "🇺🇸" },
+      "VS-West":      { x: 150, y: 165, label: "VS West",          vlag: "🇺🇸" },
+      "VS":           { x: 190, y: 163, label: "Verenigde Staten", vlag: "🇺🇸" },
+      // Score 4-5: overige regio's
+      "Azië":         { x: 760, y: 190, label: "Azië",             vlag: "🌏" },
+      "China":        { x: 770, y: 180, label: "China",            vlag: "🇨🇳" },
+      "VK":           { x: 460, y: 133, label: "Verenigd Koninkrijk", vlag: "🇬🇧" },
+      "Australië":    { x: 820, y: 360, label: "Australië",        vlag: "🇦🇺" },
+      "Onbekend":     { x: 500, y: 250, label: "Onbekend",         vlag: "❓" },
+    };
+
+    // ── Leid regio af uit A1 en A3 scores ────────────────────────────────────
+    function regioVanScore(a1, a3) {
+      // Jurisdictie regio (A1)
+      let jurisRegio = "Onbekend";
+      if (a1 <= 2) jurisRegio = "EU-West";
+      else if (a1 === 3) jurisRegio = "VS";
+      else if (a1 === 4) jurisRegio = "VS";
+      else if (a1 >= 5) jurisRegio = "VS";
+
+      // Data regio (A3)
+      let dataRegio = "Onbekend";
+      if (a3 <= 2) dataRegio = "EU-West";
+      else if (a3 === 3) dataRegio = "EU-West";
+      else if (a3 === 4) dataRegio = "VS";
+      else if (a3 >= 5) dataRegio = "VS";
+
+      return { jurisRegio, dataRegio };
+    }
+
+    // ── Bouw stippendata op uit apps ─────────────────────────────────────────
+    const scored = apps.map(a => {
+      const a1 = a.scores["A1"] || 0;
+      const a3 = a.scores["A3"] || 0;
+      const sc = calcScores(a.scores);
+      const { jurisRegio, dataRegio } = regioVanScore(a1, a3);
+      return { ...a, a1, a3, sc, jurisRegio, dataRegio };
+    }).filter(a => a.a1 > 0 || a.a3 > 0);
+
+    const incomplete = apps.filter(a => !a.scores["A1"] && !a.scores["A3"]);
+
+    // ── Kleur op basis van jurisdictie-score ──────────────────────────────────
+    function risicoKleur(score) {
+      if (!score) return "#9ca3af";
+      if (score <= 2) return "#16a34a";
+      if (score === 3) return "#ca8a04";
+      if (score === 4) return "#ea580c";
+      return "#dc2626";
+    }
+
+    // ── Groepeer stippen op locatie voor overlap ──────────────────────────────
+    function groupByRegio(type) {
+      const grouped = {};
+      scored.forEach(a => {
+        const regio = type === "juris" ? a.jurisRegio : a.dataRegio;
+        const score = type === "juris" ? a.a1 : a.a3;
+        if (!grouped[regio]) grouped[regio] = [];
+        grouped[regio].push({ ...a, score });
+      });
+      return grouped;
+    }
+
+    const jurisGroups = groupByRegio("juris");
+    const dataGroups  = groupByRegio("data");
+
+    const vandaag = new Date().toLocaleDateString("nl-NL", { day:"numeric", month:"long", year:"numeric" });
+
+    // ── SVG Wereldkaart (vereenvoudigd) ──────────────────────────────────────
+    // Continenten als SVG paden (sterk vereenvoudigd maar herkenbaar)
+    const continenten = [
+      // Noord-Amerika
+      { name:"Noord-Amerika", d:"M 100,100 L 280,95 L 300,130 L 290,200 L 250,230 L 200,240 L 160,220 L 120,200 L 90,160 Z", fill:"#e2e8f0" },
+      // Zuid-Amerika
+      { name:"Zuid-Amerika", d:"M 200,250 L 270,245 L 295,280 L 290,360 L 260,400 L 220,410 L 190,380 L 175,320 L 185,280 Z", fill:"#e2e8f0" },
+      // Europa
+      { name:"Europa", d:"M 440,95 L 540,90 L 555,120 L 545,160 L 510,170 L 470,165 L 450,145 L 440,120 Z", fill:"#dbeafe" },
+      // Afrika
+      { name:"Afrika", d:"M 450,175 L 540,170 L 565,200 L 570,280 L 555,360 L 520,400 L 490,405 L 460,380 L 445,310 L 440,240 L 445,200 Z", fill:"#e2e8f0" },
+      // Rusland/Noord-Azië
+      { name:"Rusland", d:"M 550,80 L 780,70 L 800,110 L 760,130 L 650,135 L 570,130 L 550,110 Z", fill:"#e2e8f0" },
+      // Azië (midden/oost)
+      { name:"Azië", d:"M 570,130 L 760,130 L 810,160 L 820,210 L 800,240 L 760,250 L 700,245 L 650,230 L 610,210 L 575,190 L 565,165 Z", fill:"#e2e8f0" },
+      // India
+      { name:"India", d:"M 620,210 L 680,205 L 690,240 L 670,295 L 645,305 L 620,270 L 615,235 Z", fill:"#e2e8f0" },
+      // Australië
+      { name:"Australië", d:"M 760,320 L 870,315 L 890,345 L 880,400 L 840,420 L 790,415 L 760,390 L 745,360 Z", fill:"#e2e8f0" },
+      // Groenland
+      { name:"Groenland", d:"M 360,60 L 440,55 L 445,80 L 430,100 L 390,105 L 360,90 Z", fill:"#e2e8f0" },
+      // Japan
+      { name:"Japan", d:"M 820,145 L 840,140 L 845,160 L 835,175 L 820,170 L 815,155 Z", fill:"#e2e8f0" },
+    ];
+
+    return (
+      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+        <div className="p-5 max-w-5xl mx-auto">
+
+          {/* Header */}
+          <div className="rounded p-5 mb-5 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
+                  <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
+                </div>
+                <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+                <div>
+                  <h1 className="font-bold" style={{ fontSize:17 }}>Geopolitiek Landschap</h1>
+                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Jurisdictie en datalocatie van het applicatieportfolio · {vandaag}</p>
+                </div>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
+                  {scored.length} van {apps.length} apps in kaart
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Uitleg */}
+          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Hoe lees je deze kaart?</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  De kaart toont twee geopolitieke posities per applicatie, gebaseerd op de DAAF-scores
+                  A1 (jurisdictie leverancier) en A3 (hosting en datalocatie):
+                </p>
+                <div className="space-y-2">
+                  <div className="flex gap-2 items-start">
+                    <div className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center"
+                      style={{ background:"#1A56A0", border:"2.5px solid white", boxShadow:"0 0 0 2px #1A56A0" }}>
+                    </div>
+                    <div className="text-xs" style={{ color:"#374151" }}>
+                      <strong style={{ color:"#1A56A0" }}>Gevulde cirkel</strong> = Jurisdictie leverancier (A1): onder welk rechtssysteem valt de leverancier? Dit bepaalt wie bij de data kan bij een juridische vordering.
+                    </div>
+                  </div>
+                  <div className="flex gap-2 items-start">
+                    <div className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
+                      style={{ background:"white", border:"2.5px solid #1A56A0" }}>
+                    </div>
+                    <div className="text-xs" style={{ color:"#374151" }}>
+                      <strong style={{ color:"#1A56A0" }}>Omrand vierkant</strong> = Datalocatie (A3): waar staat de data fysiek opgeslagen? Dit is de serverlocatie inclusief back-ups.
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-semibold mb-2" style={{ color:"#374151" }}>Kleurschaal (beide dimensies):</p>
+                <div className="space-y-1.5">
+                  {[
+                    { score:"1–2", label:"EU / EER", kleur:"#16a34a", bg:"#dcfce7", tekst:"Volledig Europese jurisdictie en/of datalocatie. Laagste risico." },
+                    { score:"3",   label:"Adequaat + risico", kleur:"#ca8a04", bg:"#fef9c3", tekst:"VS met adequaatheidsbesluit (DPF). CLOUD Act blijft van toepassing." },
+                    { score:"4",   label:"SCCs, geen adequaat", kleur:"#ea580c", bg:"#ffedd5", tekst:"Contractuele waarborgen, geen adequaatheidsbesluit. Verhoogd risico." },
+                    { score:"5",   label:"Geen waarborgen", kleur:"#dc2626", bg:"#fee2e2", tekst:"Buiten EU, geen waarborgen of onbekende locatie." },
+                    { score:"0",   label:"Niet ingevuld", kleur:"#9ca3af", bg:"#f3f4f6", tekst:"Score nog niet ingevuld in het assessment." },
+                  ].map(r => (
+                    <div key={r.score} className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:r.kleur }}/>
+                      <span className="text-xs px-1.5 py-0.5 rounded font-semibold flex-shrink-0"
+                        style={{ background:r.bg, color:r.kleur, minWidth:16, textAlign:"center" }}>{r.score}</span>
+                      <span className="text-xs font-semibold flex-shrink-0" style={{ color:r.kleur }}>{r.label}</span>
+                      <span className="text-xs" style={{ color:"#9ca3af" }}>{r.tekst}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Wereld SVG kaart ── */}
+          {apps.length === 0 ? (
+            <div className="rounded p-10 text-center" style={{ background:"#fff", border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
+              Nog geen applicaties. Voeg applicaties toe en vul de A1 en A3 scores in om ze op de kaart te zien.
+            </div>
+          ) : (
+            <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7", overflow:"hidden" }}>
+              <div className="px-4 pt-4 pb-1 flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
+                  <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
+                    Gebaseerd op DAAF-scores A1 (jurisdictie) en A3 (datalocatie) · hover over een stip voor details
+                  </p>
+                </div>
+              </div>
+
+              <svg viewBox="0 0 1000 500" style={{ width:"100%", height:"auto", display:"block" }}
+                xmlns="http://www.w3.org/2000/svg">
+
+                {/* Oceaan achtergrond */}
+                <rect width="1000" height="500" fill="#bfdbfe" rx="6"/>
+
+                {/* Continenten */}
+                {continenten.map(c => (
+                  <path key={c.name} d={c.d} fill={c.fill} stroke="#94a3b8" strokeWidth="0.8" opacity="0.9"/>
+                ))}
+
+                {/* EU highlight */}
+                <path d="M 440,95 L 540,90 L 555,120 L 545,160 L 510,170 L 470,165 L 450,145 L 440,120 Z"
+                  fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.2" opacity="0.6"/>
+
+                {/* Lat/lon rasterlijnen subtiel */}
+                {[100,200,300,400].map(y => (
+                  <line key={y} x1="0" y1={y} x2="1000" y2={y} stroke="#94a3b8" strokeWidth="0.3" opacity="0.4"/>
+                ))}
+                {[200,400,600,800].map(x => (
+                  <line key={x} x1={x} y1="0" x2={x} y2="500" stroke="#94a3b8" strokeWidth="0.3" opacity="0.4"/>
+                ))}
+
+                {/* Equator lijn */}
+                <line x1="0" y1="250" x2="1000" y2="250" stroke="#94a3b8" strokeWidth="0.6" strokeDasharray="8,4" opacity="0.5"/>
+                <text x="8" y="247" fontSize="8" fill="#94a3b8" opacity="0.7">Evenaar</text>
+
+                {/* ── Jurisdictie stippen (gevuld, cirkel) ── */}
+                {Object.entries(jurisGroups).map(([regio, items]) => {
+                  const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
+                  return items.map((a, idx) => {
+                    const offset = idx * 18;
+                    const cx = rc.x + (idx % 3) * 14 - 14;
+                    const cy = rc.y - Math.floor(idx / 3) * 14;
+                    const kleur = risicoKleur(a.score);
+                    const isHover = hoverId === a.id + "_j";
+                    return (
+                      <g key={a.id + "_j"}
+                        onMouseEnter={e => { setHoverId(a.id + "_j"); setTooltip({ x: cx, y: cy, app: a, type:"juris" }); }}
+                        onMouseLeave={() => { setHoverId(null); setTooltip(null); }}
+                        style={{ cursor:"pointer" }}>
+                        <circle cx={cx} cy={cy} r={isHover ? 10 : 8}
+                          fill={kleur} stroke="white" strokeWidth="1.5" opacity="0.92"/>
+                        {isHover && <circle cx={cx} cy={cy} r="13" fill="none" stroke={kleur} strokeWidth="1.5" opacity="0.5"/>}
+                        <text x={cx} y={cy + 3} textAnchor="middle" fontSize="7" fill="white" fontWeight="bold"
+                          style={{ pointerEvents:"none" }}>
+                          {displayName(a).substring(0,3).toUpperCase()}
+                        </text>
+                      </g>
+                    );
+                  });
+                })}
+
+                {/* ── Data-locatie stippen (omrand, vierkant) ── */}
+                {Object.entries(dataGroups).map(([regio, items]) => {
+                  const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
+                  return items.map((a, idx) => {
+                    const cx = rc.x + (idx % 3) * 14 - 14 + 6;
+                    const cy = rc.y - Math.floor(idx / 3) * 14 + 18;
+                    const kleur = risicoKleur(a.score);
+                    const isHover = hoverId === a.id + "_d";
+                    const sz = isHover ? 10 : 8;
+                    return (
+                      <g key={a.id + "_d"}
+                        onMouseEnter={e => { setHoverId(a.id + "_d"); setTooltip({ x: cx, y: cy, app: a, type:"data" }); }}
+                        onMouseLeave={() => { setHoverId(null); setTooltip(null); }}
+                        style={{ cursor:"pointer" }}>
+                        <rect x={cx-sz} y={cy-sz} width={sz*2} height={sz*2}
+                          fill="white" stroke={kleur} strokeWidth="2.5" rx="2" opacity="0.95"/>
+                        {isHover && <rect x={cx-14} y={cy-14} width="28" height="28" fill="none" stroke={kleur} strokeWidth="1.5" rx="3" opacity="0.5"/>}
+                        <text x={cx} y={cy + 3} textAnchor="middle" fontSize="6" fill={kleur} fontWeight="bold"
+                          style={{ pointerEvents:"none" }}>
+                          {displayName(a).substring(0,3).toUpperCase()}
+                        </text>
+                      </g>
+                    );
+                  });
+                })}
+
+                {/* Regio labels */}
+                {[
+                  { x:190, y:190, label:"Noord-Amerika" },
+                  { x:480, y:185, label:"Europa" },
+                  { x:700, y:270, label:"Azië" },
+                  { x:230, y:380, label:"Zuid-Amerika" },
+                  { x:500, y:360, label:"Afrika" },
+                  { x:815, y:370, label:"Australië" },
+                ].map(l => (
+                  <text key={l.label} x={l.x} y={l.y} textAnchor="middle" fontSize="10"
+                    fill="#64748b" opacity="0.7" fontStyle="italic">{l.label}</text>
+                ))}
+
+                {/* ── Tooltip ── */}
+                {tooltip && (() => {
+                  const tx = Math.min(tooltip.x + 15, 850);
+                  const ty = Math.max(tooltip.y - 60, 10);
+                  const a1lbl = ["","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
+                  const a3lbl = ["","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
+                  const isJuris = tooltip.type === "juris";
+                  const score = isJuris ? tooltip.app.a1 : tooltip.app.a3;
+                  const lbl = isJuris ? (a1lbl[score] || "–") : (a3lbl[score] || "–");
+                  const kleur = risicoKleur(score);
+                  return (
+                    <g>
+                      <rect x={tx} y={ty} width="220" height="70" rx="4" fill="white"
+                        stroke={kleur} strokeWidth="1.5" style={{ filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.15))" }}/>
+                      <text x={tx+10} y={ty+16} fontSize="10" fontWeight="bold" fill="#0C2340">{displayName(tooltip.app)}</text>
+                      {tooltip.app.supplier && <text x={tx+10} y={ty+28} fontSize="9" fill="#9ca3af">{tooltip.app.supplier}</text>}
+                      <text x={tx+10} y={ty+43} fontSize="9" fill="#374151">
+                        {isJuris ? "Jurisdictie (A1):" : "Datalocatie (A3):"} Score {score || "–"}
+                      </text>
+                      <text x={tx+10} y={ty+57} fontSize="9" fill={kleur} fontWeight="600">{lbl}</text>
+                    </g>
+                  );
+                })()}
+
+                {/* Legenda kaart */}
+                <g transform="translate(720, 420)">
+                  <rect x="0" y="0" width="270" height="62" rx="4" fill="white" opacity="0.92" stroke="#e2e8f0" strokeWidth="1"/>
+                  <text x="10" y="14" fontSize="9" fontWeight="bold" fill="#0C2340">Legenda</text>
+                  <circle cx="20" cy="28" r="7" fill="#1A56A0" stroke="white" strokeWidth="1"/>
+                  <text x="32" y="32" fontSize="9" fill="#374151">Gevuld = Jurisdictie leverancier (A1)</text>
+                  <rect x="13" y="42" width="14" height="14" fill="white" stroke="#1A56A0" strokeWidth="2" rx="1"/>
+                  <text x="32" y="52" fontSize="9" fill="#374151">Omrand = Datalocatie servers (A3)</text>
+                  <circle cx="175" cy="28" r="6" fill="#16a34a" stroke="white" strokeWidth="1"/>
+                  <text x="185" y="32" fontSize="9" fill="#374151">EU/EER</text>
+                  <circle cx="215" cy="28" r="6" fill="#ca8a04" stroke="white" strokeWidth="1"/>
+                  <text x="225" y="32" fontSize="9" fill="#374151">VS+DPF</text>
+                  <circle cx="175" cy="50" r="6" fill="#ea580c" stroke="white" strokeWidth="1"/>
+                  <text x="185" y="54" fontSize="9" fill="#374151">Risico</text>
+                  <circle cx="215" cy="50" r="6" fill="#dc2626" stroke="white" strokeWidth="1"/>
+                  <text x="225" y="54" fontSize="9" fill="#374151">Kritiek</text>
+                </g>
+              </svg>
+            </div>
+          )}
+
+          {/* ── Tabel onder de kaart ── */}
+          {scored.length > 0 && (
+            <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Overzicht per applicatie — jurisdictie en datalocatie</h3>
+              <div className="overflow-x-auto">
+                <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+                  <thead>
+                    <tr style={{ background:"#0C2340", color:"white" }}>
+                      {["Applicatie","Leverancier","A1 Jurisdictie","A3 Datalocatie","Risico-oordeel"].map(h => (
+                        <th key={h} style={{ padding:"7px 10px", textAlign:"left", fontSize:10, fontWeight:600 }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...apps].sort((a,b) => {
+                      const aMax = Math.max(a.scores["A1"]||0, a.scores["A3"]||0);
+                      const bMax = Math.max(b.scores["A1"]||0, b.scores["A3"]||0);
+                      return bMax - aMax;
+                    }).map((a, i) => {
+                      const a1 = a.scores["A1"] || 0;
+                      const a3 = a.scores["A3"] || 0;
+                      const a1lbl = ["Niet ingevuld","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
+                      const a3lbl = ["Niet ingevuld","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
+                      const maxScore = Math.max(a1, a3);
+                      const oordeel = !maxScore ? { t:"Niet beoordeeld", fg:"#9ca3af", bg:"#f3f4f6" }
+                        : maxScore <= 2 ? { t:"EU-conform", fg:"#15803d", bg:"#dcfce7" }
+                        : maxScore === 3 ? { t:"Acceptabel", fg:"#a16207", bg:"#fef9c3" }
+                        : maxScore === 4 ? { t:"Aandacht", fg:"#c2410c", bg:"#ffedd5" }
+                        : { t:"Kritiek", fg:"#b91c1c", bg:"#fee2e2" };
+                      return (
+                        <tr key={a.id} style={{ background: i%2===0 ? "#f8fafc" : "white", borderBottom:"1px solid #f1f5f9" }}>
+                          <td style={{ padding:"8px 10px", fontWeight:600, color:"#0C2340" }}>{displayName(a)}</td>
+                          <td style={{ padding:"8px 10px", color:"#6b7280" }}>{a.supplier || "–"}</td>
+                          <td style={{ padding:"8px 10px" }}>
+                            <div className="flex items-center gap-1.5">
+                              <span style={{ display:"inline-block", width:10, height:10, borderRadius:"50%",
+                                background:risicoKleur(a1), flexShrink:0 }}/>
+                              <span style={{ color:"#374151" }}>{a1lbl[a1] || "–"}</span>
+                              {a1 > 0 && <span style={{ fontSize:10, fontWeight:700, color:risicoKleur(a1) }}>({a1}/5)</span>}
+                            </div>
+                          </td>
+                          <td style={{ padding:"8px 10px" }}>
+                            <div className="flex items-center gap-1.5">
+                              <span style={{ display:"inline-block", width:10, height:10, borderRadius:2,
+                                background:"white", border:`2px solid ${risicoKleur(a3)}`, flexShrink:0 }}/>
+                              <span style={{ color:"#374151" }}>{a3lbl[a3] || "–"}</span>
+                              {a3 > 0 && <span style={{ fontSize:10, fontWeight:700, color:risicoKleur(a3) }}>({a3}/5)</span>}
+                            </div>
+                          </td>
+                          <td style={{ padding:"8px 10px" }}>
+                            <span style={{ fontSize:10, fontWeight:600, padding:"2px 8px", borderRadius:3,
+                              background:oordeel.bg, color:oordeel.fg }}>{oordeel.t}</span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ── Niet ingevuld melding ── */}
+          {incomplete.length > 0 && (
+            <div className="rounded p-3 mb-4 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
+              <strong>{incomplete.length} applicatie{incomplete.length !== 1 ? "s" : ""} nog niet beoordeeld op locatie:</strong>{" "}
+              {incomplete.map(a => displayName(a)).join(", ")}. Vul scores A1 en A3 in via het assessment.
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+            <p className="text-xs" style={{ color:"#9ca3af" }}>
+              NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION} · {vandaag}
+              <br/>Gebaseerd op DAAF-indicatoren A1 (jurisdictie leverancier) en A3 (hosting en datalocatie)
+            </p>
+          </div>
+
+        </div>
+      </div>
+    );
+  }
+
   function Compare() {
     const minCompare = 2;
     const visibleCompare = apps.filter(a => !compareHidden.has(a.id));
@@ -5689,6 +6107,7 @@ ${(function(){
             { k:"apps",      label:"Applicaties" },
             ...(selApp ? [{ k:"assess", label:displayName(selApp).substring(0,20) }] : []),
             { k:"compare",   label:"Vergelijking" },
+            { k:"geokaart",  label:"🌍 Geopolitiek" },
             { k:"bestuur",   label:"📊 Portfolio" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
             { k:"transparantie", label:"🔍 Over dit product" },
@@ -5711,6 +6130,7 @@ ${(function(){
         {view === "apps"      && AppsList()}
         {view === "assess"    && Assess()}
         {view === "compare"   && Compare()}
+        {view === "geokaart"  && GeoKaart()}
         {view === "bestuur"   && Bestuur()}
         {view === "about"     && About()}
         {view === "transparantie" && Transparantie()}
