@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import * as d3 from "d3";
 import * as XLSX from "xlsx";
 import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -1279,7 +1280,234 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 // APP
 // ──────────────────────────────────────────────────────────────
 
-export default function App() {
+export default // ── WorldMapD3 — echte wereldkaart via D3 Natural Earth projectie ─────────────
+function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId,
+                      geoTooltip, setGeoTooltip, risicoKleur, displayName, REGIO_COORDS }) {
+  const [worldData, setWorldData] = React.useState(null);
+  const [loading,   setLoading]   = React.useState(true);
+  const W = 960, H = 500;
+
+  React.useEffect(() => {
+    // Natural Earth 110m landen via CDN
+    fetch("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json")
+      .then(r => r.json())
+      .then(topo => {
+        // Converteer TopoJSON naar GeoJSON features
+        const countries = d3.geoPath();
+        setWorldData(topo);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const projection = React.useMemo(() =>
+    d3.geoNaturalEarth1()
+      .scale(153)
+      .translate([W / 2, H / 2]),
+    []
+  );
+
+  const pathGen = React.useMemo(() => d3.geoPath().projection(projection), [projection]);
+
+  const countries = React.useMemo(() => {
+    if (!worldData) return [];
+    try {
+      // Gebruik d3's ingebouwde topojson support via dynamic import
+      // world-atlas levert TopoJSON — we laden topojson-client dynamisch
+      if (typeof d3.geoPath !== "undefined" && worldData._converted) {
+        return worldData._converted;
+      }
+      // Inline TopoJSON decode (vereenvoudigd voor countries-110m)
+      // Gebruik fetch met een pre-geconverteerde GeoJSON als fallback
+      const obj = worldData.objects.countries;
+      if (!obj) return [];
+      // Bouw arcs op
+      const arcs = worldData.arcs;
+      function decodeArc(i) {
+        let arc = arcs[i < 0 ? ~i : i];
+        let pts = arc.map(([dx,dy]) => [dx,dy]);
+        // Delta decode
+        let x=0,y=0;
+        pts = arc.map(p => { x+=p[0]; y+=p[1]; return [x,y]; });
+        if (i < 0) pts.reverse();
+        return pts;
+      }
+      function toRing(ring) {
+        return ring.flatMap(i => decodeArc(i));
+      }
+      const scale = worldData.transform?.scale || [1,1];
+      const translate = worldData.transform?.translate || [0,0];
+      function toCoord([x,y]) {
+        return [x * scale[0] + translate[0], y * scale[1] + translate[1]];
+      }
+      const features = obj.geometries.map(g => {
+        let coords;
+        if (g.type === "Polygon") {
+          coords = [toRing(g.arcs[0]).map(toCoord)];
+        } else if (g.type === "MultiPolygon") {
+          coords = g.arcs.map(poly => [toRing(poly[0]).map(toCoord)]);
+        } else return null;
+        return {
+          type: "Feature",
+          id: g.id,
+          properties: g.properties || {},
+          geometry: { type: g.type, coordinates: coords }
+        };
+      }).filter(Boolean);
+      return features;
+    } catch(e) { console.error(e); return []; }
+  }, [worldData]);
+
+  const graticule = React.useMemo(() => d3.geoGraticule()(), []);
+  const sphere    = { type: "Sphere" };
+
+  // EU landen ISO codes voor highlight
+  const EU_CODES = new Set([
+    40,56,100,191,196,203,208,233,246,250,276,300,
+    348,372,380,428,440,442,470,528,616,620,642,703,
+    705,724,752,826,31,8
+  ]);
+
+  // Kleur per land
+  function landKleur(id) {
+    const numId = parseInt(id);
+    if (EU_CODES.has(numId)) return "#dbeafe";
+    return "#e5e9f0";
+  }
+
+  const a1lbl = ["","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
+  const a3lbl = ["","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
+
+  return (
+    <div style={{ position:"relative", background:"#bfdbfe" }}>
+      {loading && (
+        <div style={{ padding:40, textAlign:"center", color:"#9ca3af", fontSize:12 }}>
+          Kaart laden...
+        </div>
+      )}
+      {!loading && (
+        <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto", display:"block" }}>
+          {/* Oceaan */}
+          <path d={pathGen(sphere)} fill="#bfdbfe"/>
+          {/* Graticule */}
+          <path d={pathGen(graticule)} fill="none" stroke="#94a3b8" strokeWidth="0.3" opacity="0.5"/>
+          {/* Landen */}
+          {countries.map(c => (
+            <path key={c.id} d={pathGen(c)}
+              fill={landKleur(c.id)}
+              stroke="#94a3b8" strokeWidth="0.4"
+              opacity="0.95"/>
+          ))}
+          {/* EU outline extra */}
+          {countries.filter(c => EU_CODES.has(parseInt(c.id))).map(c => (
+            <path key={"eu_"+c.id} d={pathGen(c)}
+              fill="#dbeafe" stroke="#3b82f6" strokeWidth="0.6" opacity="0.7"/>
+          ))}
+
+          {/* ── Jurisdictie stippen (gevulde cirkel) ── */}
+          {Object.entries(jurisGroups).map(([regio, items]) => {
+            const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
+            // Projecteer vanuit lon/lat naar SVG-pixels
+            const [px, py] = projection([rc.lon, rc.lat]);
+            return items.map((a, idx) => {
+              const col  = idx % 4;
+              const row  = Math.floor(idx / 4);
+              const cx   = px + (col - 1.5) * 16;
+              const cy   = py + row * 18 - 10;
+              const kleur = risicoKleur(a.score);
+              const isH  = geoHoverId === a.id + "_j";
+              return (
+                <g key={a.id+"_j"} style={{ cursor:"pointer" }}
+                  onMouseEnter={() => { setGeoHoverId(a.id+"_j"); setGeoTooltip({ cx, cy, a, type:"juris" }); }}
+                  onMouseLeave={() => { setGeoHoverId(null); setGeoTooltip(null); }}>
+                  <circle cx={cx} cy={cy} r={isH ? 11 : 9}
+                    fill={kleur} stroke="white" strokeWidth="2" opacity="0.93"/>
+                  {isH && <circle cx={cx} cy={cy} r="14" fill="none" stroke={kleur} strokeWidth="1.5" opacity="0.4"/>}
+                  <text x={cx} y={cy+3.5} textAnchor="middle" fontSize="7" fill="white" fontWeight="700"
+                    style={{ pointerEvents:"none" }}>
+                    {displayName(a).substring(0,3).toUpperCase()}
+                  </text>
+                </g>
+              );
+            });
+          })}
+
+          {/* ── Data-locatie stippen (omrand vierkant) ── */}
+          {Object.entries(dataGroups).map(([regio, items]) => {
+            const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
+            const [px, py] = projection([rc.lon, rc.lat]);
+            return items.map((a, idx) => {
+              const col  = idx % 4;
+              const row  = Math.floor(idx / 4);
+              const cx   = px + (col - 1.5) * 16 + 8;
+              const cy   = py + row * 18 + 10;
+              const sz   = geoHoverId === a.id+"_d" ? 10 : 8;
+              const kleur = risicoKleur(a.score);
+              const isH  = geoHoverId === a.id+"_d";
+              return (
+                <g key={a.id+"_d"} style={{ cursor:"pointer" }}
+                  onMouseEnter={() => { setGeoHoverId(a.id+"_d"); setGeoTooltip({ cx, cy, a, type:"data" }); }}
+                  onMouseLeave={() => { setGeoHoverId(null); setGeoTooltip(null); }}>
+                  <rect x={cx-sz} y={cy-sz} width={sz*2} height={sz*2}
+                    fill="white" stroke={kleur} strokeWidth="2.5" rx="2" opacity="0.95"/>
+                  {isH && <rect x={cx-13} y={cy-13} width="26" height="26" fill="none" stroke={kleur} strokeWidth="1.5" rx="3" opacity="0.4"/>}
+                  <text x={cx} y={cy+3} textAnchor="middle" fontSize="6" fill={kleur} fontWeight="700"
+                    style={{ pointerEvents:"none" }}>
+                    {displayName(a).substring(0,3).toUpperCase()}
+                  </text>
+                </g>
+              );
+            });
+          })}
+
+          {/* ── Tooltip ── */}
+          {geoTooltip && (() => {
+            const { cx, cy, a, type } = geoTooltip;
+            const tx  = Math.min(cx + 14, W - 240);
+            const ty  = Math.max(cy - 75, 5);
+            const score = type === "juris" ? a.a1 : a.a3;
+            const lbl   = type === "juris" ? (a1lbl[score]||"–") : (a3lbl[score]||"–");
+            const kleur = risicoKleur(score);
+            return (
+              <g style={{ pointerEvents:"none" }}>
+                <rect x={tx} y={ty} width="230" height="72" rx="5"
+                  fill="white" stroke={kleur} strokeWidth="1.5"
+                  style={{ filter:"drop-shadow(0 3px 8px rgba(0,0,0,0.18))" }}/>
+                <text x={tx+10} y={ty+17} fontSize="11" fontWeight="700" fill="#0C2340">{displayName(a)}</text>
+                {a.supplier && <text x={tx+10} y={ty+30} fontSize="9" fill="#9ca3af">{a.supplier}</text>}
+                <text x={tx+10} y={ty+46} fontSize="9" fill="#374151">
+                  {type === "juris" ? "Jurisdictie leverancier (A1)" : "Datalocatie servers (A3)"}: {score||"–"}/5
+                </text>
+                <text x={tx+10} y={ty+60} fontSize="10" fill={kleur} fontWeight="600">{lbl}</text>
+              </g>
+            );
+          })()}
+
+          {/* Kaart legenda */}
+          <g transform={`translate(${W-270}, ${H-72})`}>
+            <rect width="262" height="66" rx="4" fill="white" opacity="0.93" stroke="#e2e8f0" strokeWidth="1"/>
+            <text x="10" y="15" fontSize="9" fontWeight="700" fill="#0C2340">Legenda</text>
+            <circle cx="18" cy="29" r="7" fill="#1A56A0" stroke="white" strokeWidth="1.5"/>
+            <text x="30" y="33" fontSize="9" fill="#374151">Gevuld cirkel = Jurisdictie (A1)</text>
+            <rect x="11" y="44" width="14" height="14" fill="white" stroke="#1A56A0" strokeWidth="2" rx="2"/>
+            <text x="30" y="54" fontSize="9" fill="#374151">Omrand vierkant = Datalocatie (A3)</text>
+            {[["#16a34a","EU/EER",145],["#ca8a04","VS+DPF",185],["#ea580c","Risico",222],["#dc2626","Kritiek",248]].map(([c,l,x]) => (
+              <g key={l}>
+                <circle cx={x} cy="29" r="5" fill={c} stroke="white" strokeWidth="1"/>
+                <text x={x+8} y="33" fontSize="8" fill="#374151">{l}</text>
+              </g>
+            ))}
+          </g>
+
+          {/* EU label */}
+          <text x="490" y="212" textAnchor="middle" fontSize="9" fill="#1d4ed8" opacity="0.8" fontStyle="italic">EU</text>
+        </svg>
+      )}
+    </div>
+  );
+}
+
+function App() {
   // ── Login state ─────────────────────────────────────────────
   const [loggedIn,   setLoggedIn]   = useState(() => sessionStorage.getItem("nhl_auth") === "ok");
   const [loginInput, setLoginInput] = useState("");
@@ -3604,21 +3832,22 @@ ${(function(){
     // ── Regio-mapping op basis van A1 (jurisdictie) en A3 (datalocatie) ──────
     // Kaartcoördinaten zijn percentages van SVG viewBox (0 0 1000 500)
     const REGIO_COORDS = {
-      // Score 1-2: EU/EER regio's
-      "EU-West":      { x: 480, y: 155, label: "EU West",          vlag: "🇪🇺" },
-      "EU-Noord":     { x: 490, y: 120, label: "EU Noord",         vlag: "🇪🇺" },
-      "EU-Oost":      { x: 520, y: 150, label: "EU Oost",          vlag: "🇪🇺" },
-      "NL":           { x: 474, y: 138, label: "Nederland",        vlag: "🇳🇱" },
-      // Score 3: VS (adequaatheidsbesluit)
-      "VS-Oost":      { x: 225, y: 160, label: "VS Oost",          vlag: "🇺🇸" },
-      "VS-West":      { x: 150, y: 165, label: "VS West",          vlag: "🇺🇸" },
-      "VS":           { x: 190, y: 163, label: "Verenigde Staten", vlag: "🇺🇸" },
-      // Score 4-5: overige regio's
-      "Azië":         { x: 760, y: 190, label: "Azië",             vlag: "🌏" },
-      "China":        { x: 770, y: 180, label: "China",            vlag: "🇨🇳" },
-      "VK":           { x: 460, y: 133, label: "Verenigd Koninkrijk", vlag: "🇬🇧" },
-      "Australië":    { x: 820, y: 360, label: "Australië",        vlag: "🇦🇺" },
-      "Onbekend":     { x: 500, y: 250, label: "Onbekend",         vlag: "❓" },
+      // lon/lat voor D3 Natural Earth projectie
+      "EU-West":   { lon:  10, lat: 51, label: "EU West"             },
+      "EU-Noord":  { lon:  15, lat: 56, label: "EU Noord"            },
+      "EU-Oost":   { lon:  22, lat: 49, label: "EU Oost"             },
+      "NL":        { lon:   5, lat: 52, label: "Nederland"           },
+      "VK":        { lon:  -2, lat: 53, label: "Verenigd Koninkrijk" },
+      "VS-Oost":   { lon: -75, lat: 40, label: "VS Oost"             },
+      "VS-West":   { lon:-120, lat: 37, label: "VS West"             },
+      "VS":        { lon: -95, lat: 38, label: "Verenigde Staten"    },
+      "Azië":      { lon: 105, lat: 30, label: "Azië"                },
+      "China":     { lon: 110, lat: 35, label: "China"               },
+      "India":     { lon:  78, lat: 20, label: "India"               },
+      "Japan":     { lon: 138, lat: 36, label: "Japan"               },
+      "Australië": { lon: 134, lat:-25, label: "Australië"           },
+      "Brazilië":  { lon: -52, lat:-14, label: "Brazilië"            },
+      "Onbekend":  { lon:   0, lat:  0, label: "Onbekend"            },
     };
 
     // ── Leid regio af uit A1 en A3 scores ────────────────────────────────────
@@ -3677,115 +3906,18 @@ ${(function(){
 
     const vandaag = new Date().toLocaleDateString("nl-NL", { day:"numeric", month:"long", year:"numeric" });
 
-    // ── SVG Wereldkaart (vereenvoudigd) ──────────────────────────────────────
-    // Continenten als SVG paden (sterk vereenvoudigd maar herkenbaar)
-    const continenten = [
-      // Noord-Amerika
-      { name:"Noord-Amerika", d:"M 100,100 L 280,95 L 300,130 L 290,200 L 250,230 L 200,240 L 160,220 L 120,200 L 90,160 Z", fill:"#e2e8f0" },
-      // Zuid-Amerika
-      { name:"Zuid-Amerika", d:"M 200,250 L 270,245 L 295,280 L 290,360 L 260,400 L 220,410 L 190,380 L 175,320 L 185,280 Z", fill:"#e2e8f0" },
-      // Europa
-      { name:"Europa", d:"M 440,95 L 540,90 L 555,120 L 545,160 L 510,170 L 470,165 L 450,145 L 440,120 Z", fill:"#dbeafe" },
-      // Afrika
-      { name:"Afrika", d:"M 450,175 L 540,170 L 565,200 L 570,280 L 555,360 L 520,400 L 490,405 L 460,380 L 445,310 L 440,240 L 445,200 Z", fill:"#e2e8f0" },
-      // Rusland/Noord-Azië
-      { name:"Rusland", d:"M 550,80 L 780,70 L 800,110 L 760,130 L 650,135 L 570,130 L 550,110 Z", fill:"#e2e8f0" },
-      // Azië (midden/oost)
-      { name:"Azië", d:"M 570,130 L 760,130 L 810,160 L 820,210 L 800,240 L 760,250 L 700,245 L 650,230 L 610,210 L 575,190 L 565,165 Z", fill:"#e2e8f0" },
-      // India
-      { name:"India", d:"M 620,210 L 680,205 L 690,240 L 670,295 L 645,305 L 620,270 L 615,235 Z", fill:"#e2e8f0" },
-      // Australië
-      { name:"Australië", d:"M 760,320 L 870,315 L 890,345 L 880,400 L 840,420 L 790,415 L 760,390 L 745,360 Z", fill:"#e2e8f0" },
-      // Groenland
-      { name:"Groenland", d:"M 360,60 L 440,55 L 445,80 L 430,100 L 390,105 L 360,90 Z", fill:"#e2e8f0" },
-      // Japan
-      { name:"Japan", d:"M 820,145 L 840,140 L 845,160 L 835,175 L 820,170 L 815,155 Z", fill:"#e2e8f0" },
-    ];
+    // ── D3 Wereldkaart state ─────────────────────────────────────────────────
+    // geoWorld en geoPathFn worden inline berekend via useRef + useEffect
 
-    return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
-        <div className="p-5 max-w-5xl mx-auto">
 
-          {/* Header */}
-          <div className="rounded p-5 mb-5 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
-                  <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
-                </div>
-                <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
-                <div>
-                  <h1 className="font-bold" style={{ fontSize:17 }}>Geopolitiek Landschap</h1>
-                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Jurisdictie en datalocatie van het applicatieportfolio · {vandaag}</p>
-                </div>
-              </div>
-              <div className="flex gap-2 flex-shrink-0">
-                <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
-                  {scored.length} van {apps.length} apps in kaart
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Uitleg */}
-          <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Hoe lees je deze kaart?</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-                  De kaart toont twee geopolitieke posities per applicatie, gebaseerd op de DAAF-scores
-                  A1 (jurisdictie leverancier) en A3 (hosting en datalocatie):
-                </p>
-                <div className="space-y-2">
-                  <div className="flex gap-2 items-start">
-                    <div className="w-4 h-4 rounded-full flex-shrink-0 mt-0.5 flex items-center justify-center"
-                      style={{ background:"#1A56A0", border:"2.5px solid white", boxShadow:"0 0 0 2px #1A56A0" }}>
-                    </div>
-                    <div className="text-xs" style={{ color:"#374151" }}>
-                      <strong style={{ color:"#1A56A0" }}>Gevulde cirkel</strong> = Jurisdictie leverancier (A1): onder welk rechtssysteem valt de leverancier? Dit bepaalt wie bij de data kan bij een juridische vordering.
-                    </div>
-                  </div>
-                  <div className="flex gap-2 items-start">
-                    <div className="w-4 h-4 rounded-sm flex-shrink-0 mt-0.5"
-                      style={{ background:"white", border:"2.5px solid #1A56A0" }}>
-                    </div>
-                    <div className="text-xs" style={{ color:"#374151" }}>
-                      <strong style={{ color:"#1A56A0" }}>Omrand vierkant</strong> = Datalocatie (A3): waar staat de data fysiek opgeslagen? Dit is de serverlocatie inclusief back-ups.
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs font-semibold mb-2" style={{ color:"#374151" }}>Kleurschaal (beide dimensies):</p>
-                <div className="space-y-1.5">
-                  {[
-                    { score:"1–2", label:"EU / EER", kleur:"#16a34a", bg:"#dcfce7", tekst:"Volledig Europese jurisdictie en/of datalocatie. Laagste risico." },
-                    { score:"3",   label:"Adequaat + risico", kleur:"#ca8a04", bg:"#fef9c3", tekst:"VS met adequaatheidsbesluit (DPF). CLOUD Act blijft van toepassing." },
-                    { score:"4",   label:"SCCs, geen adequaat", kleur:"#ea580c", bg:"#ffedd5", tekst:"Contractuele waarborgen, geen adequaatheidsbesluit. Verhoogd risico." },
-                    { score:"5",   label:"Geen waarborgen", kleur:"#dc2626", bg:"#fee2e2", tekst:"Buiten EU, geen waarborgen of onbekende locatie." },
-                    { score:"0",   label:"Niet ingevuld", kleur:"#9ca3af", bg:"#f3f4f6", tekst:"Score nog niet ingevuld in het assessment." },
-                  ].map(r => (
-                    <div key={r.score} className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:r.kleur }}/>
-                      <span className="text-xs px-1.5 py-0.5 rounded font-semibold flex-shrink-0"
-                        style={{ background:r.bg, color:r.kleur, minWidth:16, textAlign:"center" }}>{r.score}</span>
-                      <span className="text-xs font-semibold flex-shrink-0" style={{ color:r.kleur }}>{r.label}</span>
-                      <span className="text-xs" style={{ color:"#9ca3af" }}>{r.tekst}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── Wereld SVG kaart ── */}
+          {/* ── D3 Wereldkaart component ── */}
           {apps.length === 0 ? (
             <div className="rounded p-10 text-center" style={{ background:"#fff", border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
               Nog geen applicaties. Voeg applicaties toe en vul de A1 en A3 scores in om ze op de kaart te zien.
             </div>
           ) : (
             <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7", overflow:"hidden" }}>
-              <div className="px-4 pt-4 pb-1 flex items-center justify-between">
+              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Wereldkaart — jurisdictie en datalocatie per applicatie</h3>
                   <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
@@ -3793,145 +3925,22 @@ ${(function(){
                   </p>
                 </div>
               </div>
-
-              <svg viewBox="0 0 1000 500" style={{ width:"100%", height:"auto", display:"block" }}
-                xmlns="http://www.w3.org/2000/svg">
-
-                {/* Oceaan achtergrond */}
-                <rect width="1000" height="500" fill="#bfdbfe" rx="6"/>
-
-                {/* Continenten */}
-                {continenten.map(c => (
-                  <path key={c.name} d={c.d} fill={c.fill} stroke="#94a3b8" strokeWidth="0.8" opacity="0.9"/>
-                ))}
-
-                {/* EU highlight */}
-                <path d="M 440,95 L 540,90 L 555,120 L 545,160 L 510,170 L 470,165 L 450,145 L 440,120 Z"
-                  fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.2" opacity="0.6"/>
-
-                {/* Lat/lon rasterlijnen subtiel */}
-                {[100,200,300,400].map(y => (
-                  <line key={y} x1="0" y1={y} x2="1000" y2={y} stroke="#94a3b8" strokeWidth="0.3" opacity="0.4"/>
-                ))}
-                {[200,400,600,800].map(x => (
-                  <line key={x} x1={x} y1="0" x2={x} y2="500" stroke="#94a3b8" strokeWidth="0.3" opacity="0.4"/>
-                ))}
-
-                {/* Equator lijn */}
-                <line x1="0" y1="250" x2="1000" y2="250" stroke="#94a3b8" strokeWidth="0.6" strokeDasharray="8,4" opacity="0.5"/>
-                <text x="8" y="247" fontSize="8" fill="#94a3b8" opacity="0.7">Evenaar</text>
-
-                {/* ── Jurisdictie stippen (gevuld, cirkel) ── */}
-                {Object.entries(jurisGroups).map(([regio, items]) => {
-                  const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
-                  return items.map((a, idx) => {
-                    const offset = idx * 18;
-                    const cx = rc.x + (idx % 3) * 14 - 14;
-                    const cy = rc.y - Math.floor(idx / 3) * 14;
-                    const kleur = risicoKleur(a.score);
-                    const isHover = geoHoverId === a.id + "_j";
-                    return (
-                      <g key={a.id + "_j"}
-                        onMouseEnter={e => { setGeoHoverId(a.id + "_j"); setGeoTooltip({ x: cx, y: cy, app: a, type:"juris" }); }}
-                        onMouseLeave={() => { setGeoHoverId(null); setGeoTooltip(null); }}
-                        style={{ cursor:"pointer" }}>
-                        <circle cx={cx} cy={cy} r={isHover ? 10 : 8}
-                          fill={kleur} stroke="white" strokeWidth="1.5" opacity="0.92"/>
-                        {isHover && <circle cx={cx} cy={cy} r="13" fill="none" stroke={kleur} strokeWidth="1.5" opacity="0.5"/>}
-                        <text x={cx} y={cy + 3} textAnchor="middle" fontSize="7" fill="white" fontWeight="bold"
-                          style={{ pointerEvents:"none" }}>
-                          {displayName(a).substring(0,3).toUpperCase()}
-                        </text>
-                      </g>
-                    );
-                  });
-                })}
-
-                {/* ── Data-locatie stippen (omrand, vierkant) ── */}
-                {Object.entries(dataGroups).map(([regio, items]) => {
-                  const rc = REGIO_COORDS[regio] || REGIO_COORDS["Onbekend"];
-                  return items.map((a, idx) => {
-                    const cx = rc.x + (idx % 3) * 14 - 14 + 6;
-                    const cy = rc.y - Math.floor(idx / 3) * 14 + 18;
-                    const kleur = risicoKleur(a.score);
-                    const isHover = geoHoverId === a.id + "_d";
-                    const sz = isHover ? 10 : 8;
-                    return (
-                      <g key={a.id + "_d"}
-                        onMouseEnter={e => { setGeoHoverId(a.id + "_d"); setGeoTooltip({ x: cx, y: cy, app: a, type:"data" }); }}
-                        onMouseLeave={() => { setGeoHoverId(null); setGeoTooltip(null); }}
-                        style={{ cursor:"pointer" }}>
-                        <rect x={cx-sz} y={cy-sz} width={sz*2} height={sz*2}
-                          fill="white" stroke={kleur} strokeWidth="2.5" rx="2" opacity="0.95"/>
-                        {isHover && <rect x={cx-14} y={cy-14} width="28" height="28" fill="none" stroke={kleur} strokeWidth="1.5" rx="3" opacity="0.5"/>}
-                        <text x={cx} y={cy + 3} textAnchor="middle" fontSize="6" fill={kleur} fontWeight="bold"
-                          style={{ pointerEvents:"none" }}>
-                          {displayName(a).substring(0,3).toUpperCase()}
-                        </text>
-                      </g>
-                    );
-                  });
-                })}
-
-                {/* Regio labels */}
-                {[
-                  { x:190, y:190, label:"Noord-Amerika" },
-                  { x:480, y:185, label:"Europa" },
-                  { x:700, y:270, label:"Azië" },
-                  { x:230, y:380, label:"Zuid-Amerika" },
-                  { x:500, y:360, label:"Afrika" },
-                  { x:815, y:370, label:"Australië" },
-                ].map(l => (
-                  <text key={l.label} x={l.x} y={l.y} textAnchor="middle" fontSize="10"
-                    fill="#64748b" opacity="0.7" fontStyle="italic">{l.label}</text>
-                ))}
-
-                {/* ── Tooltip ── */}
-                {geoTooltip && (() => {
-                  const tx = Math.min(geoTooltip.x + 15, 850);
-                  const ty = Math.max(geoTooltip.y - 60, 10);
-                  const a1lbl = ["","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
-                  const a3lbl = ["","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
-                  const isJuris = geoTooltip.type === "juris";
-                  const score = isJuris ? geoTooltip.app.a1 : geoTooltip.app.a3;
-                  const lbl = isJuris ? (a1lbl[score] || "–") : (a3lbl[score] || "–");
-                  const kleur = risicoKleur(score);
-                  return (
-                    <g>
-                      <rect x={tx} y={ty} width="220" height="70" rx="4" fill="white"
-                        stroke={kleur} strokeWidth="1.5" style={{ filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.15))" }}/>
-                      <text x={tx+10} y={ty+16} fontSize="10" fontWeight="bold" fill="#0C2340">{displayName(geoTooltip.app)}</text>
-                      {geoTooltip.app.supplier && <text x={tx+10} y={ty+28} fontSize="9" fill="#9ca3af">{geoTooltip.app.supplier}</text>}
-                      <text x={tx+10} y={ty+43} fontSize="9" fill="#374151">
-                        {isJuris ? "Jurisdictie (A1):" : "Datalocatie (A3):"} Score {score || "–"}
-                      </text>
-                      <text x={tx+10} y={ty+57} fontSize="9" fill={kleur} fontWeight="600">{lbl}</text>
-                    </g>
-                  );
-                })()}
-
-                {/* Legenda kaart */}
-                <g transform="translate(720, 420)">
-                  <rect x="0" y="0" width="270" height="62" rx="4" fill="white" opacity="0.92" stroke="#e2e8f0" strokeWidth="1"/>
-                  <text x="10" y="14" fontSize="9" fontWeight="bold" fill="#0C2340">Legenda</text>
-                  <circle cx="20" cy="28" r="7" fill="#1A56A0" stroke="white" strokeWidth="1"/>
-                  <text x="32" y="32" fontSize="9" fill="#374151">Gevuld = Jurisdictie leverancier (A1)</text>
-                  <rect x="13" y="42" width="14" height="14" fill="white" stroke="#1A56A0" strokeWidth="2" rx="1"/>
-                  <text x="32" y="52" fontSize="9" fill="#374151">Omrand = Datalocatie servers (A3)</text>
-                  <circle cx="175" cy="28" r="6" fill="#16a34a" stroke="white" strokeWidth="1"/>
-                  <text x="185" y="32" fontSize="9" fill="#374151">EU/EER</text>
-                  <circle cx="215" cy="28" r="6" fill="#ca8a04" stroke="white" strokeWidth="1"/>
-                  <text x="225" y="32" fontSize="9" fill="#374151">VS+DPF</text>
-                  <circle cx="175" cy="50" r="6" fill="#ea580c" stroke="white" strokeWidth="1"/>
-                  <text x="185" y="54" fontSize="9" fill="#374151">Risico</text>
-                  <circle cx="215" cy="50" r="6" fill="#dc2626" stroke="white" strokeWidth="1"/>
-                  <text x="225" y="54" fontSize="9" fill="#374151">Kritiek</text>
-                </g>
-              </svg>
+              <WorldMapD3
+                scored={scored}
+                jurisGroups={jurisGroups}
+                dataGroups={dataGroups}
+                geoHoverId={geoHoverId}
+                setGeoHoverId={setGeoHoverId}
+                geoTooltip={geoTooltip}
+                setGeoTooltip={setGeoTooltip}
+                risicoKleur={risicoKleur}
+                displayName={displayName}
+                REGIO_COORDS={REGIO_COORDS}
+              />
             </div>
           )}
 
-          {/* ── Tabel onder de kaart ── */}
+                    {/* ── Tabel onder de kaart ── */}
           {scored.length > 0 && (
             <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Overzicht per applicatie — jurisdictie en datalocatie</h3>
