@@ -1337,9 +1337,11 @@ export default function App() {
   const [adminPinError, setAdminPinError] = useState(false);
   const [editAppId,     setEditAppId]     = useState(null);
   const [editForm,      setEditForm]      = useState({});
-  const [importData,    setImportData]    = useState(null);   // parsed import JSON
-  const [importSel,     setImportSel]     = useState(new Set()); // geselecteerde app-IDs uit import
+  const [importData,    setImportData]    = useState(null);
+  const [importSel,     setImportSel]     = useState(new Set());
   const [showImport,    setShowImport]    = useState(false);
+  const [geoHoverId,    setGeoHoverId]    = useState(null);
+  const [geoTooltip,    setGeoTooltip]    = useState(null);
   const ADMIN_PIN = "nhl2026";
 
   // Ref voor scroll-naar-boven bij stapwissel in Assess
@@ -3598,8 +3600,6 @@ ${(function(){
 
   // ── GEOKAART ───────────────────────────────────────────────────────────────
   function GeoKaart() {
-    const [hoverId, setHoverId] = React.useState(null);
-    const [tooltip, setTooltip] = React.useState(null);
 
     // ── Regio-mapping op basis van A1 (jurisdictie) en A3 (datalocatie) ──────
     // Kaartcoördinaten zijn percentages van SVG viewBox (0 0 1000 500)
@@ -3829,11 +3829,11 @@ ${(function(){
                     const cx = rc.x + (idx % 3) * 14 - 14;
                     const cy = rc.y - Math.floor(idx / 3) * 14;
                     const kleur = risicoKleur(a.score);
-                    const isHover = hoverId === a.id + "_j";
+                    const isHover = geoHoverId === a.id + "_j";
                     return (
                       <g key={a.id + "_j"}
-                        onMouseEnter={e => { setHoverId(a.id + "_j"); setTooltip({ x: cx, y: cy, app: a, type:"juris" }); }}
-                        onMouseLeave={() => { setHoverId(null); setTooltip(null); }}
+                        onMouseEnter={e => { setGeoHoverId(a.id + "_j"); setGeoTooltip({ x: cx, y: cy, app: a, type:"juris" }); }}
+                        onMouseLeave={() => { setGeoHoverId(null); setGeoTooltip(null); }}
                         style={{ cursor:"pointer" }}>
                         <circle cx={cx} cy={cy} r={isHover ? 10 : 8}
                           fill={kleur} stroke="white" strokeWidth="1.5" opacity="0.92"/>
@@ -3854,12 +3854,12 @@ ${(function(){
                     const cx = rc.x + (idx % 3) * 14 - 14 + 6;
                     const cy = rc.y - Math.floor(idx / 3) * 14 + 18;
                     const kleur = risicoKleur(a.score);
-                    const isHover = hoverId === a.id + "_d";
+                    const isHover = geoHoverId === a.id + "_d";
                     const sz = isHover ? 10 : 8;
                     return (
                       <g key={a.id + "_d"}
-                        onMouseEnter={e => { setHoverId(a.id + "_d"); setTooltip({ x: cx, y: cy, app: a, type:"data" }); }}
-                        onMouseLeave={() => { setHoverId(null); setTooltip(null); }}
+                        onMouseEnter={e => { setGeoHoverId(a.id + "_d"); setGeoTooltip({ x: cx, y: cy, app: a, type:"data" }); }}
+                        onMouseLeave={() => { setGeoHoverId(null); setGeoTooltip(null); }}
                         style={{ cursor:"pointer" }}>
                         <rect x={cx-sz} y={cy-sz} width={sz*2} height={sz*2}
                           fill="white" stroke={kleur} strokeWidth="2.5" rx="2" opacity="0.95"/>
@@ -3887,21 +3887,21 @@ ${(function(){
                 ))}
 
                 {/* ── Tooltip ── */}
-                {tooltip && (() => {
-                  const tx = Math.min(tooltip.x + 15, 850);
-                  const ty = Math.max(tooltip.y - 60, 10);
+                {geoTooltip && (() => {
+                  const tx = Math.min(geoTooltip.x + 15, 850);
+                  const ty = Math.max(geoTooltip.y - 60, 10);
                   const a1lbl = ["","EU/EER volledig","EU/EER beperkt","Adequaat + risico","SCCs, geen adequaat","Geen waarborgen"];
                   const a3lbl = ["","EU/EER contractueel","EU/EER + adequaat","EU/EER, geen garantie","Deels buiten EU","Buiten EU"];
-                  const isJuris = tooltip.type === "juris";
-                  const score = isJuris ? tooltip.app.a1 : tooltip.app.a3;
+                  const isJuris = geoTooltip.type === "juris";
+                  const score = isJuris ? geoTooltip.app.a1 : geoTooltip.app.a3;
                   const lbl = isJuris ? (a1lbl[score] || "–") : (a3lbl[score] || "–");
                   const kleur = risicoKleur(score);
                   return (
                     <g>
                       <rect x={tx} y={ty} width="220" height="70" rx="4" fill="white"
                         stroke={kleur} strokeWidth="1.5" style={{ filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.15))" }}/>
-                      <text x={tx+10} y={ty+16} fontSize="10" fontWeight="bold" fill="#0C2340">{displayName(tooltip.app)}</text>
-                      {tooltip.app.supplier && <text x={tx+10} y={ty+28} fontSize="9" fill="#9ca3af">{tooltip.app.supplier}</text>}
+                      <text x={tx+10} y={ty+16} fontSize="10" fontWeight="bold" fill="#0C2340">{displayName(geoTooltip.app)}</text>
+                      {geoTooltip.app.supplier && <text x={tx+10} y={ty+28} fontSize="9" fill="#9ca3af">{geoTooltip.app.supplier}</text>}
                       <text x={tx+10} y={ty+43} fontSize="9" fill="#374151">
                         {isJuris ? "Jurisdictie (A1):" : "Datalocatie (A3):"} Score {score || "–"}
                       </text>
