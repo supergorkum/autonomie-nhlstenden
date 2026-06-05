@@ -6439,7 +6439,6 @@ ${(function(){
                         { naam:"J. Haije",        rol:"Ambassadeur Digitale Soevereiniteit" },
                         { naam:"E. Rolf",         rol:"Ambassadeur Digitale Soevereiniteit" },
                         { naam:"J. Blom",         rol:"Ambassadeur Digitale Soevereiniteit" },
-                        { naam:"C. Segers",       rol:"Portefeuillehouder Digitale Samenhang" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
                           <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
@@ -6461,7 +6460,13 @@ ${(function(){
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs font-semibold mt-3 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
+                    <p className="text-xs font-semibold mt-3 mb-1.5" style={{ color:"#1A56A0" }}>Expertisegroep Digitale Soevereiniteit</p>
+                    <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
+                      Dit product is ontwikkeld binnen de Ambassadeurslijn Digitale Soevereiniteit van het
+                      Programma Digitale Samenhang. De ambassadeursgroep vormt de expertisegroep die het
+                      instrument inhoudelijk draagt en verder ontwikkelt binnen NHL Stenden.
+                    </p>
+                    <p className="text-xs font-semibold mt-1 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
                     <div className="flex gap-2 text-xs">
                       <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>Claude (Anthropic)</span>
                       <span style={{ color:"#6b7280" }}>AI-ontwikkelassistent — volledige applicatiebouw</span>
