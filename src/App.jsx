@@ -6436,9 +6436,9 @@ ${(function(){
                     <div className="space-y-1.5">
                       {[
                         { naam:"E. van Gorkum",  rol:"Kwartiermaker Digitale Samenhang — initiatiefnemer en ontwikkelaar" },
-                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Soevereiniteit" },
-                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Soevereiniteit" },
-                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Soevereiniteit" },
+                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Soevereiniteit — initiatiefnemer" },
+                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Soevereiniteit — initiatiefnemer en ontwikkelaar" },
+                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Soevereiniteit — initiatiefnemer en ontwikkelaar" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
                           <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
