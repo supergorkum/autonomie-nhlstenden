@@ -1181,10 +1181,18 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick, readOnly = false }) 
   const colors = dir === "fwd" ? BTN_COLORS_FWD : BTN_COLORS_INV;
   const c = colors[s - 1];
   return (
-    <button onClick={onClick} title={desc} className="flex-1 py-2 px-1 rounded-lg border-2 text-center transition-all"
+    <button
+      onClick={readOnly ? undefined : onClick}
+      title={readOnly ? "Alleen-lezen — open via Beheer om te wijzigen" : desc}
+      disabled={readOnly}
+      className="flex-1 py-2 px-1 rounded-lg border-2 text-center transition-all"
       style={selected
-        ? { borderColor: c, background: c, color: "#fff" }
-        : { borderColor: "#e5e7eb", background: "#f9fafb", color: "#374151" }
+        ? { borderColor: c, background: c, color: "#fff",
+            cursor: readOnly ? "not-allowed" : "pointer",
+            opacity: readOnly ? 0.7 : 1 }
+        : { borderColor: "#e5e7eb", background: readOnly ? "#f3f4f6" : "#f9fafb",
+            color: readOnly ? "#9ca3af" : "#374151",
+            cursor: readOnly ? "not-allowed" : "pointer" }
       }>
       <div style={{ fontWeight: 700, fontSize: 14 }}>{s}</div>
       <div style={{ fontSize: 10, lineHeight: 1.2, marginTop: 2 }}>{label}</div>
@@ -1202,7 +1210,12 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
     return note;
   }, [note, useSecondaryName, appName, appNameSecondary]);
   return (
-    <div className="mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7", borderRadius:4, padding:16 }}>
+    <div className="mb-3" style={{
+        background: readOnly ? "#fafafa" : "#fff",
+        border: readOnly ? "1px solid #e5e7eb" : "1px solid #D0E4F7",
+        borderRadius:4, padding:16,
+        position: "relative"
+      }}>
       <div className="flex items-start gap-2 mb-3">
         <span className="text-xs font-semibold px-2 py-0.5 flex-shrink-0"
           style={{ borderRadius:3, background:"#EBF3FF", color:"#1A56A0" }}>{q.key}</span>
@@ -3596,11 +3609,13 @@ ${(function(){
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({visibleApps.length})</h3>
                 <div className="flex gap-2">
-                  <button onClick={() => setShowModal(true)}
-                    className="text-white text-xs px-3 py-1.5 font-medium"
-                    style={{ background:"#1A56A0", borderRadius:4 }}>
-                    + Toevoegen
-                  </button>
+                  {adminUnlocked && (
+                    <button onClick={() => setShowModal(true)}
+                      className="text-white text-xs px-3 py-1.5 font-medium"
+                      style={{ background:"#1A56A0", borderRadius:4 }}>
+                      + Toevoegen
+                    </button>
+                  )}
                   <button onClick={exportDashboardPdf} disabled={visibleApps.length===0}
                     className="text-xs px-3 py-1.5 font-medium"
                     style={{ background:"#fee2e2", color:"#b91c1c", borderRadius:4, border:"1px solid #fecaca", opacity:visibleApps.length===0?0.5:1 }}>
@@ -3759,11 +3774,13 @@ ${(function(){
         <div className="p-5 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold" style={{ color:"#0C2340" }}>Applicaties ({apps.length})</h2>
-            <button onClick={() => setShowModal(true)}
-              className="text-white text-sm px-4 py-2 font-medium"
-              style={{ background:"#1A56A0", borderRadius:4 }}>
-              + Toevoegen
-            </button>
+            {adminUnlocked && (
+              <button onClick={() => setShowModal(true)}
+                className="text-white text-sm px-4 py-2 font-medium"
+                style={{ background:"#1A56A0", borderRadius:4 }}>
+                + Toevoegen
+              </button>
+            )}
           </div>
 
           {apps.length === 0 ? (
@@ -3791,10 +3808,10 @@ ${(function(){
                       </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
-                      <button onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}
+                      <button onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(!adminUnlocked); setView("assess"); }}
                         className="text-white text-xs px-3 py-1.5 font-medium"
-                        style={{ background:"#1A56A0", borderRadius:4 }}>
-                        Assessment openen
+                        style={{ background: adminUnlocked ? "#1A56A0" : "#6b7280", borderRadius:4 }}>
+                        {adminUnlocked ? "✏️ Bewerken" : "👁 Bekijken"}
                       </button>
                     </div>
                   </div>
