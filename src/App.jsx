@@ -6462,9 +6462,10 @@ ${(function(){
                     </div>
                     <p className="text-xs font-semibold mt-3 mb-1.5" style={{ color:"#1A56A0" }}>Expertisegroep Digitale Soevereiniteit</p>
                     <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
-                      Dit product is ontwikkeld binnen de Ambassadeurslijn Digitale Soevereiniteit van het
-                      Programma Digitale Samenhang. De ambassadeursgroep vormt de expertisegroep die het
-                      instrument inhoudelijk draagt en verder ontwikkelt binnen NHL Stenden.
+                      Met dank aan de ambassadeurs voor hun scherpte, betrokkenheid en de inspiratie
+                      die zij dagelijks meebrengen. Jullie vragen, inzichten en richting hebben dit
+                      instrument mede gemaakt tot wat het is — en zijn de drijvende kracht achter
+                      de stappen die NHL Stenden zet richting echte digitale soevereiniteit.
                     </p>
                     <p className="text-xs font-semibold mt-1 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
                     <div className="flex gap-2 text-xs">
