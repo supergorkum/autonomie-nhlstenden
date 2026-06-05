@@ -4698,11 +4698,7 @@ ${(function(){
                 style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
                 ⬆ Importeer database
               </button>
-              <button onClick={() => setShowChangelog(true)}
-                className="text-xs px-3 py-1.5 font-medium"
-                style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
-                📋 Changelog
-              </button>
+
               <button onClick={() => { setAdminUnlocked(false); setView("dashboard"); }}
                 className="text-xs px-3 py-1.5 font-medium"
                 style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#6b7280", background:"#fff" }}>
@@ -4997,63 +4993,6 @@ ${(function(){
           </div>
         )}
 
-        {/* ── Changelog modal ── */}
-        {showChangelog && (
-          <div className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ background:"rgba(12,35,64,0.6)" }}
-            onClick={() => setShowChangelog(false)}>
-            <div className="bg-white w-full max-w-lg mx-4 overflow-hidden"
-              style={{ borderRadius:6, boxShadow:"0 8px 32px rgba(12,35,64,0.3)", maxHeight:"80vh" }}
-              onClick={e => e.stopPropagation()}>
-              {/* Header */}
-              <div className="flex items-center justify-between px-5 py-4"
-                style={{ background:"#0C2340", borderBottom:"3px solid #26B5AE" }}>
-                <div className="flex items-center gap-3">
-                  <span style={{ fontSize:18 }}>📋</span>
-                  <div>
-                    <h2 className="font-bold text-white text-sm">Changelog</h2>
-                    <p className="text-xs" style={{ color:"#7DD3D0" }}>Overzicht van alle versies en wijzigingen</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowChangelog(false)}
-                  style={{ color:"#7DD3D0", fontSize:20, lineHeight:1 }}>✕</button>
-              </div>
-              {/* Inhoud */}
-              <div className="overflow-y-auto" style={{ maxHeight:"calc(80vh - 72px)" }}>
-                {CHANGELOG.map((v, vi) => (
-                  <div key={v.versie} style={{ borderBottom:"1px solid #D0E4F7" }}>
-                    {/* Versie header */}
-                    <div className="flex items-center gap-3 px-5 py-3"
-                      style={{ background: vi === 0 ? "#EBF3FF" : "#f8fafc" }}>
-                      <span className="text-xs font-bold px-2 py-1 text-white"
-                        style={{ background: vi === 0 ? "#1A56A0" : "#6b7280", borderRadius:3 }}>
-                        {v.versie}
-                      </span>
-                      <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>
-                        {vi === 0 ? "Huidige versie" : ""}
-                      </span>
-                      <span className="text-xs ml-auto" style={{ color:"#9ca3af" }}>{v.datum}</span>
-                    </div>
-                    {/* Wijzigingen */}
-                    <ul className="px-5 py-3 space-y-1.5">
-                      {v.wijzigingen.map((w, wi) => (
-                        <li key={wi} className="flex items-start gap-2">
-                          <span style={{ color:"#26B5AE", fontSize:10, marginTop:3, flexShrink:0 }}>●</span>
-                          <span className="text-xs leading-relaxed" style={{ color:"#374151" }}>{w}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-                <div className="px-5 py-3 text-center">
-                  <p className="text-xs" style={{ color:"#9ca3af" }}>
-                    Klik buiten dit venster om te sluiten
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
           {/* ── IMPORT MODAL ────────────────────────────────────────── */}
           {showImport && importData && (
@@ -6920,6 +6859,55 @@ ${(function(){
         {view === "transparantie" && Transparantie()}
         {view === "admin"     && Admin()}
       </main>
+
+      {/* ── Changelog modal — root level zodat hij altijd beschikbaar is ── */}
+      {showChangelog && (
+        <div className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ background:"rgba(12,35,64,0.6)" }}
+          onClick={() => setShowChangelog(false)}>
+          <div className="bg-white w-full max-w-lg mx-4 overflow-hidden"
+            style={{ borderRadius:8, boxShadow:"0 8px 32px rgba(12,35,64,0.4)", maxHeight:"80vh" }}
+            onClick={e => e.stopPropagation()}>
+            <div className="px-5 py-3 flex items-center justify-between"
+              style={{ background:"#0C2340", borderBottom:"3px solid #26B5AE" }}>
+              <div className="flex items-center gap-2">
+                <span style={{ fontSize:16 }}>📋</span>
+                <h2 className="font-bold text-white text-sm">Changelog</h2>
+                <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#26B5AE", color:"#0C2340", fontWeight:700 }}>
+                  {VERSION}
+                </span>
+                <span className="text-xs" style={{ color:"#7DD3D0" }}>Overzicht van alle versies en wijzigingen</span>
+              </div>
+              <button onClick={() => setShowChangelog(false)}
+                className="text-white hover:text-gray-300" style={{ fontSize:20, lineHeight:1 }}>×</button>
+            </div>
+            <div className="overflow-y-auto" style={{ maxHeight:"calc(80vh - 52px)" }}>
+              {CHANGELOG.map((v, vi) => (
+                <div key={v.versie} style={{ borderBottom:"1px solid #D0E4F7" }}>
+                  <div className="flex items-center gap-3 px-5 py-2.5"
+                    style={{ background: vi === 0 ? "#EBF3FF" : "#f8fafc" }}>
+                    <span className="text-sm font-bold px-2.5 py-0.5"
+                      style={{ background: vi === 0 ? "#1A56A0" : "#e5e7eb",
+                               color: vi === 0 ? "white" : "#374151", borderRadius:4 }}>
+                      {v.versie}
+                    </span>
+                    <span className="text-xs" style={{ color:"#9ca3af" }}>{v.datum}</span>
+                    {vi === 0 ? <span className="text-xs font-semibold" style={{ color:"#26B5AE" }}>Huidige versie</span> : ""}
+                  </div>
+                  <ul className="px-5 py-2 space-y-1">
+                    {v.wijzigingen.map((w, wi) => (
+                      <li key={wi} className="flex gap-2 text-xs" style={{ color:"#374151" }}>
+                        <span style={{ color:"#26B5AE", fontWeight:700, flexShrink:0 }}>→</span>
+                        <span>{w}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add modal */}
       {showModal && (
