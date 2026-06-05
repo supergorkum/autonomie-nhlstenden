@@ -6703,7 +6703,7 @@ ${(function(){
                     { icon:"✏️", txt:"Applicatiegegevens aanpassen (naam, leverancier, categorie, eigenaar)" },
                     { icon:"🗑️", txt:"Applicaties verwijderen uit het portfolio" },
                     { icon:"👁️", txt:"Volledig overzicht per applicatie bekijken inclusief alle scores en motivaties" },
-                    { icon:"🔒", txt:"Anonieme presentatienamen toewijzen voor de Discreet-modus (toggle 🔓 Helder / 🔒 Discreet)" },
+                    { icon:"🔒", txt:"Anonieme presentatienamen toewijzen voor de Discreet-modus (toggle 🔓 Open / 🔒 Discreet)" },
                   ].map(t => (
                     <div key={t.txt} className="flex gap-2 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                       <span style={{ fontSize:14, flexShrink:0 }}>{t.icon}</span>
@@ -6838,7 +6838,7 @@ ${(function(){
                 color: useSecondaryName ? "#f8b87a" : "#94a3b8",
                 transition: "all 0.2s",
               }}
-              title={useSecondaryName ? "Schakel naar transparante weergave" : "Schakel naar discrete weergave"}>
+              title={useSecondaryName ? "Schakel naar open weergave" : "Schakel naar discrete weergave"}>
               <span style={{ fontSize:11 }}>{useSecondaryName ? "🔒" : "🔓"}</span>
               {/* Schuifje */}
               <div style={{
@@ -6855,7 +6855,7 @@ ${(function(){
                 }}/>
               </div>
               <span style={{ fontSize:10, letterSpacing: "0.02em" }}>
-                {useSecondaryName ? "Discreet" : "Helder"}
+                {useSecondaryName ? "Discreet" : "Open"}
               </span>
             </button>
           )}
