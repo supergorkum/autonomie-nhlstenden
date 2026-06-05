@@ -6875,12 +6875,20 @@ ${(function(){
             { k:"about",     label:"ℹ️ Over & uitleg" },
             { k:"transparantie", label:"🔍 Over dit product" },
             { k:"SPACER",    label:"" },
+            { k:"CHANGELOG", label:"📋 Changelog" },
             { k:"admin",     label:"🔐 Beheer" },
           ].map(t => {
             if (t.k === "SPACER") return <div key="spacer" className="flex-1"/>;
+            if (t.k === "CHANGELOG") return (
+              <button key={t.k} onClick={() => setShowChangelog(true)}
+                className="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+                style={{ borderColor:"transparent", color:"rgba(255,255,255,0.5)", fontSize:12 }}>
+                {t.label}
+              </button>
+            );
             if (t.k === "admin") return (
               <button key={t.k} onClick={() => setView(t.k)}
-                className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ml-2"
+                className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ml-1"
                 style={view === t.k
                   ? { borderColor:"#26B5AE", color:"#fff", background:"rgba(255,255,255,0.18)", borderRadius:"4px 4px 0 0" }
                   : { borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.6)",
