@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.0";
+const VERSION = "v2.1";
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -43,6 +43,23 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.1",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Prototype-status vastgelegd: applicatie is officieel een prototype — zichtbaar in header, Over de tool en Over dit product",
+      "Header: subtitel bijgewerkt naar 'Prototype · Ambassadeurslijn Digitale Soevereiniteit'",
+      "Over de tool: migratieparagraaf toegevoegd — product draait nu op Netlify, gaat over naar eigen NVIDIA DGX Spark",
+      "Over de tool: inspiratiebron-paragraaf toegevoegd — instrument als voorbeeld voor beleidsontwikkeling in eigen organisatie",
+      "Over dit product: prototype-vermelding en migratieplan naar eigen NHL Stenden-server toegevoegd",
+      "Aan de slag stap 2: verwijzing naar 'live sidebar' verwijderd (niet meer aanwezig in huidige versie)",
+      "Aan de slag stap 4: verwijzing naar 'autonomiekwadrant' verwijderd (niet meer aanwezig in huidige versie)",
+      "Excel-exportknop verplaatst van header naar Dashboard (was al zo maar tekst klopte niet)",
+      "Assessment: alleen-lezen voor gewone gebruikers, bewerken alleen via Beheer met pincode",
+      "Geopolitiek tabblad verwijderd — geopolitieke kaart verplaatst naar Portfolio-pagina als compact overzicht",
+      "Consistentiecheck gehele applicatie: beschrijvingen, labels en uitleg actueel gemaakt voor v2.1",
+    ]
+  },
   {
     versie: "v2.0",
     datum: "Juni 2026",
@@ -1870,7 +1887,7 @@ function App() {
               <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
               <div>
                 <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Soevereiniteitsassessment</p>
-                <p style={{ fontSize:10, color:"#7DD3D0" }}>Project Digitale Soevereiniteit</p>
+                <p style={{ fontSize:10, color:"#7DD3D0" }}>Prototype · Ambassadeurslijn Digitale Soevereiniteit</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -5481,7 +5498,7 @@ ${(function(){
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
               De applicatie draait volledig op Amerikaanse infrastructuur (Netlify, GitHub). De assessment-data van NHL Stenden
               wordt opgeslagen in Netlify Blobs zonder gegarandeerde EU-datalocatie.
-              Dit is een bewuste pragmatische keuze voor een intern prototype. De data bevat geen persoonsgegevens
+              Dit is een bewuste pragmatische keuze voor dit prototype. De data bevat geen persoonsgegevens
               van studenten of medewerkers — het betreft uitsluitend scores en omschrijvingen van softwareapplicaties.
             </p>
             <div className="grid grid-cols-3 gap-3">
@@ -5502,6 +5519,7 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
+              <br/>Prototype v2.1 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
               <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: netlify.com/security, anthropic.com/privacy, github.com/security
             </p>
           </div>
@@ -6225,6 +6243,61 @@ ${(function(){
                   ))}
                 </div>
               </div>
+
+              {/* Prototype-status */}
+              <div className="rounded p-4 mb-3" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+                <div className="flex items-start gap-3">
+                  <span style={{ fontSize:20, flexShrink:0 }}>🧪</span>
+                  <div>
+                    <p className="text-sm font-bold mb-1" style={{ color:"#92400e" }}>Status: Prototype</p>
+                    <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                      Dit instrument is een <strong>werkend prototype</strong> — volledig functioneel en in gebruik, maar nog niet definitief ingericht voor productie.
+                      Het is ontwikkeld in mei–juni 2026 als onderdeel van de Ambassadeurslijn Digitale Soevereiniteit van het Programma Digitale Samenhang.
+                      De huidige fase is gericht op het vullen van de database met applicaties en het valideren van de methodiek.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Migratie naar eigen server */}
+              <div className="rounded p-4 mb-3" style={{ background:"#f0f9f9", border:"1px solid #26B5AE44" }}>
+                <div className="flex items-start gap-3">
+                  <span style={{ fontSize:20, flexShrink:0 }}>🖥️</span>
+                  <div>
+                    <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Van cloud naar eigen NHL Stenden-infrastructuur</p>
+                    <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>
+                      Het instrument draait momenteel op Amerikaanse cloudinfrastructuur (Netlify, GitHub). Het team Infrastructuur van NHL Stenden
+                      bereidt de migratie voor naar een <strong>NVIDIA DGX Spark</strong> — de eigen mini-supercomputer van NHL Stenden.
+                      Na de migratie draait het instrument volledig op eigen NHL Stenden-hardware in Leeuwarden, onder Nederlands recht,
+                      zonder afhankelijkheid van externe cloudpartijen.
+                    </p>
+                    <p className="text-xs leading-relaxed" style={{ color:"#6b7280" }}>
+                      Dat maakt dit product ook intern consistent: een instrument dat digitale soevereiniteit meet,
+                      draait straks zelf maximaal soeverein — score 1 op alle DAAF en DICTU-dimensies.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Inspiratiebron */}
+              <div className="rounded p-4" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                <div className="flex items-start gap-3">
+                  <span style={{ fontSize:20, flexShrink:0 }}>💡</span>
+                  <div>
+                    <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Een voorbeeld voor beleidsontwikkeling in de eigen organisatie</p>
+                    <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                      Dit instrument is meer dan een tool voor digitale soevereiniteit. Het laat zien hoe je beleid en de toepassing daarvan
+                      kunt ontwerpen, verwerken en gebruiken in een hedendaagse manier die aansluit bij de eigen organisatie.
+                      Ontwikkeld in nauwe samenwerking met een AI-assistent, in enkele weken gebouwd van nul tot werkend product,
+                      en direct inzetbaar voor het team — zonder externe leverancier, zonder IT-ticket, zonder lang traject.
+                    </p>
+                    <p className="text-xs leading-relaxed mt-2" style={{ color:"#6b7280" }}>
+                      Dit is de praktijk van digitale geletterdheid: technologie begrijpen, zelf regie voeren, en instrumenten bouwen
+                      die passen bij wat de organisatie nodig heeft.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </Section>
 
             <Section title="Gebruikte frameworks">
@@ -6294,13 +6367,13 @@ ${(function(){
                     tip:"Begin met de applicaties die je het meest kritisch acht — je kunt er altijd meer toevoegen." },
                   { n:"2", icon:"📋", title:"DAAF Quick Scan invullen",
                     txt:'Open de applicatie en ga naar Stap 1. Je ziet 8 vragen verdeeld over drie niveaus: Risico, Mitigatie en Belang. Klik op de score (1–5) die het best past. Per vraag staat een uitgebreide toelichting en omschrijving per score.',
-                    tip:"De live sidebar rechtsboven toont direct hoe je scores uitpakken in de einduitkomst." },
+                    tip:"Voeg een motivatie toe bij elke vraag — dat maakt de score veel waardevoller voor toekomstige reviews." },
                   { n:"3", icon:"🔍", title:"DICTU Soevereiniteitscheck invullen",
                     txt:'Ga naar Stap 2 van het assessment. Vier vragen over dataresidency, technische beveiliging, juridische bescherming en EU-infrastructuur. Scores worden direct zichtbaar in de kleurenbalk op het dashboard.',
                     tip:"Voeg per vraag een motivatietekst toe — die wordt meegenomen in de Excel en PDF export." },
                   { n:"4", icon:"📊", title:"Dashboard en vergelijking lezen",
                     txt:'Na het invullen van meerdere applicaties toont het dashboard het volledige portfolio. Het autonomiekwadrant laat zien welke applicaties urgente aandacht vragen. Het tabblad Vergelijking plaatst alle applicaties naast elkaar.',
-                    tip:"Klik op een punt in het kwadrant om direct naar het assessment van die applicatie te gaan." },
+                    tip:"Gebruik de filterknopjes op het Dashboard om applicaties te verbergen en zo de vergelijking scherper te maken." },
                 ].map(s => (
                   <div key={s.n} className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                     <div className="flex gap-3">
@@ -6324,7 +6397,7 @@ ${(function(){
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                   <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>📥 Excel exporteren</p>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
-                    Klik op "Exporteer Excel" in de header. Het bestand bevat vijf tabbladen:
+                    Klik op "Exporteer Excel" op het Dashboard. Het bestand bevat vijf tabbladen:
                   </p>
                   {["Overzicht — alle scores per applicatie", "DAAF scores — per indicator inclusief motivatie", "DICTU scores — per vraag inclusief motivatie", "Vragenlijst — alle vragen met normen", "Motivaties — volledig overzicht toelichtingen"].map(t => (
                     <div key={t} className="flex gap-2 text-xs mb-1">
@@ -6336,7 +6409,7 @@ ${(function(){
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                   <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>📄 PDF exporteren</p>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
-                    Klik op de PDF-knop in het dashboard (per applicatie) of boven het kwadrant (volledig portfolio). De PDF bevat:
+                    Klik op de PDF-knop op het Dashboard. Met de filterknopjes bepaal je of je een enkelvoudig rapport (één app) of een portfoliorapport (meerdere apps) wilt. De PDF bevat:
                   </p>
                   {["Voorblad met naam, datum en versie", "Inhoudsopgave", "Frameworkuitleg (DAAF + DICTU)", "Scores, kwadrantpositie en aanbevelingen per app"].map(t => (
                     <div key={t} className="flex gap-2 text-xs mb-1">
