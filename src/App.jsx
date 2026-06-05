@@ -1177,7 +1177,7 @@ function SovBar({ score5 }) {
 const BTN_COLORS_INV = ["#16a34a","#84cc16","#ca8a04","#ea580c","#dc2626"];
 const BTN_COLORS_FWD = ["#dc2626","#ea580c","#ca8a04","#84cc16","#16a34a"];
 
-function ScoreBtn({ s, selected, label, desc, dir, onClick }) {
+function ScoreBtn({ s, selected, label, desc, dir, onClick, readOnly = false }) {
   const colors = dir === "fwd" ? BTN_COLORS_FWD : BTN_COLORS_INV;
   const c = colors[s - 1];
   return (
@@ -1192,7 +1192,7 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick }) {
   );
 }
 
-function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondaryName = false, appName = "", appNameSecondary = "" }) {
+function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondaryName = false, appName = "", appNameSecondary = "", readOnly = false }) {
   // Bereken de weergavenaam op basis van de toggle
   const displayedNote = React.useMemo(() => {
     if (!note || !appName || !appNameSecondary || appName === appNameSecondary) return note;
@@ -1226,7 +1226,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
       )}
       <div className="flex gap-1.5">
         {q.scores.map(({ s, label, desc }) => (
-          <ScoreBtn key={s} s={s} selected={value === s} label={label} desc={desc} dir={dir} onClick={() => onChange(s)} />
+          <ScoreBtn key={s} s={s} selected={value === s} label={label} desc={desc} dir={dir} onClick={() => !readOnly && onChange(s)} readOnly={readOnly} />
         ))}
       </div>
       {value > 0 && (
@@ -1247,7 +1247,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
         <textarea
           value={displayedNote || ""}
           onChange={e => {
-            if (!onNoteChange) return;
+            if (!onNoteChange || readOnly) return;
             // Sla altijd op met de primaire naam — zet secundaire terug als die actief is
             let tekst = e.target.value;
             if (useSecondaryName && appNameSecondary && appName && appName !== appNameSecondary) {
@@ -1261,8 +1261,8 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
             width:"100%", fontSize:11, padding:"7px 10px",
             border:"1px solid #D0E4F7", borderRadius:4,
             color:"#374151", lineHeight:1.5, resize:"vertical",
-            background: note ? "#f0fdf4" : "#f8fafc",
-            borderColor: note ? "#86efac" : "#D0E4F7",
+            background: readOnly ? "#f3f4f6" : (note ? "#f0fdf4" : "#f8fafc"),
+            borderColor: readOnly ? "#e5e7eb" : (note ? "#86efac" : "#D0E4F7"),
             outline:"none", fontFamily:"inherit", boxSizing:"border-box"
           }}
           onFocus={e => e.target.style.borderColor = "#1A56A0"}
@@ -1763,6 +1763,7 @@ function App() {
 
   // Beheer (admin) state
   const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [assessReadOnly, setAssessReadOnly] = useState(true); // true = alleen lezen, false = bewerken
   const [showChangelog, setShowChangelog] = useState(false);
   const [showDeleteAll, setShowDeleteAll] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
@@ -1919,6 +1920,7 @@ function App() {
     setShowModal(false);
     setSelId(a.id);
     setStep(0);
+    setAssessReadOnly(false); // Nieuwe app: direct in bewerkingsmodus
     setView("assess");
   }
 
@@ -3440,7 +3442,7 @@ ${(function(){
         id: a.id
       }));
 
-    const handleKwClick = (id) => { setSelId(id); setStep(0); setView("assess"); };
+    const handleKwClick = (id) => { setSelId(id); setStep(0); setAssessReadOnly(true); setView("assess"); };
 
     return (
       <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
@@ -3616,7 +3618,7 @@ ${(function(){
                   const lbl = scoreLabel(a.sc.autonomyScore);
                   return (
                     <div key={a.id}
-                      onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
+                      onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}
                       className="cursor-pointer transition-all"
                       style={{ background:"#fff", borderRadius:4, padding:14, border:"1px solid #D0E4F7", borderLeft:`4px solid ${scoreColor(a.sc.autonomyScore)}` }}
                       onMouseEnter={e=>e.currentTarget.style.boxShadow="0 2px 10px rgba(26,86,160,0.15)"}
@@ -3789,7 +3791,7 @@ ${(function(){
                       </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
-                      <button onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
+                      <button onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}
                         className="text-white text-xs px-3 py-1.5 font-medium"
                         style={{ background:"#1A56A0", borderRadius:4 }}>
                         Assessment openen
@@ -3826,6 +3828,24 @@ ${(function(){
               <span className="text-gray-300">›</span>
               <h2 className="font-semibold truncate" style={{ color:"#0C2340" }}>{displayName(selApp)}</h2>
             </div>
+
+            {/* Readonly banner */}
+            {assessReadOnly && (
+              <div className="flex items-center justify-between px-4 py-2.5 rounded mb-4"
+                style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+                <div className="flex items-center gap-2">
+                  <span style={{ fontSize:16 }}>🔒</span>
+                  <span className="text-xs font-semibold" style={{ color:"#92400e" }}>
+                    Alleen-lezen — scores wijzigen kan via Beheer
+                  </span>
+                </div>
+                <button onClick={() => setView("admin")}
+                  className="text-xs px-3 py-1.5 font-semibold"
+                  style={{ background:"#1A56A0", color:"white", borderRadius:4 }}>
+                  Naar Beheer →
+                </button>
+              </div>
+            )}
 
             {/* Step tabs */}
             <div className="flex gap-2 mb-5">
@@ -3889,8 +3909,9 @@ ${(function(){
                             <QuestionCard key={q.key} q={q} value={selApp.scores[q.key] || 0}
                               dir={lv === "Mitigatie" ? "fwd" : "inv"}
                               note={(selApp.notes || {})[q.key] || ""}
-                              onNoteChange={t => setNote(selApp.id, q.key, t)}
-                              onChange={v => setScore(selApp.id, q.key, v)}
+                              onNoteChange={t => !assessReadOnly && setNote(selApp.id, q.key, t)}
+                              onChange={v => !assessReadOnly && setScore(selApp.id, q.key, v)}
+                              readOnly={assessReadOnly}
                               useSecondaryName={useSecondaryName}
                               appName={selApp.name}
                               appNameSecondary={selApp.nameSecondary || ""} />
@@ -3927,8 +3948,9 @@ ${(function(){
                     <QuestionCard key={q.key} q={q} value={selApp.scores[q.key] || 0}
                       dir="fwd"
                       note={(selApp.notes || {})[q.key] || ""}
-                      onNoteChange={t => setNote(selApp.id, q.key, t)}
-                      onChange={v => setScore(selApp.id, q.key, v)}
+                      onNoteChange={t => !assessReadOnly && setNote(selApp.id, q.key, t)}
+                      onChange={v => !assessReadOnly && setScore(selApp.id, q.key, v)}
+                      readOnly={assessReadOnly}
                       useSecondaryName={useSecondaryName}
                       appName={selApp.name}
                       appNameSecondary={selApp.nameSecondary || ""} />
@@ -4518,7 +4540,7 @@ ${(function(){
                   const lbl = scoreLabel(s.autonomyScore);
                   return (
                     <tr key={a.id} style={{ borderBottom:"1px solid #EBF3FF", cursor:"pointer" }}
-                      onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}>
+                      onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}>
                       <td className="py-2 px-2 font-medium" style={{ color:"#0C2340" }}>{displayName(a)}</td>
                       <td className="py-2 px-2 text-gray-500">{a.supplier}</td>
                       <td className="py-2 px-2">
@@ -4695,7 +4717,7 @@ ${(function(){
                       {/* Action buttons */}
                       <div className="flex gap-2 flex-shrink-0">
                         <button
-                          onClick={() => { setSelId(a.id); setStep(0); setView("assess"); }}
+                          onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}
                           className="text-white text-xs px-3 py-1.5 font-medium"
                           style={{ background:"#1A56A0", borderRadius:4 }}>
                           ✏️ Invullen
