@@ -6161,7 +6161,7 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION} · {vandaag}
-              <br/>Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum
+              
             </p>
           </div>
 
@@ -6303,14 +6303,23 @@ ${(function(){
             <Section title="Gebruikte frameworks">
               <div className="grid grid-cols-2 gap-3 mb-2">
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                    <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Digital Autonomy Assessment Framework</span>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
+                      <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Digital Autonomy Assessment Framework</span>
+                    </div>
+                    <a href="https://utrechtuniversity.github.io/digital-autonomy-assessment-tool/" target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-medium px-2 py-0.5"
+                      style={{ color:"#1A56A0", border:"1px solid #D0E4F7", borderRadius:3, textDecoration:"none", whiteSpace:"nowrap" }}>
+                      🔗 Open DAAF-tool ↗
+                    </a>
                   </div>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
-                    Ontwikkeld door de Universiteit Utrecht. Beoordeelt digitale autonomie ten opzichte van leveranciers in drie niveaus:
+                    Ontwikkeld door de <strong>Universiteit Utrecht</strong>. Beoordeelt digitale autonomie ten opzichte van leveranciers
+                    op 22 indicatoren verdeeld over 8 dimensies en 3 analyseniveaus. Het framework is gratis beschikbaar en
+                    continu in ontwikkeling.
                   </p>
-                  <div className="space-y-1">
+                  <div className="space-y-1 mb-3">
                     {[
                       { lv:"Niveau 1 · Risico (A, B)",       txt:"Jurisdictie leverancier, hosting & datalocatie, vendor concentratie.",   c:"#dc2626" },
                       { lv:"Niveau 2 · Mitigatie (C, D, E)", txt:"Alternatieven beschikbaar, kennis in huis, contractuele bescherming.",   c:"#26B5AE" },
@@ -6322,17 +6331,34 @@ ${(function(){
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs mt-2 italic" style={{ color:"#9ca3af" }}>Elke dimensie scoort 1–5. Autonomiescore (1–10) = Mitigatie ÷ (Risico × Belang), logaritmisch genormaliseerd.</p>
+                  <div className="rounded p-2 mb-2" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
+                    <p className="text-xs font-semibold mb-0.5" style={{ color:"#92400e" }}>🧪 Quickscan vs. volledige scan</p>
+                    <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                      Dit prototype gebruikt de <strong>DAAF Quickscan</strong> — 8 kernindicatoren (één per dimensie) voor een snelle indicatie.
+                      De volledige DAAF-scan beoordeelt <strong>22 indicatoren</strong> voor een diepgaandere analyse.
+                      In een vervolg op dit prototype wordt de uitgebreide scan geïmplementeerd voor een completer en robuuster beeld.
+                    </p>
+                  </div>
+                  <p className="text-xs italic" style={{ color:"#9ca3af" }}>Autonomiescore (1–10) = Mitigatie ÷ (Risico × Belang), logaritmisch genormaliseerd.</p>
                 </div>
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #26B5AE44" }}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                    <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Dienst ICT Uitvoering</span>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
+                      <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Toetsingsinstrument Soevereiniteit Clouddiensten</span>
+                    </div>
+                    <a href="https://www.dictu.nl/sites/default/files/bestanden/website/DICTU%20Toetsingsinstrument%20Soevereiniteit%20Clouddiensten%20v1.0.1.pdf" target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-medium px-2 py-0.5"
+                      style={{ color:"#26B5AE", border:"1px solid #26B5AE44", borderRadius:3, textDecoration:"none", whiteSpace:"nowrap" }}>
+                      🔗 Open DICTU-framework ↗
+                    </a>
                   </div>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
-                    Framework van het Ministerie van EZK (Rijksoverheid). Vier vragen over juridische en technische bescherming van klantdata:
+                    Gepubliceerd door <strong>DICTU (Dienst ICT Uitvoering)</strong> van het Ministerie van Economische Zaken en Klimaat.
+                    Het volledige instrument beoordeelt clouddiensten op vijf dimensies: juridisch, data & AI, technologie, operationeel en mens.
+                    NHL Stenden past de vier meest relevante indicatoren toe:
                   </p>
-                  <div className="space-y-1">
+                  <div className="space-y-1 mb-2">
                     {[
                       { k:"2.1", lbl:"Dataresidency",         txt:"Staat alle data (incl. back-ups) uitsluitend in de EU?" },
                       { k:"2.2", lbl:"Technische beveiliging", txt:"Zijn er verifieerbare garanties dat niemand de data kan inzien?" },
@@ -6345,7 +6371,102 @@ ${(function(){
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs mt-2 italic" style={{ color:"#9ca3af" }}>Score 1–5 per vraag. Gemiddelde = soevereiniteitsscore op de kleurenbalk (rood → groen).</p>
+                  <p className="text-xs italic" style={{ color:"#9ca3af" }}>Score 1–5 per vraag. Gemiddelde = soevereiniteitsscore op de kleurenbalk (rood → groen).</p>
+                </div>
+              </div>
+            </Section>
+
+            <Section title="Bronnen en team">
+              <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-sm font-bold mb-2" style={{ color:"#0C2340" }}>📚 Wetenschappelijke en beleidsmatige bronnen</p>
+                <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
+                  Dit instrument is gebouwd op twee erkende en publiek beschikbare normenkaders. Ze vormen de inhoudelijke ruggengraat
+                  van alles wat je in deze tool ziet — van de score-knoppen tot de PDF-rapporten. Zonder deze frameworks zou dit instrument
+                  niet hebben bestaan.
+                </p>
+                <div className="space-y-3">
+                  <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold mb-1" style={{ color:"#1A56A0" }}>
+                          Digital Autonomy Assessment Framework (DAAF) — Universiteit Utrecht
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                          Ontwikkeld door Tim van Neerbos (lead enterprise architect) en prof. Albert Meijer (Bestuurskunde) aan de Universiteit Utrecht.
+                          Het framework meet 22 indicatoren verdeeld over 8 dimensies en 3 niveaus, en is gratis beschikbaar voor alle organisaties.
+                          Dit prototype gebruikt de quickscan-variant — de volledige scan wordt in een vervolgfase geïmplementeerd.
+                        </p>
+                      </div>
+                      <a href="https://www.uu.nl/organisatie/digitale-autonomie/tools" target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize:11, color:"#1A56A0", textDecoration:"none", border:"1px solid #D0E4F7",
+                                 padding:"3px 8px", borderRadius:3, whiteSpace:"nowrap", flexShrink:0 }}>
+                        🔗 uu.nl/daaf ↗
+                      </a>
+                    </div>
+                  </div>
+                  <div className="rounded p-3" style={{ background:"#f0f9f9", border:"1px solid #26B5AE44" }}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="text-xs font-bold mb-1" style={{ color:"#26B5AE" }}>
+                          Toetsingsinstrument Soevereiniteit Clouddiensten — DICTU (Ministerie van EZK)
+                        </p>
+                        <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
+                          Gepubliceerd door de Dienst ICT Uitvoering (DICTU) van het Ministerie van Economische Zaken en Klimaat in 2026.
+                          Het instrument beoordeelt clouddiensten op vijf dimensies: juridisch, data & AI, technologie, operationeel en mens —
+                          elk met vijf oplopende soevereiniteitsniveaus. Combineert elementen uit het EuroStack-initiatief en het
+                          Cloud Sovereignty Framework van de Europese Commissie.
+                        </p>
+                      </div>
+                      <a href="https://www.dictu.nl/sites/default/files/bestanden/website/DICTU%20Toetsingsinstrument%20Soevereiniteit%20Clouddiensten%20v1.0.1.pdf"
+                        target="_blank" rel="noopener noreferrer"
+                        style={{ fontSize:11, color:"#26B5AE", textDecoration:"none", border:"1px solid #26B5AE44",
+                                 padding:"3px 8px", borderRadius:3, whiteSpace:"nowrap", flexShrink:0 }}>
+                        🔗 DICTU-rapport ↗
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>👥 Betrokken bij dit product</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs font-semibold mb-2" style={{ color:"#1A56A0" }}>Programma Digitale Samenhang</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { naam:"E. van Gorkum",  rol:"Kwartiermaker Digitale Samenhang — initiatiefnemer en ontwikkelaar" },
+                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Soevereiniteit" },
+                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Soevereiniteit" },
+                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Soevereiniteit" },
+                        { naam:"C. Segers",       rol:"Portefeuillehouder Digitale Samenhang" },
+                      ].map(p => (
+                        <div key={p.naam} className="flex gap-2 text-xs">
+                          <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
+                          <span style={{ color:"#6b7280" }}>{p.rol}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold mb-2" style={{ color:"#26B5AE" }}>Team Infrastructuur (DLWO) — server & migratie</p>
+                    <div className="space-y-1.5">
+                      {[
+                        { naam:"Jeffrey Klein",   rol:"Infrastructuur engineer — migratie naar DGX Spark" },
+                        { naam:"Dolf Keimpema",   rol:"Infrastructuur engineer — migratie naar DGX Spark" },
+                      ].map(p => (
+                        <div key={p.naam} className="flex gap-2 text-xs">
+                          <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
+                          <span style={{ color:"#6b7280" }}>{p.rol}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs font-semibold mt-3 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
+                    <div className="flex gap-2 text-xs">
+                      <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>Claude (Anthropic)</span>
+                      <span style={{ color:"#6b7280" }}>AI-ontwikkelassistent — volledige applicatiebouw</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Section>
@@ -6645,7 +6766,7 @@ ${(function(){
           <div className="rounded p-3 text-center mt-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit
-              <br/>Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum · {VERSION}
+               · {VERSION}
             </p>
           </div>
 
@@ -6680,11 +6801,9 @@ ${(function(){
           <div>
             <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Soevereiniteitsassessment</h1>
             <p style={{ fontSize:11, color:"#7DD3D0" }}>
-              Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit
+              Prototype · Ambassadeurslijn Digitale Soevereiniteit
             </p>
-            <p style={{ fontSize:10, color:"rgba(125,211,208,0.7)", marginTop:1 }}>
-              Ambassadeurs: J. Haije · E. Rolf · J. Blom · Kwartiermaker: E. van Gorkum
-            </p>
+
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -6751,16 +6870,30 @@ ${(function(){
             { k:"bestuur",   label:"📊 Portfolio" },
             { k:"about",     label:"ℹ️ Over & uitleg" },
             { k:"transparantie", label:"🔍 Over dit product" },
+            { k:"SPACER",    label:"" },
             { k:"admin",     label:"🔐 Beheer" },
-          ].map(t => (
-            <button key={t.k} onClick={() => setView(t.k)}
-              className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
-              style={view === t.k
-                ? { borderColor:"#26B5AE", color:"#fff", background:"rgba(255,255,255,0.12)" }
-                : { borderColor:"transparent", color:"rgba(255,255,255,0.75)" }}>
-              {t.label}
-            </button>
-          ))}
+          ].map(t => {
+            if (t.k === "SPACER") return <div key="spacer" className="flex-1"/>;
+            if (t.k === "admin") return (
+              <button key={t.k} onClick={() => setView(t.k)}
+                className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ml-2"
+                style={view === t.k
+                  ? { borderColor:"#26B5AE", color:"#fff", background:"rgba(255,255,255,0.18)", borderRadius:"4px 4px 0 0" }
+                  : { borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.6)",
+                      background:"rgba(255,255,255,0.07)", borderRadius:"4px 4px 0 0" }}>
+                {t.label}
+              </button>
+            );
+            return (
+              <button key={t.k} onClick={() => setView(t.k)}
+                className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+                style={view === t.k
+                  ? { borderColor:"#26B5AE", color:"#fff", background:"rgba(255,255,255,0.12)" }
+                  : { borderColor:"transparent", color:"rgba(255,255,255,0.75)" }}>
+                {t.label}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
