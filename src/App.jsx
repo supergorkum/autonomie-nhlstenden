@@ -2622,8 +2622,8 @@ function App() {
   </div>`;
 
     const naamModus = useSecondaryName && visible.some(a => a.nameSecondary)
-      ? `Secundaire namen actief`
-      : `Primaire namen actief`;
+      ? `Discreet (geanonimiseerd)`
+      : `Helder (echte namen)`;
 
 
     // ── Verbeteracties HTML (berekend vóór de PDF template) ────────────────
@@ -6702,7 +6702,7 @@ ${(function(){
                     { icon:"✏️", txt:"Applicatiegegevens aanpassen (naam, leverancier, categorie, eigenaar)" },
                     { icon:"🗑️", txt:"Applicaties verwijderen uit het portfolio" },
                     { icon:"👁️", txt:"Volledig overzicht per applicatie bekijken inclusief alle scores en motivaties" },
-                    { icon:"🏷️", txt:"Secundaire (anonieme) namen toewijzen voor gebruik in presentaties" },
+                    { icon:"🔒", txt:"Anonieme presentatienamen toewijzen voor de Discreet-modus (toggle 🔓 Helder / 🔒 Discreet)" },
                   ].map(t => (
                     <div key={t.txt} className="flex gap-2 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                       <span style={{ fontSize:14, flexShrink:0 }}>{t.icon}</span>
@@ -6711,9 +6711,7 @@ ${(function(){
                   ))}
                 </div>
                 <div className="rounded p-2.5 text-xs" style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e" }}>
-                  <strong>Secundaire namen:</strong> gebruik de toggle in de header om te wisselen tussen primaire
-                  (echte) en secundaire (anonieme) namen. Handig voor presentaties aan externen. De toggle is
-                  alleen zichtbaar als er secundaire namen zijn toegewezen in de beheeromgeving.
+                  <strong>Helder / Discreet:</strong> gebruik de toggle in de header om te wisselen tussen de echte namen (🔓 Helder) en anonieme presentatienamen (🔒 Discreet). Handig bij presentaties aan externen. De toggle verschijnt alleen als er anonieme namen zijn ingesteld via de beheeromgeving.
                 </div>
               </div>
 
@@ -6839,8 +6837,8 @@ ${(function(){
                 color: useSecondaryName ? "#f8b87a" : "#94a3b8",
                 transition: "all 0.2s",
               }}
-              title={useSecondaryName ? "Schakel naar primaire namen" : "Schakel naar secundaire namen"}>
-              <span style={{ fontSize:11 }}>🏷</span>
+              title={useSecondaryName ? "Schakel naar transparante weergave" : "Schakel naar discrete weergave"}>
+              <span style={{ fontSize:11 }}>{useSecondaryName ? "🔒" : "🔓"}</span>
               {/* Schuifje */}
               <div style={{
                 width: 28, height: 16, borderRadius: 8, position: "relative",
@@ -6856,7 +6854,7 @@ ${(function(){
                 }}/>
               </div>
               <span style={{ fontSize:10, letterSpacing: "0.02em" }}>
-                {useSecondaryName ? "Secundair" : "Primair"}
+                {useSecondaryName ? "Discreet" : "Helder"}
               </span>
             </button>
           )}
