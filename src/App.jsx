@@ -1826,21 +1826,7 @@ function App() {
   const [form,       setForm]      = useState({ name:"", nameSecondary:"", cat:"", supplier:"", owner:"", appNotes:"" });
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
 
-  // Automatisch verbergen als er meer dan 10 apps zijn: standaard laatste 10 zichtbaar
-  React.useEffect(function() {
-    if (apps.length <= 10) {
-      setHiddenApps(new Set());
-      return;
-    }
-    // Bewaar huidige selectie als die al is aangepast
-    setHiddenApps(function(prev) {
-      // Als er al een handmatige selectie is, niet overschrijven
-      if (prev.size > 0) return prev;
-      // Standaard: laatste 10 zichtbaar, rest verborgen
-      const toHide = new Set(apps.slice(0, apps.length - 10).map(function(a) { return a.id; }));
-      return toHide;
-    });
-  }, [apps.length]);
+
   const [compareHidden, setCompareHidden] = useState(new Set()); // IDs verborgen in vergelijking
 
   // Beheer (admin) state
@@ -3465,12 +3451,13 @@ ${(function(){
       setHiddenApps(prev => {
         const next = new Set(prev);
         if (next.has(id)) {
-          // Zichtbaar maken: alleen als het onder de max blijft
+          // Zichtbaar maken: controleer max
           const currentVisible = apps.filter(a => !next.has(a.id)).length;
-          if (currentVisible >= MAX_VISIBLE) return prev; // max bereikt
+          if (currentVisible >= MAX_VISIBLE) return prev; // max voor leesbaarheid grafieken
           next.delete(id);
         } else {
-          if (apps.filter(a => !next.has(a.id)).length <= 1) return prev; // min bewaken
+          // Verbergen: minimaal 1 zichtbaar houden
+          if (apps.filter(a => !next.has(a.id)).length <= 1) return prev;
           next.add(id);
         }
         return next;
@@ -3563,15 +3550,15 @@ ${(function(){
             <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
-                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Selectie</span>
+                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Grafiek-selectie</span>
                 <span className="text-xs px-2 py-0.5 rounded font-semibold"
-                  style={{ background: visibleApps.length >= MAX_VISIBLE ? "#fee2e2" : "#dcfce7",
-                           color: visibleApps.length >= MAX_VISIBLE ? "#b91c1c" : "#15803d" }}>
-                  {visibleApps.length} / {MAX_VISIBLE} geselecteerd
+                  style={{ background: visibleApps.length >= MAX_VISIBLE ? "#fffbeb" : "#f0f9f9",
+                           color: visibleApps.length >= MAX_VISIBLE ? "#92400e" : "#0f766e" }}>
+                  {visibleApps.length} van {apps.length} zichtbaar in grafieken
                 </span>
-                {apps.length > MAX_VISIBLE && (
+                {apps.length > MAX_VISIBLE && visibleApps.length >= MAX_VISIBLE && (
                   <span style={{ fontSize:10, color:"#9ca3af" }}>
-                    max {MAX_VISIBLE} tegelijk zichtbaar
+                    max {MAX_VISIBLE} voor leesbaarheid
                   </span>
                 )}
               </div>
