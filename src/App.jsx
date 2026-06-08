@@ -3949,7 +3949,11 @@ ${(function(){
             </div>
           ) : (
             <div className="space-y-3">
-              {apps.map(a => {
+              {[...apps].sort((a, b) => {
+                const na = (useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).toLowerCase();
+                const nb = (useSecondaryName && b.nameSecondary ? b.nameSecondary : b.name).toLowerCase();
+                return na.localeCompare(nb, "nl", { sensitivity:"base" });
+              }).map(a => {
                 const sc  = calcScores(a.scores);
                 const lbl = scoreLabel(sc.autonomyScore);
                 return (
@@ -4891,7 +4895,11 @@ ${(function(){
             </div>
           ) : (
             <div className="space-y-3">
-              {apps.map(a => {
+              {[...apps].sort((a, b) => {
+                const na = (useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).toLowerCase();
+                const nb = (useSecondaryName && b.nameSecondary ? b.nameSecondary : b.name).toLowerCase();
+                return na.localeCompare(nb, "nl", { sensitivity:"base" });
+              }).map(a => {
                 const sc  = calcScores(a.scores);
                 const lbl = scoreLabel(sc.autonomyScore);
                 const allQ = [...DAAF, ...DICTU];
