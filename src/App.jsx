@@ -1803,6 +1803,22 @@ function App() {
   const [showModal,  setShowModal] = useState(false);
   const [form,       setForm]      = useState({ name:"", nameSecondary:"", cat:"", supplier:"", owner:"", appNotes:"" });
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
+
+  // Automatisch verbergen als er meer dan 10 apps zijn: standaard laatste 10 zichtbaar
+  React.useEffect(function() {
+    if (apps.length <= 10) {
+      setHiddenApps(new Set());
+      return;
+    }
+    // Bewaar huidige selectie als die al is aangepast
+    setHiddenApps(function(prev) {
+      // Als er al een handmatige selectie is, niet overschrijven
+      if (prev.size > 0) return prev;
+      // Standaard: laatste 10 zichtbaar, rest verborgen
+      const toHide = new Set(apps.slice(0, apps.length - 10).map(function(a) { return a.id; }));
+      return toHide;
+    });
+  }, [apps.length]);
   const [compareHidden, setCompareHidden] = useState(new Set()); // IDs verborgen in vergelijking
 
   // Beheer (admin) state
@@ -3422,19 +3438,34 @@ ${(function(){
   function Dashboard() {
     // ── Zichtbare applicaties (gefilterd op hiddenApps) ─────────
     const visibleApps = apps.filter(a => !hiddenApps.has(a.id));
-    const minVisible  = 1;
+
+    const MAX_VISIBLE = 10;
 
     function toggleApp(id) {
       setHiddenApps(prev => {
         const next = new Set(prev);
         if (next.has(id)) {
-          next.delete(id); // altijd zichtbaar maken mag
+          // Zichtbaar maken: alleen als het onder de max blijft
+          const currentVisible = apps.filter(a => !next.has(a.id)).length;
+          if (currentVisible >= MAX_VISIBLE) return prev; // max bereikt
+          next.delete(id);
         } else {
-          if (visibleApps.length <= minVisible) return prev; // minimum bewaken
+          if (apps.filter(a => !next.has(a.id)).length <= 1) return prev; // min bewaken
           next.add(id);
         }
         return next;
       });
+    }
+
+    function selectLaatste10() {
+      const toHide = new Set(apps.slice(0, Math.max(0, apps.length - MAX_VISIBLE)).map(a => a.id));
+      setHiddenApps(toHide);
+    }
+
+    function selectAlles() {
+      if (apps.length <= MAX_VISIBLE) {
+        setHiddenApps(new Set());
+      }
     }
 
     const scored = visibleApps.map(a => ({ ...a, sc: calcScores(a.scores) }));
@@ -3512,31 +3543,40 @@ ${(function(){
           {apps.length > 2 && (
             <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Dashboard filter</span>
-                <span style={{ fontSize:10, color:"#9ca3af" }}>
-                  — {visibleApps.length} van {apps.length} zichtbaar
-                  {hiddenApps.size > 0 && ` · ${hiddenApps.size} verborgen`}
+              <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Selectie</span>
+                <span className="text-xs px-2 py-0.5 rounded font-semibold"
+                  style={{ background: visibleApps.length >= MAX_VISIBLE ? "#fee2e2" : "#dcfce7",
+                           color: visibleApps.length >= MAX_VISIBLE ? "#b91c1c" : "#15803d" }}>
+                  {visibleApps.length} / {MAX_VISIBLE} geselecteerd
                 </span>
+                {apps.length > MAX_VISIBLE && (
+                  <span style={{ fontSize:10, color:"#9ca3af" }}>
+                    max {MAX_VISIBLE} tegelijk zichtbaar
+                  </span>
+                )}
               </div>
               <div className="flex gap-2 flex-wrap flex-1">
                 {allScored.map((a, i) => {
                   const hidden  = hiddenApps.has(a.id);
-                  const isLast2 = !hidden && visibleApps.length <= minVisible;
                   const col     = COLORS[i % COLORS.length];
                   return (
                     <button key={a.id}
                       onClick={() => toggleApp(a.id)}
-                      disabled={isLast2 && !hidden}
-                      title={isLast2 && !hidden ? "Minimaal 1 applicatie moet zichtbaar blijven" : hidden ? "Klik om zichtbaar te maken" : "Klik om te verbergen"}
+                      disabled={(!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)}
+                      title={
+                        !hidden && visibleApps.length <= 1 ? "Minimaal 1 applicatie moet zichtbaar blijven" :
+                        hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt — verberg eerst een andere` :
+                        hidden ? "Klik om toe te voegen aan selectie" : "Klik om uit selectie te verwijderen"
+                      }
                       className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium transition-all"
                       style={{
                         borderRadius: 4,
                         border: `2px solid ${hidden ? "#e5e7eb" : col}`,
                         background: hidden ? "#f9fafb" : `${col}18`,
                         color: hidden ? "#9ca3af" : col,
-                        opacity: isLast2 && !hidden ? 0.5 : 1,
-                        cursor: isLast2 && !hidden ? "not-allowed" : "pointer",
+                        opacity: ((!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)) ? 0.4 : 1,
+                        cursor: ((!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)) ? "not-allowed" : "pointer",
                         textDecoration: hidden ? "line-through" : "none"
                       }}>
                       <span className="w-2 h-2 rounded-full flex-shrink-0"
@@ -3549,13 +3589,22 @@ ${(function(){
                   );
                 })}
               </div>
-              {hiddenApps.size > 0 && (
-                <button onClick={() => setHiddenApps(new Set())}
-                  className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
-                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
-                  Alles tonen
-                </button>
-              )}
+              <div className="flex gap-2 flex-shrink-0">
+                {apps.length > MAX_VISIBLE && (
+                  <button onClick={selectLaatste10}
+                    className="text-xs px-2.5 py-1.5 font-medium"
+                    style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                    Laatste {MAX_VISIBLE}
+                  </button>
+                )}
+                {apps.length <= MAX_VISIBLE && hiddenApps.size > 0 && (
+                  <button onClick={() => setHiddenApps(new Set())}
+                    className="text-xs px-2.5 py-1.5 font-medium"
+                    style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                    Alles tonen
+                  </button>
+                )}
+              </div>
             </div>
           )}
 
@@ -4469,7 +4518,7 @@ ${(function(){
                   const col     = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"][i % 6];
                   return (
                     <button key={a.id} onClick={() => toggleCompare(a.id)}
-                      disabled={isLast2 && !hidden}
+                      disabled={(!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)}
                       title={isLast2 && !hidden ? "Minimaal 2 applicaties voor vergelijking" : ""}
                       className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium"
                       style={{
