@@ -915,7 +915,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
                       Niet-EU jurisdictie ({nonEU.length})
                     </p>
                     <p style={{ fontSize:9, color:"#7f1d1d", lineHeight:1.4 }}>
-                      {nonEU.map(a=>dName(a)).join(", ")}
+                      {nonEU.map(a=>a.name).join(", ")}
                     </p>
                   </div>
                 )}
