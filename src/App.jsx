@@ -35,6 +35,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 const VERSION = "v2.1";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
+const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -633,7 +634,6 @@ function KwadrantSVG({ kwData, onAppClick }) {
 // Links/rood = risico (laag is beter), rechts/groen = weerbaarheid (hoog is beter)
 function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
-  const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`;
 
   const dimScore = (app, letter) => {
     if (letter === "A") {
@@ -959,9 +959,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
 function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
   const svgRef = React.useRef(null);
-  // Genereer unieke kleur op basis van index via gouden hoek
-  const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`;
-
+  
   const dims = [
     { key:"2.1", label:"Data residency" },
     { key:"2.2", label:"Technische beveiliging" },
