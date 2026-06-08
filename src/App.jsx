@@ -637,10 +637,10 @@ function KwadrantSVG({ kwData, onAppClick }) {
         const cx = toX(d.x), cy = toY(d.y), col = scoreColor(d.score);
         return (
           <g key={d.id} style={{ cursor:"pointer" }} onClick={() => onAppClick(d.id)}>
-            <circle cx={cx} cy={cy} r={13} fill={col} fillOpacity={0.2} stroke={col} strokeWidth={2} />
-            <circle cx={cx} cy={cy} r={5} fill={col} />
-            <rect x={cx+10} y={cy-10} width={Math.min(d.name.length*6.5+8,120)} height={16} rx={3} fill="white" fillOpacity={0.88} />
-            <text x={cx+14} y={cy+2} fill={col} style={{ fontSize:10, fontWeight:600 }}>{d.name.substring(0,18)}</text>
+            <circle cx={cx} cy={cy} r={9} fill={col} fillOpacity={0.15} stroke={col} strokeWidth={1.5} />
+            <circle cx={cx} cy={cy} r={3.5} fill={col} />
+            <rect x={cx+8} y={cy-9} width={Math.min(d.name.length*5.5+6,110)} height={14} rx={2} fill="white" fillOpacity={0.9} />
+            <text x={cx+11} y={cy+1.5} fill={col} style={{ fontSize:9, fontWeight:600 }}>{d.name.substring(0,18)}</text>
           </g>
         );
       })}
@@ -3901,7 +3901,7 @@ ${(function(){
                 Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
               <div style={{ maxWidth:640, margin:"0 auto" }}>
-                <DictuRadarSVG apps={scored} W={580} H={320} useSecondaryName={useSecondaryName} />
+                <DictuRadarSVG apps={scored} W={660} H={420} useSecondaryName={useSecondaryName} />
               </div>
               {/* Legenda dimensies */}
               <div className="grid grid-cols-4 gap-2 mt-3">
@@ -5441,17 +5441,17 @@ ${(function(){
                 </div>
 
                 <div className="p-4">
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-3">
 
                     {/* Vestiging & jurisdictie */}
-                    <div>
+                    <div className="rounded p-3" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                       <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Vestiging & jurisdictie</p>
                       <p className="text-xs font-semibold mb-0.5" style={{ color:"#0C2340" }}>{s.jurisdictie}</p>
                       <p className="text-xs" style={{ color:"#6b7280" }}>{s.vestiging}</p>
                     </div>
 
                     {/* DAAF A1 */}
-                    <div>
+                    <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
                       <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A1 — Jurisdictie leverancier</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA1) }}>{s.daafA1}/5</span>
@@ -5463,7 +5463,7 @@ ${(function(){
                     </div>
 
                     {/* DAAF A3 */}
-                    <div>
+                    <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
                       <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A3 — Hosting & datalocatie</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA3) }}>{s.daafA3}/5</span>
