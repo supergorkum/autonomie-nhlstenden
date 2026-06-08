@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.2.1";
+const VERSION = "v2.2.1"; // UPLOAD-CHECK: kwadrant r=7 fontSize=12
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -5636,7 +5636,7 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
-              <br/>Prototype v2.1 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
+              <br/>Prototype v2.2 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
               <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: netlify.com/security, anthropic.com/privacy, github.com/security
             </p>
           </div>
