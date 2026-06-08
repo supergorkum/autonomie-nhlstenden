@@ -977,7 +977,10 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
 // Alle 4 assen hebben dezelfde richting: hoger = meer soeverein (goed)
 function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
+  const [hiddenInRadar, setHiddenInRadar] = React.useState(new Set());
   const svgRef = React.useRef(null);
+
+  const visibleAppsRadar = apps.filter((_, i) => !hiddenInRadar.has(i));
   
   const dims = [
     { key:"2.1", label:"Data residency" },
@@ -987,9 +990,12 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   ];
 
   const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
-  const cx = W / 2;
-  const cy = (H - 80) / 2 + 10;
-  const maxR = Math.min(W, H - 80) / 2 - 60;
+  // Ruimte voor legenda rechts
+  const LEGEND_W = 140;
+  const chartW = W - LEGEND_W;
+  const cx = chartW / 2;
+  const cy = (H - 20) / 2 + 10;
+  const maxR = Math.min(chartW, H - 40) / 2 - 48;
 
   const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
   const pt = (i, v) => {
@@ -1042,19 +1048,26 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const tipY = tip ? Math.max(tip.sy - TH - 18, 6) : 0;
 
   return (
-    <svg ref={svgRef} viewBox={`-20 0 ${W+40} ${H}`} width="100%"
+    <svg ref={svgRef} viewBox={`-10 -5 ${W+20} ${H+10}`} width="100%"
       style={{ display:"block", overflow:"visible", cursor:"crosshair" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTip(null)}>
 
-      {/* Grid */}
+      {/* Grid — subtiel, strak */}
+      <polygon points={dims.map((_, i) => pt(i, 5).join(",")).join(" ")}
+        fill="rgba(241,245,249,0.6)" stroke="none" />
       {LEVELS.map(lv => (
         <polygon key={lv}
           points={dims.map((_, i) => pt(i, lv).join(",")).join(" ")}
-          fill={lv === 5 ? "rgba(38,181,174,0.04)" : "none"}
-          stroke={lv === 5 ? "#26B5AE" : "#e5e7eb"}
-          strokeWidth={lv === 5 ? 1.5 : 0.8} />
+          fill="none"
+          stroke={lv === 5 ? "#cbd5e1" : "#e9ecef"}
+          strokeWidth={lv === 5 ? 0.8 : 0.4} />
       ))}
+      {/* Schaalcijfers langs bovenas */}
+      {LEVELS.map(lv => {
+        const [sx, sy] = pt(0, lv);
+        return <text key={lv} x={sx + 4} y={sy + 3} fontSize={7} fill="#94a3b8" fontFamily="system-ui">{lv}</text>;
+      })}
       {dims.map((_, i) => {
         const [x, y] = pt(i, 5);
         return <line key={i} x1={cx} y1={cy} x2={x} y2={y} stroke="#d1d5db" strokeWidth={1} />;
@@ -1065,49 +1078,49 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         return <text key={lv} x={x + 5} y={y + 3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>;
       })}
 
-      {/* Polygonen — lichte transparantie zodat overlappende vormen leesbaar blijven */}
-      {apps.map((app, ai) => {
-        const color  = appColor(ai);
+      {/* Polygonen — strak, dun, licht gevuld */}
+      {visibleAppsRadar.map((app, ai) => {
+        const origIdx = apps.indexOf(app);
+        const color = appColor(origIdx);
         const scores = dims.map(d => app.scores[d.key] || 0);
         if (scores.every(v => v === 0)) return null;
-        const poly   = dims.map((d, i) => pt(i, scores[i]).join(",")).join(" ");
+        const poly = dims.map((d, i) => pt(i, scores[i]).join(",")).join(" ");
         return (
           <polygon key={app.id || ai} points={poly}
-            fill={color} fillOpacity={0.08}
-            stroke={color} strokeWidth={2} strokeLinejoin="round"
-            strokeDasharray={ai > 4 ? "6 3" : "none"} />
+            fill={color} fillOpacity={0.07}
+            stroke={color} strokeWidth={1.5} strokeLinejoin="round"
+            strokeDasharray={ai > 4 ? "5 3" : "none"} />
         );
       })}
 
-      {/* Stippen — bij overlap kleine spiraalverschuiving zodat ze naast elkaar liggen */}
-      {apps.map((app, ai) => {
-        const color  = appColor(ai);
+      {/* Stippen — klein, strak, jitter bij overlap */}
+      {visibleAppsRadar.map((app, ai) => {
+        const origIdx = apps.indexOf(app);
+        const color = appColor(origIdx);
         const scores = dims.map(d => app.scores[d.key] || 0);
         return dims.map((d, i) => {
           const v = scores[i];
           if (v === 0) return null;
           const [basePx, basePy] = pt(i, v);
-          // Kleine spiraalverschuiving per app-index zodat gelijke scores naast elkaar staan
-          const jitterAngle = (ai * 2 * Math.PI / Math.max(apps.length, 1)) + axisAngle(i);
-          const jitterR = ai === 0 ? 0 : Math.min(ai * 3.5, 12);
+          const jitterAngle = (ai * 2 * Math.PI / Math.max(visibleAppsRadar.length, 1)) + axisAngle(i);
+          const jitterR = visibleAppsRadar.length <= 1 ? 0 : Math.min(ai * 3, 9);
           const px = basePx + Math.cos(jitterAngle) * jitterR;
           const py = basePy + Math.sin(jitterAngle) * jitterR;
-          const active = tip && tip.appName === app.name && tip.dimKey === d.key;
+          const active = tip && tip.appName === (useSecondaryName && app.nameSecondary ? app.nameSecondary : app.name) && tip.dimKey === d.key;
           return (
             <g key={`${ai}-${i}`}>
-              {/* Verbindingslijn van as-punt naar jitter-positie als er verschoven is */}
               {jitterR > 0 && (
                 <line x1={basePx} y1={basePy} x2={px} y2={py}
-                  stroke={color} strokeWidth={1} strokeOpacity={0.3} strokeDasharray="2 2" />
+                  stroke={color} strokeWidth={0.8} strokeOpacity={0.25} strokeDasharray="2 2" />
               )}
               <circle cx={px} cy={py}
-                r={active ? 8 : 6}
+                r={active ? 6 : 4}
                 fill={color} stroke="white"
-                strokeWidth={active ? 2.5 : 1.5}
-                opacity={0.9} />
+                strokeWidth={active ? 2 : 1}
+                opacity={0.95} />
               {active && (
-                <circle cx={px} cy={py} r={12}
-                  fill="none" stroke={color} strokeWidth={1.5} strokeOpacity={0.4} />
+                <circle cx={px} cy={py} r={9}
+                  fill="none" stroke={color} strokeWidth={1} strokeOpacity={0.35} />
               )}
             </g>
           );
@@ -1130,30 +1143,60 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         );
       })}
 
-      {/* Legenda — max 8 in SVG, de rest valt buiten */}
-      {apps.slice(0, 8).map((app, ai) => {
-        const color = appColor(ai);
-        const scores = dims.map(d => app.scores[d.key] || 0);
-        const heeftData = !scores.every(v => v === 0);
-        const maxToon = Math.min(apps.length, 8);
-        const lx = cx - ((maxToon - 1) * 110) / 2 + ai * 110;
-        return (
-          <g key={app.id || ai}>
-            <rect x={lx - 28} y={H - 12} width={9} height={9}
-              fill={heeftData ? color : "#d1d5db"} fillOpacity={heeftData ? 0.7 : 1} rx={2} />
-            <text x={lx - 15} y={H - 3} fontSize={9}
-              fill={heeftData ? "#374151" : "#9ca3af"} fontFamily="system-ui">
-              {dn(app, useSecondaryName).substring(0, 12)}{!heeftData ? " *" : ""}
-            </text>
-          </g>
-        );
-      })}
-      {apps.length > 8 && (
-        <text x={cx} y={H} textAnchor="middle" fontSize={9} fill="#9ca3af" fontFamily="system-ui"
-          fontStyle="italic">
-          + {apps.length - 8} meer — hover over het diagram voor namen
-        </text>
-      )}
+      {/* Legenda rechts in SVG als foreignObject — scrollbaar, met toggle per app */}
+      <foreignObject x={cx * 2 + 8} y={4} width={LEGEND_W - 8} height={H - 8}>
+        <div xmlns="http://www.w3.org/1999/xhtml"
+          style={{ height:"100%", overflowY:"auto", display:"flex", flexDirection:"column", gap:3, paddingRight:2 }}>
+          {apps.map((app, ai) => {
+            const color = appColor(ai);
+            const scores = dims.map(d => app.scores[d.key] || 0);
+            const heeftData = !scores.every(v => v === 0);
+            const isHidden = hiddenInRadar.has(ai);
+            return (
+              <button key={app.id || ai}
+                onClick={() => setHiddenInRadar(prev => {
+                  const next = new Set(prev);
+                  next.has(ai) ? next.delete(ai) : next.add(ai);
+                  return next;
+                })}
+                style={{
+                  display:"flex", alignItems:"center", gap:5,
+                  padding:"3px 6px", borderRadius:4, cursor:"pointer", textAlign:"left",
+                  background: isHidden ? "#f9fafb" : `${color}12`,
+                  border: `1px solid ${isHidden ? "#e5e7eb" : color}44`,
+                  opacity: !heeftData ? 0.4 : 1,
+                  flexShrink:0
+                }}>
+                <span style={{
+                  width:8, height:8, borderRadius:"50%", flexShrink:0,
+                  background: isHidden ? "#d1d5db" : color,
+                  border: `1.5px solid ${isHidden ? "#d1d5db" : color}`
+                }}/>
+                <span style={{
+                  fontSize:9, color: isHidden ? "#9ca3af" : "#374151",
+                  fontFamily:"system-ui", lineHeight:1.3,
+                  textDecoration: isHidden ? "line-through" : "none",
+                  overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:100
+                }}>
+                  {dn(app, useSecondaryName)}
+                </span>
+              </button>
+            );
+          })}
+          {hiddenInRadar.size > 0 && (
+            <button onClick={() => setHiddenInRadar(new Set())}
+              style={{ fontSize:8, color:"#1A56A0", background:"#EBF3FF", border:"1px solid #D0E4F7",
+                       borderRadius:3, padding:"2px 6px", cursor:"pointer", marginTop:2 }}>
+              Alles tonen
+            </button>
+          )}
+          <div style={{ borderTop:"1px solid #f1f5f9", marginTop:4, paddingTop:4 }}>
+            <div style={{ fontSize:8, color:"#9ca3af", lineHeight:1.4 }}>
+              Klik om te verbergen
+            </div>
+          </div>
+        </div>
+      </foreignObject>
 
       {/* Noot als er apps zijn zonder DICTU-scores */}
       {apps.some(app => dims.map(d => app.scores[d.key] || 0).every(v => v === 0)) && (
