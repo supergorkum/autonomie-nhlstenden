@@ -3628,12 +3628,12 @@ ${(function(){
           ) : (<>
 
           {/* ── Opdrachtskaart — centrale vraagstelling ── */}
-          <OpdrachtKaart apps={visibleApps} useSecondaryName={useSecondaryName} />
+          <OpdrachtKaart apps={apps} useSecondaryName={useSecondaryName} />
 
-          {/* ── Rij 1: Kwadrant (links) + App-kaarten (rechts, 2 cols) ── */}
-          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
+          {/* ── Rij 1: Kwadrant volledig breed ── */}
+          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr" }}>
 
-            {/* Autonomie-kwadrant */}
+            {/* Autonomie-kwadrant — volledig breed */}
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <div className="flex items-center gap-2">
@@ -3664,7 +3664,10 @@ ${(function(){
               </div>
             </div>
 
-            {/* App-kaarten rechts — 2 kolommen */}
+          </div>
+
+          {/* ── Rij 2: App-kaarten in 2 kolommen ── */}
+          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
             <div>
               {/* Leeswijzer bovenaan app-kaarten */}
               <div className="grid grid-cols-2 gap-2 mb-3">
@@ -3827,7 +3830,7 @@ ${(function(){
                 Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
               <div style={{ width:"100%" }}>
-                <DictuRadarSVG apps={scored} W={700} H={520} useSecondaryName={useSecondaryName} />
+                <DictuRadarSVG apps={scored} W={560} H={440} useSecondaryName={useSecondaryName} />
               </div>
               {/* Legenda dimensies */}
               <div className="grid grid-cols-4 gap-2 mt-3">
@@ -6814,10 +6817,18 @@ ${(function(){
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {/* App-teller */}
+          <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded"
+            style={{ background:"rgba(255,255,255,0.1)", color:"#7DD3D0", border:"1px solid rgba(255,255,255,0.1)" }}>
+            <span style={{ fontSize:11 }}>📦</span>
+            <span style={{ fontWeight:700 }}>{apps.length}</span>
+            <span style={{ opacity:0.75 }}>app{apps.length !== 1 ? "s" : ""}</span>
+          </div>
           {/* Opslaan status */}
           {saving && (
-            <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
-              ⏳ Opslaan…
+            <span className="text-xs flex items-center gap-1.5 px-2 py-1 rounded"
+              style={{ background:"rgba(251,191,36,0.2)", color:"#fbbf24" }}>
+              <span className="animate-pulse">●</span> Opslaan…
             </span>
           )}
           {saveError && (
@@ -6826,8 +6837,9 @@ ${(function(){
             </span>
           )}
           {!saving && !saveError && ready && (
-            <span className="text-xs px-2 py-1 rounded" style={{ background:"rgba(38,181,174,0.2)", color:"#7DD3D0" }}>
-              ✓ Gesynchroniseerd
+            <span className="text-xs flex items-center gap-1.5 px-2 py-1 rounded"
+              style={{ background:"rgba(38,181,174,0.15)", color:"#7DD3D0" }}>
+              <span style={{ color:"#4ade80", fontSize:9 }}>●</span> Gesynchroniseerd
             </span>
           )}
           {/* Naamweergave toggle switch */}
