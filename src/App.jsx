@@ -969,7 +969,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
 
   const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
   const cx = W / 2;
-  const cy = (H - 60) / 2 + 10;
+  const cy = (H - 80) / 2 + 10;
   const maxR = Math.min(W, H - 80) / 2 - 60;
 
   const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
@@ -982,7 +982,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
     return x > 0.3 ? "start" : x < -0.3 ? "end" : "middle";
   };
   const labelPt = i => {
-    const r = maxR + 34, a = axisAngle(i);
+    const r = maxR + 38, a = axisAngle(i);
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   };
 
@@ -1023,7 +1023,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const tipY = tip ? Math.max(tip.sy - TH - 18, 6) : 0;
 
   return (
-    <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} width="100%"
+    <svg ref={svgRef} viewBox={`-20 0 ${W+40} ${H}`} width="100%"
       style={{ display:"block", overflow:"visible", cursor:"crosshair" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTip(null)}>
@@ -3840,7 +3840,7 @@ ${(function(){
                 Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
               <div style={{ width:"100%" }}>
-                <DictuRadarSVG apps={scored} W={700} H={480} useSecondaryName={useSecondaryName} />
+                <DictuRadarSVG apps={scored} W={700} H={520} useSecondaryName={useSecondaryName} />
               </div>
               {/* Legenda dimensies */}
               <div className="grid grid-cols-4 gap-2 mt-3">
