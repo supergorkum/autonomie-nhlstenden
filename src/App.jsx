@@ -3713,13 +3713,9 @@ ${(function(){
               <div className="mt-2 px-2 py-1 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#9ca3af" }}>
                 Risico = gem. A1+A3+B1 · Mitigatie = gem. C1+D1+E1 · Belang = gem. F1+G1+H1 · Grens: X=13, Y=3
               </div>
-            </div>
 
-          </div>
-
-          {/* ── Rij 2: App-kaarten in 2 kolommen ── */}
-          <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr 1fr" }}>
-            <div>
+          {/* ── Rij 2: Leeswijzer + App-kaarten ── */}
+          <div className="mb-4">
               {/* Leeswijzer bovenaan app-kaarten */}
               <div className="grid grid-cols-2 gap-2 mb-3">
                 <div className="rounded p-2" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
@@ -3815,9 +3811,6 @@ ${(function(){
                   );
                 })}
               </div>
-
-
-            </div>
           </div>
 
           {/* ── Rij 2: Dimensieprofiel full-width ── */}
@@ -3848,7 +3841,6 @@ ${(function(){
                   <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.4 }}>{t.text}</p>
                 </div>
               ))}
-            </div>
           </div>
 
           {/* ── Rij 3: DICTU spindiagram ── */}
