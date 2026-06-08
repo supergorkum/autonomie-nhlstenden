@@ -1846,7 +1846,20 @@ function App() {
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
 
 
-  const [compareHidden, setCompareHidden] = useState(new Set()); // IDs verborgen in vergelijking
+  const [compareHidden, setCompareHidden] = useState(new Set());
+  const MAX_COMPARE = 5;
+
+  // Auto-select laatste 5 in vergelijking als er meer zijn
+  React.useEffect(function() {
+    if (apps.length <= MAX_COMPARE) {
+      setCompareHidden(new Set());
+      return;
+    }
+    setCompareHidden(function(prev) {
+      if (prev.size > 0) return prev;
+      return new Set(apps.slice(0, apps.length - MAX_COMPARE).map(function(a) { return a.id; }));
+    });
+  }, [apps.length]); // IDs verborgen in vergelijking
 
   // Beheer (admin) state
   const [adminUnlocked, setAdminUnlocked] = useState(false);
@@ -3588,7 +3601,7 @@ ${(function(){
                   return (
                     <button key={a.id}
                       onClick={() => toggleApp(a.id)}
-                      disabled={isLast2 && !hidden}
+                      disabled={(!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)}
                       title={
                         !hidden && visibleApps.length <= 1 ? "Minimaal 1 applicatie moet zichtbaar blijven" :
                         hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt — verberg eerst een andere` :
@@ -4472,10 +4485,20 @@ ${(function(){
     function toggleCompare(id) {
       setCompareHidden(prev => {
         const next = new Set(prev);
-        if (next.has(id)) { next.delete(id); return next; }
-        if (visibleCompare.length <= minCompare) return prev;
-        next.add(id); return next;
+        const currentVisible = apps.filter(a => !next.has(a.id)).length;
+        if (next.has(id)) {
+          if (currentVisible >= MAX_COMPARE) return prev; // max bewaken
+          next.delete(id);
+          return next;
+        }
+        if (currentVisible <= minCompare) return prev; // min bewaken
+        next.add(id);
+        return next;
       });
+    }
+
+    function selectLaatste5() {
+      setCompareHidden(new Set(apps.slice(0, Math.max(0, apps.length - MAX_COMPARE)).map(a => a.id)));
     }
 
     if (visibleCompare.length < 2) return (
@@ -4527,11 +4550,16 @@ ${(function(){
           {apps.length > 2 && (
             <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Vergelijkingsfilter</span>
-                <span style={{ fontSize:10, color:"#9ca3af" }}>
-                  — {visibleCompare.length} van {apps.length} geselecteerd (min. 2)
+              <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Grafiek-selectie</span>
+                <span className="text-xs px-2 py-0.5 rounded font-semibold"
+                  style={{ background: visibleCompare.length >= MAX_COMPARE ? "#fffbeb" : "#f0f9f9",
+                           color: visibleCompare.length >= MAX_COMPARE ? "#92400e" : "#0f766e" }}>
+                  {visibleCompare.length} / {MAX_COMPARE} geselecteerd
                 </span>
+                {apps.length > MAX_COMPARE && (
+                  <span style={{ fontSize:10, color:"#9ca3af" }}>max {MAX_COMPARE} voor leesbaarheid</span>
+                )}
               </div>
               <div className="flex gap-2 flex-wrap flex-1">
                 {apps.map((a, i) => {
@@ -4540,13 +4568,17 @@ ${(function(){
                   const col     = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"][i % 6];
                   return (
                     <button key={a.id} onClick={() => toggleCompare(a.id)}
-                      disabled={isLast2 && !hidden}
-                      title={isLast2 && !hidden ? "Minimaal 2 applicaties voor vergelijking" : ""}
+                      disabled={(isLast2 && !hidden) || (!hidden && visibleCompare.length >= MAX_COMPARE && false)}
+                      title={
+                        isLast2 && !hidden ? "Minimaal 2 applicaties voor vergelijking" :
+                        hidden && visibleCompare.length >= MAX_COMPARE ? `Maximum van ${MAX_COMPARE} geselecteerd` : ""
+                      }
                       className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium"
                       style={{
                         borderRadius:4, border:`2px solid ${hidden?"#e5e7eb":col}`,
                         background: hidden?"#f9fafb":`${col}18`, color:hidden?"#9ca3af":col,
-                        opacity:isLast2&&!hidden?0.5:1, cursor:isLast2&&!hidden?"not-allowed":"pointer",
+                        opacity: (isLast2&&!hidden) || (hidden && visibleCompare.length >= MAX_COMPARE) ? 0.4 : 1,
+                        cursor: (isLast2&&!hidden) || (hidden && visibleCompare.length >= MAX_COMPARE) ? "not-allowed" : "pointer",
                         textDecoration:hidden?"line-through":"none"
                       }}>
                       <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:hidden?"#d1d5db":col }}/>
@@ -4555,7 +4587,14 @@ ${(function(){
                   );
                 })}
               </div>
-              {compareHidden.size > 0 && (
+              {apps.length > MAX_COMPARE && (
+                <button onClick={selectLaatste5}
+                  className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
+                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                  Laatste {MAX_COMPARE}
+                </button>
+              )}
+              {compareHidden.size > 0 && apps.length <= MAX_COMPARE && (
                 <button onClick={() => setCompareHidden(new Set())}
                   className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
                   style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
