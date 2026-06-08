@@ -4378,26 +4378,26 @@ ${(function(){
           {apps.length > 0 && (
             <div className="rounded p-3 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold" style={{ color:"#0C2340" }}>
-                  Applicaties op de kaart ({apps.length - geoHidden.size} van {apps.length} zichtbaar)
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs font-semibold" style={{ color:"#0C2340" }}>Kaart-selectie</p>
+                  <span className="text-xs px-2 py-0.5 rounded font-semibold"
+                    style={{ background: geoHidden.size === 0 ? "#f0f9f9" : "#fffbeb",
+                             color: geoHidden.size === 0 ? "#0f766e" : "#92400e" }}>
+                    {apps.length - geoHidden.size} van {apps.length} zichtbaar
+                  </span>
+                </div>
                 <div className="flex gap-2">
-                  <button onClick={() => setGeoHidden(new Set())}
-                    className="text-xs px-2.5 py-1 font-medium"
-                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF",
-                             opacity: geoHidden.size === 0 ? 0.4 : 1 }}>
-                    Alles tonen
-                  </button>
-                  <button onClick={() => setGeoHidden(new Set(apps.map(a => a.id)))}
-                    className="text-xs px-2.5 py-1 font-medium"
-                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#6b7280", background:"#f8fafc",
-                             opacity: geoHidden.size === apps.length ? 0.4 : 1 }}>
-                    Alles verbergen
-                  </button>
+                  {geoHidden.size > 0 && (
+                    <button onClick={() => setGeoHidden(new Set())}
+                      className="text-xs px-2.5 py-1 font-medium"
+                      style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF" }}>
+                      Alles tonen
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {apps.map(a => {
+                {[...apps].sort((a, b) => displayName(a).localeCompare(displayName(b), "nl", { sensitivity:"base", numeric:true })).map(a => {
                   const sc = calcScores(a.scores || {});
                   const col = scoreColor(sc.autonomyScore);
                   const hidden = geoHidden.has(a.id);
