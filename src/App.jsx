@@ -3952,7 +3952,7 @@ ${(function(){
               {[...apps].sort((a, b) => {
                 const na = (useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).toLowerCase();
                 const nb = (useSecondaryName && b.nameSecondary ? b.nameSecondary : b.name).toLowerCase();
-                return na.localeCompare(nb, "nl", { sensitivity:"base" });
+                return na.localeCompare(nb, "nl", { sensitivity:"base", numeric:true });
               }).map(a => {
                 const sc  = calcScores(a.scores);
                 const lbl = scoreLabel(sc.autonomyScore);
@@ -4898,7 +4898,7 @@ ${(function(){
               {[...apps].sort((a, b) => {
                 const na = (useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).toLowerCase();
                 const nb = (useSecondaryName && b.nameSecondary ? b.nameSecondary : b.name).toLowerCase();
-                return na.localeCompare(nb, "nl", { sensitivity:"base" });
+                return na.localeCompare(nb, "nl", { sensitivity:"base", numeric:true });
               }).map(a => {
                 const sc  = calcScores(a.scores);
                 const lbl = scoreLabel(sc.autonomyScore);
