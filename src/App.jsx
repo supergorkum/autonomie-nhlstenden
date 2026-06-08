@@ -1831,6 +1831,7 @@ function App() {
   const [ready,      setReady]     = useState(false);
   const [saving,     setSaving]    = useState(false);
   const [saveError,  setSaveError] = useState(false);
+  const [lastSaved,  setLastSaved]  = useState(null); // timestamp van laatste succesvolle save
   const [view,       setView]      = useState("about");
   const [aboutTab,   setAboutTab]  = useState("over");
   const [snapshots,  setSnapshots] = useState(() => {
@@ -1919,6 +1920,8 @@ function App() {
         if (!r.ok) throw new Error("save failed");
         // Lokale backup
         localStorage.setItem("nhl_sov_v2", JSON.stringify(apps));
+        setLastSaved(new Date().toISOString());
+        setSaveError(false);
       } catch {
         setSaveError(true);
         // Sla toch lokaal op als fallback
@@ -3746,7 +3749,7 @@ ${(function(){
               <h3 className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>
                 Applicaties ({visibleApps.length})
               </h3>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-3" style={{ gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))" }}>
                 {scored.map(a => {
                   const lbl = scoreLabel(a.sc.autonomyScore);
                   return (
@@ -4642,19 +4645,29 @@ ${(function(){
                 <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF + DICTU</span>
                 <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Scores per applicatie</p>
               </div>
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={barData} margin={{ top:5, right:10, bottom:65, left:0 }}>
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={barData} margin={{ top:5, right:10, bottom:80, left:0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-                  <XAxis dataKey="name" tick={{ fontSize:9 }} angle={-35} textAnchor="end" interval={0} />
-                  <YAxis domain={[0,10]} tick={{ fontSize:9 }} />
+                  <XAxis dataKey="name" tick={{ fontSize:8 }} angle={-40} textAnchor="end" interval={0} height={75} />
+                  <YAxis domain={[0,10]} tick={{ fontSize:9 }} width={24} />
                   <Tooltip wrapperStyle={{ fontSize:11 }} />
-                  <Legend wrapperStyle={{ fontSize:10 }} />
                   <Bar dataKey="Autonomiescore" radius={[3,3,0,0]} name="Autonomiescore (1-10)">
                     {barData.map((d,i) => <Cell key={i} fill={scoreColor(d.Autonomiescore)} />)}
                   </Bar>
                   <Bar dataKey="DICTU x2" fill="#26B5AE" fillOpacity={0.7} radius={[3,3,0,0]} name="DICTU x2 (schaal 0-10)" />
                 </BarChart>
               </ResponsiveContainer>
+              {/* Legenda buiten de grafiek */}
+              <div className="flex gap-4 mt-2 justify-center">
+                <div className="flex items-center gap-1.5">
+                  <div style={{ width:12, height:12, background:"#ca8a04", borderRadius:2 }}/>
+                  <span style={{ fontSize:10, color:"#6b7280" }}>Autonomiescore (1–10)</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div style={{ width:12, height:12, background:"#26B5AE", borderRadius:2, opacity:0.7 }}/>
+                  <span style={{ fontSize:10, color:"#6b7280" }}>DICTU-score (schaal 0–10)</span>
+                </div>
+              </div>
             </div>
 
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
@@ -6874,12 +6887,24 @@ ${(function(){
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {/* App-teller */}
+          {/* App-teller + laatste opslag */}
           <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded"
             style={{ background:"rgba(255,255,255,0.1)", color:"#7DD3D0", border:"1px solid rgba(255,255,255,0.1)" }}>
-            <span style={{ fontSize:11 }}>📦</span>
+            <span style={{ fontSize:12 }}>🗂</span>
             <span style={{ fontWeight:700 }}>{apps.length}</span>
-            <span style={{ opacity:0.75 }}>app{apps.length !== 1 ? "s" : ""}</span>
+            <span style={{ opacity:0.75 }}>applicatie{apps.length !== 1 ? "s" : ""}</span>
+            {lastSaved && (
+              <span style={{ opacity:0.6, fontSize:10, borderLeft:"1px solid rgba(255,255,255,0.2)", paddingLeft:6, marginLeft:2 }}>
+                {(() => {
+                  const d = new Date(lastSaved);
+                  const now = new Date();
+                  const sameDay = d.toDateString() === now.toDateString();
+                  return sameDay
+                    ? `opgeslagen ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`
+                    : `opgeslagen ${d.toLocaleDateString("nl-NL", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`;
+                })()}
+              </span>
+            )}
           </div>
           {/* Opslaan status */}
           {saving && (
