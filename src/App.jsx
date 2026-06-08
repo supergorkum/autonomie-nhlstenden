@@ -3713,6 +3713,8 @@ ${(function(){
               <div className="mt-2 px-2 py-1 rounded text-xs" style={{ background:"#f8fafc", border:"1px solid #e5e7eb", color:"#9ca3af" }}>
                 Risico = gem. A1+A3+B1 · Mitigatie = gem. C1+D1+E1 · Belang = gem. F1+G1+H1 · Grens: X=13, Y=3
               </div>
+            </div>
+          </div>
 
           {/* ── Rij 2: Leeswijzer + App-kaarten ── */}
           <div className="mb-4">
@@ -3841,6 +3843,7 @@ ${(function(){
                   <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.4 }}>{t.text}</p>
                 </div>
               ))}
+            </div>
           </div>
 
           {/* ── Rij 3: DICTU spindiagram ── */}
