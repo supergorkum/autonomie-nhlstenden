@@ -3710,13 +3710,11 @@ ${(function(){
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({visibleApps.length})</h3>
                 <div className="flex gap-2">
-                  {adminUnlocked && (
-                    <button onClick={() => setShowModal(true)}
-                      className="text-white text-xs px-3 py-1.5 font-medium"
-                      style={{ background:"#1A56A0", borderRadius:4 }}>
-                      + Toevoegen
-                    </button>
-                  )}
+                  <button onClick={() => setShowModal(true)}
+                    className="text-white text-xs px-3 py-1.5 font-medium"
+                    style={{ background:"#1A56A0", borderRadius:4 }}>
+                    + Toevoegen
+                  </button>
                   <button onClick={exportDashboardPdf} disabled={visibleApps.length===0}
                     className="text-xs px-3 py-1.5 font-medium"
                     style={{ background:"#fee2e2", color:"#b91c1c", borderRadius:4, border:"1px solid #fecaca", opacity:visibleApps.length===0?0.5:1 }}>
@@ -3875,13 +3873,11 @@ ${(function(){
         <div className="p-5 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-semibold" style={{ color:"#0C2340" }}>Applicaties ({apps.length})</h2>
-            {adminUnlocked && (
-              <button onClick={() => setShowModal(true)}
-                className="text-white text-sm px-4 py-2 font-medium"
-                style={{ background:"#1A56A0", borderRadius:4 }}>
-                + Toevoegen
-              </button>
-            )}
+            <button onClick={() => setShowModal(true)}
+              className="text-white text-sm px-4 py-2 font-medium"
+              style={{ background:"#1A56A0", borderRadius:4 }}>
+              + Toevoegen
+            </button>
           </div>
 
           {apps.length === 0 ? (
