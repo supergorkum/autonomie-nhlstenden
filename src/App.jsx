@@ -990,12 +990,12 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   ];
 
   const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
-  // Ruimte voor legenda rechts
-  const LEGEND_W = 140;
-  const chartW = W - LEGEND_W;
+  const LEGEND_W = 115;
+  const chartW = W - LEGEND_W - 10;
+  const PAD = 46; // ruimte voor as-labels rondom het web
+  const maxR = Math.min(chartW - 20, H - 60) / 2 - PAD;
   const cx = chartW / 2;
-  const cy = (H - 20) / 2 + 10;
-  const maxR = Math.min(chartW, H - 40) / 2 - 48;
+  const cy = H / 2;
 
   const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
   const pt = (i, v) => {
@@ -1007,7 +1007,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
     return x > 0.3 ? "start" : x < -0.3 ? "end" : "middle";
   };
   const labelPt = i => {
-    const r = maxR + 38, a = axisAngle(i);
+    const r = maxR + 28, a = axisAngle(i);
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   };
 
@@ -1048,7 +1048,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const tipY = tip ? Math.max(tip.sy - TH - 18, 6) : 0;
 
   return (
-    <svg ref={svgRef} viewBox={`-10 -5 ${W+20} ${H+10}`} width="100%"
+    <svg ref={svgRef} viewBox={`-8 -8 ${W+16} ${H+16}`} width="100%"
       style={{ display:"block", overflow:"visible", cursor:"crosshair" }}
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTip(null)}>
@@ -1144,7 +1144,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       })}
 
       {/* Legenda rechts in SVG als foreignObject — scrollbaar, met toggle per app */}
-      <foreignObject x={cx * 2 + 8} y={4} width={LEGEND_W - 8} height={H - 8}>
+      <foreignObject x={chartW + 10} y={4} width={LEGEND_W} height={H - 8}>
         <div xmlns="http://www.w3.org/1999/xhtml"
           style={{ height:"100%", overflowY:"auto", display:"flex", flexDirection:"column", gap:3, paddingRight:2 }}>
           {apps.map((app, ai) => {
@@ -1160,23 +1160,22 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
                   return next;
                 })}
                 style={{
-                  display:"flex", alignItems:"center", gap:5,
-                  padding:"3px 6px", borderRadius:4, cursor:"pointer", textAlign:"left",
-                  background: isHidden ? "#f9fafb" : `${color}12`,
-                  border: `1px solid ${isHidden ? "#e5e7eb" : color}44`,
+                  display:"flex", alignItems:"center", gap:4,
+                  padding:"2px 4px", borderRadius:3, cursor:"pointer", textAlign:"left",
+                  background: isHidden ? "#f9fafb" : `${color}10`,
+                  border: `1px solid ${isHidden ? "#e5e7eb" : color}33`,
                   opacity: !heeftData ? 0.4 : 1,
                   flexShrink:0
                 }}>
                 <span style={{
-                  width:8, height:8, borderRadius:"50%", flexShrink:0,
+                  width:7, height:7, borderRadius:"50%", flexShrink:0,
                   background: isHidden ? "#d1d5db" : color,
-                  border: `1.5px solid ${isHidden ? "#d1d5db" : color}`
                 }}/>
                 <span style={{
-                  fontSize:9, color: isHidden ? "#9ca3af" : "#374151",
+                  fontSize:8, color: isHidden ? "#9ca3af" : "#374151",
                   fontFamily:"system-ui", lineHeight:1.3,
                   textDecoration: isHidden ? "line-through" : "none",
-                  overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:100
+                  overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", maxWidth:90
                 }}>
                   {dn(app, useSecondaryName)}
                 </span>
@@ -3476,7 +3475,7 @@ ${(function(){
 
   html2 += '</div>';
   html2 += '</div>';
-  return html2;
+  return ""; // portfoliopagina niet opnemen in applicatie-PDF
 })()}
 
 ${(function(){
@@ -3901,8 +3900,8 @@ ${(function(){
                 Een kleine vorm dicht bij het centrum betekent <span style={{ color:"#dc2626", fontWeight:600 }}>volledig afhankelijk</span> van de leverancier.
                 Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
-              <div style={{ width:"100%" }}>
-                <DictuRadarSVG apps={scored} W={560} H={440} useSecondaryName={useSecondaryName} />
+              <div style={{ maxWidth:640, margin:"0 auto" }}>
+                <DictuRadarSVG apps={scored} W={580} H={320} useSecondaryName={useSecondaryName} />
               </div>
               {/* Legenda dimensies */}
               <div className="grid grid-cols-4 gap-2 mt-3">
