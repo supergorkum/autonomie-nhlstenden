@@ -1902,7 +1902,7 @@ function App() {
   function handleLogin() {
     if (loginInput === LOGIN_CODE) {
       sessionStorage.setItem("nhl_auth", "ok");
-      sessionStorage.setItem("nhl_api_token", loginInput);
+      sessionStorage.setItem("nhl_api_token", loginInput); // loginInput === APP_API_TOKEN
       setLoggedIn(true);
       setLoginError(false);
     } else {
