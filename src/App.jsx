@@ -970,8 +970,8 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
 
   const N = dims.length, maxV = 5, LEVELS = [1,2,3,4,5];
   const cx = W / 2;
-  const cy = (H - 44) / 2 + 10;
-  const maxR = Math.min(W, H - 64) / 2 - 52;
+  const cy = (H - 60) / 2 + 10;
+  const maxR = Math.min(W, H - 80) / 2 - 60;
 
   const axisAngle = i => (2 * Math.PI * i / N) - Math.PI / 2;
   const pt = (i, v) => {
@@ -983,7 +983,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
     return x > 0.3 ? "start" : x < -0.3 ? "end" : "middle";
   };
   const labelPt = i => {
-    const r = maxR + 26, a = axisAngle(i);
+    const r = maxR + 34, a = axisAngle(i);
     return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
   };
 
@@ -996,17 +996,22 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
     const mx = (e.clientX - rect.left) * scale;
     const my = (e.clientY - rect.top)  * scale;
 
-    let closest = null, minDist = 22; // drempel: 22px SVG-eenheden
+    let closest = null, minDist = 22;
     apps.forEach((app, ai) => {
       const color = appColor(ai);
       dims.forEach((d, i) => {
         const v = app.scores[d.key] || 0;
         if (!v) return;
-        const [px, py] = pt(i, v);
+        const [basePx, basePy] = pt(i, v);
+        const jitterAngle = (ai * 2 * Math.PI / Math.max(apps.length, 1)) + axisAngle(i);
+        const jitterR = ai === 0 ? 0 : Math.min(ai * 3.5, 12);
+        const px = basePx + Math.cos(jitterAngle) * jitterR;
+        const py = basePy + Math.sin(jitterAngle) * jitterR;
         const dist = Math.sqrt((mx - px) ** 2 + (my - py) ** 2);
         if (dist < minDist) {
           minDist = dist;
-          closest = { sx: px, sy: py, appName: app.name, dimLabel: d.label, dimKey: d.key, value: v, color };
+          const appDisplayName = useSecondaryName && app.nameSecondary ? app.nameSecondary : app.name;
+          closest = { sx: px, sy: py, appName: appDisplayName, dimLabel: d.label, dimKey: d.key, value: v, color };
         }
       });
     });
@@ -1042,7 +1047,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         return <text key={lv} x={x + 5} y={y + 3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>;
       })}
 
-      {/* Polygonen */}
+      {/* Polygonen — lichte transparantie zodat overlappende vormen leesbaar blijven */}
       {apps.map((app, ai) => {
         const color  = appColor(ai);
         const scores = dims.map(d => app.scores[d.key] || 0);
@@ -1050,25 +1055,43 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         const poly   = dims.map((d, i) => pt(i, scores[i]).join(",")).join(" ");
         return (
           <polygon key={app.id || ai} points={poly}
-            fill={color} fillOpacity={0.14}
-            stroke={color} strokeWidth={2.5} strokeLinejoin="round" />
+            fill={color} fillOpacity={0.08}
+            stroke={color} strokeWidth={2} strokeLinejoin="round"
+            strokeDasharray={ai > 4 ? "6 3" : "none"} />
         );
       })}
 
-      {/* Punten — worden gemarkeerd als ze de actieve tooltip zijn */}
+      {/* Stippen — bij overlap kleine spiraalverschuiving zodat ze naast elkaar liggen */}
       {apps.map((app, ai) => {
         const color  = appColor(ai);
         const scores = dims.map(d => app.scores[d.key] || 0);
         return dims.map((d, i) => {
           const v = scores[i];
           if (v === 0) return null;
-          const [px, py] = pt(i, v);
+          const [basePx, basePy] = pt(i, v);
+          // Kleine spiraalverschuiving per app-index zodat gelijke scores naast elkaar staan
+          const jitterAngle = (ai * 2 * Math.PI / Math.max(apps.length, 1)) + axisAngle(i);
+          const jitterR = ai === 0 ? 0 : Math.min(ai * 3.5, 12);
+          const px = basePx + Math.cos(jitterAngle) * jitterR;
+          const py = basePy + Math.sin(jitterAngle) * jitterR;
           const active = tip && tip.appName === app.name && tip.dimKey === d.key;
           return (
-            <circle key={`${ai}-${i}`} cx={px} cy={py}
-              r={active ? 9 : 7}
-              fill={color} stroke="white"
-              strokeWidth={active ? 2.5 : 2} />
+            <g key={`${ai}-${i}`}>
+              {/* Verbindingslijn van as-punt naar jitter-positie als er verschoven is */}
+              {jitterR > 0 && (
+                <line x1={basePx} y1={basePy} x2={px} y2={py}
+                  stroke={color} strokeWidth={1} strokeOpacity={0.3} strokeDasharray="2 2" />
+              )}
+              <circle cx={px} cy={py}
+                r={active ? 8 : 6}
+                fill={color} stroke="white"
+                strokeWidth={active ? 2.5 : 1.5}
+                opacity={0.9} />
+              {active && (
+                <circle cx={px} cy={py} r={12}
+                  fill="none" stroke={color} strokeWidth={1.5} strokeOpacity={0.4} />
+              )}
+            </g>
           );
         });
       })}
@@ -3822,8 +3845,8 @@ ${(function(){
                 Een kleine vorm dicht bij het centrum betekent <span style={{ color:"#dc2626", fontWeight:600 }}>volledig afhankelijk</span> van de leverancier.
                 Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
-              <div style={{ maxWidth:520, margin:"0 auto" }}>
-                <DictuRadarSVG apps={scored} W={480} H={360} useSecondaryName={useSecondaryName} />
+              <div style={{ width:"100%" }}>
+                <DictuRadarSVG apps={scored} W={700} H={480} useSecondaryName={useSecondaryName} />
               </div>
               {/* Legenda dimensies */}
               <div className="grid grid-cols-4 gap-2 mt-3">
