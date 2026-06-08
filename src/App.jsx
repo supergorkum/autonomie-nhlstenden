@@ -637,8 +637,7 @@ function KwadrantSVG({ kwData, onAppClick }) {
         const cx = toX(d.x), cy = toY(d.y), col = scoreColor(d.score);
         return (
           <g key={d.id} style={{ cursor:"pointer" }} onClick={() => onAppClick(d.id)}>
-            <circle cx={cx} cy={cy} r={9} fill={col} fillOpacity={0.15} stroke={col} strokeWidth={1.5} />
-            <circle cx={cx} cy={cy} r={3.5} fill={col} />
+            <circle cx={cx} cy={cy} r={7} fill={col} fillOpacity={0.85} stroke="white" strokeWidth={1.5} />
             <rect x={cx+8} y={cy-9} width={Math.min(d.name.length*5.5+6,110)} height={14} rx={2} fill="white" fillOpacity={0.9} />
             <text x={cx+11} y={cy+1.5} fill={col} style={{ fontSize:9, fontWeight:600 }}>{d.name.substring(0,18)}</text>
           </g>
