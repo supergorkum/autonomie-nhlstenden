@@ -597,10 +597,10 @@ function KwadrantSVG({ kwData, onAppClick }) {
         const cx = (q.x1+q.x2)/2, cy = (q.y1+q.y2)/2;
         return (
           <g key={i}>
-            <text x={cx} y={cy-14} textAnchor="middle" fill={q.color}
-              style={{ fontSize:15, fontWeight:700, fontStyle:"italic", letterSpacing:1 }}>{q.label}</text>
+            <text x={cx} y={cy-10} textAnchor="middle" fill={q.color}
+              style={{ fontSize:12, fontWeight:700, fontStyle:"italic", letterSpacing:0.5 }}>{q.label}</text>
             {q.sub.split("\n").map((l,j) => (
-              <text key={j} x={cx} y={cy+8+j*16} textAnchor="middle" fill="#555" style={{ fontSize:11 }}>{l}</text>
+              <text key={j} x={cx} y={cy+6+j*13} textAnchor="middle" fill="#777" style={{ fontSize:9 }}>{l}</text>
             ))}
           </g>
         );
@@ -613,17 +613,17 @@ function KwadrantSVG({ kwData, onAppClick }) {
       {xTicks.map(v => (
         <g key={v}>
           <line x1={toX(v)} y1={pad.top+iH} x2={toX(v)} y2={pad.top+iH+5} stroke="#999" strokeWidth={1}/>
-          <text x={toX(v)} y={pad.top+iH+17} textAnchor="middle" fill="#888" style={{ fontSize:10 }}>{v}</text>
+          <text x={toX(v)} y={pad.top+iH+14} textAnchor="middle" fill="#aaa" style={{ fontSize:8 }}>{v}</text>
         </g>
       ))}
       {yTicks.map(v => (
         <g key={v}>
           <line x1={pad.left-5} y1={toY(v)} x2={pad.left} y2={toY(v)} stroke="#999" strokeWidth={1}/>
-          <text x={pad.left-10} y={toY(v)+4} textAnchor="end" fill="#888" style={{ fontSize:10 }}>{v}</text>
+          <text x={pad.left-8} y={toY(v)+3} textAnchor="end" fill="#aaa" style={{ fontSize:8 }}>{v}</text>
         </g>
       ))}
-      <text x={pad.left+iW/2} y={H-4} textAnchor="middle" fill="#444" style={{ fontSize:12, fontWeight:600 }}>Risico-exposure × Strategisch belang</text>
-      <text x={14} y={pad.top+iH/2} textAnchor="middle" fill="#444" transform={`rotate(-90,14,${pad.top+iH/2})`} style={{ fontSize:12, fontWeight:600 }}>Mitigatie</text>
+      <text x={pad.left+iW/2} y={H-4} textAnchor="middle" fill="#666" style={{ fontSize:10, fontWeight:600 }}>Risico-exposure × Strategisch belang</text>
+      <text x={14} y={pad.top+iH/2} textAnchor="middle" fill="#666" transform={`rotate(-90,14,${pad.top+iH/2})`} style={{ fontSize:10, fontWeight:600 }}>Mitigatie</text>
       <text x={pad.left+6}    y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
       <text x={pad.left+iW-24} y={pad.top-10} fill="#aaa" style={{ fontSize:9 }}>Hoog</text>
       <text x={pad.left-46}  y={pad.top+iH-4} fill="#aaa" style={{ fontSize:9 }}>Laag</text>
@@ -638,8 +638,8 @@ function KwadrantSVG({ kwData, onAppClick }) {
         return (
           <g key={d.id} style={{ cursor:"pointer" }} onClick={() => onAppClick(d.id)}>
             <circle cx={cx} cy={cy} r={7} fill={col} fillOpacity={0.85} stroke="white" strokeWidth={1.5} />
-            <rect x={cx+8} y={cy-9} width={Math.min(d.name.length*5.5+6,110)} height={14} rx={2} fill="white" fillOpacity={0.9} />
-            <text x={cx+11} y={cy+1.5} fill={col} style={{ fontSize:9, fontWeight:600 }}>{d.name.substring(0,18)}</text>
+            <rect x={cx+6} y={cy-7} width={Math.min(d.name.length*5+4,100)} height={12} rx={2} fill="white" fillOpacity={0.88} />
+            <text x={cx+8} y={cy+1} fill={col} style={{ fontSize:8, fontWeight:600 }}>{d.name.substring(0,18)}</text>
           </g>
         );
       })}
@@ -1146,7 +1146,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       <foreignObject x={chartW + 10} y={4} width={LEGEND_W} height={H - 8}>
         <div xmlns="http://www.w3.org/1999/xhtml"
           style={{ height:"100%", overflowY:"auto", display:"flex", flexDirection:"column", gap:3, paddingRight:2 }}>
-          {apps.map((app, ai) => {
+          {apps.slice(0, 50).map((app, ai) => {
             const color = appColor(ai);
             const scores = dims.map(d => app.scores[d.key] || 0);
             const heeftData = !scores.every(v => v === 0);
@@ -3788,6 +3788,11 @@ ${(function(){
               <h3 className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>
                 Applicaties ({visibleApps.length})
               </h3>
+              {scored.length > 20 && (
+                <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>
+                  {scored.length} applicaties — scroll voor het volledige overzicht
+                </p>
+              )}
               <div className="grid gap-3" style={{ gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))" }}>
                 {scored.map(a => {
                   const lbl = scoreLabel(a.sc.autonomyScore);
