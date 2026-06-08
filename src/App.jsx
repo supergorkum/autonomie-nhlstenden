@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.1";
+const VERSION = "v2.2";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -45,6 +45,25 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.2",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Versienummer verhoogd naar v2.2 vanwege omvang van wijzigingen",
+      "Header: app-teller toegevoegd met aantal apps in database en statuslampje",
+      "Header: groen lampje = gesynchroniseerd, geel = opslaan, rood = fout",
+      "Dashboard: autonomie-kwadrant volledig breed over de pagina",
+      "Dashboard: app-kaarten in aparte 2-koloms rij onder het kwadrant",
+      "Spindiagram: kleiner gemaakt (560x440) zodat het binnen de browser past",
+      "Bug opgelost: visibleApps scope-fout op Dashboard bij meer dan 10 apps",
+      "Bug opgelost: appColor scope-fout na toevoegen applicatie",
+      "Bug opgelost: Toevoegen-knop weer zichtbaar voor alle gebruikers",
+      "Bug opgelost: MAX_VISIBLE naar module-level zodat alle paginas hem kennen",
+      "Grafieken schaalbaar naar 50+ applicaties met dynamische HSL-kleuren",
+      "Spindiagram: overlappende stippen gespreide weergave via jitter",
+      "Grafiek-selectie: max 10 apps tegelijk voor leesbaarheid, handmatig instelbaar",
+    ]
+  },
   {
     versie: "v2.1",
     datum: "Juni 2026",
@@ -3569,7 +3588,7 @@ ${(function(){
                   return (
                     <button key={a.id}
                       onClick={() => toggleApp(a.id)}
-                      disabled={(!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)}
+                      disabled={isLast2 && !hidden}
                       title={
                         !hidden && visibleApps.length <= 1 ? "Minimaal 1 applicatie moet zichtbaar blijven" :
                         hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt — verberg eerst een andere` :
@@ -3595,7 +3614,7 @@ ${(function(){
                   );
                 })}
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 flex-shrink-0 flex-wrap">
                 {apps.length > MAX_VISIBLE && (
                   <button onClick={selectLaatste10}
                     className="text-xs px-2.5 py-1.5 font-medium"
@@ -3610,6 +3629,22 @@ ${(function(){
                     Alles tonen
                   </button>
                 )}
+                <div className="w-px self-stretch" style={{ background:"#D0E4F7", margin:"0 4px" }}/>
+                <button onClick={() => setShowModal(true)}
+                  className="text-white text-xs px-3 py-1.5 font-medium"
+                  style={{ background:"#1A56A0", borderRadius:4 }}>
+                  + Toevoegen
+                </button>
+                <button onClick={exportDashboardPdf} disabled={visibleApps.length===0}
+                  className="text-xs px-2.5 py-1.5 font-medium"
+                  style={{ background:"#fee2e2", color:"#b91c1c", borderRadius:4, border:"1px solid #fecaca", opacity:visibleApps.length===0?0.5:1 }}>
+                  📄 PDF
+                </button>
+                <button onClick={exportXlsx} disabled={apps.length===0}
+                  className="text-xs px-2.5 py-1.5 font-medium"
+                  style={{ background:"#E6F7F7", color:"#26B5AE", borderRadius:4, border:"1px solid #26B5AE55", opacity:apps.length===0?0.5:1 }}>
+                  📥 Excel
+                </button>
               </div>
             </div>
           )}
@@ -3695,26 +3730,9 @@ ${(function(){
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold" style={{ color:"#0C2340" }}>Applicaties ({visibleApps.length})</h3>
-                <div className="flex gap-2">
-                  <button onClick={() => setShowModal(true)}
-                    className="text-white text-xs px-3 py-1.5 font-medium"
-                    style={{ background:"#1A56A0", borderRadius:4 }}>
-                    + Toevoegen
-                  </button>
-                  <button onClick={exportDashboardPdf} disabled={visibleApps.length===0}
-                    className="text-xs px-3 py-1.5 font-medium"
-                    style={{ background:"#fee2e2", color:"#b91c1c", borderRadius:4, border:"1px solid #fecaca", opacity:visibleApps.length===0?0.5:1 }}>
-                    📄 PDF
-                  </button>
-                  <button onClick={exportXlsx} disabled={apps.length===0}
-                    className="text-xs px-3 py-1.5 font-medium"
-                    style={{ background:"#E6F7F7", color:"#26B5AE", borderRadius:4, border:"1px solid #26B5AE55", opacity:apps.length===0?0.5:1 }}>
-                    📥 Excel
-                  </button>
-                </div>
-              </div>
+              <h3 className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>
+                Applicaties ({visibleApps.length})
+              </h3>
               <div className="grid grid-cols-2 gap-3">
                 {scored.map(a => {
                   const lbl = scoreLabel(a.sc.autonomyScore);
@@ -4522,7 +4540,7 @@ ${(function(){
                   const col     = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"][i % 6];
                   return (
                     <button key={a.id} onClick={() => toggleCompare(a.id)}
-                      disabled={(!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)}
+                      disabled={isLast2 && !hidden}
                       title={isLast2 && !hidden ? "Minimaal 2 applicaties voor vergelijking" : ""}
                       className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium"
                       style={{
