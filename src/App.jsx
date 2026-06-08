@@ -34,6 +34,7 @@ export class ErrorBoundary extends React.Component {
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
 const VERSION = "v2.1";
+const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 
 // Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
@@ -3462,8 +3463,6 @@ ${(function(){
     // ── Zichtbare applicaties (gefilterd op hiddenApps) ─────────
     const visibleApps = apps.filter(a => !hiddenApps.has(a.id));
 
-    const MAX_VISIBLE = 10;
-
     function toggleApp(id) {
       setHiddenApps(prev => {
         const next = new Set(prev);
@@ -3495,7 +3494,6 @@ ${(function(){
     const allScored = apps.map(a => ({ ...a, sc: calcScores(a.scores) })); // voor filter-strip
     const withSc = scored.filter(a => a.sc.autonomyScore);
     const avgA   = withSc.length ? withSc.map(a => a.sc.autonomyScore).reduce((x,y)=>x+y,0)/withSc.length : null;
-    const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
 
     const radarKey = n => n.substring(0, 13);
 
@@ -3582,7 +3580,7 @@ ${(function(){
               <div className="flex gap-2 flex-wrap flex-1">
                 {allScored.map((a, i) => {
                   const hidden  = hiddenApps.has(a.id);
-                  const col     = COLORS[i % COLORS.length];
+                  const col     = appColor(i);
                   return (
                     <button key={a.id}
                       onClick={() => toggleApp(a.id)}
@@ -4487,7 +4485,6 @@ ${(function(){
       </div>
     );
 
-    const COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"];
     const name14 = n => n.substring(0, 14);
 
     // Radar met gewogen dimensiescores
