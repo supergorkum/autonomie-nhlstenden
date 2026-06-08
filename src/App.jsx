@@ -632,7 +632,7 @@ function KwadrantSVG({ kwData, onAppClick }) {
 // Links/rood = risico (laag is beter), rechts/groen = weerbaarheid (hoog is beter)
 function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
-  const APP_COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e","#be185d","#0891b2","#ca8a04","#4d7c0f"];
+  const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`;
 
   const dimScore = (app, letter) => {
     if (letter === "A") {
@@ -682,18 +682,24 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
     },
   ];
 
+  const manyApps = apps.length > 20;
   const barH    = compact ? 20 : 24;
   const labelW  = compact ? 200 : 230;
-  const dotSize = compact ? 14  : 16;
+  const dotSize = compact ? 10 : manyApps ? 10 : 16;
 
   return (
     <div style={{ fontFamily:"system-ui,sans-serif", position:"relative" }}>
-      {/* Legenda */}
-      <div style={{ display:"flex", gap:14, flexWrap:"wrap", marginBottom:10 }}>
-        {apps.slice(0,10).map((app,i) => (
-          <div key={i} style={{ display:"flex", alignItems:"center", gap:5 }}>
-            <div style={{ width:10,height:10,borderRadius:5,background:APP_COLORS[i],flexShrink:0 }}/>
-            <span style={{ fontSize:10, color:"#374151" }}>{dn(app, useSecondaryName).substring(0,18)}</span>
+      {/* Legenda — scrollbaar bij veel apps */}
+      <div style={{ display:"flex", flexWrap:"wrap", gap:"4px 12px", marginBottom:10,
+                    maxHeight: apps.length > 15 ? 72 : "none", overflowY: apps.length > 15 ? "auto" : "visible",
+                    padding: apps.length > 15 ? "4px 0" : 0 }}>
+        {apps.map((app,i) => (
+          <div key={i} style={{ display:"flex", alignItems:"center", gap:4, minWidth:0 }}>
+            <div style={{ width:8, height:8, borderRadius:4, background:appColor(i), flexShrink:0 }}/>
+            <span style={{ fontSize:9, color:"#374151", whiteSpace:"nowrap", overflow:"hidden",
+                           textOverflow:"ellipsis", maxWidth:120 }}>
+              {dn(app, useSecondaryName).substring(0,20)}
+            </span>
           </div>
         ))}
       </div>
@@ -712,10 +718,10 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
           </div>
 
           {g.dims.map(d => {
-            const points = apps.slice(0,10).map((app,ai) => ({
+            const points = apps.map((app,ai) => ({
               name:app.name,
               score:dimScore(app,d.l),
-              color:APP_COLORS[ai]
+              color:appColor(ai)
             })).filter(p => p.score > 0);
 
             return (
@@ -952,7 +958,8 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
 function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
   const svgRef = React.useRef(null);
-  const APP_COLORS = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e","#be185d","#0891b2","#ca8a04","#4d7c0f"];
+  // Genereer unieke kleur op basis van index via gouden hoek
+  const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`;
 
   const dims = [
     { key:"2.1", label:"Data residency" },
@@ -990,8 +997,8 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
     const my = (e.clientY - rect.top)  * scale;
 
     let closest = null, minDist = 22; // drempel: 22px SVG-eenheden
-    apps.slice(0, 10).forEach((app, ai) => {
-      const color = APP_COLORS[ai % APP_COLORS.length];
+    apps.forEach((app, ai) => {
+      const color = appColor(ai);
       dims.forEach((d, i) => {
         const v = app.scores[d.key] || 0;
         if (!v) return;
@@ -1036,8 +1043,8 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       })}
 
       {/* Polygonen */}
-      {apps.slice(0, 10).map((app, ai) => {
-        const color  = APP_COLORS[ai % APP_COLORS.length];
+      {apps.map((app, ai) => {
+        const color  = appColor(ai);
         const scores = dims.map(d => app.scores[d.key] || 0);
         if (scores.every(v => v === 0)) return null;
         const poly   = dims.map((d, i) => pt(i, scores[i]).join(",")).join(" ");
@@ -1049,8 +1056,8 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       })}
 
       {/* Punten — worden gemarkeerd als ze de actieve tooltip zijn */}
-      {apps.slice(0, 10).map((app, ai) => {
-        const color  = APP_COLORS[ai % APP_COLORS.length];
+      {apps.map((app, ai) => {
+        const color  = appColor(ai);
         const scores = dims.map(d => app.scores[d.key] || 0);
         return dims.map((d, i) => {
           const v = scores[i];
@@ -1082,26 +1089,33 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         );
       })}
 
-      {/* Legenda */}
-      {apps.slice(0, 10).map((app, ai) => {
-        const color = APP_COLORS[ai % APP_COLORS.length];
+      {/* Legenda — max 8 in SVG, de rest valt buiten */}
+      {apps.slice(0, 8).map((app, ai) => {
+        const color = appColor(ai);
         const scores = dims.map(d => app.scores[d.key] || 0);
         const heeftData = !scores.every(v => v === 0);
-        const lx    = cx - ((Math.min(apps.length, 5) - 1) * 130) / 2 + ai * 130;
+        const maxToon = Math.min(apps.length, 8);
+        const lx = cx - ((maxToon - 1) * 110) / 2 + ai * 110;
         return (
           <g key={app.id || ai}>
-            <rect x={lx - 32} y={H - 12} width={11} height={11}
-              fill={heeftData ? color : "#d1d5db"} fillOpacity={heeftData ? 0.6 : 1} rx={2} />
-            <text x={lx - 17} y={H - 3} fontSize={10}
+            <rect x={lx - 28} y={H - 12} width={9} height={9}
+              fill={heeftData ? color : "#d1d5db"} fillOpacity={heeftData ? 0.7 : 1} rx={2} />
+            <text x={lx - 15} y={H - 3} fontSize={9}
               fill={heeftData ? "#374151" : "#9ca3af"} fontFamily="system-ui">
-              {dn(app, useSecondaryName).substring(0, 14)}{!heeftData ? " *" : ""}
+              {dn(app, useSecondaryName).substring(0, 12)}{!heeftData ? " *" : ""}
             </text>
           </g>
         );
       })}
+      {apps.length > 8 && (
+        <text x={cx} y={H} textAnchor="middle" fontSize={9} fill="#9ca3af" fontFamily="system-ui"
+          fontStyle="italic">
+          + {apps.length - 8} meer — hover over het diagram voor namen
+        </text>
+      )}
 
       {/* Noot als er apps zijn zonder DICTU-scores */}
-      {apps.slice(0, 10).some(app => dims.map(d => app.scores[d.key] || 0).every(v => v === 0)) && (
+      {apps.some(app => dims.map(d => app.scores[d.key] || 0).every(v => v === 0)) && (
         <text x={cx} y={H - 0} textAnchor="middle" fontSize={9} fill="#9ca3af" fontFamily="system-ui"
           fontStyle="italic">
           * DICTU-vragen nog niet ingevuld — niet zichtbaar in diagram
@@ -3455,7 +3469,7 @@ ${(function(){
 
     const radarData = dimLetters.map(letter => {
       const entry = { dim: dimLabel(letter) };
-      scored.slice(0, 10).forEach(a => {
+      scored.forEach(a => {
         entry[radarKey(displayName(a))] = +dimScore(a, letter).toFixed(2);
       });
       return entry;
