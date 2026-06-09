@@ -4549,13 +4549,16 @@ ${(function(){
   // ── GEOKAART ───────────────────────────────────────────────────────────────
 
   function Compare() {
-    const minCompare = 2;
-    // Auto-selecteer laatste MAX_COMPARE bij eerste render als er meer apps zijn
+    // Auto-selecteer de laatste MAX_COMPARE apps bij eerste render
     React.useEffect(() => {
       if (apps.length > MAX_COMPARE) {
-        setCompareHidden(new Set(apps.slice(0, Math.max(0, apps.length - MAX_COMPARE)).map(a => a.id)));
+        setCompareHidden(new Set(
+          [...apps].sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0))
+            .slice(MAX_COMPARE).map(a => a.id)
+        ));
       }
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [apps.length]); // eslint-disable-line react-hooks/exhaustive-deps
+    const minCompare = 2;
     const visibleCompare = apps.filter(a => !compareHidden.has(a.id));
 
     function toggleCompare(id) {
@@ -4868,7 +4871,7 @@ ${(function(){
                 <span style={{ fontSize:16 }}>🔐</span>
               </div>
               <div>
-                <h2 className="font-bold" style={{ color:"#0C2340" }}>Beheeromgeving</h2>
+                <h2 id="beheer-top" className="font-bold" style={{ color:"#0C2340" }}>Beheeromgeving</h2>
                 <p className="text-xs text-gray-400">{apps.length} applicatie{apps.length !== 1 ? "s" : ""} in het systeem</p>
               </div>
             </div>
@@ -5066,7 +5069,10 @@ ${(function(){
                       {/* Action buttons */}
                       <div className="flex gap-2 flex-shrink-0 items-center">
                         <button
-                          onClick={() => window.scrollTo({ top:0, behavior:"smooth" })}
+                          onClick={() => {
+                            const el = document.getElementById("beheer-top");
+                            if (el) el.scrollIntoView({ behavior:"smooth" });
+                          }}
                           className="text-xs px-2 py-1.5 font-medium"
                           title="Terug naar boven"
                           style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#9ca3af", background:"#fff" }}>
