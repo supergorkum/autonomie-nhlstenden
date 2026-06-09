@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.2.1"; // UPLOAD-CHECK: kwadrant r=7 fontSize=12
+const VERSION = "v2.3";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -45,6 +45,17 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.3",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Automatische cloud-backups om 10:00, 13:00 en 18:00 via Netlify scheduled functions",
+      "Server-backups bewaard 7 dagen, daarna automatisch verwijderd",
+      "Import-modal met keuze: herstel vanuit server-backup of importeer lokaal bestand",
+      "Header toont icoon: ☁️ automatische backup of 💾 handmatige export met datum en tijd",
+      "Restore-functie: herstel elke server-backup direct via Beheer",
+    ]
+  },
   {
     versie: "v2.2",
     datum: "Juni 2026",
@@ -2184,6 +2195,7 @@ function App() {
   const [importData,    setImportData]    = useState(null);
   const [importSel,     setImportSel]     = useState(new Set());
   const [showImport,    setShowImport]    = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false); // import keuze modal
   const [geoHoverId,    setGeoHoverId]    = useState(null);
   const [geoTooltip,    setGeoTooltip]    = useState(null);
   const [geoHidden,     setGeoHidden]     = useState(new Set()); // verborgen apps op de kaart
@@ -4870,7 +4882,7 @@ ${(function(){
                          opacity: apps.length === 0 ? 0.5 : 1 }}>
                 ⬇ Exporteer database
               </button>
-              <button onClick={() => document.getElementById("db-import-input").click()}
+              <button onClick={() => setShowImportModal(true)}
                 className="text-xs px-3 py-1.5 font-medium"
                 style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
                 ⬆ Importeer database
@@ -6962,6 +6974,114 @@ ${(function(){
                   </ul>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Import keuze modal ── */}
+      {showImportModal && (
+        <div className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ background:"rgba(12,35,64,0.6)" }}
+          onClick={() => setShowImportModal(false)}>
+          <div className="bg-white w-full max-w-lg mx-4 overflow-hidden"
+            style={{ borderRadius:8, boxShadow:"0 8px 32px rgba(12,35,64,0.4)" }}
+            onClick={e => e.stopPropagation()}>
+
+            {/* Header */}
+            <div className="px-5 py-3 flex items-center justify-between"
+              style={{ background:"#0C2340", borderBottom:"3px solid #26B5AE" }}>
+              <div className="flex items-center gap-2">
+                <span style={{ fontSize:16 }}>⬆</span>
+                <h2 className="font-bold text-white text-sm">Database importeren</h2>
+              </div>
+              <button onClick={() => setShowImportModal(false)}
+                className="text-white hover:text-gray-300" style={{ fontSize:20, lineHeight:1 }}>×</button>
+            </div>
+
+            <div className="p-5 space-y-4">
+
+              {/* Optie 1: Server backups */}
+              <div className="rounded p-4" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>☁️ Herstel vanuit server-backup</p>
+                <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
+                  Automatische backups op de server — elke dag om 10:00, 13:00 en 18:00 aangemaakt, 7 dagen bewaard.
+                </p>
+                {!backupsLoaded ? (
+                  <p className="text-xs italic" style={{ color:"#9ca3af" }}>Backups laden...</p>
+                ) : serverBackups.length === 0 ? (
+                  <p className="text-xs italic" style={{ color:"#9ca3af" }}>
+                    Nog geen automatische backups beschikbaar. De eerste wordt aangemaakt om 10:00 of 13:00.
+                  </p>
+                ) : (
+                  <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                    {serverBackups.map((b, i) => {
+                      const d = new Date(b.timestamp);
+                      const sameDay = d.toDateString() === new Date().toDateString();
+                      const dateStr = d.toLocaleDateString("nl-NL", {weekday:"short", day:"numeric", month:"short"});
+                      const timeStr = d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
+                      const label = sameDay ? `Vandaag ${timeStr}` : `${dateStr} ${timeStr}`;
+                      return (
+                        <div key={b.key} className="flex items-center justify-between rounded p-2"
+                          style={{ background: i === 0 ? "#fff" : "#f8fafc", border:`1px solid ${i === 0 ? "#D0E4F7" : "#e5e7eb"}` }}>
+                          <div className="flex items-center gap-2">
+                            {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:"#1A56A0", color:"white" }}>Laatste</span>}
+                            <span className="text-xs" style={{ color:"#374151" }}>☁️ {label}</span>
+                          </div>
+                          <button
+                            onClick={async () => {
+                              if (!confirm(`Herstel backup van ${label}?
+Huidige data wordt overschreven.`)) return;
+                              try {
+                                const r = await fetch("/api/restore-backup", {
+                                  method:"POST",
+                                  headers:{ "Content-Type":"application/json", "x-api-token": apiToken },
+                                  body: JSON.stringify({ key: b.key }),
+                                });
+                                const result = await r.json();
+                                if (result.ok) {
+                                  const loadR = await fetch("/api/load-data", { headers:{ "x-api-token": apiToken } });
+                                  const freshData = await loadR.json();
+                                  if (Array.isArray(freshData)) {
+                                    setApps(freshData);
+                                    setLastBackup(b.timestamp);
+                                    setBackupType("auto");
+                                    setShowImportModal(false);
+                                    alert(`Hersteld: ${result.count} applicaties geladen.`);
+                                  }
+                                } else {
+                                  alert("Herstel mislukt: " + result.error);
+                                }
+                              } catch(e) { alert("Fout: " + e.message); }
+                            }}
+                            className="text-xs px-2.5 py-1 font-medium"
+                            style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#fff" }}>
+                            ↩ Herstel
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Optie 2: Lokaal bestand */}
+              <div className="rounded p-4" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
+                <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>💾 Importeer lokaal bestand</p>
+                <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
+                  Selecteer een eerder geëxporteerd JSON-bestand van jouw computer.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowImportModal(false);
+                    setTimeout(() => document.getElementById("db-import-input").click(), 100);
+                  }}
+                  className="text-xs px-3 py-2 font-medium"
+                  style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
+                  📂 Kies bestand...
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
