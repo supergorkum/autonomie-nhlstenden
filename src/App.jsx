@@ -1962,7 +1962,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
           )}
         </div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:"4px", padding:"6px 16px 10px" }}>
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(120px, 1fr))", gap:"4px", padding:"4px 16px 10px" }}>
         {[...apps].sort((a, b) => displayName(a).localeCompare(displayName(b), "nl", { sensitivity:"base", numeric:true })).map((a) => {
           const col = appColor(apps.indexOf(a));
           const hidden = geoHidden.has(a.id);
@@ -1986,9 +1986,9 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
         <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
           <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
           {/* Legenda onder kaart */}
-          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+          <div className="mt-2">
               {/* Legenda: app-kleuren + vorm-uitleg */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(110px,1fr))", gap:"2px 8px" }}>
     {visibleGeoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
       return (
         <div key={a.id} className="flex items-center gap-1.5">
@@ -3943,9 +3943,9 @@ ${(function(){
 
           {/* ── Filter strip — alleen tonen als er >2 apps zijn ── */}
           {apps.length > 2 && (
-            <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
+            <div className="rounded p-3 mb-4"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+              <div className="flex items-center gap-2 mb-2">
                 <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Grafiek-selectie</span>
                 <span className="text-xs px-2 py-0.5 rounded font-semibold"
                   style={{ background: visibleApps.length >= MAX_VISIBLE ? "#fffbeb" : "#f0f9f9",
@@ -3958,7 +3958,7 @@ ${(function(){
                   </span>
                 )}
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px", flex:1 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px" }}>
                 {allScored.map((a, i) => {
                   const hidden  = hiddenApps.has(a.id);
                   const col     = appColor(i);
@@ -4627,9 +4627,9 @@ ${(function(){
 
           {/* Filter strip */}
           {apps.length > 2 && (
-            <div className="rounded p-3 mb-4 flex items-center gap-3 flex-wrap"
+            <div className="rounded p-3 mb-4"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+              <div className="flex items-center gap-2 mb-2">
                 <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Grafiek-selectie</span>
                 <span className="text-xs px-2 py-0.5 rounded font-semibold"
                   style={{ background: visibleCompare.length >= MAX_COMPARE ? "#fffbeb" : "#f0f9f9",
@@ -4640,7 +4640,7 @@ ${(function(){
                   <span style={{ fontSize:10, color:"#9ca3af" }}>max {MAX_COMPARE} voor leesbaarheid</span>
                 )}
               </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px", flex:1 }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px" }}>
                 {apps.map((a, i) => {
                   const hidden  = compareHidden.has(a.id);
                   const isLast2 = !hidden && visibleCompare.length <= minCompare;
@@ -5073,7 +5073,14 @@ ${(function(){
                         {a.appNotes && <p className="text-xs text-gray-400 mt-1 italic">"{adaptNote(a.appNotes, a)}"</p>}
                       </div>
                       {/* Action buttons */}
-                      <div className="flex gap-2 flex-shrink-0">
+                      <div className="flex gap-2 flex-shrink-0 items-center">
+                        <button
+                          onClick={() => window.scrollTo({ top:0, behavior:"smooth" })}
+                          className="text-xs px-2 py-1.5 font-medium"
+                          title="Terug naar boven"
+                          style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#9ca3af", background:"#fff" }}>
+                          ↑
+                        </button>
                         <button
                           onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}
                           className="text-white text-xs px-3 py-1.5 font-medium"
