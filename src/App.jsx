@@ -1543,8 +1543,9 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cx = pt[0] + Math.cos(angle) * spread - 2;
           const cy = pt[1] + Math.sin(angle) * spread - 2;
           return (
-            <g key={a.id+"_j"}>
+            <g key={a.id+"_j"} style={{cursor:"default"}}>
               <circle cx={cx} cy={cy} r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
+              <title>{displayName(a)} — jurisdictie: {a.jRegio}</title>
             </g>
           );
         });
@@ -1563,8 +1564,9 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cx = pt[0] + Math.cos(angle) * spread + 3;
           const cy = pt[1] + Math.sin(angle) * spread + 4;
           return (
-            <g key={a.id+"_d"}>
+            <g key={a.id+"_d"} style={{cursor:"default"}}>
               <circle cx={cx} cy={cy} r="3.5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="1.8"/>
+              <title>{displayName(a)} — datalocatie: {a.dRegio}</title>
             </g>
           );
         });
@@ -1995,25 +1997,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
               <span style={{ fontSize:11, color:"#374151" }}>Ring = datalocatie servers</span>
             </div>
           </div>
-          <div style={{ marginTop:12, display:"flex", flexDirection:"column", gap:3 }}>
-            <p style={{ fontSize:10, fontWeight:700, color:"#9ca3af", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4 }}>App-kleuren</p>
-            {geoApps.map(a => {
-              const hidden = geoHidden.has(a.id);
-              return (
-                <div key={a.id}
-                  onClick={() => setGeoHidden(p => { const n = new Set(p); n.has(a.id) ? n.delete(a.id) : n.add(a.id); return n; })}
-                  style={{ display:"flex", alignItems:"center", gap:5, cursor:"pointer",
-                           opacity: hidden ? 0.35 : 1 }}>
-                  <svg width="16" height="10">
-                    <circle cx="4" cy="5" r="3" fill={hidden ? "#d1d5db" : a.appKleur} stroke="white" strokeWidth="1"/>
-                    <circle cx="12" cy="5" r="3" fill="white" stroke={hidden ? "#d1d5db" : a.appKleur} strokeWidth="1.6"/>
-                  </svg>
-                  <span style={{ fontSize:10, color: hidden ? "#9ca3af" : "#374151",
-                                 textDecoration: hidden ? "line-through" : "none" }}>{displayName(a)}</span>
-                </div>
-              );
-            })}
-          </div>
+
         </div>
 
         {/* Kolom 2: Regio tellingen */}
