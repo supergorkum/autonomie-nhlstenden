@@ -2172,13 +2172,7 @@ function App() {
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
 
 
-  const [compareHidden, setCompareHidden] = useState(() => {
-    // Start met de laatste MAX_COMPARE apps geselecteerd
-    if (apps.length > MAX_COMPARE) {
-      return new Set(apps.slice(0, apps.length - MAX_COMPARE).map(a => a.id));
-    }
-    return new Set();
-  });
+  const [compareHidden, setCompareHidden] = useState(new Set());
   const MAX_COMPARE = 5;
 
   // Auto-select laatste 5 in vergelijking als er meer zijn
@@ -4556,7 +4550,12 @@ ${(function(){
 
   function Compare() {
     const minCompare = 2;
-    const visibleCompare = apps.filter(a => !compareHidden.has(a.id));
+    // Als nog niets verborgen is en er meer apps zijn dan MAX_COMPARE:
+    // automatisch de laatste MAX_COMPARE tonen (oudste verbergen)
+    const effectiveHidden = compareHidden.size === 0 && apps.length > MAX_COMPARE
+      ? new Set(apps.slice(0, apps.length - MAX_COMPARE).map(a => a.id))
+      : compareHidden;
+    const visibleCompare = apps.filter(a => !effectiveHidden.has(a.id));
 
     function toggleCompare(id) {
       setCompareHidden(prev => {
@@ -4639,7 +4638,7 @@ ${(function(){
               </div>
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px" }}>
                 {apps.map((a, i) => {
-                  const hidden  = compareHidden.has(a.id);
+                  const hidden  = effectiveHidden.has(a.id);
                   const isLast2 = !hidden && visibleCompare.length <= minCompare;
                   const col     = appColor(i);
                   return (
