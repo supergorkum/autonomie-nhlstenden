@@ -4955,31 +4955,36 @@ ${(function(){
                         </div>
                         <button
                           onClick={async () => {
-                            if (!confirm(`Herstel backup van ${dateStr}? Huidige data wordt overschreven.`)) return;
                             try {
                               const r = await fetch("/api/restore-backup", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json", "x-api-token": apiToken },
-                                body: JSON.stringify({ key: b.key }),
+                                body: JSON.stringify({ key: b.key, previewOnly: true }),
                               });
                               const result = await r.json();
-                              if (result.ok) {
-                                const loadR = await fetch("/api/load-data", { headers: { "x-api-token": apiToken } });
-                                const freshData = await loadR.json();
-                                if (Array.isArray(freshData)) {
-                                  setApps(freshData);
-                                  alert(`Hersteld: ${result.count} applicaties geladen.`);
-                                }
+                              if (result.apps) {
+                                const d2 = new Date(b.timestamp);
+                                const nlTime = d2.toLocaleTimeString("nl-NL", { timeZone:"Europe/Amsterdam", hour:"2-digit", minute:"2-digit" });
+                                const nlDate = d2.toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"long" });
+                                setImportData({
+                                  apps: result.apps,
+                                  appCount: result.apps.length,
+                                  exportedAt: b.timestamp,
+                                  version: "server-backup",
+                                  label: `☁️ ${nlDate} ${nlTime}`,
+                                });
+                                setImportSel(new Set(result.apps.map(a => a.id)));
+                                setShowImport(true);
                               } else {
-                                alert("Herstel mislukt: " + result.error);
+                                alert("Backup laden mislukt: " + (result.error || "onbekend"));
                               }
                             } catch (e) {
-                              alert("Fout bij herstel: " + e.message);
+                              alert("Fout: " + e.message);
                             }
                           }}
                           className="text-xs px-2.5 py-1 font-medium"
                           style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#fff" }}>
-                          ↩ Herstel
+                          ↩ Selecteer
                         </button>
                       </div>
                     );
@@ -5293,9 +5298,12 @@ ${(function(){
                   <div>
                     <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Database importeren</h3>
                     <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
-                      Geëxporteerd op {new Date(importData.exportedAt).toLocaleString("nl-NL")} &nbsp;·&nbsp;
-                      {importData.appCount} applicatie{importData.appCount !== 1 ? "s" : ""} in bestand &nbsp;·&nbsp;
-                      versie {importData.version}
+                      {importData.label
+                        ? <>{importData.label} &nbsp;·&nbsp; {importData.appCount} applicatie{importData.appCount !== 1 ? "s" : ""} in backup</>
+                        : <>Geëxporteerd op {new Date(importData.exportedAt).toLocaleString("nl-NL", { timeZone:"Europe/Amsterdam" })} &nbsp;·&nbsp;
+                          {importData.appCount} applicatie{importData.appCount !== 1 ? "s" : ""} in bestand &nbsp;·&nbsp;
+                          versie {importData.version}</>
+                      }
                     </p>
                   </div>
                   <button onClick={() => { setShowImport(false); setImportData(null); setImportSel(new Set()); }}
@@ -6836,9 +6844,7 @@ ${(function(){
                   const nlDate = d.toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"short" });
                   const todayNL = new Date().toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"short", year:"numeric" });
                   const dateNL  = d.toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"short", year:"numeric" });
-                  return dateNL === todayNL
-                    ? `${icon} ${nlTime}`
-                    : `${icon} ${nlDate} ${nlTime}`;
+                  return `${icon} ${nlDate} ${nlTime}`;
                 })()}
               </span>
             )}
@@ -7057,33 +7063,36 @@ ${(function(){
                           </div>
                           <button
                             onClick={async () => {
-                              if (!confirm(`Herstel backup van ${label}?
-Huidige data wordt overschreven.`)) return;
                               try {
                                 const r = await fetch("/api/restore-backup", {
                                   method:"POST",
                                   headers:{ "Content-Type":"application/json", "x-api-token": apiToken },
-                                  body: JSON.stringify({ key: b.key }),
+                                  body: JSON.stringify({ key: b.key, previewOnly: true }),
                                 });
                                 const result = await r.json();
-                                if (result.ok) {
-                                  const loadR = await fetch("/api/load-data", { headers:{ "x-api-token": apiToken } });
-                                  const freshData = await loadR.json();
-                                  if (Array.isArray(freshData)) {
-                                    setApps(freshData);
-                                    setLastBackup(b.timestamp);
-                                    setBackupType("auto");
-                                    setShowImportModal(false);
-                                    alert(`Hersteld: ${result.count} applicaties geladen.`);
-                                  }
+                                if (result.apps) {
+                                  const d2 = new Date(b.timestamp);
+                                  const nlOpts2 = { timeZone:"Europe/Amsterdam" };
+                                  const nlTime2 = d2.toLocaleTimeString("nl-NL", { ...nlOpts2, hour:"2-digit", minute:"2-digit" });
+                                  const nlDate2 = d2.toLocaleDateString("nl-NL", { ...nlOpts2, day:"numeric", month:"long" });
+                                  setImportData({
+                                    apps: result.apps,
+                                    appCount: result.apps.length,
+                                    exportedAt: b.timestamp,
+                                    version: "server-backup",
+                                    label: `☁️ ${nlDate2} ${nlTime2}`,
+                                  });
+                                  setImportSel(new Set(result.apps.map(a => a.id)));
+                                  setShowImport(true);
+                                  setShowImportModal(false);
                                 } else {
-                                  alert("Herstel mislukt: " + result.error);
+                                  alert("Backup laden mislukt: " + (result.error || "onbekend"));
                                 }
                               } catch(e) { alert("Fout: " + e.message); }
                             }}
                             className="text-xs px-2.5 py-1 font-medium"
                             style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#fff" }}>
-                            ↩ Herstel
+                            ↩ Selecteer
                           </button>
                         </div>
                       );
