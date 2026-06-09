@@ -1544,8 +1544,9 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cy = pt[1] + Math.sin(angle) * spread - 2;
           return (
             <g key={a.id+"_j"} style={{cursor:"default"}}>
-              <circle cx={cx} cy={cy} r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
               <title>{displayName(a)} — jurisdictie: {a.jRegio}</title>
+              <circle cx={cx} cy={cy} r="5" fill="transparent"/>
+              <circle cx={cx} cy={cy} r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
             </g>
           );
         });
@@ -1565,8 +1566,9 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cy = pt[1] + Math.sin(angle) * spread + 4;
           return (
             <g key={a.id+"_d"} style={{cursor:"default"}}>
-              <circle cx={cx} cy={cy} r="3.5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="1.8"/>
               <title>{displayName(a)} — datalocatie: {a.dRegio}</title>
+              <circle cx={cx} cy={cy} r="5" fill="transparent"/>
+              <circle cx={cx} cy={cy} r="3.5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="1.8"/>
             </g>
           );
         });
