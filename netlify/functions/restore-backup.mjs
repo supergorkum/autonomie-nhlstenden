@@ -14,7 +14,7 @@ export default async (request) => {
   }
 
   try {
-    const { key } = await request.json();
+    const { key, previewOnly } = await request.json();
     if (!key || !key.startsWith("backup:")) {
       return new Response(JSON.stringify({ error: "Ongeldige backup key" }), { status: 400 });
     }
@@ -23,6 +23,18 @@ export default async (request) => {
     const backup = await store.get(key, { type: "json" });
     if (!backup || !Array.isArray(backup.apps)) {
       return new Response(JSON.stringify({ error: "Backup niet gevonden" }), { status: 404 });
+    }
+
+    // previewOnly: stuur alleen de data terug zonder te herstellen
+    if (previewOnly) {
+      return new Response(JSON.stringify({
+        apps: backup.apps,
+        count: backup.apps.length,
+        timestamp: backup.timestamp,
+      }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Herstel de apps
