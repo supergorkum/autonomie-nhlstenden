@@ -2207,20 +2207,33 @@ function App() {
   // ── Laden van gedeelde data via Netlify Blobs API ───────────
   useEffect(() => {
     if (!loggedIn) return;
-    // Haal ook laatste backup op
-    fetch("/api/list-backups", { headers: { "x-api-token": apiToken } })
-      .then(r => r.json())
-      .then(backups => {
-        if (Array.isArray(backups)) {
-          setServerBackups(backups);
-          if (backups.length > 0) {
-            setLastBackup(backups[0].timestamp);
-            setBackupType("auto");
-          }
+    // Haal laatste backup en export timestamp op
+    Promise.all([
+      fetch("/api/list-backups", { headers: { "x-api-token": apiToken } }).then(r => r.json()),
+      fetch("/api/load-export-timestamp", { headers: { "x-api-token": apiToken } }).then(r => r.json()),
+    ]).then(([backups, exportTs]) => {
+      if (Array.isArray(backups)) setServerBackups(backups);
+      // Bepaal welke het meest recent is: server-backup of handmatige export
+      const lastAutoTs = Array.isArray(backups) && backups.length > 0 ? backups[0].timestamp : null;
+      const lastManualTs = exportTs?.timestamp || null;
+      if (lastAutoTs && lastManualTs) {
+        // Vergelijk welke recenter is
+        if (new Date(lastManualTs) > new Date(lastAutoTs)) {
+          setLastBackup(lastManualTs);
+          setBackupType("manual");
+        } else {
+          setLastBackup(lastAutoTs);
+          setBackupType("auto");
         }
-        setBackupsLoaded(true);
-      })
-      .catch(() => setBackupsLoaded(true));
+      } else if (lastAutoTs) {
+        setLastBackup(lastAutoTs);
+        setBackupType("auto");
+      } else if (lastManualTs) {
+        setLastBackup(lastManualTs);
+        setBackupType("manual");
+      }
+      setBackupsLoaded(true);
+    }).catch(() => setBackupsLoaded(true));
     async function load() {
       try {
         const r = await fetch("/api/load-data", { headers: { "x-api-token": apiToken } });
@@ -2403,6 +2416,12 @@ function App() {
     URL.revokeObjectURL(url);
     setLastBackup(now.toISOString()); // update header teller
     setBackupType("manual");
+    // Sla laatste export timestamp op op server zodat iedereen het ziet
+    fetch("/api/save-export-timestamp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-token": apiToken },
+      body: JSON.stringify({ timestamp: now.toISOString(), type: "manual" }),
+    }).catch(() => {});
   }
 
   // ── Database import verwerken ────────────────────────────────────────────────
