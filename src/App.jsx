@@ -1981,14 +1981,14 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
         })}
       </div>
 
-      <div className="grid gap-0" style={{ gridTemplateColumns:"3fr 2fr", borderTop:"1px solid #EBF3FF" }}>
-        {/* Mini kaart */}
-        <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
-          <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
-          {/* Legenda onder kaart */}
-          <div className="mt-2">
-              {/* Legenda: app-kleuren + vorm-uitleg */}
-            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(110px,1fr))", gap:"2px 8px" }}>
+      {/* Kaart: volle breedte */}
+      <div style={{ borderTop:"1px solid #EBF3FF", padding:"8px 12px" }}>
+        <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
+      </div>
+
+      {/* Legenda + toelichting: auto-fill grid onder kaart */}
+      <div style={{ borderTop:"1px solid #EBF3FF", padding:"6px 12px 10px" }}>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(110px,1fr))", gap:"2px 8px" }}>
     {visibleGeoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
       return (
         <div key={a.id} className="flex items-center gap-1.5">
@@ -2011,11 +2011,12 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
       <span style={{ fontSize:9, color:"#9ca3af" }}>Ring = datalocatie</span>
     </div>
             </div>
-          </div>
-        </div>
+      </div>
 
-        {/* Tabel */}
-        <div style={{ padding:"8px 12px" }}>
+      {/* Tabel + app-badges: 2 kolommen onder de kaart */}
+      <div className="grid gap-4" style={{ gridTemplateColumns:"1fr 2fr", borderTop:"1px solid #EBF3FF", padding:"8px 12px" }}>
+        {/* Tabel links */}
+        <div>
           <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
             <thead>
     <tr style={{ background:"#0C2340", color:"white" }}>
