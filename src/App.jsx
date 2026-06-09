@@ -2058,11 +2058,11 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
           <p style={{ fontSize:10, fontWeight:700, color:"#9ca3af", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:8 }}>Applicaties per regio</p>
           <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
             {REGIO_ORDER.filter(r => {
-              const appsInRegio = visibleGeoApps.filter(a => a.jRegio === r || a.dRegio === r);
+              const appsInRegio = geoApps.filter(a => a.jRegio === r || a.dRegio === r);
               return appsInRegio.length > 0;
             }).map(r => {
               const k = REGIO_KLEUR[r];
-              const appsInRegio = visibleGeoApps.filter(a => a.jRegio === r || a.dRegio === r);
+              const appsInRegio = geoApps.filter(a => a.jRegio === r || a.dRegio === r);
               return (
                 <div key={r}>
                   <div style={{ display:"flex", alignItems:"center", gap:5, marginBottom:4 }}>
@@ -3836,11 +3836,7 @@ ${(function(){
       setHiddenApps(prev => {
         const next = new Set(prev);
         if (next.has(id)) {
-          // Zichtbaar maken: als max bereikt, verberg de eerste zichtbare (niet zichzelf)
-          const currentVisible = apps.filter(a => !next.has(a.id) && a.id !== id);
-          if (currentVisible.length >= MAX_VISIBLE) {
-            next.add(currentVisible[0].id);
-          }
+          // Zichtbaar maken - altijd toegestaan
           next.delete(id);
         } else {
           // Verbergen: minimaal 1 zichtbaar houden
@@ -3955,7 +3951,7 @@ ${(function(){
                         border: `2px solid ${hidden ? "#e5e7eb" : col}`,
                         background: hidden ? "#f9fafb" : `${col}18`,
                         color: hidden ? "#9ca3af" : col,
-                        opacity: (!hidden && visibleApps.length <= 1) ? 0.4 : hidden ? 0.45 : 1,
+                        opacity: (!hidden && visibleApps.length <= 1) ? 0.35 : hidden ? 0.4 : 1,
                         cursor: (!hidden && visibleApps.length <= 1) ? "not-allowed" : "pointer",
                         textDecoration: hidden ? "line-through" : "none"
                       }}>
@@ -3972,7 +3968,7 @@ ${(function(){
               <div className="flex items-center gap-2 mt-2 pt-2 flex-wrap" style={{ borderTop:"1px solid #EBF3FF" }}>
                 <span className="text-xs font-semibold mr-auto" style={{ color:"#9ca3af" }}>
                   Grafiek-selectie · {visibleApps.length} van {apps.length} zichtbaar
-                  {apps.length > MAX_VISIBLE && visibleApps.length >= MAX_VISIBLE && <span> · max {MAX_VISIBLE}</span>}
+                  {visibleApps.length > MAX_VISIBLE && <span style={{color:"#dc2626"}}> · meer dan max {MAX_VISIBLE} — grafieken tonen eerste {MAX_VISIBLE}</span>}
                 </span>
                 {apps.length > MAX_VISIBLE && (
                   <button onClick={selectLaatste10}
