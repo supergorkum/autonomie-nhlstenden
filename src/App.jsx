@@ -2139,10 +2139,15 @@ function App() {
   // Helper: vervangt primaire naam door secondaire (of vice versa) in motivatieteksten
   const adaptNote = (tekst, app) => {
     if (!tekst || !app) return tekst;
+    // Verwijder artefacten zoals tijdstempels en streepjes die soms in teksten terechtkomen
+    let t = tekst
+      .replace(/\d{1,2}:\d{2}[\u2500-\u257F\u2580-\u259F\u25A0-\u25FF\u2600-\u26FF=\-_]{2,}[A-Za-z ]+responded:?\s*/g, "")
+      .replace(/^\s*\d{1,2}:\d{2}\s*/gm, "")
+      .trim();
     const from = useSecondaryName ? app.name : (app.nameSecondary || "");
     const to   = useSecondaryName ? (app.nameSecondary || "") : app.name;
-    if (!from || !to || from === to) return tekst;
-    return tekst.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), to);
+    if (!from || !to || from === to) return t;
+    return t.replace(new RegExp(from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), to);
   };
   const [ready,      setReady]     = useState(false);
   const [saving,     setSaving]    = useState(false);

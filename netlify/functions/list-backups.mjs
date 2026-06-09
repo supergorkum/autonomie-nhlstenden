@@ -17,7 +17,8 @@ export default async (request) => {
     const backups = blobs
       .map(b => ({
         key: b.key,
-        timestamp: b.key.replace("backup:", ""),
+        // Voeg Z toe zodat browser het als UTC herkent (niet als lokale tijd)
+        timestamp: b.key.replace("backup:", "") + ":00Z",
       }))
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
       .slice(0, 14); // max 14 tonen (7 dagen × 2 per dag)
