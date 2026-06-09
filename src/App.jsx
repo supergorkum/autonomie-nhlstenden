@@ -6072,7 +6072,7 @@ ${(function(){
             ];
 
             // Bouw geo-data op (gefilterd op selectie)
-            const geoApps = apps.filter(function(a) { return !geoHiddenBestuur.has(a.id); }).map(function(a, i) {
+            const geoApps = apps.map(function(a, i) {
               const a1 = a.scores["A1"] || 0;
               const a3 = a.scores["A3"] || 0;
               // A1: score 1-2=EU, 3=VS+adequaat, 4=VS+SCCs, 5=buiten EU
@@ -6114,6 +6114,9 @@ ${(function(){
               };
             });
 
+            // Filter op hidden state
+            const visibleGeoApps = geoApps.filter(function(a) { return !geoHiddenBestuur.has(a.id); });
+
             // Groepeer per regio
             const REGIO_ORDER = ["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"];
             const REGIO_LON_LAT = {
@@ -6133,7 +6136,7 @@ ${(function(){
 
             // Tel per regio
             const jTelling = {}; const dTelling = {};
-            geoApps.forEach(function(a) {
+            visibleGeoApps.forEach(function(a) {
               jTelling[a.jRegio] = (jTelling[a.jRegio]||0) + 1;
               dTelling[a.dRegio] = (dTelling[a.dRegio]||0) + 1;
             });
@@ -6197,12 +6200,12 @@ ${(function(){
                 <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
                   {/* Mini kaart */}
                   <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
-                    <MiniGeoKaart geoApps={geoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
+                    <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
                     {/* Legenda onder kaart */}
                     <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
                                             {/* Legenda: app-kleuren + vorm-uitleg */}
                       <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        {geoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
+                        {visibleGeoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
                           return (
                             <div key={a.id} className="flex items-center gap-1.5">
                               <svg width="20" height="10" style={{flexShrink:0}}>
@@ -6263,7 +6266,7 @@ ${(function(){
                         })}
                       </tbody>
                     </table>
-                    {geoApps.some(function(a) { return a.a1 === 0 && a.a3 === 0; }) && (
+                    {visibleGeoApps.some(function(a) { return a.a1 === 0 && a.a3 === 0; }) && (
                       <p className="text-xs mt-2" style={{ color:"#9ca3af" }}>
                         * Applicaties zonder A1/A3-score zijn niet meegenomen.
                       </p>
@@ -6273,7 +6276,7 @@ ${(function(){
                     <div className="mt-3 pt-3" style={{ borderTop:"1px solid #EBF3FF" }}>
                       <p className="text-xs font-semibold mb-2" style={{ color:"#6b7280" }}>Applicaties per regio:</p>
                       {["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"].map(function(regio) {
-                        const appsInRegio = geoApps.filter(function(a) {
+                        const appsInRegio = visibleGeoApps.filter(function(a) {
                           return a.jRegio === regio || a.dRegio === regio;
                         });
                         if (appsInRegio.length === 0) return null;
