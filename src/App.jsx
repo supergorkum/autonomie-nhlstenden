@@ -1419,6 +1419,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 
 // ── MiniGeoKaart — compacte wereldkaart voor Portfolio-pagina ────────────────
 function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, displayName }) {
+  const [tooltip, setTooltip] = React.useState(null); // {x, y, text}
   const [worldData, setWorldData] = React.useState(null);
 
   React.useEffect(function() {
@@ -1543,9 +1544,10 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cx = pt[0] + Math.cos(angle) * spread - 2;
           const cy = pt[1] + Math.sin(angle) * spread - 2;
           return (
-            <g key={a.id+"_j"} style={{cursor:"default"}}>
-              <title>{displayName(a)} — jurisdictie: {a.jRegio}</title>
-              <circle cx={cx} cy={cy} r="5" fill="transparent"/>
+            <g key={a.id+"_j"} style={{cursor:"default"}}
+              onMouseEnter={e => setTooltip({x:cx, y:cy-10, text:displayName(a)+" — "+a.jRegio})}
+              onMouseLeave={() => setTooltip(null)}>
+              <circle cx={cx} cy={cy} r="7" fill="transparent"/>
               <circle cx={cx} cy={cy} r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
             </g>
           );
@@ -1565,15 +1567,33 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cx = pt[0] + Math.cos(angle) * spread + 3;
           const cy = pt[1] + Math.sin(angle) * spread + 4;
           return (
-            <g key={a.id+"_d"} style={{cursor:"default"}}>
-              <title>{displayName(a)} — datalocatie: {a.dRegio}</title>
-              <circle cx={cx} cy={cy} r="5" fill="transparent"/>
+            <g key={a.id+"_d"} style={{cursor:"default"}}
+              onMouseEnter={e => setTooltip({x:cx, y:cy-10, text:displayName(a)+" — "+a.dRegio})}
+              onMouseLeave={() => setTooltip(null)}>
+              <circle cx={cx} cy={cy} r="7" fill="transparent"/>
               <circle cx={cx} cy={cy} r="3.5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="1.8"/>
             </g>
           );
         });
       })}
 
+      {/* Tooltip */}
+      {tooltip && (
+        <g style={{pointerEvents:"none"}}>
+          <rect x={Math.min(tooltip.x - 4, W - 160)}
+                y={tooltip.y - 18}
+                width={Math.min(tooltip.text.length * 5.5 + 12, 200)}
+                height={17}
+                rx={3}
+                fill="rgba(15,23,42,0.88)"/>
+          <text x={Math.min(tooltip.x, W - 156)}
+                y={tooltip.y - 6}
+                fill="white"
+                style={{fontSize:9.5, fontFamily:"system-ui", fontWeight:500}}>
+            {tooltip.text}
+          </text>
+        </g>
+      )}
 
     </svg>
   );
