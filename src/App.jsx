@@ -1948,7 +1948,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
       <div style={{ padding:"14px 16px 10px", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
         <div>
           <h3 style={{ fontSize:14, fontWeight:700, color:"#0C2340", margin:0 }}>Geopolitieke positie — applicatielandschap</h3>
-          <p style={{ fontSize:11, color:"#9ca3af", margin:"3px 0 0" }}>Jurisdictie leverancier en datalocatie servers per regio</p>
+          <p style={{ fontSize:11, color:"#9ca3af", margin:"3px 0 0" }}>Jurisdictie leverancier en datalocatie per regio · klik op een app-naam om te filteren</p>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
           <span style={{ fontSize:11, fontWeight:600, padding:"2px 8px", borderRadius:4,
@@ -1967,28 +1967,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
         </div>
       </div>
 
-      {/* ── App-selectie knoppen ── */}
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:4, padding:"0 16px 12px" }}>
-        {[...apps].sort((a,b) => displayName(a).localeCompare(displayName(b),"nl",{sensitivity:"base",numeric:true})).map((a) => {
-          const col = appColor(apps.indexOf(a));
-          const hidden = geoHidden.has(a.id);
-          return (
-            <button key={a.id}
-              onClick={() => setGeoHidden(p => { const n = new Set(p); n.has(a.id) ? n.delete(a.id) : n.add(a.id); return n; })}
-              style={{ display:"flex", alignItems:"center", gap:6, padding:"5px 8px", borderRadius:4,
-                border: hidden ? "1px solid #e5e7eb" : `1px solid ${col}88`,
-                background: hidden ? "#f9fafb" : `${col}12`,
-                color: hidden ? "#9ca3af" : col,
-                fontSize:11, fontWeight:500, cursor:"pointer",
-                textDecoration: hidden ? "line-through" : "none",
-                overflow:"hidden", whiteSpace:"nowrap", textOverflow:"ellipsis" }}>
-              <span style={{ width:7, height:7, borderRadius:"50%", flexShrink:0,
-                             background: hidden ? "#d1d5db" : col, display:"inline-block" }}/>
-              <span style={{ overflow:"hidden", textOverflow:"ellipsis" }}>{displayName(a).substring(0,16)}</span>
-            </button>
-          );
-        })}
-      </div>
+
 
       {/* ── Kaart: volle breedte, responsief ── */}
       <div style={{ width:"100%", borderTop:"1px solid #EBF3FF", padding:"0 16px 8px", boxSizing:"border-box" }}>
@@ -2018,15 +1997,22 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
           </div>
           <div style={{ marginTop:12, display:"flex", flexDirection:"column", gap:3 }}>
             <p style={{ fontSize:10, fontWeight:700, color:"#9ca3af", textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:4 }}>App-kleuren</p>
-            {visibleGeoApps.filter(a => a.a1 > 0 || a.a3 > 0).map(a => (
-              <div key={a.id} style={{ display:"flex", alignItems:"center", gap:5 }}>
-                <svg width="16" height="10">
-                  <circle cx="4" cy="5" r="3" fill={a.appKleur} stroke="white" strokeWidth="1"/>
-                  <circle cx="12" cy="5" r="3" fill="white" stroke={a.appKleur} strokeWidth="1.6"/>
-                </svg>
-                <span style={{ fontSize:10, color:"#6b7280" }}>{displayName(a)}</span>
-              </div>
-            ))}
+            {geoApps.map(a => {
+              const hidden = geoHidden.has(a.id);
+              return (
+                <div key={a.id}
+                  onClick={() => setGeoHidden(p => { const n = new Set(p); n.has(a.id) ? n.delete(a.id) : n.add(a.id); return n; })}
+                  style={{ display:"flex", alignItems:"center", gap:5, cursor:"pointer",
+                           opacity: hidden ? 0.35 : 1 }}>
+                  <svg width="16" height="10">
+                    <circle cx="4" cy="5" r="3" fill={hidden ? "#d1d5db" : a.appKleur} stroke="white" strokeWidth="1"/>
+                    <circle cx="12" cy="5" r="3" fill="white" stroke={hidden ? "#d1d5db" : a.appKleur} strokeWidth="1.6"/>
+                  </svg>
+                  <span style={{ fontSize:10, color: hidden ? "#9ca3af" : "#374151",
+                                 textDecoration: hidden ? "line-through" : "none" }}>{displayName(a)}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
 
@@ -2089,9 +2075,13 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
                       const isD = a.dRegio === r;
                       const tag = isJ && isD ? "juris.+data" : isJ ? "juris." : "data";
                       return (
-                        <div key={a.id} style={{ display:"flex", alignItems:"center", gap:3,
-                          padding:"2px 7px", borderRadius:3, fontSize:10, fontWeight:500,
-                          border:`1px solid ${a.appKleur}55`, background:`${a.appKleur}0d`, color:"#374151" }}>
+                        <div key={a.id}
+                          onClick={() => setGeoHidden(p => { const n = new Set(p); n.has(a.id) ? n.delete(a.id) : n.add(a.id); return n; })}
+                          style={{ display:"flex", alignItems:"center", gap:3,
+                          padding:"2px 7px", borderRadius:3, fontSize:10, fontWeight:500, cursor:"pointer",
+                          border:`1px solid ${a.appKleur}55`, background:`${a.appKleur}0d`, color:"#374151",
+                          opacity: geoHidden.has(a.id) ? 0.35 : 1,
+                          textDecoration: geoHidden.has(a.id) ? "line-through" : "none" }}>
                           {isJ && <span style={{ width:6, height:6, borderRadius:"50%", background:a.appKleur, display:"inline-block" }}/>}
                           {isD && !isJ && <span style={{ width:6, height:6, borderRadius:"50%", background:"white", border:`1.5px solid ${a.appKleur}`, display:"inline-block" }}/>}
                           {isJ && isD && <span style={{ width:6, height:6, borderRadius:"50%", background:"white", border:`1.5px solid ${a.appKleur}`, display:"inline-block" }}/>}
@@ -3846,10 +3836,9 @@ ${(function(){
       setHiddenApps(prev => {
         const next = new Set(prev);
         if (next.has(id)) {
-          // Zichtbaar maken: als max al bereikt, verberg de oudste zichtbare
-          const currentVisible = apps.filter(a => !next.has(a.id));
+          // Zichtbaar maken: als max bereikt, verberg de eerste zichtbare (niet zichzelf)
+          const currentVisible = apps.filter(a => !next.has(a.id) && a.id !== id);
           if (currentVisible.length >= MAX_VISIBLE) {
-            // Verberg de eerste zichtbare om ruimte te maken
             next.add(currentVisible[0].id);
           }
           next.delete(id);
