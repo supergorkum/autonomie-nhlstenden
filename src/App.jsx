@@ -1942,6 +1942,8 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
 
   return (
     <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+
+      {/* Header */}
       <div className="px-4 pt-3 pb-2 flex items-center justify-between">
         <div>
           <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Geopolitieke positie — applicatielandschap</h3>
@@ -1962,33 +1964,40 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
           )}
         </div>
       </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(120px, 1fr))", gap:"4px", padding:"4px 16px 10px" }}>
+
+      {/* App-selectie knoppen als vakjes in grid */}
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:"4px", padding:"0 12px 10px" }}>
         {[...apps].sort((a, b) => displayName(a).localeCompare(displayName(b), "nl", { sensitivity:"base", numeric:true })).map((a) => {
           const col = appColor(apps.indexOf(a));
           const hidden = geoHidden.has(a.id);
           return (
             <button key={a.id}
               onClick={() => setGeoHidden(p => { const n = new Set(p); n.has(a.id) ? n.delete(a.id) : n.add(a.id); return n; })}
-              className="flex items-center gap-1.5 text-xs px-2 py-1 font-medium"
-              style={{ borderRadius:4, border: hidden ? "1px solid #e5e7eb" : "1px solid "+col+"88",
-                       background: hidden ? "#f9fafb" : col+"12", color: hidden ? "#9ca3af" : col,
-                       textDecoration: hidden ? "line-through" : "none" }}>
-              <span style={{ width:6, height:6, borderRadius:"50%", flexShrink:0, display:"inline-block",
+              className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium"
+              style={{ borderRadius:4,
+                       border: hidden ? "1px solid #e5e7eb" : "1px solid "+col+"99",
+                       background: hidden ? "#f9fafb" : col+"15",
+                       color: hidden ? "#9ca3af" : col,
+                       textDecoration: hidden ? "line-through" : "none",
+                       overflow:"hidden" }}>
+              <span style={{ width:7, height:7, borderRadius:"50%", flexShrink:0, display:"inline-block",
                              background: hidden ? "#d1d5db" : col }}/>
-              {displayName(a).substring(0,18)}
+              <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                {displayName(a).substring(0,16)}
+              </span>
             </button>
           );
         })}
       </div>
 
-      {/* Kaart: volle breedte */}
-      <div style={{ borderTop:"1px solid #EBF3FF", padding:"8px 12px" }}>
-        <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
-      </div>
-
-      {/* Legenda + toelichting: auto-fill grid onder kaart */}
-      <div style={{ borderTop:"1px solid #EBF3FF", padding:"6px 12px 10px" }}>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(110px,1fr))", gap:"2px 8px" }}>
+      {/* Kaart + tabel naast elkaar */}
+      <div style={{ display:"grid", gridTemplateColumns:"3fr 2fr", borderTop:"1px solid #EBF3FF" }}>
+        {/* Kaart links */}
+        <div style={{ padding:"8px 12px", borderRight:"1px solid #EBF3FF" }}>
+          <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
+          {/* App-kleur legenda onder kaart */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(100px,1fr))", gap:"1px 6px", marginTop:6 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(100px,1fr))", gap:"1px 6px" }}>
     {visibleGeoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
       return (
         <div key={a.id} className="flex items-center gap-1.5">
@@ -2011,12 +2020,11 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
       <span style={{ fontSize:9, color:"#9ca3af" }}>Ring = datalocatie</span>
     </div>
             </div>
-      </div>
+          </div>
+        </div>
 
-      {/* Tabel + app-badges: 2 kolommen onder de kaart */}
-      <div className="grid gap-4" style={{ gridTemplateColumns:"1fr 2fr", borderTop:"1px solid #EBF3FF", padding:"8px 12px" }}>
-        {/* Tabel links */}
-        <div>
+        {/* Tabel + badges rechts */}
+        <div style={{ padding:"8px 12px", overflowY:"auto", maxHeight:420 }}>
           <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
             <thead>
     <tr style={{ background:"#0C2340", color:"white" }}>
@@ -3953,7 +3961,7 @@ ${(function(){
                   return (
                     <button key={a.id}
                       onClick={() => toggleApp(a.id)}
-                      disabled={(!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)}
+                      disabled={(!hidden && visibleApps.length <= 1)}
                       title={
                         !hidden && visibleApps.length <= 1 ? "Minimaal 1 applicatie moet zichtbaar blijven" :
                         hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt — verberg eerst een andere` :
@@ -3965,8 +3973,8 @@ ${(function(){
                         border: `2px solid ${hidden ? "#e5e7eb" : col}`,
                         background: hidden ? "#f9fafb" : `${col}18`,
                         color: hidden ? "#9ca3af" : col,
-                        opacity: ((!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)) ? 0.4 : 1,
-                        cursor: ((!hidden && visibleApps.length <= 1) || (hidden && visibleApps.length >= MAX_VISIBLE)) ? "not-allowed" : "pointer",
+                        opacity: (!hidden && visibleApps.length <= 1) ? 0.4 : hidden ? 0.45 : 1,
+                        cursor: (!hidden && visibleApps.length <= 1) ? "not-allowed" : "pointer",
                         textDecoration: hidden ? "line-through" : "none"
                       }}>
                       <span className="w-2 h-2 rounded-full flex-shrink-0"
