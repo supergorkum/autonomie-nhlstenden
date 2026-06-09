@@ -3945,20 +3945,7 @@ ${(function(){
           {apps.length > 2 && (
             <div className="rounded p-3 mb-4"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-              <div className="flex items-center gap-2 mb-2">
-                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Grafiek-selectie</span>
-                <span className="text-xs px-2 py-0.5 rounded font-semibold"
-                  style={{ background: visibleApps.length >= MAX_VISIBLE ? "#fffbeb" : "#f0f9f9",
-                           color: visibleApps.length >= MAX_VISIBLE ? "#92400e" : "#0f766e" }}>
-                  {visibleApps.length} van {apps.length} zichtbaar in grafieken
-                </span>
-                {apps.length > MAX_VISIBLE && visibleApps.length >= MAX_VISIBLE && (
-                  <span style={{ fontSize:10, color:"#9ca3af" }}>
-                    max {MAX_VISIBLE} voor leesbaarheid
-                  </span>
-                )}
-              </div>
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px" }}>
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px", marginBottom:8 }}>
                 {allScored.map((a, i) => {
                   const hidden  = hiddenApps.has(a.id);
                   const col     = appColor(i);
@@ -3991,7 +3978,11 @@ ${(function(){
                   );
                 })}
               </div>
-              <div className="flex gap-2 flex-shrink-0 flex-wrap">
+              <div className="flex items-center gap-2 mt-2 pt-2 flex-wrap" style={{ borderTop:"1px solid #EBF3FF" }}>
+                <span className="text-xs font-semibold mr-auto" style={{ color:"#9ca3af" }}>
+                  Grafiek-selectie · {visibleApps.length} van {apps.length} zichtbaar
+                  {apps.length > MAX_VISIBLE && visibleApps.length >= MAX_VISIBLE && <span> · max {MAX_VISIBLE}</span>}
+                </span>
                 {apps.length > MAX_VISIBLE && (
                   <button onClick={selectLaatste10}
                     className="text-xs px-2.5 py-1.5 font-medium"
@@ -4559,6 +4550,12 @@ ${(function(){
 
   function Compare() {
     const minCompare = 2;
+    // Auto-selecteer laatste MAX_COMPARE bij eerste render als er meer apps zijn
+    React.useEffect(() => {
+      if (apps.length > MAX_COMPARE) {
+        setCompareHidden(new Set(apps.slice(0, Math.max(0, apps.length - MAX_COMPARE)).map(a => a.id)));
+      }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
     const visibleCompare = apps.filter(a => !compareHidden.has(a.id));
 
     function toggleCompare(id) {
@@ -4666,13 +4663,7 @@ ${(function(){
                   );
                 })}
               </div>
-              {apps.length > MAX_COMPARE && (
-                <button onClick={selectLaatste5}
-                  className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
-                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
-                  Laatste {MAX_COMPARE}
-                </button>
-              )}
+
               {compareHidden.size > 0 && apps.length <= MAX_COMPARE && (
                 <button onClick={() => setCompareHidden(new Set())}
                   className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
