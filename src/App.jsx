@@ -2385,6 +2385,7 @@ function App() {
     el.download = `NHL_Sov_Database_${ts}.json`;
     el.click();
     URL.revokeObjectURL(url);
+    setLastBackup(now.toISOString()); // update header teller
   }
 
   // ── Database import verwerken ────────────────────────────────────────────────
@@ -6792,10 +6793,9 @@ ${(function(){
                   const d = new Date(ts);
                   const now = new Date();
                   const sameDay = d.toDateString() === now.toDateString();
-                  const prefix = lastBackup ? "backup" : "opgeslagen";
                   return sameDay
-                    ? `${prefix} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`
-                    : `${prefix} ${d.toLocaleDateString("nl-NL", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`;
+                    ? `Backup ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`
+                    : `Backup ${d.toLocaleDateString("nl-NL", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`;
                 })()}
               </span>
             )}
