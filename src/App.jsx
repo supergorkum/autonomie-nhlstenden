@@ -1838,6 +1838,270 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
   );
 }
 
+function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
+  const [geoHidden, setGeoHidden] = React.useState(new Set());
+  
+  function displayName(a) {
+    return useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name;
+  }
+  
+  if (!apps || apps.length === 0) return null;
+
+
+  // Vaste app-kleuren palette — elke app krijgt eigen kleur
+  const APP_PALETTE = [
+    "#6d28d9","#0891b2","#be185d","#15803d","#b45309",
+    "#1d4ed8","#dc2626","#7c3aed","#0f766e","#c2410c",
+  ];
+
+  // Bouw geo-data op (gefilterd op selectie)
+  const geoApps = apps.map(function(a, i) {
+    const a1 = a.scores["A1"] || 0;
+    const a3 = a.scores["A3"] || 0;
+    // A1: score 1-2=EU, 3=VS+adequaat, 4=VS+SCCs, 5=buiten EU
+    // A3: score 1-3=EU/EER (met variaties), 4=deels buiten EU, 5=buiten EU
+    // We gebruiken A1 voor jurisdictie-regio en A3 voor data-regio
+    // maar de weergave-regio moet per dimensie anders worden bepaald
+    function regioA1(sc) {
+      if (sc <= 0)  return "Niet ingevuld";
+      if (sc <= 2)  return "EU / EER";
+      if (sc <= 3)  return "VS";
+      if (sc <= 4)  return "Deels buiten EU";
+      return "Buiten EU";
+    }
+    function regioA3(sc) {
+      if (sc <= 0)  return "Niet ingevuld";
+      if (sc <= 3)  return "EU / EER";   // score 1,2,3 = data in EU/EER
+      if (sc <= 4)  return "Deels buiten EU"; // score 4 = deels buiten EU
+      return "Buiten EU";        // score 5 = buiten EU
+    }
+    function regio(sc) { return regioA1(sc); } // default voor A1
+    function regioKleur(sc) {
+      if (sc <= 0)  return "#9ca3af";
+      if (sc <= 2)  return "#16a34a";
+      if (sc <= 3)  return "#ca8a04";
+      if (sc <= 4)  return "#ea580c";
+      return "#dc2626";
+    }
+    function regioKleurA3(sc) {
+      if (sc <= 0)  return "#9ca3af";
+      if (sc <= 3)  return "#16a34a";   // score 1-3 = groen (EU)
+      if (sc <= 4)  return "#ea580c";   // score 4 = oranje
+      return "#dc2626";
+    }
+    const appKleur = APP_PALETTE[i % APP_PALETTE.length];
+    return { ...a, a1, a3,
+      jRegio: regioA1(a1), dRegio: regioA3(a3),
+      jKleur: regioKleur(a1), dKleur: regioKleurA3(a3),
+      appKleur
+    };
+  });
+
+  // Filter op hidden state
+  const visibleGeoApps = geoApps.filter(function(a) { return !geoHidden.has(a.id); });
+
+  // Groepeer per regio
+  const REGIO_ORDER = ["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"];
+  const REGIO_LON_LAT = {
+    "EU / EER":     [10, 52],
+    "VS":[-95, 38],
+    "Deels buiten EU":  [-95, 38],
+    "Buiten EU":    [100, 25],
+    "Niet ingevuld":[0, 0],
+  };
+  const REGIO_KLEUR = {
+    "EU / EER":     "#16a34a",
+    "VS":"#ca8a04",
+    "Deels buiten EU":  "#ea580c",
+    "Buiten EU":    "#dc2626",
+    "Niet ingevuld":"#9ca3af",
+  };
+
+  // Tel per regio
+  const jTelling = {}; const dTelling = {};
+  visibleGeoApps.forEach(function(a) {
+    jTelling[a.jRegio] = (jTelling[a.jRegio]||0) + 1;
+    dTelling[a.dRegio] = (dTelling[a.dRegio]||0) + 1;
+  });
+
+  // Mini SVG kaart met Natural Earth-achtige positionering
+  // Gebruik de WorldMapD3 component maar mini
+  const W = 600, H = 300;
+  const proj = d3.geoNaturalEarth1().scale(90).translate([W/2, H/2]);
+
+  return (
+    <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+      <div className="px-4 pt-3 pb-2 flex items-center justify-between">
+        <div>
+          <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Geopolitieke positie — applicatielandschap</h3>
+          <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>Jurisdictie leverancier en datalocatie servers per regio</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs px-2 py-0.5 rounded font-semibold"
+            style={{ background: geoHidden.size === 0 ? "#f0f9f9" : "#fffbeb",
+                     color: geoHidden.size === 0 ? "#0f766e" : "#92400e" }}>
+            {apps.length - geoHidden.size} van {apps.length}
+          </span>
+          {geoHidden.size > 0 && (
+            <button onClick={() => setGeoHidden(new Set())}
+              className="text-xs px-2 py-0.5 font-medium"
+              style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF" }}>
+              Alles tonen
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5 px-4 pb-2">
+        {[...apps].sort((a, b) => displayName(a).localeCompare(displayName(b), "nl", { sensitivity:"base", numeric:true })).map((a) => {
+          const col = appColor(apps.indexOf(a));
+          const hidden = geoHidden.has(a.id);
+          return (
+            <button key={a.id}
+              onClick={() => setGeoHidden(p => { const n = new Set(p); n.has(a.id) ? n.delete(a.id) : n.add(a.id); return n; })}
+              className="flex items-center gap-1.5 text-xs px-2 py-1 font-medium"
+              style={{ borderRadius:4, border: hidden ? "1px solid #e5e7eb" : "1px solid "+col+"88",
+                       background: hidden ? "#f9fafb" : col+"12", color: hidden ? "#9ca3af" : col,
+                       textDecoration: hidden ? "line-through" : "none" }}>
+              <span style={{ width:6, height:6, borderRadius:"50%", flexShrink:0, display:"inline-block",
+                             background: hidden ? "#d1d5db" : col }}/>
+              {displayName(a).substring(0,18)}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
+        {/* Mini kaart */}
+        <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
+          <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
+          {/* Legenda onder kaart */}
+          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
+              {/* Legenda: app-kleuren + vorm-uitleg */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+    {visibleGeoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
+      return (
+        <div key={a.id} className="flex items-center gap-1.5">
+          <svg width="20" height="10" style={{flexShrink:0}}>
+            <circle cx="5"  cy="5" r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
+            <circle cx="15" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="1.8"/>
+          </svg>
+          <span style={{ fontSize:9, color:"#6b7280" }}>{displayName(a)}</span>
+        </div>
+      );
+    })}
+            </div>
+            <div className="flex gap-4 mt-1.5 pt-1.5" style={{ borderTop:"1px solid #f1f5f9" }}>
+    <div className="flex items-center gap-1">
+      <svg width="10" height="10" style={{flexShrink:0}}><circle cx="5" cy="5" r="3.5" fill="#9ca3af" stroke="white" strokeWidth="1"/></svg>
+      <span style={{ fontSize:9, color:"#9ca3af" }}>Gevuld = jurisdictie</span>
+    </div>
+    <div className="flex items-center gap-1">
+      <svg width="10" height="10" style={{flexShrink:0}}><circle cx="5" cy="5" r="3.5" fill="white" stroke="#9ca3af" strokeWidth="1.8"/></svg>
+      <span style={{ fontSize:9, color:"#9ca3af" }}>Ring = datalocatie</span>
+    </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabel */}
+        <div style={{ padding:"8px 12px" }}>
+          <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
+            <thead>
+    <tr style={{ background:"#0C2340", color:"white" }}>
+      <th style={{ padding:"5px 8px", textAlign:"left", fontSize:10 }}>Regio</th>
+      <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Jurisdictie</th>
+      <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Datalocatie</th>
+    </tr>
+            </thead>
+            <tbody>
+    {REGIO_ORDER.filter(function(r) { return jTelling[r] || dTelling[r]; }).map(function(r, i) {
+      const k = REGIO_KLEUR[r];
+      return (
+        <tr key={r} style={{ background: i%2===0 ? "#f8fafc" : "white", borderBottom:"1px solid #f1f5f9" }}>
+          <td style={{ padding:"5px 8px" }}>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
+              <span style={{ fontSize:11, color:"#374151", fontWeight:600 }}>{r}</span>
+            </div>
+          </td>
+          <td style={{ padding:"5px 8px", textAlign:"center" }}>
+            {jTelling[r] ? (
+              <span style={{ fontSize:12, fontWeight:700, color:k }}>{jTelling[r]}</span>
+            ) : <span style={{ color:"#d1d5db" }}>–</span>}
+          </td>
+          <td style={{ padding:"5px 8px", textAlign:"center" }}>
+            {dTelling[r] ? (
+              <span style={{ fontSize:12, fontWeight:700, color:k }}>{dTelling[r]}</span>
+            ) : <span style={{ color:"#d1d5db" }}>–</span>}
+          </td>
+        </tr>
+      );
+    })}
+            </tbody>
+          </table>
+          {visibleGeoApps.some(function(a) { return a.a1 === 0 && a.a3 === 0; }) && (
+            <p className="text-xs mt-2" style={{ color:"#9ca3af" }}>
+    * Applicaties zonder A1/A3-score zijn niet meegenomen.
+            </p>
+          )}
+
+          {/* Applicatie badges per regio */}
+          <div className="mt-3 pt-3" style={{ borderTop:"1px solid #EBF3FF" }}>
+            <p className="text-xs font-semibold mb-2" style={{ color:"#6b7280" }}>Applicaties per regio:</p>
+            {["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"].map(function(regio) {
+    const appsInRegio = visibleGeoApps.filter(function(a) {
+      return a.jRegio === regio || a.dRegio === regio;
+    });
+    if (appsInRegio.length === 0) return null;
+    const k = REGIO_KLEUR[regio];
+    return (
+      <div key={regio} className="mb-2">
+        <div className="flex items-center gap-1 mb-1">
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
+          <span style={{ fontSize:10, color:k, fontWeight:700 }}>{regio}</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5 pl-3">
+          {appsInRegio.map(function(a) {
+            const isJuris = a.jRegio === regio;
+            const isData  = a.dRegio === regio;
+            return (
+              <div key={a.id} className="flex items-center gap-1 px-2 py-1 rounded"
+      style={{ background:a.appKleur+"14", border:"1.5px solid "+a.appKleur+"55" }}>
+      {/* Gevulde cirkel (jurisdictie) of ring (datalocatie) als mini-icoon */}
+      {isJuris && (
+        <svg width="10" height="10" style={{flexShrink:0}}>
+          <circle cx="5" cy="5" r="4.5" fill={a.appKleur}/>
+        </svg>
+      )}
+      {isData && !isJuris && (
+        <svg width="10" height="10" style={{flexShrink:0}}>
+          <circle cx="5" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="2"/>
+        </svg>
+      )}
+      {isJuris && isData && (
+        <svg width="10" height="10" style={{flexShrink:0, marginLeft:2}}>
+          <circle cx="5" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="2"/>
+        </svg>
+      )}
+      <span style={{ fontSize:10, color:"#0C2340", fontWeight:600 }}>{displayName(a)}</span>
+      <span style={{ fontSize:9, color:a.appKleur, opacity:0.85 }}>
+        {isJuris && isData ? "juris.+data" : isJuris ? "juris." : "data"}
+      </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function App() {
   // ── Login state ─────────────────────────────────────────────
   const [loggedIn,   setLoggedIn]   = useState(() => sessionStorage.getItem("nhl_auth") === "ok");
@@ -6063,227 +6327,7 @@ ${(function(){
           </div>
 
           {/* ── Geopolitiek overzicht compact ── */}
-          {(() => {
-            // Vaste app-kleuren palette — elke app krijgt eigen kleur
-            const APP_PALETTE = [
-              "#6d28d9","#0891b2","#be185d","#15803d","#b45309",
-              "#1d4ed8","#dc2626","#7c3aed","#0f766e","#c2410c",
-            ];
-
-            // Bouw geo-data op (gefilterd op selectie)
-            const geoApps = apps.map(function(a, i) {
-              const a1 = a.scores["A1"] || 0;
-              const a3 = a.scores["A3"] || 0;
-              // A1: score 1-2=EU, 3=VS+adequaat, 4=VS+SCCs, 5=buiten EU
-              // A3: score 1-3=EU/EER (met variaties), 4=deels buiten EU, 5=buiten EU
-              // We gebruiken A1 voor jurisdictie-regio en A3 voor data-regio
-              // maar de weergave-regio moet per dimensie anders worden bepaald
-              function regioA1(sc) {
-                if (sc <= 0)  return "Niet ingevuld";
-                if (sc <= 2)  return "EU / EER";
-                if (sc <= 3)  return "VS";
-                if (sc <= 4)  return "Deels buiten EU";
-                return "Buiten EU";
-              }
-              function regioA3(sc) {
-                if (sc <= 0)  return "Niet ingevuld";
-                if (sc <= 3)  return "EU / EER";   // score 1,2,3 = data in EU/EER
-                if (sc <= 4)  return "Deels buiten EU"; // score 4 = deels buiten EU
-                return "Buiten EU";                  // score 5 = buiten EU
-              }
-              function regio(sc) { return regioA1(sc); } // default voor A1
-              function regioKleur(sc) {
-                if (sc <= 0)  return "#9ca3af";
-                if (sc <= 2)  return "#16a34a";
-                if (sc <= 3)  return "#ca8a04";
-                if (sc <= 4)  return "#ea580c";
-                return "#dc2626";
-              }
-              function regioKleurA3(sc) {
-                if (sc <= 0)  return "#9ca3af";
-                if (sc <= 3)  return "#16a34a";   // score 1-3 = groen (EU)
-                if (sc <= 4)  return "#ea580c";   // score 4 = oranje
-                return "#dc2626";
-              }
-              const appKleur = APP_PALETTE[i % APP_PALETTE.length];
-              return { ...a, a1, a3,
-                jRegio: regioA1(a1), dRegio: regioA3(a3),
-                jKleur: regioKleur(a1), dKleur: regioKleurA3(a3),
-                appKleur
-              };
-            });
-
-            // Filter op hidden state
-            const visibleGeoApps = geoApps;
-
-            // Groepeer per regio
-            const REGIO_ORDER = ["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"];
-            const REGIO_LON_LAT = {
-              "EU / EER":     [10, 52],
-              "VS":[-95, 38],
-              "Deels buiten EU":  [-95, 38],
-              "Buiten EU":    [100, 25],
-              "Niet ingevuld":[0, 0],
-            };
-            const REGIO_KLEUR = {
-              "EU / EER":     "#16a34a",
-              "VS":"#ca8a04",
-              "Deels buiten EU":  "#ea580c",
-              "Buiten EU":    "#dc2626",
-              "Niet ingevuld":"#9ca3af",
-            };
-
-            // Tel per regio
-            const jTelling = {}; const dTelling = {};
-            visibleGeoApps.forEach(function(a) {
-              jTelling[a.jRegio] = (jTelling[a.jRegio]||0) + 1;
-              dTelling[a.dRegio] = (dTelling[a.dRegio]||0) + 1;
-            });
-
-            // Mini SVG kaart met Natural Earth-achtige positionering
-            // Gebruik de WorldMapD3 component maar mini
-            const W = 600, H = 300;
-            const proj = d3.geoNaturalEarth1().scale(90).translate([W/2, H/2]);
-
-            return (
-              <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <div className="px-4 pt-3 pb-1 flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Geopolitieke positie — applicatielandschap</h3>
-                    <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>Jurisdictie leverancier en datalocatie servers per regio</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
-                  {/* Mini kaart */}
-                  <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
-                    <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
-                    {/* Legenda onder kaart */}
-                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
-                                            {/* Legenda: app-kleuren + vorm-uitleg */}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1">
-                        {visibleGeoApps.filter(function(a) { return a.a1 > 0 || a.a3 > 0; }).map(function(a) {
-                          return (
-                            <div key={a.id} className="flex items-center gap-1.5">
-                              <svg width="20" height="10" style={{flexShrink:0}}>
-                                <circle cx="5"  cy="5" r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
-                                <circle cx="15" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="1.8"/>
-                              </svg>
-                              <span style={{ fontSize:9, color:"#6b7280" }}>{displayName(a)}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                      <div className="flex gap-4 mt-1.5 pt-1.5" style={{ borderTop:"1px solid #f1f5f9" }}>
-                        <div className="flex items-center gap-1">
-                          <svg width="10" height="10" style={{flexShrink:0}}><circle cx="5" cy="5" r="3.5" fill="#9ca3af" stroke="white" strokeWidth="1"/></svg>
-                          <span style={{ fontSize:9, color:"#9ca3af" }}>Gevuld = jurisdictie</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <svg width="10" height="10" style={{flexShrink:0}}><circle cx="5" cy="5" r="3.5" fill="white" stroke="#9ca3af" strokeWidth="1.8"/></svg>
-                          <span style={{ fontSize:9, color:"#9ca3af" }}>Ring = datalocatie</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tabel */}
-                  <div style={{ padding:"8px 12px" }}>
-                    <table style={{ width:"100%", borderCollapse:"collapse", fontSize:11 }}>
-                      <thead>
-                        <tr style={{ background:"#0C2340", color:"white" }}>
-                          <th style={{ padding:"5px 8px", textAlign:"left", fontSize:10 }}>Regio</th>
-                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Jurisdictie</th>
-                          <th style={{ padding:"5px 8px", textAlign:"center", fontSize:10 }}>Datalocatie</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {REGIO_ORDER.filter(function(r) { return jTelling[r] || dTelling[r]; }).map(function(r, i) {
-                          const k = REGIO_KLEUR[r];
-                          return (
-                            <tr key={r} style={{ background: i%2===0 ? "#f8fafc" : "white", borderBottom:"1px solid #f1f5f9" }}>
-                              <td style={{ padding:"5px 8px" }}>
-                                <div className="flex items-center gap-1.5">
-                                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
-                                  <span style={{ fontSize:11, color:"#374151", fontWeight:600 }}>{r}</span>
-                                </div>
-                              </td>
-                              <td style={{ padding:"5px 8px", textAlign:"center" }}>
-                                {jTelling[r] ? (
-                                  <span style={{ fontSize:12, fontWeight:700, color:k }}>{jTelling[r]}</span>
-                                ) : <span style={{ color:"#d1d5db" }}>–</span>}
-                              </td>
-                              <td style={{ padding:"5px 8px", textAlign:"center" }}>
-                                {dTelling[r] ? (
-                                  <span style={{ fontSize:12, fontWeight:700, color:k }}>{dTelling[r]}</span>
-                                ) : <span style={{ color:"#d1d5db" }}>–</span>}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                    {visibleGeoApps.some(function(a) { return a.a1 === 0 && a.a3 === 0; }) && (
-                      <p className="text-xs mt-2" style={{ color:"#9ca3af" }}>
-                        * Applicaties zonder A1/A3-score zijn niet meegenomen.
-                      </p>
-                    )}
-
-                    {/* Applicatie badges per regio */}
-                    <div className="mt-3 pt-3" style={{ borderTop:"1px solid #EBF3FF" }}>
-                      <p className="text-xs font-semibold mb-2" style={{ color:"#6b7280" }}>Applicaties per regio:</p>
-                      {["EU / EER","VS","Deels buiten EU","Buiten EU","Niet ingevuld"].map(function(regio) {
-                        const appsInRegio = visibleGeoApps.filter(function(a) {
-                          return a.jRegio === regio || a.dRegio === regio;
-                        });
-                        if (appsInRegio.length === 0) return null;
-                        const k = REGIO_KLEUR[regio];
-                        return (
-                          <div key={regio} className="mb-2">
-                            <div className="flex items-center gap-1 mb-1">
-                              <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background:k }}/>
-                              <span style={{ fontSize:10, color:k, fontWeight:700 }}>{regio}</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1.5 pl-3">
-                              {appsInRegio.map(function(a) {
-                                const isJuris = a.jRegio === regio;
-                                const isData  = a.dRegio === regio;
-                                return (
-                                  <div key={a.id} className="flex items-center gap-1 px-2 py-1 rounded"
-                                    style={{ background:a.appKleur+"14", border:"1.5px solid "+a.appKleur+"55" }}>
-                                    {/* Gevulde cirkel (jurisdictie) of ring (datalocatie) als mini-icoon */}
-                                    {isJuris && (
-                                      <svg width="10" height="10" style={{flexShrink:0}}>
-                                        <circle cx="5" cy="5" r="4.5" fill={a.appKleur}/>
-                                      </svg>
-                                    )}
-                                    {isData && !isJuris && (
-                                      <svg width="10" height="10" style={{flexShrink:0}}>
-                                        <circle cx="5" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="2"/>
-                                      </svg>
-                                    )}
-                                    {isJuris && isData && (
-                                      <svg width="10" height="10" style={{flexShrink:0, marginLeft:2}}>
-                                        <circle cx="5" cy="5" r="3.5" fill="white" stroke={a.appKleur} strokeWidth="2"/>
-                                      </svg>
-                                    )}
-                                    <span style={{ fontSize:10, color:"#0C2340", fontWeight:600 }}>{displayName(a)}</span>
-                                    <span style={{ fontSize:9, color:a.appKleur, opacity:0.85 }}>
-                                      {isJuris && isData ? "juris.+data" : isJuris ? "juris." : "data"}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
+          <GeoKaartCompact apps={apps} useSecondaryName={useSecondaryName} calcScores={calcScores} appColor={appColor} d3={d3} />
 
           {/* Footer */}
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
