@@ -48,7 +48,7 @@ export default async () => {
   }
 };
 
-// Elke dag om 10:00 UTC (12:00 NL zomertijd) en 16:00 UTC (18:00 NL zomertijd)
+// Elke dag om 08:00, 11:00 en 16:00 UTC = 10:00, 13:00 en 18:00 NL zomertijd
 export const config = {
-  schedule: "0 10,16 * * *",
+  schedule: "0 8,11,16 * * *",
 };
