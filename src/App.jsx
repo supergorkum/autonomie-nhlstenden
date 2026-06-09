@@ -89,7 +89,7 @@ const CHANGELOG = [
       "Excel-exportknop verplaatst van header naar Dashboard (was al zo maar tekst klopte niet)",
       "Assessment: alleen-lezen voor gewone gebruikers, bewerken alleen via Beheer met pincode",
       "Geopolitiek tabblad verwijderd — geopolitieke kaart verplaatst naar Portfolio-pagina als compact overzicht",
-      "Consistentiecheck gehele applicatie: beschrijvingen, labels en uitleg actueel gemaakt voor v2.1",
+      "Consistentiecheck gehele applicatie: beschrijvingen, labels en uitleg actueel gemaakt voor v2.3",
     ]
   },
   {
@@ -5722,7 +5722,7 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
-              <br/>Prototype v2.2 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
+              <br/>Prototype v2.3 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
               <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: netlify.com/security, anthropic.com/privacy, github.com/security
             </p>
           </div>
