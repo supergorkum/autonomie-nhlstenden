@@ -5656,6 +5656,7 @@ ${(function(){
 
   // ── BESTUUR (Portfolio) ─────────────────────────────────────
   function Bestuur() {
+    const [geoHiddenBestuur, setGeoHiddenBestuur] = React.useState(new Set());
     const scored = apps
       .map(a => ({ ...a, sc: calcScores(a.scores) }))
       .filter(a => a.sc.autonomyScore);
@@ -6070,8 +6071,8 @@ ${(function(){
               "#1d4ed8","#dc2626","#7c3aed","#0f766e","#c2410c",
             ];
 
-            // Bouw geo-data op
-            const geoApps = apps.map(function(a, i) {
+            // Bouw geo-data op (gefilterd op selectie)
+            const geoApps = apps.filter(function(a) { return !geoHiddenBestuur.has(a.id); }).map(function(a, i) {
               const a1 = a.scores["A1"] || 0;
               const a3 = a.scores["A3"] || 0;
               // A1: score 1-2=EU, 3=VS+adequaat, 4=VS+SCCs, 5=buiten EU
@@ -6144,11 +6145,53 @@ ${(function(){
 
             return (
               <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <div className="px-4 pt-3 pb-1 flex items-center justify-between">
+                <div className="px-4 pt-3 pb-2 flex items-center justify-between">
                   <div>
                     <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Geopolitieke positie — applicatielandschap</h3>
                     <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>Jurisdictie leverancier en datalocatie servers per regio</p>
                   </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs px-2 py-0.5 rounded font-semibold"
+                      style={{ background: geoHiddenBestuur.size === 0 ? "#f0f9f9" : "#fffbeb",
+                               color: geoHiddenBestuur.size === 0 ? "#0f766e" : "#92400e" }}>
+                      {apps.length - geoHiddenBestuur.size} van {apps.length}
+                    </span>
+                    {geoHiddenBestuur.size > 0 && (
+                      <button onClick={() => setGeoHiddenBestuur(new Set())}
+                        className="text-xs px-2 py-0.5 font-medium"
+                        style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF" }}>
+                        Alles tonen
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {/* App-selectie knoppen */}
+                <div className="flex flex-wrap gap-1.5 px-4 pb-2">
+                  {[...apps].sort((a, b) => a.name.localeCompare(b.name, "nl", { sensitivity:"base", numeric:true })).map(a => {
+                    const sc = calcScores(a.scores || {});
+                    const col = appColor(apps.indexOf(a));
+                    const hidden = geoHiddenBestuur.has(a.id);
+                    return (
+                      <button key={a.id}
+                        onClick={() => setGeoHiddenBestuur(p => {
+                          const n = new Set(p);
+                          n.has(a.id) ? n.delete(a.id) : n.add(a.id);
+                          return n;
+                        })}
+                        className="flex items-center gap-1.5 text-xs px-2 py-1 font-medium"
+                        style={{
+                          borderRadius:4,
+                          border: hidden ? "1px solid #e5e7eb" : "1px solid " + col + "88",
+                          background: hidden ? "#f9fafb" : col + "12",
+                          color: hidden ? "#9ca3af" : col,
+                          textDecoration: hidden ? "line-through" : "none",
+                        }}>
+                        <span style={{ width:6, height:6, borderRadius:"50%", flexShrink:0, display:"inline-block",
+                                       background: hidden ? "#d1d5db" : col }}/>
+                        {a.name.substring(0,18)}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
