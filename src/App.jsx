@@ -2136,7 +2136,10 @@ function App() {
   const [ready,      setReady]     = useState(false);
   const [saving,     setSaving]    = useState(false);
   const [saveError,  setSaveError] = useState(false);
-  const [lastSaved,  setLastSaved]  = useState(null); // timestamp van laatste succesvolle save
+  const [lastSaved,  setLastSaved]  = useState(null);
+  const [lastBackup, setLastBackup] = useState(null); // timestamp van laatste backup (auto of handmatig)
+  const [serverBackups, setServerBackups] = useState([]); // lijst van server-backups
+  const [backupsLoaded, setBackupsLoaded] = useState(false);
   const [view,       setView]      = useState("about");
   const [aboutTab,   setAboutTab]  = useState("over");
   const [snapshots,  setSnapshots] = useState(() => {
@@ -2191,6 +2194,17 @@ function App() {
   // ── Laden van gedeelde data via Netlify Blobs API ───────────
   useEffect(() => {
     if (!loggedIn) return;
+    // Haal ook laatste backup op
+    fetch("/api/list-backups", { headers: { "x-api-token": apiToken } })
+      .then(r => r.json())
+      .then(backups => {
+        if (Array.isArray(backups)) {
+          setServerBackups(backups);
+          if (backups.length > 0) setLastBackup(backups[0].timestamp);
+        }
+        setBackupsLoaded(true);
+      })
+      .catch(() => setBackupsLoaded(true));
     async function load() {
       try {
         const r = await fetch("/api/load-data", { headers: { "x-api-token": apiToken } });
@@ -4864,6 +4878,77 @@ ${(function(){
             </div>
           </div>
 
+          {/* ── Server-backups sectie ── */}
+          {backupsLoaded && (
+            <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-sm font-bold" style={{ color:"#0C2340" }}>☁️ Server-backups</p>
+                  <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
+                    Automatische backups om 12:00 en 18:00 · bewaard 7 dagen
+                  </p>
+                </div>
+                {serverBackups.length > 0 && (
+                  <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#f0f9f9", color:"#0f766e", border:"1px solid #86efac" }}>
+                    {serverBackups.length} backup{serverBackups.length !== 1 ? "s" : ""} beschikbaar
+                  </span>
+                )}
+              </div>
+              {serverBackups.length === 0 ? (
+                <p className="text-xs italic" style={{ color:"#9ca3af" }}>
+                  Nog geen automatische backups. De eerste backup wordt aangemaakt om 12:00 of 18:00.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {serverBackups.map((b, i) => {
+                    const d = new Date(b.timestamp);
+                    const sameDay = d.toDateString() === new Date().toDateString();
+                    const dateStr = sameDay
+                      ? `Vandaag ${d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"})}`
+                      : d.toLocaleDateString("nl-NL", {weekday:"short", day:"numeric", month:"short"}) + " " + d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
+                    return (
+                      <div key={b.key} className="flex items-center justify-between rounded p-2.5"
+                        style={{ background: i === 0 ? "#EBF3FF" : "#f8fafc", border:`1px solid ${i === 0 ? "#D0E4F7" : "#e5e7eb"}` }}>
+                        <div className="flex items-center gap-2">
+                          {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:"#1A56A0", color:"white" }}>Laatste</span>}
+                          <span className="text-xs font-medium" style={{ color:"#374151" }}>{dateStr}</span>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            if (!confirm(`Herstel backup van ${dateStr}? Huidige data wordt overschreven.`)) return;
+                            try {
+                              const r = await fetch("/api/restore-backup", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json", "x-api-token": apiToken },
+                                body: JSON.stringify({ key: b.key }),
+                              });
+                              const result = await r.json();
+                              if (result.ok) {
+                                const loadR = await fetch("/api/load-data", { headers: { "x-api-token": apiToken } });
+                                const freshData = await loadR.json();
+                                if (Array.isArray(freshData)) {
+                                  setApps(freshData);
+                                  alert(`Hersteld: ${result.count} applicaties geladen.`);
+                                }
+                              } else {
+                                alert("Herstel mislukt: " + result.error);
+                              }
+                            } catch (e) {
+                              alert("Fout bij herstel: " + e.message);
+                            }
+                          }}
+                          className="text-xs px-2.5 py-1 font-medium"
+                          style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#fff" }}>
+                          ↩ Herstel
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
           {apps.length === 0 ? (
             <div className="text-center py-16 bg-white rounded" style={{ border:"2px dashed #D0E4F7", color:"#9ca3af" }}>
               Nog geen applicaties in het systeem.
@@ -6700,15 +6785,17 @@ ${(function(){
             <span style={{ fontSize:12 }}>🗂</span>
             <span style={{ fontWeight:700 }}>{apps.length}</span>
             <span style={{ opacity:0.75 }}>applicatie{apps.length !== 1 ? "s" : ""}</span>
-            {lastSaved && (
+            {(lastBackup || lastSaved) && (
               <span style={{ opacity:0.6, fontSize:10, borderLeft:"1px solid rgba(255,255,255,0.2)", paddingLeft:6, marginLeft:2 }}>
                 {(() => {
-                  const d = new Date(lastSaved);
+                  const ts = lastBackup || lastSaved;
+                  const d = new Date(ts);
                   const now = new Date();
                   const sameDay = d.toDateString() === now.toDateString();
+                  const prefix = lastBackup ? "backup" : "opgeslagen";
                   return sameDay
-                    ? `opgeslagen ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`
-                    : `opgeslagen ${d.toLocaleDateString("nl-NL", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`;
+                    ? `${prefix} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`
+                    : `${prefix} ${d.toLocaleDateString("nl-NL", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`;
                 })()}
               </span>
             )}
