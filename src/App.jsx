@@ -46,6 +46,21 @@ function dn(app, useSecondary) {
 
 const CHANGELOG = [
   {
+    versie: "v2.4",
+    datum: "Juni 2026",
+    wijzigingen: [
+      "Portfolio kaart volledig responsief — volle breedte, schaalt automatisch mee",
+      "Hover tooltip op kaart-stippen: naam en regio zichtbaar bij mouseover",
+      "App-selectie in geo kaart via chips en legenda — dubbele lijst verwijderd",
+      "Dashboard grafiek-selectie: label en knoppen in nette grid over volle breedte",
+      "Vergelijking: auto-selectie laatste 5 apps bij openen",
+      "Beheer snelnavigatie: klik op app-naam springt direct naar de kaart",
+      "Beheer home-knop per applicatie voor snel terugscrollenaren",
+      "Applicatielijst A-Z gesorteerd met numerieke volgorde",
+      "Dashboard toggle: wisselen altijd mogelijk",
+    ]
+  },
+  {
     versie: "v2.3",
     datum: "Juni 2026",
     wijzigingen: [
@@ -4565,9 +4580,6 @@ ${(function(){
       });
     }
 
-    function selectLaatste5() {
-      setCompareHidden(new Set(apps.slice(0, Math.max(0, apps.length - MAX_COMPARE)).map(a => a.id)));
-    }
 
     if (visibleCompare.length < 2) return (
       <div className="h-full flex items-center justify-center text-gray-400">
