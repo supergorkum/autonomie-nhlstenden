@@ -4920,10 +4920,13 @@ ${(function(){
                 <div className="space-y-2">
                   {serverBackups.map((b, i) => {
                     const d = new Date(b.timestamp);
-                    const sameDay = d.toDateString() === new Date().toDateString();
-                    const dateStr = sameDay
-                      ? `Vandaag ${d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"})}`
-                      : d.toLocaleDateString("nl-NL", {weekday:"short", day:"numeric", month:"short"}) + " " + d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
+                    const nlTZ2 = { timeZone:"Europe/Amsterdam" };
+                    const timeStr2 = d.toLocaleTimeString("nl-NL", { ...nlTZ2, hour:"2-digit", minute:"2-digit" });
+                    const todayNL2 = new Date().toLocaleDateString("nl-NL", { ...nlTZ2, day:"numeric", month:"short", year:"numeric" });
+                    const dateNL2  = d.toLocaleDateString("nl-NL", { ...nlTZ2, day:"numeric", month:"short", year:"numeric" });
+                    const dateStr = dateNL2 === todayNL2
+                      ? `Vandaag ${timeStr2}`
+                      : d.toLocaleDateString("nl-NL", { ...nlTZ2, weekday:"short", day:"numeric", month:"short" }) + " " + timeStr2;
                     return (
                       <div key={b.key} className="flex items-center justify-between rounded p-2.5"
                         style={{ background: i === 0 ? "#EBF3FF" : "#f8fafc", border:`1px solid ${i === 0 ? "#D0E4F7" : "#e5e7eb"}` }}>
@@ -6810,10 +6813,13 @@ ${(function(){
                   const d = new Date(ts);
                   const now = new Date();
                   const icon = backupType === "manual" ? "💾" : "☁️";
-                  const dateStr = d.toLocaleDateString("nl-NL", {day:"numeric", month:"short"});
-                  const timeStr = d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
-                  const sameDay = d.toDateString() === now.toDateString();
-                  return `${icon} ${sameDay ? "" : dateStr + " "}${timeStr}`;
+                  const nlTime = d.toLocaleTimeString("nl-NL", { timeZone:"Europe/Amsterdam", hour:"2-digit", minute:"2-digit" });
+                  const nlDate = d.toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"short" });
+                  const todayNL = new Date().toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"short", year:"numeric" });
+                  const dateNL  = d.toLocaleDateString("nl-NL", { timeZone:"Europe/Amsterdam", day:"numeric", month:"short", year:"numeric" });
+                  return dateNL === todayNL
+                    ? `${icon} ${nlTime}`
+                    : `${icon} ${nlDate} ${nlTime}`;
                 })()}
               </span>
             )}
@@ -7017,10 +7023,12 @@ ${(function(){
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">
                     {serverBackups.map((b, i) => {
                       const d = new Date(b.timestamp);
-                      const sameDay = d.toDateString() === new Date().toDateString();
-                      const dateStr = d.toLocaleDateString("nl-NL", {weekday:"short", day:"numeric", month:"short"});
-                      const timeStr = d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
-                      const label = sameDay ? `Vandaag ${timeStr}` : `${dateStr} ${timeStr}`;
+                      const nlTZ = { timeZone:"Europe/Amsterdam" };
+                      const timeStr = d.toLocaleTimeString("nl-NL", { ...nlTZ, hour:"2-digit", minute:"2-digit" });
+                      const dateStr = d.toLocaleDateString("nl-NL", { ...nlTZ, weekday:"short", day:"numeric", month:"short" });
+                      const todayNL = new Date().toLocaleDateString("nl-NL", { ...nlTZ, day:"numeric", month:"short", year:"numeric" });
+                      const dateNL  = d.toLocaleDateString("nl-NL", { ...nlTZ, day:"numeric", month:"short", year:"numeric" });
+                      const label = dateNL === todayNL ? `Vandaag ${timeStr}` : `${dateStr} ${timeStr}`;
                       return (
                         <div key={b.key} className="flex items-center justify-between rounded p-2"
                           style={{ background: i === 0 ? "#fff" : "#f8fafc", border:`1px solid ${i === 0 ? "#D0E4F7" : "#e5e7eb"}` }}>
