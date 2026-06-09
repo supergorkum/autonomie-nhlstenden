@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.3";
+const VERSION = "v2.4";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -1937,8 +1937,8 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
 
   // Mini SVG kaart met Natural Earth-achtige positionering
   // Gebruik de WorldMapD3 component maar mini
-  const W = 600, H = 300;
-  const proj = d3.geoNaturalEarth1().scale(90).translate([W/2, H/2]);
+  const W = 750, H = 380;
+  const proj = d3.geoNaturalEarth1().scale(110).translate([W/2, H/2]);
 
   return (
     <div className="rounded mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
@@ -1962,7 +1962,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
           )}
         </div>
       </div>
-      <div className="flex flex-wrap gap-1.5 px-4 pb-2">
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:"4px", padding:"6px 16px 10px" }}>
         {[...apps].sort((a, b) => displayName(a).localeCompare(displayName(b), "nl", { sensitivity:"base", numeric:true })).map((a) => {
           const col = appColor(apps.indexOf(a));
           const hidden = geoHidden.has(a.id);
@@ -1981,7 +1981,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
         })}
       </div>
 
-      <div className="grid grid-cols-2 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
+      <div className="grid gap-0" style={{ gridTemplateColumns:"3fr 2fr", borderTop:"1px solid #EBF3FF" }}>
         {/* Mini kaart */}
         <div style={{ borderRight:"1px solid #EBF3FF", padding:"8px 12px" }}>
           <MiniGeoKaart geoApps={visibleGeoApps} proj={proj} W={W} H={H} REGIO_LON_LAT={REGIO_LON_LAT} REGIO_KLEUR={REGIO_KLEUR} displayName={displayName}/>
@@ -3958,7 +3958,7 @@ ${(function(){
                   </span>
                 )}
               </div>
-              <div className="flex gap-2 flex-wrap flex-1">
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px", flex:1 }}>
                 {allScored.map((a, i) => {
                   const hidden  = hiddenApps.has(a.id);
                   const col     = appColor(i);
@@ -3971,7 +3971,7 @@ ${(function(){
                         hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt — verberg eerst een andere` :
                         hidden ? "Klik om toe te voegen aan selectie" : "Klik om uit selectie te verwijderen"
                       }
-                      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 font-medium transition-all"
+                      className="flex items-center gap-1.5 text-xs px-2 py-1 font-medium transition-all"
                       style={{
                         borderRadius: 4,
                         border: `2px solid ${hidden ? "#e5e7eb" : col}`,
@@ -4640,11 +4640,11 @@ ${(function(){
                   <span style={{ fontSize:10, color:"#9ca3af" }}>max {MAX_COMPARE} voor leesbaarheid</span>
                 )}
               </div>
-              <div className="flex gap-2 flex-wrap flex-1">
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(140px, 1fr))", gap:"4px", flex:1 }}>
                 {apps.map((a, i) => {
                   const hidden  = compareHidden.has(a.id);
                   const isLast2 = !hidden && visibleCompare.length <= minCompare;
-                  const col     = ["#1e40af","#7c3aed","#065f46","#92400e","#991b1b","#0f766e"][i % 6];
+                  const col     = appColor(i);
                   return (
                     <button key={a.id} onClick={() => toggleCompare(a.id)}
                       disabled={(isLast2 && !hidden) || (!hidden && visibleCompare.length >= MAX_COMPARE && false)}
@@ -5004,6 +5004,38 @@ ${(function(){
               Nog geen applicaties in het systeem.
             </div>
           ) : (
+            <>
+              {/* Snelnavigatie */}
+              <div className="rounded p-3 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
+                <p className="text-xs font-semibold mb-2" style={{ color:"#9ca3af" }}>Spring naar applicatie</p>
+                <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(130px, 1fr))", gap:"4px" }}>
+                  {[...apps].sort((a, b) => {
+                    const na = (useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).toLowerCase();
+                    const nb = (useSecondaryName && b.nameSecondary ? b.nameSecondary : b.name).toLowerCase();
+                    return na.localeCompare(nb, "nl", { sensitivity:"base", numeric:true });
+                  }).map(a => {
+                    const sc = calcScores(a.scores);
+                    const lbl = scoreLabel(sc.autonomyScore);
+                    return (
+                      <button key={a.id}
+                        onClick={() => {
+                          const el = document.getElementById(`admin-app-${a.id}`);
+                          if (el) el.scrollIntoView({ behavior:"smooth", block:"start" });
+                        }}
+                        className="flex items-center gap-1.5 text-xs px-2 py-1.5 text-left font-medium"
+                        style={{ borderRadius:4, border:`1px solid ${lbl.fg}44`,
+                                 background:`${lbl.bg}`, color:lbl.fg, overflow:"hidden" }}>
+                        <span style={{ width:6, height:6, borderRadius:"50%", flexShrink:0,
+                                       background:lbl.fg, display:"inline-block" }}/>
+                        <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                          {(useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).substring(0,16)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
             <div className="space-y-3">
               {[...apps].sort((a, b) => {
                 const na = (useSecondaryName && a.nameSecondary ? a.nameSecondary : a.name).toLowerCase();
@@ -5016,7 +5048,7 @@ ${(function(){
                 const filled = allQ.filter(q => (a.scores[q.key] || 0) > 0);
 
                 return (
-                  <div key={a.id} className="bg-white rounded" style={{ border:"1px solid #D0E4F7", borderLeft:`4px solid ${scoreColor(sc.autonomyScore)}` }}>
+                  <div key={a.id} id={`admin-app-${a.id}`} className="bg-white rounded" style={{ border:"1px solid #D0E4F7", borderLeft:`4px solid ${scoreColor(sc.autonomyScore)}`, scrollMarginTop:"12px" }}>
                     {/* App header row */}
                     <div className="flex items-center gap-4 p-4">
                       <Gauge score={sc.autonomyScore} size={60} />
@@ -5127,6 +5159,7 @@ ${(function(){
                 );
               })}
             </div>
+            </>
           )}
 
           {/* Danger zone verwijderd — data wissen niet beschikbaar via de interface */}
@@ -5757,7 +5790,7 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
-              <br/>Prototype v2.3 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
+              <br/>Prototype v2.4 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
               <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: netlify.com/security, anthropic.com/privacy, github.com/security
             </p>
           </div>
