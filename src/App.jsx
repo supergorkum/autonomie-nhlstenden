@@ -2172,7 +2172,13 @@ function App() {
   const [hiddenApps, setHiddenApps] = useState(new Set()); // IDs verborgen in dashboard
 
 
-  const [compareHidden, setCompareHidden] = useState(new Set());
+  const [compareHidden, setCompareHidden] = useState(() => {
+    // Start met de laatste MAX_COMPARE apps geselecteerd
+    if (apps.length > MAX_COMPARE) {
+      return new Set(apps.slice(0, apps.length - MAX_COMPARE).map(a => a.id));
+    }
+    return new Set();
+  });
   const MAX_COMPARE = 5;
 
   // Auto-select laatste 5 in vergelijking als er meer zijn
@@ -4549,15 +4555,6 @@ ${(function(){
   // ── GEOKAART ───────────────────────────────────────────────────────────────
 
   function Compare() {
-    // Auto-selecteer de laatste MAX_COMPARE apps bij eerste render
-    React.useEffect(() => {
-      if (apps.length > MAX_COMPARE) {
-        setCompareHidden(new Set(
-          [...apps].sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0))
-            .slice(MAX_COMPARE).map(a => a.id)
-        ));
-      }
-    }, [apps.length]); // eslint-disable-line react-hooks/exhaustive-deps
     const minCompare = 2;
     const visibleCompare = apps.filter(a => !compareHidden.has(a.id));
 
