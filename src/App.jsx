@@ -2137,7 +2137,8 @@ function App() {
   const [saving,     setSaving]    = useState(false);
   const [saveError,  setSaveError] = useState(false);
   const [lastSaved,  setLastSaved]  = useState(null);
-  const [lastBackup, setLastBackup] = useState(null); // timestamp van laatste backup (auto of handmatig)
+  const [lastBackup, setLastBackup] = useState(null); // timestamp van laatste backup
+  const [backupType, setBackupType] = useState(null); // "auto" of "manual"
   const [serverBackups, setServerBackups] = useState([]); // lijst van server-backups
   const [backupsLoaded, setBackupsLoaded] = useState(false);
   const [view,       setView]      = useState("about");
@@ -2200,7 +2201,10 @@ function App() {
       .then(backups => {
         if (Array.isArray(backups)) {
           setServerBackups(backups);
-          if (backups.length > 0) setLastBackup(backups[0].timestamp);
+          if (backups.length > 0) {
+            setLastBackup(backups[0].timestamp);
+            setBackupType("auto");
+          }
         }
         setBackupsLoaded(true);
       })
@@ -2386,6 +2390,7 @@ function App() {
     el.click();
     URL.revokeObjectURL(url);
     setLastBackup(now.toISOString()); // update header teller
+    setBackupType("manual");
   }
 
   // ── Database import verwerken ────────────────────────────────────────────────
@@ -6792,10 +6797,11 @@ ${(function(){
                   const ts = lastBackup || lastSaved;
                   const d = new Date(ts);
                   const now = new Date();
+                  const icon = backupType === "manual" ? "💾" : "☁️";
+                  const dateStr = d.toLocaleDateString("nl-NL", {day:"numeric", month:"short"});
+                  const timeStr = d.toLocaleTimeString("nl-NL", {hour:"2-digit", minute:"2-digit"});
                   const sameDay = d.toDateString() === now.toDateString();
-                  return sameDay
-                    ? `Backup ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`
-                    : `Backup ${d.toLocaleDateString("nl-NL", {day:"numeric",month:"short"})} ${d.toLocaleTimeString("nl-NL", {hour:"2-digit",minute:"2-digit"})}`;
+                  return `${icon} ${sameDay ? "" : dateStr + " "}${timeStr}`;
                 })()}
               </span>
             )}
