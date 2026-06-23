@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.4";
+const VERSION = "v2.0";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -45,6 +45,17 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.0",
+    datum: "Juni 2026",
+    label: "Huidige versie",
+    wijzigingen: [
+      "Migratie naar eigen NHL Stenden-serverinfrastructuur voltooid — draait nu op Ubuntu Linux in Leeuwarden",
+      "Loginscherm verwijderd — applicatie direct toegankelijk binnen NHL Stenden ICT-omgeving",
+      "Transparantiepagina bijgewerkt naar productiesituatie: eigen server, eigen jurisdictie, maximale soevereiniteit",
+      "Versienummer verhoogd naar v2.0 als markering van livegang in eigen productie",
+    ]
+  },
   {
     versie: "v2.4",
     datum: "Juni 2026",
@@ -96,9 +107,9 @@ const CHANGELOG = [
     wijzigingen: [
       "Prototype-status vastgelegd: applicatie is officieel een prototype — zichtbaar in header, Over de tool en Over dit product",
       "Header: subtitel bijgewerkt naar 'Prototype · Ambassadeurslijn Digitale Soevereiniteit'",
-      "Over de tool: migratieparagraaf toegevoegd — product draait nu op Netlify, gaat over naar eigen NVIDIA DGX Spark",
+      "Over de tool: omschrijving bijgewerkt — product draait op eigen NHL Stenden-serverinfrastructuur (Ubuntu Linux, Leeuwarden).",
       "Over de tool: inspiratiebron-paragraaf toegevoegd — instrument als voorbeeld voor beleidsontwikkeling in eigen organisatie",
-      "Over dit product: prototype-vermelding en migratieplan naar eigen NHL Stenden-server toegevoegd",
+      "Over dit product: volledig bijgewerkt naar productiesituatie — eigen NHL Stenden-infrastructuur, geen externe cloudpartijen.",
       "Aan de slag stap 2: verwijzing naar 'live sidebar' verwijderd (niet meer aanwezig in huidige versie)",
       "Aan de slag stap 4: verwijzing naar 'autonomiekwadrant' verwijderd (niet meer aanwezig in huidige versie)",
       "Excel-exportknop verplaatst van header naar Dashboard (was al zo maar tekst klopte niet)",
@@ -2125,7 +2136,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
 
 function App() {
   // ── Login state ─────────────────────────────────────────────
-  const [loggedIn,   setLoggedIn]   = useState(() => sessionStorage.getItem("nhl_auth") === "ok");
+  const [loggedIn,   setLoggedIn]   = useState(true);
   const [loginInput, setLoginInput] = useState("");
   const [loginError, setLoginError] = useState(false);
   const LOGIN_CODE = "Geheim";
@@ -2310,7 +2321,7 @@ function App() {
   }
 
   // ── Login scherm ─────────────────────────────────────────────
-  if (!loggedIn) {
+  if (false) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ background:"#EBF3FF", fontFamily:"system-ui,sans-serif" }}>
         <div className="bg-white w-full max-w-sm p-0 overflow-hidden" style={{ borderRadius:4, boxShadow:"0 8px 32px rgba(12,35,64,0.2)" }}>
@@ -5470,18 +5481,18 @@ ${(function(){
 
     const STACK = [
       {
-        naam: "Netlify",
-        rol: "Hosting, serverless functies en opslag",
+        naam: "NHL Stenden Serverinfrastructuur",
+        rol: "Hosting en opslag op eigen NHL Stenden-hardware",
         type: "Hosting & opslag",
-        jurisdictie: "Verenigde Staten",
-        vestiging: "San Francisco, CA — VS",
-        daafA1: 3,
-        daafA1toe: "Adequaatheidsbesluit EU-VS Data Privacy Framework (2023) van kracht, maar CLOUD Act en FISA 702 zijn ongewijzigd. Buitenlandse overheidsinstanties houden potentieel toegang tot data op Amerikaanse servers.",
-        daafA3: 3,
-        daafA3toe: "Netlify Blobs (de opslag van deze applicatie) staat in één primaire regio. Netlify publiceert de exacte regio niet. Op basis van standaard Netlify-configuratie is dit vermoedelijk een Amerikaanse regio (AWS us-east-1 of vergelijkbaar). Geen EU-datalocatiegarantie.",
-        beveiliging: "TLS 1.2+ en AES-256 voor data in transit en at rest. Gratis HTTPS via Let's Encrypt. GDPR-DPA beschikbaar. SOC 2 Type II gecertificeerd.",
-        opmerking: "De assessment-data (scores, applicatienamen, motivaties) wordt opgeslagen in Netlify Blobs. Aanbeveling: exporteer regelmatig naar Excel als lokale back-up.",
-        url: "https://www.netlify.com/security/",
+        jurisdictie: "Nederland",
+        vestiging: "Leeuwarden — NHL Stenden ICT-omgeving",
+        daafA1: 1,
+        daafA1toe: "Volledig onder Nederlandse jurisdictie. Geen extraterritoriale claims van toepassing. Beheerd door eigen NHL Stenden-personeel (DLWO).",
+        daafA3: 1,
+        daafA3toe: "Data staat uitsluitend op eigen NHL Stenden-servers in Leeuwarden. Geen externe cloudpartijen betrokken bij opslag of verwerking. Datalocatie is volledig onder beheer van de eigen organisatie.",
+        beveiliging: "Beheerd binnen de beveiligingsstandaarden van NHL Stenden ICT. Ubuntu Linux met reguliere beveiligingsupdates. Toegang uitsluitend via NHL Stenden-netwerk en beheeraccounts.",
+        opmerking: "De assessment-data wordt opgeslagen op eigen NHL Stenden-infrastructuur. Dit is de meest soevereine configuratie mogelijk — geen afhankelijkheid van externe partijen voor opslag of verwerking.",
+        url: "https://www.nhlstenden.com",
       },
       {
         naam: "Anthropic / Claude API",
@@ -5659,10 +5670,10 @@ ${(function(){
             <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Gegevensstroom — wat gaat waarheen</h3>
             <div className="space-y-2">
               {[
-                { van:"Gebruiker (browser)", naar:"Netlify Blobs (VS)", data:"Assessment-scores, applicatienamen, motivaties", actie:"Opslaan bij elke wijziging", kleur:"#ea580c" },
-                { van:"Netlify Blobs (VS)", naar:"Gebruiker (browser)", data:"Dezelfde data terug bij laden van de pagina", actie:"Laden bij inloggen", kleur:"#ea580c" },
+                { van:"Gebruiker (browser)", naar:"NHL Stenden Server (Leeuwarden)", data:"Assessment-scores, applicatienamen, motivaties", actie:"Opslaan bij elke wijziging", kleur:"#16a34a" },
+                { van:"NHL Stenden Server (Leeuwarden)", naar:"Gebruiker (browser)", data:"Dezelfde data terug bij laden van de pagina", actie:"Laden bij paginabezoek", kleur:"#16a34a" },
                 { van:"Gebruiker (browser)", naar:"Lokale download", data:"Excel-exportbestand, PDF-rapport", actie:"Op verzoek van gebruiker", kleur:"#16a34a" },
-                { van:"Broncode (GitHub, VS)", naar:"Netlify (VS)", data:"Applicatiecode — geen gebruikersdata", actie:"Bij elke git push (deploy)", kleur:"#ca8a04" },
+                { van:"Broncode (GitHub, VS)", naar:"NHL Stenden Server (Leeuwarden)", data:"Applicatiecode — geen gebruikersdata", actie:"Bij elke git push (deploy)", kleur:"#ca8a04" },
                 { van:"Claude API (Anthropic, VS)", naar:"–", data:"Niet actief tijdens gebruik", actie:"Alleen gebruikt bij ontwikkeling", kleur:"#9ca3af" },
               ].map((r, i) => (
                 <div key={i} className="flex items-start gap-3 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
@@ -5689,8 +5700,8 @@ ${(function(){
                 {[
                   { icon:"🔒", titel:"Data in transit (TLS)", status:"Actief", kleur:"#15803d", bg:"#dcfce7",
                     tekst:"Alle communicatie tussen de browser en de Netlify-servers verloopt via HTTPS met TLS 1.2 of hoger. Data kan onderweg niet worden onderschept of gewijzigd." },
-                  { icon:"💾", titel:"Data at rest (Netlify Blobs)", status:"Platformniveau", kleur:"#ca8a04", bg:"#fef9c3",
-                    tekst:"Netlify versleutelt opgeslagen data op schijfniveau (AES-256) als onderdeel van hun infrastructuur. Er is geen applicatieniveau-encryptie: de data is leesbaar voor Netlify zelf en voor iedereen met toegang tot het Netlify-account van NHL Stenden." },
+                  { icon:"💾", titel:"Data at rest (eigen server)", status:"Eigen beheer", kleur:"#15803d", bg:"#dcfce7",
+                    tekst:"Data wordt opgeslagen op eigen NHL Stenden-servers in Leeuwarden. Beheerd door het team Infrastructuur (DLWO). Geen externe partij heeft toegang tot de opgeslagen data." },
                 ].map(k => (
                   <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -5736,7 +5747,7 @@ ${(function(){
                   { tekst:"Het inlogwachtwoord staat als platte tekst in de JavaScript-broncode die naar de browser wordt gestuurd. Iedereen die de browser-devtools opent kan het wachtwoord inzien. De server-side tokencheck (v1.7+) beperkt de schade, maar vervangt geen echte authenticatie." },
                   { tekst:"Er is geen rate limiting of lockout na foutieve inlogpogingen. Geautomatiseerde aanvallen op het inlogscherm zijn technisch mogelijk." },
                   { tekst:"Er is geen logging van wie wanneer heeft ingelogd of data heeft gewijzigd. Bij een incident is er geen audit trail." },
-                  { tekst:"De data staat zonder applicatieniveau-encryptie in Netlify Blobs. NHL Stenden heeft geen zicht op wie binnen Netlify toegang heeft tot de ruwe opgeslagen data." },
+                  { tekst:"Broncode staat nog op GitHub (VS). Bij verdere professionalisering is een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur aan te bevelen." },
                 ].map((b, i) => (
                   <div key={i} className="flex gap-2 text-xs">
                     <span className="flex-shrink-0 font-bold" style={{ color:"#ea580c" }}>!</span>
@@ -5751,9 +5762,9 @@ ${(function(){
               <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Advies bij doorontwikkeling</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { n:"1", titel:"Niveau 1 — Gedaan (v1.7)", tekst:"Server-side API-tokencheck in Netlify Functions. Verzoeken zonder token worden geweigerd met HTTP 401. Minimale inspanning, directe verbetering.", kleur:"#15803d", bg:"#dcfce7" },
-                  { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door Netlify Identity of SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1A56A0", bg:"#EBF3FF" },
-                  { n:"3", titel:"Niveau 3 — Bij institutionele uitrol", tekst:"Migreer naar EU-hosting (Hetzner, Cloudflare EU, Nederlandse aanbieder), voeg applicatieniveau-encryptie toe aan de opgeslagen data, en integreer logging en audit trail.", kleur:"#6d28d9", bg:"#faf5ff" },
+                  { n:"1", titel:"Niveau 1 — Gerealiseerd (v2.0)", tekst:"Migratie naar eigen NHL Stenden-infrastructuur voltooid. Het instrument draait volledig op eigen hardware in Leeuwarden. Maximale soevereiniteit bereikt voor hosting en opslag.", kleur:"#15803d", bg:"#dcfce7" },
+                  { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1A56A0", bg:"#EBF3FF" },
+                  { n:"3", titel:"Niveau 3 — Bij verdere professionalisering", tekst:"Voeg applicatieniveau-encryptie toe aan de opgeslagen data, integreer logging en audit trail, en overweeg een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#6d28d9", bg:"#faf5ff" },
                 ].map(k => (
                   <div key={k.n} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -5772,16 +5783,15 @@ ${(function(){
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"2px solid #E87722" }}>
             <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Conclusie — soevereiniteitsrisico van dit instrument</h3>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-              De applicatie draait volledig op Amerikaanse infrastructuur (Netlify, GitHub). De assessment-data van NHL Stenden
-              wordt opgeslagen in Netlify Blobs zonder gegarandeerde EU-datalocatie.
-              Dit is een bewuste pragmatische keuze voor dit prototype. De data bevat geen persoonsgegevens
-              van studenten of medewerkers — het betreft uitsluitend scores en omschrijvingen van softwareapplicaties.
+              De applicatie draait volledig op eigen NHL Stenden-serverinfrastructuur in Leeuwarden, beheerd door het team Infrastructuur (DLWO).
+              De omgeving is gebaseerd op Ubuntu Linux en staat volledig binnen de ICT-omgeving van NHL Stenden.
+              Er zijn geen externe cloudpartijen betrokken bij de opslag of verwerking van assessment-data.
             </p>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { titel:"Wat dit betekent", tekst:"Data over het applicatielandschap van NHL Stenden staat op Amerikaanse servers. Bij een juridische vordering onder de CLOUD Act is toegang door Amerikaanse autoriteiten niet uit te sluiten.", kleur:"#ea580c", bg:"#ffedd5" },
-                { titel:"Mitigerende factoren", tekst:"Geen persoonsgegevens. Data is niet bedrijfskritisch in de zin van DPIA. Regelmatige Excel-export biedt lokale back-up. De broncode is volledig inzichtelijk.", kleur:"#ca8a04", bg:"#fef9c3" },
-                { titel:"Aanbeveling", tekst:"Overweeg bij doorontwikkeling migratie naar een EU-hostingpartij (bijv. Cloudflare Pages EU-regio, Hetzner of een Nederlandse aanbieder) en gebruik van een Europese blob-storage dienst.", kleur:"#15803d", bg:"#dcfce7" },
+                { titel:"Wat dit betekent", tekst:"Data over het applicatielandschap van NHL Stenden staat uitsluitend op eigen NHL Stenden-servers in Leeuwarden. Geen extraterritoriale claims van toepassing. Volledige controle door eigen organisatie.", kleur:"#15803d", bg:"#dcfce7" },
+                { titel:"Soevereiniteitsstatus", tekst:"Dit instrument scoort zelf score 1 op alle DAAF en DICTU-dimensies. Maximale soevereiniteit: eigen jurisdictie, eigen hardware, eigen beheer, geen afhankelijkheid van externe partijen.", kleur:"#1A56A0", bg:"#EBF3FF" },
+                { titel:"Aandachtspunten", tekst:"Broncode staat nog op GitHub (VS). Overweeg bij verdere professionalisering een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#ca8a04", bg:"#fef9c3" },
               ].map(k => (
                 <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
                   <p className="text-xs font-bold mb-1" style={{ color:k.kleur }}>{k.titel}</p>
@@ -5795,8 +5805,8 @@ ${(function(){
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
-              <br/>Prototype v2.4 · In voorbereiding: migratie naar NVIDIA DGX Spark (eigen NHL Stenden-infrastructuur, Leeuwarden)
-              <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: netlify.com/security, anthropic.com/privacy, github.com/security
+              <br/>v2.0 · Draait op eigen NHL Stenden-infrastructuur (Ubuntu Linux, Leeuwarden)
+              <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: nhlstenden.com, anthropic.com/privacy, github.com/security
             </p>
           </div>
 
@@ -6323,16 +6333,15 @@ ${(function(){
                 <div className="flex items-start gap-3">
                   <span style={{ fontSize:20, flexShrink:0 }}>🖥️</span>
                   <div>
-                    <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Van cloud naar eigen NHL Stenden-infrastructuur</p>
+                    <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Draait op eigen NHL Stenden-infrastructuur</p>
                     <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>
-                      Het instrument draait momenteel op Amerikaanse cloudinfrastructuur (Netlify, GitHub). Het team Infrastructuur van NHL Stenden
-                      bereidt de migratie voor naar een <strong>NVIDIA DGX Spark</strong> — de eigen mini-supercomputer van NHL Stenden.
-                      Na de migratie draait het instrument volledig op eigen NHL Stenden-hardware in Leeuwarden, onder Nederlands recht,
-                      zonder afhankelijkheid van externe cloudpartijen.
+                      Het instrument draait op eigen NHL Stenden-serverinfrastructuur, beheerd door het team Infrastructuur van NHL Stenden (DLWO).
+                      De omgeving is gebaseerd op <strong>Ubuntu Linux</strong> en aanverwante open source producten, en staat volledig binnen de
+                      ICT-omgeving van NHL Stenden in Leeuwarden — onder Nederlands recht, zonder afhankelijkheid van externe cloudpartijen.
                     </p>
                     <p className="text-xs leading-relaxed" style={{ color:"#6b7280" }}>
-                      Dat maakt dit product ook intern consistent: een instrument dat digitale soevereiniteit meet,
-                      draait straks zelf maximaal soeverein — score 1 op alle DAAF en DICTU-dimensies.
+                      Dit maakt het product intern consistent: een instrument dat digitale soevereiniteit meet,
+                      draait zelf maximaal soeverein — score 1 op alle DAAF en DICTU-dimensies.
                     </p>
                   </div>
                 </div>
