@@ -2136,10 +2136,10 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
 
 function App() {
   // ── Login state ─────────────────────────────────────────────
-  const [loggedIn,   setLoggedIn]   = useState(true);
+  const [loggedIn,   setLoggedIn]   = useState(false);
   const [loginInput, setLoginInput] = useState("");
   const [loginError, setLoginError] = useState(false);
-  const LOGIN_CODE = "Geheim";
+  const LOGIN_CODE = "autonomie2026";
   // API-token: hetzelfde als het inlogwachtwoord — wordt meegestuurd als request-header
   // zodat de Netlify Functions server-side kunnen controleren of het verzoek geldig is.
   const apiToken = sessionStorage.getItem("nhl_api_token") || "";
@@ -2226,7 +2226,7 @@ function App() {
   const [geoHoverId,    setGeoHoverId]    = useState(null);
   const [geoTooltip,    setGeoTooltip]    = useState(null);
   const [geoHidden,     setGeoHidden]     = useState(new Set()); // verborgen apps op de kaart
-  const ADMIN_PIN = "nhl2026";
+  const ADMIN_PIN = "beheerautonomie2026";
 
   // Ref voor scroll-naar-boven bij stapwissel in Assess
   const assessScrollRef = useRef(null);
