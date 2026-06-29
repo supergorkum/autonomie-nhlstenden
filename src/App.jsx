@@ -7042,6 +7042,15 @@ ${(function(){
       </div>
 
       {/* Content */}
+      {/* Golf overgang — zelfde als AI-Netwerk */}
+      <div className="flex-shrink-0" style={{ background:"#162D6E", marginBottom:-2 }}>
+        <svg viewBox="0 0 1440 40" fill="none" preserveAspectRatio="none"
+          style={{ width:"100%", height:40, display:"block" }}>
+          <path d="M0 40L1440 40L1440 10C1380 25 1300 2 1200 9C1100 16 1000 30 880 26C760 22 660 5 540 10C420 15 320 29 200 25C100 21 50 10 0 15L0 40Z" fill="#F8F9FB" fillOpacity="0.3"/>
+          <path d="M0 40L1440 40L1440 16C1360 29 1260 6 1140 14C1020 22 900 34 780 30C660 26 540 8 420 14C300 20 180 32 60 26L0 22L0 40Z" fill="#F8F9FB" fillOpacity="0.6"/>
+          <path d="M0 40L1440 40L1440 22C1350 35 1230 14 1100 21C970 28 860 39 740 34C620 29 500 15 380 21C260 27 140 38 0 30L0 40Z" fill="#F8F9FB"/>
+        </svg>
+      </div>
       <main className="flex-1 overflow-hidden" style={{ background:"#F8F9FB" }}>
         {view === "dashboard" && Dashboard()}
         {view === "apps"      && AppsList()}
