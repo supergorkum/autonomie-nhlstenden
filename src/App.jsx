@@ -33,7 +33,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.0";
+const VERSION = "v2.1";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -75,6 +75,7 @@ const CHANGELOG = [
     versie: "v2.3",
     datum: "Juni 2026",
     wijzigingen: [
+      "v2.1: Redesign huisstijl gelijkgetrokken met AI-Netwerk — diep blauw gradient, NHL Stenden logo, Inter font, roze accenten, golf overgang, pagina titel gecorrigeerd naar Digitale Autonomie-assessment",
       "Naamwijziging: ‘Digitale Soevereiniteit’ hernoemd naar ‘Digitale Autonomie’ conform SURF en Utrecht University terminologie — doorgevoerd in alle teksten, titels, PDF-rapporten, Excel-exports en de handleiding",
       "Automatische cloud-backups om 10:00, 13:00 en 18:00 via Netlify scheduled functions",
       "Server-backups bewaard 7 dagen, daarna automatisch verwijderd",
