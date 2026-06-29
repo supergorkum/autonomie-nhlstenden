@@ -4018,6 +4018,16 @@ ${(function(){
                     Alles tonen
                   </button>
                 )}
+                <button onClick={() => setHiddenApps(new Set())}
+                  className="text-xs px-2.5 py-1.5 font-medium"
+                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                  ✓ Alles selecteren
+                </button>
+                <button onClick={() => setHiddenApps(new Set(apps.map(a => a.id).slice(1)))}
+                  className="text-xs px-2.5 py-1.5 font-medium"
+                  style={{ borderRadius:4, background:"#f9fafb", color:"#6b7280", border:"1px solid #e5e7eb" }}>
+                  ✕ Alles verbergen
+                </button>
                 <div className="w-px self-stretch" style={{ background:"#D0E4F7", margin:"0 4px" }}/>
                 <button onClick={() => setShowModal(true)}
                   className="text-white text-xs px-3 py-1.5 font-medium"
