@@ -585,19 +585,19 @@ function generateRecommendations(scores) {
 
 
 // About sub-components — module level om React re-mount te voorkomen
-function Section({ title, children, accent="#1A56A0" }) {
+function Section({ title, children, accent="#1E3A8A" }) {
   return (
     <div className="mb-6">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-1 h-5 rounded-full flex-shrink-0" style={{ background:accent }}/>
-        <h2 className="font-bold text-base" style={{ color:"#0C2340" }}>{title}</h2>
+        <h2 className="font-bold text-base" style={{ color:"#162D6E" }}>{title}</h2>
       </div>
       {children}
     </div>
   );
 }
 
-function Tip({ label, children, color="#1A56A0", bg="#EBF3FF" }) {
+function Tip({ label, children, color="#1E3A8A", bg="#EFF6FF" }) {
   return (
     <div className="rounded p-3 mb-2" style={{ background:bg, border:`1px solid ${color}33` }}>
       <p className="text-xs font-bold mb-1" style={{ color }}>{label}</p>
@@ -627,7 +627,7 @@ function KwadrantSVG({ kwData, onAppClick }) {
   const yTicks = [1,2,3,4,5];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ fontFamily:"system-ui,sans-serif", display:"block" }}>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ fontFamily:"Inter, system-ui, sans-serif", display:"block" }}>
       {quads.map((q,i) => (
         <rect key={i} x={q.x1} y={q.y1} width={q.x2-q.x1} height={q.y2-q.y1} fill={q.fill} />
       ))}
@@ -745,7 +745,7 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
   const dotSize = compact ? 10 : manyApps ? 10 : 16;
 
   return (
-    <div style={{ fontFamily:"system-ui,sans-serif", position:"relative" }}>
+    <div style={{ fontFamily:"Inter, system-ui, sans-serif", position:"relative" }}>
       {/* Legenda — scrollbaar bij veel apps */}
       <div style={{ display:"flex", flexWrap:"wrap", gap:"4px 12px", marginBottom:10,
                     maxHeight: apps.length > 15 ? 72 : "none", overflowY: apps.length > 15 ? "auto" : "visible",
@@ -876,9 +876,9 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
   return (
     <div className="rounded mb-4" style={{ border:"2px solid #1A56A0", overflow:"hidden" }}>
       {/* Koptekst */}
-      <div style={{ background:"#0C2340", padding:"14px 20px" }}>
+      <div style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", padding:"14px 20px" }}>
         <div className="flex items-center gap-3">
-          <div style={{ background:"#26B5AE", borderRadius:3, padding:"4px 10px",
+          <div style={{ background:"#E91E8C", borderRadius:3, padding:"4px 10px",
             fontSize:10, fontWeight:700, color:"white", flexShrink:0 }}>
             VRAAGSTELLING
           </div>
@@ -886,17 +886,17 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
             Waar zetten we onze data neer en waar liggen de potentiële problemen?
           </p>
         </div>
-        <p style={{ fontSize:10, color:"#7DD3D0", marginTop:4 }}>
+        <p style={{ fontSize:10, color:"#F9A8D4", marginTop:4 }}>
           Aanleiding: inventarisatie digitale autonomie — aansluiting bij VH en SURF digitale strategie
         </p>
       </div>
 
       {/* Inhoud */}
-      <div className="grid grid-cols-3 gap-0" style={{ background:"#EBF3FF" }}>
+      <div className="grid grid-cols-3 gap-0" style={{ background:"#F8F9FB" }}>
 
         {/* Kolom 1: Applicatieoverzicht */}
         <div style={{ padding:"14px 16px", borderRight:"1px solid #D0E4F7" }}>
-          <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:8 }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#162D6E", marginBottom:8 }}>
             📋 Geassesseerd ({apps.length})
           </p>
           {[
@@ -924,7 +924,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
 
         {/* Kolom 2: Waar liggen de risico's */}
         <div style={{ padding:"14px 16px", borderRight:"1px solid #D0E4F7" }}>
-          <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:8 }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#162D6E", marginBottom:8 }}>
             ⚠️ Potentiële problemen
           </p>
           {scored.length > 0 ? (
@@ -962,7 +962,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
 
         {/* Kolom 3: Waar staat de data */}
         <div style={{ padding:"14px 16px" }}>
-          <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:8 }}>
+          <p style={{ fontSize:10, fontWeight:700, color:"#162D6E", marginBottom:8 }}>
             🌍 Datalocatie & jurisdictie
           </p>
           {apps.length > 0 ? (() => {
@@ -1221,7 +1221,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
           })}
           {hiddenInRadar.size > 0 && (
             <button onClick={() => setHiddenInRadar(new Set())}
-              style={{ fontSize:8, color:"#1A56A0", background:"#EBF3FF", border:"1px solid #D0E4F7",
+              style={{ fontSize:8, color:"#1E3A8A", background:"#F8F9FB", border:"1px solid #D0E4F7",
                        borderRadius:3, padding:"2px 6px", cursor:"pointer", marginTop:2 }}>
               Alles tonen
             </button>
@@ -1369,9 +1369,9 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
       }}>
       <div className="flex items-start gap-2 mb-3">
         <span className="text-xs font-semibold px-2 py-0.5 flex-shrink-0"
-          style={{ borderRadius:3, background:"#EBF3FF", color:"#1A56A0" }}>{q.key}</span>
+          style={{ borderRadius:3, background:"#F8F9FB", color:"#1E3A8A" }}>{q.key}</span>
         <div>
-          <p className="font-semibold text-sm leading-snug" style={{ color:"#0C2340" }}>{q.name}</p>
+          <p className="font-semibold text-sm leading-snug" style={{ color:"#162D6E" }}>{q.name}</p>
           <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{q.question || q.description}</p>
         </div>
       </div>
@@ -1403,7 +1403,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
         <label style={{ fontSize:10, color:"#6b7280", fontWeight:600, display:"block", marginBottom:3 }}>
           Motivatie / toelichting score <span style={{ fontWeight:400 }}>(optioneel)</span>
           {useSecondaryName && appNameSecondary && appName !== appNameSecondary && (
-            <span style={{ marginLeft:6, fontSize:9, color:"#E87722", fontWeight:600 }}>
+            <span style={{ marginLeft:6, fontSize:9, color:"#E91E8C", fontWeight:600 }}>
               🏷 Weergave: secundaire naam
             </span>
           )}
@@ -1426,11 +1426,11 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
             border:"1px solid #D0E4F7", borderRadius:4,
             color:"#374151", lineHeight:1.5, resize:"vertical",
             background: readOnly ? "#f3f4f6" : (note ? "#f0fdf4" : "#f8fafc"),
-            borderColor: readOnly ? "#e5e7eb" : (note ? "#86efac" : "#D0E4F7"),
+            borderColor: readOnly ? "#e5e7eb" : (note ? "#86efac" : "#DBEAFE"),
             outline:"none", fontFamily:"inherit", boxSizing:"border-box"
           }}
-          onFocus={e => e.target.style.borderColor = "#1A56A0"}
-          onBlur={e => e.target.style.borderColor = note ? "#86efac" : "#D0E4F7"}
+          onFocus={e => e.target.style.borderColor = "#1E3A8A"}
+          onBlur={e => e.target.style.borderColor = note ? "#86efac" : "#DBEAFE"}
         />
         {note && (
           <p style={{ fontSize:9, color:"#16a34a", marginTop:2 }}>✓ Motivatie opgeslagen</p>
@@ -1751,7 +1751,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           </span>
           <button onClick={resetZoom}
             style={{ fontSize:10, background:"white", border:"1px solid #D0E4F7", borderRadius:4,
-                     padding:"3px 10px", color:"#1A56A0", cursor:"pointer", fontWeight:600 }}>
+                     padding:"3px 10px", color:"#1E3A8A", cursor:"pointer", fontWeight:600 }}>
             ↺ Reset
           </button>
         </div>
@@ -1858,7 +1858,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
                 <rect x={tx} y={ty} width="230" height="72" rx="5"
                   fill="white" stroke={kleur} strokeWidth="1.5"
                   style={{ filter:"drop-shadow(0 3px 8px rgba(0,0,0,0.18))" }}/>
-                <text x={tx+10} y={ty+17} fontSize="11" fontWeight="700" fill="#0C2340">{displayName(a)}</text>
+                <text x={tx+10} y={ty+17} fontSize="11" fontWeight="700" fill="#162D6E">{displayName(a)}</text>
                 {a.supplier && <text x={tx+10} y={ty+30} fontSize="9" fill="#9ca3af">{a.supplier}</text>}
                 <text x={tx+10} y={ty+46} fontSize="9" fill="#374151">
                   {type === "juris" ? "Jurisdictie leverancier (A1)" : "Datalocatie servers (A3)"}: {score||"–"}/5
@@ -1881,10 +1881,10 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           {/* Kaart legenda — buiten zoom */}
           <g transform={`translate(${W-270}, ${H-72})`}>
             <rect width="262" height="66" rx="4" fill="white" opacity="0.93" stroke="#e2e8f0" strokeWidth="1"/>
-            <text x="10" y="15" fontSize="9" fontWeight="700" fill="#0C2340">Legenda</text>
-            <circle cx="18" cy="29" r="7" fill="#1A56A0" stroke="white" strokeWidth="1.5"/>
+            <text x="10" y="15" fontSize="9" fontWeight="700" fill="#162D6E">Legenda</text>
+            <circle cx="18" cy="29" r="7" fill="#1E3A8A" stroke="white" strokeWidth="1.5"/>
             <text x="30" y="33" fontSize="9" fill="#374151">Gevuld cirkel = Jurisdictie (A1)</text>
-            <rect x="11" y="44" width="14" height="14" fill="white" stroke="#1A56A0" strokeWidth="2" rx="2"/>
+            <rect x="11" y="44" width="14" height="14" fill="white" stroke="#1E3A8A" strokeWidth="2" rx="2"/>
             <text x="30" y="54" fontSize="9" fill="#374151">Omrand vierkant = Datalocatie (A3)</text>
             {[["#16a34a","EU/EER",145],["#ca8a04","VS+DPF",185],["#ea580c","Risico",222],["#dc2626","Kritiek",248]].map(([c,l,x]) => (
               <g key={l}>
@@ -1998,7 +1998,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
       {/* ── Header ── */}
       <div style={{ padding:"14px 16px 10px", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
         <div>
-          <h3 style={{ fontSize:14, fontWeight:700, color:"#0C2340", margin:0 }}>Geopolitieke positie — applicatielandschap</h3>
+          <h3 style={{ fontSize:14, fontWeight:700, color:"#162D6E", margin:0 }}>Geopolitieke positie — applicatielandschap</h3>
           <p style={{ fontSize:11, color:"#9ca3af", margin:"3px 0 0" }}>Jurisdictie leverancier en datalocatie per regio · klik op een app-naam om te filteren</p>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -2011,7 +2011,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
           {geoHidden.size > 0 && (
             <button onClick={() => setGeoHidden(new Set())}
               style={{ fontSize:11, padding:"2px 8px", borderRadius:4, border:"1px solid #D0E4F7",
-                       color:"#1A56A0", background:"#EBF3FF", cursor:"pointer" }}>
+                       color:"#1E3A8A", background:"#F8F9FB", cursor:"pointer" }}>
               Alles tonen
             </button>
           )}
@@ -2326,25 +2326,27 @@ function App() {
   // ── Login scherm ─────────────────────────────────────────────
   if (!loggedIn) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background:"#EBF3FF", fontFamily:"system-ui,sans-serif" }}>
+      <div className="flex items-center justify-center h-screen" style={{ background:"#F8F9FB", fontFamily:"Inter, system-ui, sans-serif" }}>
         <div className="bg-white w-full max-w-sm p-0 overflow-hidden" style={{ borderRadius:4, boxShadow:"0 8px 32px rgba(12,35,64,0.2)" }}>
           {/* Header */}
-          <div className="px-8 py-6 text-white" style={{ background:"#0C2340" }}>
+          <div className="px-8 py-6 text-white" style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)" }}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="px-2.5 py-1.5 border-2 border-white" style={{ borderRadius:2 }}>
-                <span className="font-bold leading-none text-white" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
-              </div>
-              <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+              <img
+                src="/nhl-logo-transparent.png"
+                alt="NHL Stenden"
+                style={{ height:32, width:32, objectFit:"contain", display:"block" }}
+              />
+              <div className="w-px self-stretch" style={{ background:"#E91E8C", margin:"2px 0" }}/>
               <div>
                 <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Autonomie-assessment</p>
-                <p style={{ fontSize:10, color:"#7DD3D0" }}>Prototype · Ambassadeurslijn Digitale Autonomie</p>
+                <p style={{ fontSize:10, color:"#F9A8D4" }}>Prototype · Ambassadeurslijn Digitale Autonomie</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <p style={{ fontSize:10, color:"rgba(255,255,255,0.5)" }}>
                 Ambassadeurslijn Digitale Autonomie
               </p>
-              <span className="font-bold px-2 py-0.5" style={{ fontSize:10, color:"#0C2340", background:"#26B5AE", borderRadius:3 }}>
+              <span className="font-bold px-2 py-0.5" style={{ fontSize:10, color:"#162D6E", background:"#E91E8C", borderRadius:3 }}>
                 {VERSION}
               </span>
             </div>
@@ -2352,9 +2354,9 @@ function App() {
           {/* Form */}
           <div className="px-8 py-6">
             <div className="flex items-center gap-2 mb-5">
-              <div className="w-8 h-8 flex items-center justify-center text-white" style={{ background:"#1A56A0", borderRadius:4, fontSize:16 }}>🔒</div>
+              <div className="w-8 h-8 flex items-center justify-center text-white" style={{ background:"#1E3A8A", borderRadius:4, fontSize:16 }}>🔒</div>
               <div>
-                <p className="font-semibold text-sm" style={{ color:"#0C2340" }}>Toegangscode vereist</p>
+                <p className="font-semibold text-sm" style={{ color:"#162D6E" }}>Toegangscode vereist</p>
                 <p className="text-xs text-gray-400">Voer de code in om toegang te krijgen</p>
               </div>
             </div>
@@ -2366,7 +2368,7 @@ function App() {
               placeholder="Toegangscode"
               autoFocus
               className="w-full border px-3 py-2.5 text-sm focus:outline-none mb-2"
-              style={{ borderColor: loginError ? "#dc2626" : "#D0E4F7", borderRadius:4, letterSpacing:3 }}
+              style={{ borderColor: loginError ? "#dc2626" : "#DBEAFE", borderRadius:4, letterSpacing:3 }}
             />
             {loginError && (
               <p className="text-xs mb-3" style={{ color:"#dc2626" }}>Toegangscode onjuist. Probeer opnieuw.</p>
@@ -2374,7 +2376,7 @@ function App() {
             <button
               onClick={handleLogin}
               className="w-full text-white py-2.5 text-sm font-semibold mt-1"
-              style={{ background:"#1A56A0", borderRadius:4 }}>
+              style={{ background:"#1E3A8A", borderRadius:4 }}>
               Inloggen
             </button>
             <p className="text-xs text-center mt-4" style={{ color:"#9ca3af" }}>
@@ -3111,15 +3113,15 @@ function App() {
       if ((a.scores||{})["B1"] >= 4)
         acties.push({ niveau:"Risico", prio:"Hoog", dim:"B — Leverancier", actie:"Breng de concentratie in kaart: hoeveel kritieke processen zijn afhankelijk van deze leverancier? Stel een maximum vast.", tip:"Gebruik de tool om vergelijkbare applicaties van dezelfde leverancier bij elkaar te zoeken.", kleur:"#ea580c", bg:"#ffedd5" });
       if ((a.scores||{})["C1"] <= 2)
-        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C — Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen voor de eerste 4 uur is al waardevol.", kleur:"#1A56A0", bg:"#EBF3FF" });
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C — Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen voor de eerste 4 uur is al waardevol.", kleur:"#1E3A8A", bg:"#EFF6FF" });
       if ((a.scores||{})["D1"] <= 2)
-        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D — Organisatorisch", actie:"Leg de kennis over configuratie en beheer vast bij minimaal twee medewerkers.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint.", kleur:"#1A56A0", bg:"#EBF3FF" });
+        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D — Organisatorisch", actie:"Leg de kennis over configuratie en beheer vast bij minimaal twee medewerkers.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint.", kleur:"#1E3A8A", bg:"#EFF6FF" });
       if ((a.scores||{})["E1"] <= 2)
-        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, dataportabiliteitsgarantie en opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een data return plan: wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1A56A0", bg:"#EBF3FF" });
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, dataportabiliteitsgarantie en opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een data return plan: wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1E3A8A", bg:"#EFF6FF" });
       if (sc.dictuAvg && sc.dictuAvg < 3)
         acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Autonomie", actie:"Vraag de leverancier schriftelijk naar datalocatie, garantie geen leverancierstoegang, verzet tegen niet-EU dataverzoeken en locatie control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier.", kleur:"#6d28d9", bg:"#faf5ff" });
       if (sc.belang >= 4 && sc.risico >= 3)
-        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico bewust aanvaard? Maak een korte risicoafweging en leg de beslissing vast inclusief een herzieningsdatum.", tip:"Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E87722", bg:"#fff8e1" });
+        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico bewust aanvaard? Maak een korte risicoafweging en leg de beslissing vast inclusief een herzieningsdatum.", tip:"Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E91E8C", bg:"#fff8e1" });
       if (acties.length === 0)
         acties.push({ niveau:"Onderhoud", prio:"Laag", dim:"Algemeen", actie:"Alle scores zijn acceptabel of goed. Plan een hercontrole bij de eerstvolgende contractverlenging.", tip:"Stel een terugkerende herinnering in op de einddatum van het contract.", kleur:"#15803d", bg:"#dcfce7" });
 
@@ -3134,7 +3136,7 @@ function App() {
       if (sc.autonomyScore) html += '<span style="font-size:10px;font-weight:700;color:' + kleur + '">Score: ' + sc.autonomyScore.toFixed(1) + "/10</span>";
       html += "</div>";
       html += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:8px">';
-      [["Risico", sc.risico, "#dc2626"], ["Mitigatie", sc.mitigatie, "#26B5AE"], ["Belang", sc.belang, "#E87722"], ["DICTU", sc.dictuAvg, "#6d28d9"]].forEach(function(s) {
+      [["Risico", sc.risico, "#dc2626"], ["Mitigatie", sc.mitigatie, "#E91E8C"], ["Belang", sc.belang, "#E91E8C"], ["DICTU", sc.dictuAvg, "#6d28d9"]].forEach(function(s) {
         html += '<div style="text-align:center;background:white;border-radius:3px;padding:6px 4px;border:1px solid #e5e7eb">';
         html += '<div style="font-size:14px;font-weight:700;color:' + (s[1] ? s[2] : "#d1d5db") + '">' + (s[1] ? s[1].toFixed(1) : "–") + "</div>";
         html += '<div style="font-size:8px;color:#9ca3af">' + s[0] + "</div></div>";
@@ -3806,7 +3808,7 @@ ${(function(){
       html2 += '<span style="font-size:9px;font-weight:600;background:' + lblBg + ';color:' + klr + ';padding:1px 6px;border-radius:2px">' + lbl + '</span>';
       html2 += '<span style="font-size:10px;font-weight:700;color:' + klr + '">Score: ' + sc.toFixed(1) + '/10</span></div>';
       html2 += '<div style="display:flex;gap:8px">';
-      [["Risico",s.risico,"#dc2626"],["Mitigatie",s.mitigatie,"#26B5AE"],["Belang",s.belang,"#E87722"],["DICTU",s.dictuAvg,"#6d28d9"]].forEach(function(d){
+      [["Risico",s.risico,"#dc2626"],["Mitigatie",s.mitigatie,"#E91E8C"],["Belang",s.belang,"#E91E8C"],["DICTU",s.dictuAvg,"#6d28d9"]].forEach(function(d){
         html2 += '<div style="text-align:center;background:white;border:1px solid #e5e7eb;border-radius:3px;padding:3px 6px;min-width:44px">';
         html2 += '<div style="font-size:11px;font-weight:700;color:' + (d[1]?d[2]:"#d1d5db") + '">' + (d[1]?d[1].toFixed(1):"–") + '</div>';
         html2 += '<div style="font-size:8px;color:#9ca3af">' + d[0] + '</div></div>';
@@ -3944,16 +3946,16 @@ ${(function(){
     const handleKwClick = (id) => { setSelId(id); setStep(0); setAssessReadOnly(true); setView("assess"); };
 
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5" style={{ maxWidth:"100%", margin:"0 auto" }}>
 
           {/* ── Stat row ── */}
           <div className="grid grid-cols-4 gap-3 mb-4">
             {[
-              { label:"Applicaties",        val: apps.length,     color: "#1A56A0" },
+              { label:"Applicaties",        val: apps.length,     color: "#1E3A8A" },
               { label:"Gem. autonomiescore", val: avgA ? avgA.toFixed(1) : "–", color: scoreColor(avgA) },
-              { label:"Goed (≥7)",           val: withSc.filter(a=>a.sc.autonomyScore>=7).length, color:"#26B5AE" },
-              { label:"Aandacht nodig (<5)", val: withSc.filter(a=>a.sc.autonomyScore<5).length,  color:"#E87722" },
+              { label:"Goed (≥7)",           val: withSc.filter(a=>a.sc.autonomyScore>=7).length, color:"#E91E8C" },
+              { label:"Aandacht nodig (<5)", val: withSc.filter(a=>a.sc.autonomyScore<5).length,  color:"#E91E8C" },
             ].map(({ label, val, color }) => (
               <div key={label} className="rounded text-center px-3 py-3"
                 style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
@@ -4008,20 +4010,20 @@ ${(function(){
                 {apps.length > MAX_VISIBLE && (
                   <button onClick={selectLaatste10}
                     className="text-xs px-2.5 py-1.5 font-medium"
-                    style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                    style={{ borderRadius:4, background:"#F8F9FB", color:"#1E3A8A", border:"1px solid #D0E4F7" }}>
                     Laatste {MAX_VISIBLE}
                   </button>
                 )}
                 {apps.length <= MAX_VISIBLE && hiddenApps.size > 0 && (
                   <button onClick={() => setHiddenApps(new Set())}
                     className="text-xs px-2.5 py-1.5 font-medium"
-                    style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                    style={{ borderRadius:4, background:"#F8F9FB", color:"#1E3A8A", border:"1px solid #D0E4F7" }}>
                     Alles tonen
                   </button>
                 )}
                 <button onClick={() => setHiddenApps(new Set())}
                   className="text-xs px-2.5 py-1.5 font-medium"
-                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                  style={{ borderRadius:4, background:"#F8F9FB", color:"#1E3A8A", border:"1px solid #D0E4F7" }}>
                   ✓ Alles selecteren
                 </button>
                 <button onClick={() => setHiddenApps(new Set(apps.map(a => a.id).slice(1)))}
@@ -4029,10 +4031,10 @@ ${(function(){
                   style={{ borderRadius:4, background:"#f9fafb", color:"#6b7280", border:"1px solid #e5e7eb" }}>
                   ✕ Alles de-selecteren
                 </button>
-                <div className="w-px self-stretch" style={{ background:"#D0E4F7", margin:"0 4px" }}/>
+                <div className="w-px self-stretch" style={{ background:"#DBEAFE", margin:"0 4px" }}/>
                 <button onClick={() => setShowModal(true)}
                   className="text-white text-xs px-3 py-1.5 font-medium"
-                  style={{ background:"#1A56A0", borderRadius:4 }}>
+                  style={{ background:"#1E3A8A", borderRadius:4 }}>
                   + Toevoegen
                 </button>
                 <button onClick={exportDashboardPdf} disabled={visibleApps.length===0}
@@ -4042,7 +4044,7 @@ ${(function(){
                 </button>
                 <button onClick={exportXlsx} disabled={apps.length===0}
                   className="text-xs px-2.5 py-1.5 font-medium"
-                  style={{ background:"#E6F7F7", color:"#26B5AE", borderRadius:4, border:"1px solid #26B5AE55", opacity:apps.length===0?0.5:1 }}>
+                  style={{ background:"#E6F7F7", color:"#E91E8C", borderRadius:4, border:"1px solid #26B5AE55", opacity:apps.length===0?0.5:1 }}>
                   📥 Excel
                 </button>
               </div>
@@ -4056,7 +4058,7 @@ ${(function(){
               <p className="text-gray-400 text-sm mb-5">Voeg een applicatie toe om te beginnen.</p>
               <button onClick={() => setShowModal(true)}
                 className="text-white text-sm px-5 py-2.5 font-medium"
-                style={{ background:"#1A56A0", borderRadius:4 }}>
+                style={{ background:"#1E3A8A", borderRadius:4 }}>
                 + Applicatie toevoegen
               </button>
             </div>
@@ -4072,8 +4074,8 @@ ${(function(){
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                  <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Autonomie-kwadrant</h3>
+                  <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
+                  <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Autonomie-kwadrant</h3>
                 </div>
                 <div className="flex gap-1.5 flex-wrap">
                   {[
@@ -4086,7 +4088,7 @@ ${(function(){
                   ))}
                 </div>
               </div>
-              <div className="rounded p-2 mb-3 text-xs" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7", color:"#374151" }}>
+              <div className="rounded p-2 mb-3 text-xs" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7", color:"#374151" }}>
                 <strong>Horizontale as</strong> = Risico × Belang (rechts = meer urgentie) ·{" "}
                 <strong>Verticale as</strong> = Mitigatie (hoger = beter) ·{" "}
                 <span style={{ color:"#2e7d5e", fontWeight:600 }}>Linksboven</span> = ideaal ·{" "}
@@ -4104,10 +4106,10 @@ ${(function(){
           <div className="mb-4">
               {/* Leeswijzer bovenaan app-kaarten */}
               <div className="grid grid-cols-2 gap-2 mb-3">
-                <div className="rounded p-2" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                <div className="rounded p-2" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                    <span style={{ fontSize:10, fontWeight:600, color:"#0C2340" }}>Snelheidsmeter (1–10)</span>
+                    <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
+                    <span style={{ fontSize:10, fontWeight:600, color:"#162D6E" }}>Snelheidsmeter (1–10)</span>
                   </div>
                   <div className="flex gap-1 flex-wrap">
                     {[{t:"≥7 Goed",bg:"#dcfce7",fg:"#15803d"},{t:"5–7 OK",bg:"#fef9c3",fg:"#a16207"},{t:"3–5 Let op",bg:"#ffedd5",fg:"#c2410c"},{t:"<3 Kritiek",bg:"#fee2e2",fg:"#b91c1c"}].map(s=>(
@@ -4117,8 +4119,8 @@ ${(function(){
                 </div>
                 <div className="rounded p-2" style={{ background:"#E6F7F7", border:"1px solid #26B5AE44" }}>
                   <div className="flex items-center gap-1.5 mb-1">
-                    <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                    <span style={{ fontSize:10, fontWeight:600, color:"#0C2340" }}>Kleurenbalk (1–5)</span>
+                    <span style={{ fontSize:9, fontWeight:700, padding:"1px 5px", background:"#E91E8C", color:"#fff", borderRadius:3 }}>DICTU</span>
+                    <span style={{ fontSize:10, fontWeight:600, color:"#162D6E" }}>Kleurenbalk (1–5)</span>
                   </div>
                   <div className="flex gap-1 flex-wrap">
                     {[{t:"1–2 Afhankelijk",bg:"#fee2e2",fg:"#b91c1c"},{t:"3 Deels",bg:"#fef9c3",fg:"#a16207"},{t:"4–5 Soeverein",bg:"#dcfce7",fg:"#15803d"}].map(s=>(
@@ -4128,7 +4130,7 @@ ${(function(){
                 </div>
               </div>
 
-              <h3 className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>
+              <h3 className="text-sm font-bold mb-3" style={{ color:"#162D6E" }}>
                 Applicaties ({visibleApps.length})
               </h3>
               {scored.length > 20 && (
@@ -4152,7 +4154,7 @@ ${(function(){
                           <span style={{ fontSize:8, fontWeight:700, color:"#9ca3af", letterSpacing:"0.04em" }}>DAAF</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-xs truncate" style={{ color:"#0C2340" }}>{displayName(a)}</h3>
+                          <h3 className="font-bold text-xs truncate" style={{ color:"#162D6E" }}>{displayName(a)}</h3>
                           {a.supplier && <p style={{ fontSize:10, color:"#9ca3af" }}>{a.supplier}</p>}
                           <span className="text-xs px-1.5 py-0.5 font-medium mt-1 inline-block"
                             style={{ borderRadius:3, background: lbl.bg, color: lbl.fg, fontSize:10 }}>{lbl.text}</span>
@@ -4161,7 +4163,7 @@ ${(function(){
                       <div className="mb-2">
                         <div className="flex justify-between items-center" style={{ fontSize:9, marginBottom:2 }}>
                           <div className="flex items-center gap-1">
-                            <span style={{ fontSize:8, fontWeight:700, padding:"0 4px", background:"#26B5AE", color:"#fff", borderRadius:2 }}>DICTU</span>
+                            <span style={{ fontSize:8, fontWeight:700, padding:"0 4px", background:"#E91E8C", color:"#fff", borderRadius:2 }}>DICTU</span>
                             <span style={{ color:"#9ca3af" }}>Autonomie</span>
                           </div>
                           <span style={{ color: a.sc.dictuAvg ? (a.sc.dictuAvg >= 4 ? "#15803d" : a.sc.dictuAvg >= 3 ? "#a16207" : "#b91c1c") : "#9ca3af", fontWeight:600 }}>
@@ -4173,8 +4175,8 @@ ${(function(){
                       <div className="grid grid-cols-3 gap-1">
                         {[
                           { lbl:"Risico",    val:a.sc.risico,    color:"#dc2626" },
-                          { lbl:"Mitigatie", val:a.sc.mitigatie, color:"#26B5AE" },
-                          { lbl:"Belang",    val:a.sc.belang,    color:"#E87722" },
+                          { lbl:"Mitigatie", val:a.sc.mitigatie, color:"#E91E8C" },
+                          { lbl:"Belang",    val:a.sc.belang,    color:"#E91E8C" },
                         ].map(s => (
                           <div key={s.lbl} className="text-center rounded py-1" style={{ background:"#f8fafc" }}>
                             <div style={{ fontSize:12, fontWeight:700, color:s.val ? s.color : "#d1d5db" }}>{s.val ? s.val.toFixed(1) : "–"}</div>
@@ -4207,8 +4209,8 @@ ${(function(){
           {/* ── Rij 2: Dimensieprofiel full-width ── */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-              <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Dimensieprofiel — per applicatie vergelijken</h3>
+              <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
+              <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Dimensieprofiel — per applicatie vergelijken</h3>
             </div>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#6b7280" }}>
               Elke balk toont de gewogen score (1–5) op één DAAF-dimensie. De kleurovergang geeft direct de kwaliteit aan:
@@ -4228,7 +4230,7 @@ ${(function(){
                 { label:"Belang-assen (F, G, H)", text:"Hoge belang-scores (oranje/bruin) betekenen meer strategische urgentie. Dit is niet per se slecht — maar vraagt dat de risico- en mitigatiescores voor die applicatie goed op orde zijn." },
               ].map(t => (
                 <div key={t.label} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
-                  <p style={{ fontSize:9, fontWeight:700, color:"#0C2340", marginBottom:2 }}>{t.label}</p>
+                  <p style={{ fontSize:9, fontWeight:700, color:"#162D6E", marginBottom:2 }}>{t.label}</p>
                   <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.4 }}>{t.text}</p>
                 </div>
               ))}
@@ -4239,13 +4241,13 @@ ${(function(){
           {scored.some(a => a.sc.dictuAvg) && (
             <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Autonomiecheck — spindiagram per applicatie</h3>
+                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#E91E8C", color:"#fff", borderRadius:3 }}>DICTU</span>
+                <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Autonomiecheck — spindiagram per applicatie</h3>
               </div>
               <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                 Het spindiagram toont de vier DICTU-dimensies per applicatie op een schaal van 1 tot 5. Alle assen hebben dezelfde richting: hoe groter de gekleurde vorm, hoe soeverein de applicatie scoort.
                 Een kleine vorm dicht bij het centrum betekent <span style={{ color:"#dc2626", fontWeight:600 }}>volledig afhankelijk</span> van de leverancier.
-                Een grote vorm die de buitenste ring raakt is <span style={{ color:"#26B5AE", fontWeight:600 }}>maximaal soeverein</span>.
+                Een grote vorm die de buitenste ring raakt is <span style={{ color:"#E91E8C", fontWeight:600 }}>maximaal soeverein</span>.
               </p>
               <div style={{ maxWidth:640, margin:"0 auto" }}>
                 <DictuRadarSVG apps={scored} W={660} H={420} useSecondaryName={useSecondaryName} />
@@ -4275,13 +4277,13 @@ ${(function(){
 
   function AppsList() {
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold" style={{ color:"#0C2340" }}>Applicaties ({apps.length})</h2>
+            <h2 className="text-lg font-semibold" style={{ color:"#162D6E" }}>Applicaties ({apps.length})</h2>
             <button onClick={() => setShowModal(true)}
               className="text-white text-sm px-4 py-2 font-medium"
-              style={{ background:"#1A56A0", borderRadius:4 }}>
+              style={{ background:"#1E3A8A", borderRadius:4 }}>
               + Toevoegen
             </button>
           </div>
@@ -4305,7 +4307,7 @@ ${(function(){
                              borderLeft:`4px solid ${scoreColor(sc.autonomyScore)}` }}>
                     <Gauge score={sc.autonomyScore} size={64} />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold" style={{ color:"#0C2340" }}>{displayName(a)}</h3>
+                      <h3 className="font-semibold" style={{ color:"#162D6E" }}>{displayName(a)}</h3>
                       <p className="text-xs text-gray-500">{a.supplier}{a.cat ? ` · ${a.cat}` : ""}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className="text-xs px-2 py-0.5 font-medium" style={{ borderRadius:3, background: lbl.bg, color: lbl.fg }}>
@@ -4317,7 +4319,7 @@ ${(function(){
                     <div className="flex gap-2 flex-shrink-0">
                       <button onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(!adminUnlocked); setView("assess"); }}
                         className="text-white text-xs px-3 py-1.5 font-medium"
-                        style={{ background: adminUnlocked ? "#1A56A0" : "#6b7280", borderRadius:4 }}>
+                        style={{ background: adminUnlocked ? "#1E3A8A" : "#6b7280", borderRadius:4 }}>
                         {adminUnlocked ? "✏️ Bewerken" : "👁 Bekijken"}
                       </button>
                     </div>
@@ -4343,14 +4345,14 @@ ${(function(){
     return (
       <div className="flex h-full overflow-hidden">
         {/* Main form */}
-        <div ref={assessScrollRef} className="flex-1 overflow-y-auto p-5" style={{ background:"#EBF3FF" }}>
+        <div ref={assessScrollRef} className="flex-1 overflow-y-auto p-5" style={{ background:"#F8F9FB" }}>
           <div className="max-w-2xl mx-auto">
             <div className="flex items-center gap-2 mb-4">
-              <button onClick={() => setView("apps")} className="text-sm hover:underline font-medium" style={{ color:"#1A56A0" }}>
+              <button onClick={() => setView("apps")} className="text-sm hover:underline font-medium" style={{ color:"#1E3A8A" }}>
                 ← Applicaties
               </button>
               <span className="text-gray-300">›</span>
-              <h2 className="font-semibold truncate" style={{ color:"#0C2340" }}>{displayName(selApp)}</h2>
+              <h2 className="font-semibold truncate" style={{ color:"#162D6E" }}>{displayName(selApp)}</h2>
             </div>
 
             {/* Readonly banner */}
@@ -4365,7 +4367,7 @@ ${(function(){
                 </div>
                 <button onClick={() => setView("admin")}
                   className="text-xs px-3 py-1.5 font-semibold"
-                  style={{ background:"#1A56A0", color:"white", borderRadius:4 }}>
+                  style={{ background:"#1E3A8A", color:"white", borderRadius:4 }}>
                   Naar Beheer →
                 </button>
               </div>
@@ -4374,8 +4376,8 @@ ${(function(){
             {/* Step tabs */}
             <div className="flex gap-2 mb-5">
               {[
-                { i:0, label:"1 · DAAF Quick Scan",           bg:"#1A56A0" },
-                { i:1, label:"2 · DICTU Autonomiecheck", bg:"#26B5AE" }
+                { i:0, label:"1 · DAAF Quick Scan",           bg:"#1E3A8A" },
+                { i:1, label:"2 · DICTU Autonomiecheck", bg:"#E91E8C" }
               ].map(t => (
                 <button key={t.i} onClick={() => {
                   setStep(t.i);
@@ -4393,14 +4395,14 @@ ${(function(){
 
             {step === 0 && <>
               <div className="rounded p-3 mb-4 text-xs"
-                style={{ background:"#EBF3FF", border:"1px solid #D0E4F7", color:"#1A56A0" }}>
+                style={{ background:"#F8F9FB", border:"1px solid #D0E4F7", color:"#1E3A8A" }}>
                 <strong>DAAF Framework — Quick Scan</strong> — Niveau 1 (Risico): score 1 = weinig risico, score 5 = hoog risico.
                 Niveau 2 (Mitigatie): score 1 = slechte mitigatie, score 5 = sterke mitigatie (goed).
                 Niveau 3 (Belang): score 1 = laag belang, score 5 = hoog belang (urgent).
               </div>
               {["Risico","Mitigatie","Belang"].map(lv => {
-                const colors  = { Risico:"#dc2626", Mitigatie:"#26B5AE", Belang:"#E87722" };
-                const bgColors = { Risico:"#0C2340", Mitigatie:"#166534", Belang:"#92400e" };
+                const colors  = { Risico:"#dc2626", Mitigatie:"#E91E8C", Belang:"#E91E8C" };
+                const bgColors = { Risico:"#162D6E", Mitigatie:"#166534", Belang:"#92400e" };
                 const hints   = {
                   Risico:    "1 = weinig risico ... 5 = hoog risico",
                   Mitigatie: "1 = slechte mitigatie ... 5 = sterke mitigatie (goed)",
@@ -4424,7 +4426,7 @@ ${(function(){
                         <div key={dimName} className="mb-4">
                           {/* Dimensie header */}
                           <div className="rounded px-3 py-2 mb-2" style={{ background:"#f3f4f6", border:"1px solid #e5e7eb" }}>
-                            <p className="font-semibold text-sm" style={{ color:"#0C2340" }}>
+                            <p className="font-semibold text-sm" style={{ color:"#162D6E" }}>
                               Dimensie {firstQ.dim}: {dimName}
                             </p>
                             {firstQ.dimSub && <p className="text-xs text-gray-500 mt-0.5">{firstQ.dimSub}</p>}
@@ -4451,7 +4453,7 @@ ${(function(){
                 if (assessScrollRef.current) assessScrollRef.current.scrollTop = 0;
               }}
                 className="w-full text-white py-3 text-sm font-medium mb-4"
-                style={{ background:"#26B5AE", borderRadius:4 }}>
+                style={{ background:"#E91E8C", borderRadius:4 }}>
                 Verder: DICTU Autonomiecheck →
               </button>
             </>}
@@ -4464,8 +4466,8 @@ ${(function(){
               </div>
               {["Data & AI","EU-Infrastructuur"].map(cat => (
                 <div key={cat} className="mb-5">
-                  <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color:"#1A56A0" }}>
-                    <span className="w-1 inline-block rounded-full" style={{ background:"#26B5AE", height:14 }}/>
+                  <h3 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color:"#1E3A8A" }}>
+                    <span className="w-1 inline-block rounded-full" style={{ background:"#E91E8C", height:14 }}/>
                     {cat}
                   </h3>
                   {DICTU.filter(q => q.cat === cat).map(q => (
@@ -4483,7 +4485,7 @@ ${(function(){
               ))}
               <button onClick={() => setView("dashboard")}
                 className="w-full text-white py-3 text-sm font-medium mb-4"
-                style={{ background:"#1A56A0", borderRadius:4 }}>
+                style={{ background:"#1E3A8A", borderRadius:4 }}>
                 ✓ Afronden en naar Dashboard →
               </button>
             </>}
@@ -4492,10 +4494,10 @@ ${(function(){
 
         {/* Score sidebar */}
         <div className="w-64 flex-shrink-0 border-l overflow-y-auto p-4"
-          style={{ background:"#fff", borderColor:"#D0E4F7" }}>
+          style={{ background:"#fff", borderColor:"#DBEAFE" }}>
           <div className="flex items-center gap-2 mb-3 pb-2" style={{ borderBottom:"2px solid #1A56A0" }}>
-            <div className="w-1 h-4 rounded-full" style={{ background:"#26B5AE" }}/>
-            <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Live scoreoverzicht</p>
+            <div className="w-1 h-4 rounded-full" style={{ background:"#E91E8C" }}/>
+            <p className="text-sm font-semibold" style={{ color:"#162D6E" }}>Live scoreoverzicht</p>
           </div>
 
           <div className="flex justify-center mb-3">
@@ -4511,8 +4513,8 @@ ${(function(){
           <div className="rounded p-3 mb-3" style={{ border:"1px solid #D0E4F7" }}>
             {[
               { label:"Risico-exposure",   val:sc.risico,    hint:"↓ goed", color:"#dc2626" },
-              { label:"Mitigatie-cap.",     val:sc.mitigatie, hint:"↑ goed", color:"#26B5AE" },
-              { label:"Strategisch belang", val:sc.belang,    hint:"↓ goed", color:"#E87722" },
+              { label:"Mitigatie-cap.",     val:sc.mitigatie, hint:"↑ goed", color:"#E91E8C" },
+              { label:"Strategisch belang", val:sc.belang,    hint:"↓ goed", color:"#E91E8C" },
             ].map(({ label,val,hint,color }) => (
               <div key={label} className="mb-2 last:mb-0">
                 <div className="flex justify-between text-xs mb-0.5">
@@ -4532,13 +4534,13 @@ ${(function(){
             {sc.dictuAvg ? (
               <>
                 <div className="text-center mb-2">
-                  <span style={{ fontSize:22, fontWeight:700, color:"#26B5AE" }}>{sc.dictuAvg.toFixed(1)}</span>
+                  <span style={{ fontSize:22, fontWeight:700, color:"#E91E8C" }}>{sc.dictuAvg.toFixed(1)}</span>
                   <span className="text-xs text-gray-400">/5</span>
                 </div>
                 <SovBar score5={sc.dictuAvg} />
               </>
             ) : (
-              <p className="text-xs text-center" style={{ color:"#26B5AE" }}>Nog geen DICTU scores ingevuld</p>
+              <p className="text-xs text-center" style={{ color:"#E91E8C" }}>Nog geen DICTU scores ingevuld</p>
             )}
           </div>
 
@@ -4546,16 +4548,16 @@ ${(function(){
           <div className="rounded p-3 mb-3" style={{ border:"1px solid #D0E4F7" }}>
             <div className="flex justify-between text-xs mb-1">
               <span className="font-medium text-gray-600">Volledigheid</span>
-              <span style={{ fontWeight:700, color:"#1A56A0" }}>{sc.completeness}%</span>
+              <span style={{ fontWeight:700, color:"#1E3A8A" }}>{sc.completeness}%</span>
             </div>
-            <div className="rounded-full h-2" style={{ background:"#EBF3FF" }}>
-              <div className="h-2 rounded-full transition-all" style={{ width:`${sc.completeness}%`, background:"#1A56A0" }} />
+            <div className="rounded-full h-2" style={{ background:"#F8F9FB" }}>
+              <div className="h-2 rounded-full transition-all" style={{ width:`${sc.completeness}%`, background:"#1E3A8A" }} />
             </div>
           </div>
 
           {/* Per-question dots */}
           <div className="rounded p-3" style={{ border:"1px solid #D0E4F7" }}>
-            <p className="text-xs font-semibold mb-2" style={{ color:"#0C2340" }}>Per vraag</p>
+            <p className="text-xs font-semibold mb-2" style={{ color:"#162D6E" }}>Per vraag</p>
             <div className="space-y-1">
               {[...DAAF,...DICTU].map(q => (
                 <div key={q.key} className="flex items-center gap-1.5">
@@ -4563,7 +4565,7 @@ ${(function(){
                   <div className="flex gap-0.5">
                     {[1,2,3,4,5].map(s => (
                       <div key={s} className="w-2.5 h-2.5 rounded-sm"
-                        style={{ background:(selApp.scores[q.key]||0) >= s ? "#1A56A0" : "#e5e7eb" }} />
+                        style={{ background:(selApp.scores[q.key]||0) >= s ? "#1E3A8A" : "#e5e7eb" }} />
                     ))}
                   </div>
                   {(selApp.scores[q.key]||0) > 0 && (
@@ -4647,7 +4649,7 @@ ${(function(){
     });
 
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-5xl mx-auto">
 
           {/* Filter strip */}
@@ -4655,7 +4657,7 @@ ${(function(){
             <div className="rounded p-3 mb-4"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-2">
-                <span style={{ fontSize:11, fontWeight:600, color:"#0C2340" }}>Grafiek-selectie</span>
+                <span style={{ fontSize:11, fontWeight:600, color:"#162D6E" }}>Grafiek-selectie</span>
                 <span className="text-xs px-2 py-0.5 rounded font-semibold"
                   style={{ background: visibleCompare.length >= MAX_COMPARE ? "#fffbeb" : "#f0f9f9",
                            color: visibleCompare.length >= MAX_COMPARE ? "#92400e" : "#0f766e" }}>
@@ -4695,7 +4697,7 @@ ${(function(){
               {compareHidden.size > 0 && apps.length <= MAX_COMPARE && (
                 <button onClick={() => setCompareHidden(new Set())}
                   className="text-xs px-2.5 py-1.5 flex-shrink-0 font-medium"
-                  style={{ borderRadius:4, background:"#EBF3FF", color:"#1A56A0", border:"1px solid #D0E4F7" }}>
+                  style={{ borderRadius:4, background:"#F8F9FB", color:"#1E3A8A", border:"1px solid #D0E4F7" }}>
                   Alles tonen
                 </button>
               )}
@@ -4704,22 +4706,22 @@ ${(function(){
 
           {/* Leeswijzer */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h2 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Leeswijzer vergelijking</h2>
+            <h2 className="font-bold text-sm mb-3" style={{ color:"#162D6E" }}>Leeswijzer vergelijking</h2>
             <div className="grid grid-cols-3 gap-3">
               {[
-                { badge:"DAAF", bg:"#1A56A0", title:"Autonomiescore (1-10)",
+                { badge:"DAAF", bg:"#1E3A8A", title:"Autonomiescore (1-10)",
                   body:"Toont hoe urgent het autonomieprobleem is. Berekend via Mitigatie / (Risico x Belang). Hoger = minder urgent. De kleur geeft de status aan.",
                   statuses:[{t:">=7 Goed",sb:"#dcfce7",sf:"#15803d"},{t:"5-7 Acceptabel",sb:"#fef9c3",sf:"#a16207"},{t:"3-5 Zorgwekkend",sb:"#ffedd5",sf:"#c2410c"},{t:"<3 Kritiek",sb:"#fee2e2",sf:"#b91c1c"}]
                 },
-                { badge:"DAAF", bg:"#1A56A0", title:"Risico / Mitigatie / Belang",
+                { badge:"DAAF", bg:"#1E3A8A", title:"Risico / Mitigatie / Belang",
                   body:"Drie DAAF-niveauscores (1-5). Risico (rood): laag is beter. Mitigatie (teal): hoog is beter. Belang (oranje): laag = minder urgent. Zijn gewogen gemiddelden van de ingevulde dimensies." },
-                { badge:"DICTU", bg:"#26B5AE", title:"DICTU-score (1-5)",
+                { badge:"DICTU", bg:"#E91E8C", title:"DICTU-score (1-5)",
                   body:"Gemiddelde van 4 vragen: 2.1 Dataresidency, 2.2 Technische beveiliging, 2.3 Juridische bescherming, 4.1 EU-infrastructuur. Score 1 = volledig afhankelijk, 5 = maximaal soeverein." }
               ].map(c => (
                 <div key={c.title} className="rounded p-3" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs font-bold px-1.5 py-0.5" style={{ background:c.bg, color:"#fff", borderRadius:3 }}>{c.badge}</span>
-                    <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>{c.title}</span>
+                    <span className="text-xs font-semibold" style={{ color:"#162D6E" }}>{c.title}</span>
                   </div>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>{c.body}</p>
                   {c.statuses && (
@@ -4737,8 +4739,8 @@ ${(function(){
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF + DICTU</span>
-                <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Scores per applicatie</p>
+                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF + DICTU</span>
+                <p className="text-sm font-semibold" style={{ color:"#162D6E" }}>Scores per applicatie</p>
               </div>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={barData} margin={{ top:5, right:10, bottom:80, left:0 }}>
@@ -4749,7 +4751,7 @@ ${(function(){
                   <Bar dataKey="Autonomiescore" radius={[3,3,0,0]} name="Autonomiescore (1-10)">
                     {barData.map((d,i) => <Cell key={i} fill={scoreColor(d.Autonomiescore)} />)}
                   </Bar>
-                  <Bar dataKey="DICTU x2" fill="#26B5AE" fillOpacity={0.7} radius={[3,3,0,0]} name="DICTU x2 (schaal 0-10)" />
+                  <Bar dataKey="DICTU x2" fill="#E91E8C" fillOpacity={0.7} radius={[3,3,0,0]} name="DICTU x2 (schaal 0-10)" />
                 </BarChart>
               </ResponsiveContainer>
               {/* Legenda buiten de grafiek */}
@@ -4759,7 +4761,7 @@ ${(function(){
                   <span style={{ fontSize:10, color:"#6b7280" }}>Autonomiescore (1–10)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div style={{ width:12, height:12, background:"#26B5AE", borderRadius:2, opacity:0.7 }}/>
+                  <div style={{ width:12, height:12, background:"#E91E8C", borderRadius:2, opacity:0.7 }}/>
                   <span style={{ fontSize:10, color:"#6b7280" }}>DICTU-score (schaal 0–10)</span>
                 </div>
               </div>
@@ -4767,8 +4769,8 @@ ${(function(){
 
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                <p className="text-sm font-semibold" style={{ color:"#0C2340" }}>Dimensieprofiel — vergelijking</p>
+                <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
+                <p className="text-sm font-semibold" style={{ color:"#162D6E" }}>Dimensieprofiel — vergelijking</p>
               </div>
               <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen scores 1–5 per dimensie. Kleurovergang toont de richting: groen = gewenste kant. Hover voor details.</p>
               <DivergingChart apps={visibleCompare} compact={true} useSecondaryName={useSecondaryName} />
@@ -4785,7 +4787,7 @@ ${(function(){
           {/* Vergelijkingstabel */}
           <div className="rounded p-4 overflow-x-auto" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center gap-2 mb-3">
-              <h3 className="font-semibold text-sm" style={{ color:"#0C2340" }}>Vergelijkingstabel</h3>
+              <h3 className="font-semibold text-sm" style={{ color:"#162D6E" }}>Vergelijkingstabel</h3>
               <span className="text-xs text-gray-400">klik op een rij om naar het assessment te gaan</span>
             </div>
             <table className="w-full" style={{ fontSize:12 }}>
@@ -4796,7 +4798,7 @@ ${(function(){
                     "Autonomiescore (1-10)","Risico (1-5) ↓","Mitigatie (1-5) ↑","Belang (1-5) ↓",
                     "DICTU (1-5)","Volledigheid"
                   ].map(h => (
-                    <th key={h} className="text-left py-2 px-2 font-semibold" style={{ color:"#1A56A0", fontSize:11 }}>{h}</th>
+                    <th key={h} className="text-left py-2 px-2 font-semibold" style={{ color:"#1E3A8A", fontSize:11 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -4807,7 +4809,7 @@ ${(function(){
                   return (
                     <tr key={a.id} style={{ borderBottom:"1px solid #EBF3FF", cursor:"pointer" }}
                       onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}>
-                      <td className="py-2 px-2 font-medium" style={{ color:"#0C2340" }}>{displayName(a)}</td>
+                      <td className="py-2 px-2 font-medium" style={{ color:"#162D6E" }}>{displayName(a)}</td>
                       <td className="py-2 px-2 text-gray-500">{a.supplier}</td>
                       <td className="py-2 px-2">
                         <span className="px-2 py-0.5 font-semibold text-xs" style={{ borderRadius:3, background:lbl.bg, color:lbl.fg }}>
@@ -4815,8 +4817,8 @@ ${(function(){
                         </span>
                       </td>
                       <td className="py-2 px-2 font-semibold" style={{ color:"#dc2626" }}>{s.risico    ? s.risico.toFixed(2)    : "--"}</td>
-                      <td className="py-2 px-2 font-semibold" style={{ color:"#26B5AE" }}>{s.mitigatie ? s.mitigatie.toFixed(2) : "--"}</td>
-                      <td className="py-2 px-2 font-semibold" style={{ color:"#E87722" }}>{s.belang    ? s.belang.toFixed(2)    : "--"}</td>
+                      <td className="py-2 px-2 font-semibold" style={{ color:"#E91E8C" }}>{s.mitigatie ? s.mitigatie.toFixed(2) : "--"}</td>
+                      <td className="py-2 px-2 font-semibold" style={{ color:"#E91E8C" }}>{s.belang    ? s.belang.toFixed(2)    : "--"}</td>
                       <td className="py-2 px-2 text-gray-600">{s.dictuAvg  ? s.dictuAvg.toFixed(1)+"/5"  : "--"}</td>
                       <td className="py-2 px-2 text-gray-600">{s.completeness}%</td>
                     </tr>
@@ -4834,14 +4836,14 @@ ${(function(){
     // PIN lock screen
     if (!adminUnlocked) {
       return (
-        <div className="h-full flex items-center justify-center" style={{ background:"#EBF3FF" }}>
+        <div className="h-full flex items-center justify-center" style={{ background:"#F8F9FB" }}>
           <div className="bg-white p-8 w-full max-w-sm" style={{ borderRadius:4, boxShadow:"0 4px 24px rgba(12,35,64,0.15)", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 flex items-center justify-center" style={{ background:"#0C2340", borderRadius:4 }}>
+              <div className="w-10 h-10 flex items-center justify-center" style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", borderRadius:4 }}>
                 <span style={{ fontSize:20 }}>🔐</span>
               </div>
               <div>
-                <h2 className="font-bold" style={{ color:"#0C2340" }}>Beheeromgeving</h2>
+                <h2 className="font-bold" style={{ color:"#162D6E" }}>Beheeromgeving</h2>
                 <p className="text-xs text-gray-400">Voer de beheerpincode in</p>
               </div>
             </div>
@@ -4857,7 +4859,7 @@ ${(function(){
               }}
               placeholder="Pincode"
               className="w-full border px-3 py-2.5 text-sm focus:outline-none mb-2"
-              style={{ borderColor: adminPinError ? "#dc2626" : "#D0E4F7", borderRadius:4, letterSpacing:4 }}
+              style={{ borderColor: adminPinError ? "#dc2626" : "#DBEAFE", borderRadius:4, letterSpacing:4 }}
               autoFocus
             />
             {adminPinError && (
@@ -4869,7 +4871,7 @@ ${(function(){
                 else { setAdminPinError(true); setAdminPin(""); }
               }}
               className="w-full text-white py-2.5 text-sm font-semibold"
-              style={{ background:"#1A56A0", borderRadius:4 }}>
+              style={{ background:"#1E3A8A", borderRadius:4 }}>
               Toegang
             </button>
             <button onClick={() => setView("dashboard")}
@@ -4886,17 +4888,17 @@ ${(function(){
     const editApp = editAppId ? apps.find(a => a.id === editAppId) : null;
 
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-5xl mx-auto">
 
           {/* Header strip */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 flex items-center justify-center" style={{ background:"#0C2340", borderRadius:4 }}>
+              <div className="w-8 h-8 flex items-center justify-center" style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", borderRadius:4 }}>
                 <span style={{ fontSize:16 }}>🔐</span>
               </div>
               <div>
-                <h2 id="beheer-top" className="font-bold" style={{ color:"#0C2340" }}>Beheeromgeving</h2>
+                <h2 id="beheer-top" className="font-bold" style={{ color:"#162D6E" }}>Beheeromgeving</h2>
                 <p className="text-xs text-gray-400">{apps.length} applicatie{apps.length !== 1 ? "s" : ""} in het systeem</p>
               </div>
             </div>
@@ -4927,7 +4929,7 @@ ${(function(){
               </button>
               <button onClick={() => setShowImportModal(true)}
                 className="text-xs px-3 py-1.5 font-medium"
-                style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
+                style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1E3A8A", background:"#F8F9FB" }}>
                 ⬆ Importeer database
               </button>
 
@@ -4944,7 +4946,7 @@ ${(function(){
             <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <p className="text-sm font-bold" style={{ color:"#0C2340" }}>☁️ Server-backups</p>
+                  <p className="text-sm font-bold" style={{ color:"#162D6E" }}>☁️ Server-backups</p>
                   <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
                     Automatische backups om 12:00 en 18:00 · bewaard 7 dagen
                   </p>
@@ -4980,7 +4982,7 @@ ${(function(){
                       }
                     }}
                     className="text-xs px-2.5 py-1 font-medium"
-                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background: backupBezig ? "#f3f4f6" : "#fff", cursor: backupBezig ? "not-allowed" : "pointer" }}>
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1E3A8A", background: backupBezig ? "#f3f4f6" : "#fff", cursor: backupBezig ? "not-allowed" : "pointer" }}>
                     {backupBezig ? "Bezig..." : "☁️ Nu backup maken"}
                   </button>
                 </div>
@@ -5002,9 +5004,9 @@ ${(function(){
                       : d.toLocaleDateString("nl-NL", { ...nlTZ2, weekday:"short", day:"numeric", month:"short" }) + " " + timeStr2;
                     return (
                       <div key={b.key} className="flex items-center justify-between rounded p-2.5"
-                        style={{ background: i === 0 ? "#EBF3FF" : "#f8fafc", border:`1px solid ${i === 0 ? "#D0E4F7" : "#e5e7eb"}` }}>
+                        style={{ background: i === 0 ? "#EFF6FF" : "#f8fafc", border:`1px solid ${i === 0 ? "#DBEAFE" : "#e5e7eb"}` }}>
                         <div className="flex items-center gap-2">
-                          {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:"#1A56A0", color:"white" }}>Laatste</span>}
+                          {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:"#1E3A8A", color:"white" }}>Laatste</span>}
                           <span className="text-xs font-medium" style={{ color:"#374151" }}>{dateStr}</span>
                         </div>
                         <button
@@ -5037,7 +5039,7 @@ ${(function(){
                             }
                           }}
                           className="text-xs px-2.5 py-1 font-medium"
-                          style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#fff" }}>
+                          style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1E3A8A", background:"#fff" }}>
                           ↩ Selecteer
                         </button>
                       </div>
@@ -5103,7 +5105,7 @@ ${(function(){
                       <Gauge score={sc.autonomyScore} size={60} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-bold" style={{ color:"#0C2340" }}>{a.name}</h3>
+                          <h3 className="font-bold" style={{ color:"#162D6E" }}>{a.name}</h3>
                           {a.nameSecondary && (
                             <span className="text-xs px-2 py-0.5 font-medium"
                               style={{ background:"#fffbeb", border:"1px solid #fde68a", color:"#92400e", borderRadius:3 }}>
@@ -5111,7 +5113,7 @@ ${(function(){
                             </span>
                           )}
                           {a.supplier && <span className="text-xs text-gray-400">· {a.supplier}</span>}
-                          {a.cat && <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#EBF3FF", color:"#1A56A0" }}>{a.cat}</span>}
+                          {a.cat && <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#F8F9FB", color:"#1E3A8A" }}>{a.cat}</span>}
                         </div>
                         <div className="flex items-center gap-3 mt-1 flex-wrap">
                           {a.owner && <span className="text-xs text-gray-400">👤 {a.owner}</span>}
@@ -5136,7 +5138,7 @@ ${(function(){
                         <button
                           onClick={() => { setSelId(a.id); setStep(0); setAssessReadOnly(false); setView("assess"); }}
                           className="text-white text-xs px-3 py-1.5 font-medium"
-                          style={{ background:"#1A56A0", borderRadius:4 }}>
+                          style={{ background:"#1E3A8A", borderRadius:4 }}>
                           ✏️ Invullen
                         </button>
                         <button
@@ -5145,7 +5147,7 @@ ${(function(){
                             setEditForm({ name:a.name, nameSecondary:a.nameSecondary||"", cat:a.cat, supplier:a.supplier, owner:a.owner, appNotes:a.appNotes });
                           }}
                           className="text-xs px-3 py-1.5 font-medium"
-                          style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#fff" }}>
+                          style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1E3A8A", background:"#fff" }}>
                           ⚙️ Gegevens
                         </button>
                         <button
@@ -5166,9 +5168,9 @@ ${(function(){
                     <div className="grid grid-cols-6 gap-0" style={{ borderTop:"1px solid #EBF3FF" }}>
                       {[
                         { label:"Risico",    val:sc.risico,    color:"#dc2626", hint:"↓ beter" },
-                        { label:"Mitigatie", val:sc.mitigatie, color:"#26B5AE", hint:"↑ beter" },
-                        { label:"Belang",    val:sc.belang,    color:"#E87722", hint:"↓ beter" },
-                        { label:"DICTU",     val:sc.dictuAvg,  color:"#1A56A0", hint:"/5" },
+                        { label:"Mitigatie", val:sc.mitigatie, color:"#E91E8C", hint:"↑ beter" },
+                        { label:"Belang",    val:sc.belang,    color:"#E91E8C", hint:"↓ beter" },
+                        { label:"DICTU",     val:sc.dictuAvg,  color:"#1E3A8A", hint:"/5" },
                         { label:"Autonomie", val:sc.autonomyScore, color:scoreColor(sc.autonomyScore), hint:"/10" },
                         { label:"Volledig",  val:sc.completeness, color:"#6b7280", hint:"%" },
                       ].map(({ label, val, color, hint }) => (
@@ -5184,7 +5186,7 @@ ${(function(){
 
                     {/* Ingevulde scores per vraag */}
                     <div className="px-4 py-3" style={{ borderTop:"1px solid #EBF3FF" }}>
-                      <p className="text-xs font-semibold mb-2" style={{ color:"#0C2340" }}>Scores per vraag</p>
+                      <p className="text-xs font-semibold mb-2" style={{ color:"#162D6E" }}>Scores per vraag</p>
                       <div className="flex flex-wrap gap-1.5 mb-2">
                         {allQ.map(q => {
                           const s = a.scores[q.key] || 0;
@@ -5192,8 +5194,8 @@ ${(function(){
                           return (
                             <div key={q.key} title={`${q.key}: ${q.name}\nScore: ${s || "niet ingevuld"}${n ? `\nMotivatie: ${n}` : ""}`}
                               className="flex items-center gap-1 px-2 py-1 text-xs"
-                              style={{ borderRadius:3, background: s ? "#EBF3FF" : "#f9fafb", border:`1px solid ${n ? "#86efac" : "#D0E4F7"}`, color:"#0C2340" }}>
-                              <span style={{ color:"#1A56A0", fontWeight:600 }}>{q.key}</span>
+                              style={{ borderRadius:3, background: s ? "#EFF6FF" : "#f9fafb", border:`1px solid ${n ? "#86efac" : "#DBEAFE"}`, color:"#162D6E" }}>
+                              <span style={{ color:"#1E3A8A", fontWeight:600 }}>{q.key}</span>
                               <span style={{ fontWeight:700, color: s ? scoreColor(s, 5) : "#d1d5db" }}>{s || "–"}</span>
                               {n && <span style={{ color:"#16a34a", fontSize:9 }}>💬</span>}
                             </div>
@@ -5207,7 +5209,7 @@ ${(function(){
                           {allQ.filter(q => (a.notes || {})[q.key]).map(q => (
                             <div key={q.key} className="rounded px-3 py-2"
                               style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
-                              <span className="text-xs font-semibold" style={{ color:"#0C2340" }}>{q.key} — {q.name}: </span>
+                              <span className="text-xs font-semibold" style={{ color:"#162D6E" }}>{q.key} — {q.name}: </span>
                               <span className="text-xs" style={{ color:"#374151" }}>{adaptNote((a.notes || {})[q.key], a)}</span>
                             </div>
                           ))}
@@ -5264,7 +5266,7 @@ ${(function(){
                         border: `2px solid ${deleteConfirmText === "VERWIJDER ALLES" ? "#22c55e" : "#fecaca"}`,
                         borderRadius:4, outline:"none",
                         background: deleteConfirmText === "VERWIJDER ALLES" ? "#f0fdf4" : "white",
-                        color:"#0C2340", letterSpacing:"0.05em"
+                        color:"#162D6E", letterSpacing:"0.05em"
                       }}
                       onFocus={e => e.target.style.borderColor = deleteConfirmText === "VERWIJDER ALLES" ? "#22c55e" : "#dc2626"}
                     />
@@ -5317,8 +5319,8 @@ ${(function(){
               <div className="px-6 py-4" style={{ borderBottom:"3px solid #1A56A0" }}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-1 h-5" style={{ background:"#26B5AE", borderRadius:2 }}/>
-                    <h2 className="text-base font-semibold" style={{ color:"#0C2340" }}>Applicatiegegevens aanpassen</h2>
+                    <div className="w-1 h-5" style={{ background:"#E91E8C", borderRadius:2 }}/>
+                    <h2 className="text-base font-semibold" style={{ color:"#162D6E" }}>Applicatiegegevens aanpassen</h2>
                   </div>
                   <button onClick={() => setEditAppId(null)} style={{ color:"#9ca3af", fontSize:18 }}>✕</button>
                 </div>
@@ -5333,27 +5335,27 @@ ${(function(){
                     { k:"owner",         l:"Applicatie-eigenaar",   hint:"" },
                   ].map(f => (
                     <div key={f.k}>
-                      <label className="text-xs font-semibold block mb-0.5" style={{ color:"#0C2340" }}>{f.l}</label>
+                      <label className="text-xs font-semibold block mb-0.5" style={{ color:"#162D6E" }}>{f.l}</label>
                       {f.hint && <p className="text-xs mb-1" style={{ color:"#9ca3af" }}>{f.hint}</p>}
                       <input
                         value={editForm[f.k] || ""}
                         onChange={e => setEditForm(p => ({ ...p, [f.k]: e.target.value }))}
                         className="w-full border px-3 py-2 text-sm focus:outline-none"
-                        style={{ borderColor: f.k==="nameSecondary" ? "#D0E4F7" : "#D0E4F7", borderRadius:4,
+                        style={{ borderColor: f.k==="nameSecondary" ? "#DBEAFE" : "#DBEAFE", borderRadius:4,
                                  background: f.k==="nameSecondary" ? "#fffbeb" : "white" }}
-                        onFocus={e => e.target.style.borderColor="#1A56A0"}
-                        onBlur={e => e.target.style.borderColor="#D0E4F7"}
+                        onFocus={e => e.target.style.borderColor="#1E3A8A"}
+                        onBlur={e => e.target.style.borderColor="#DBEAFE"}
                       />
                     </div>
                   ))}
                   <div>
-                    <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>Toelichting</label>
+                    <label className="text-xs font-semibold block mb-1" style={{ color:"#162D6E" }}>Toelichting</label>
                     <textarea
                       value={editForm.appNotes || ""}
                       onChange={e => setEditForm(p => ({ ...p, notes: e.target.value }))}
                       rows={2}
                       className="w-full border px-3 py-2 text-sm focus:outline-none"
-                      style={{ borderColor:"#D0E4F7", borderRadius:4 }}/>
+                      style={{ borderColor:"#DBEAFE", borderRadius:4 }}/>
                   </div>
                 </div>
                 <div className="flex gap-3 mt-5">
@@ -5372,7 +5374,7 @@ ${(function(){
                       setEditAppId(null);
                     }}
                     className="flex-1 text-white py-2 text-sm font-semibold"
-                    style={{ background: editForm.name?.trim() ? "#1A56A0" : "#d1d5db", borderRadius:4 }}>
+                    style={{ background: editForm.name?.trim() ? "#1E3A8A" : "#d1d5db", borderRadius:4 }}>
                     Opslaan
                   </button>
                 </div>
@@ -5393,7 +5395,7 @@ ${(function(){
                 <div className="flex items-center justify-between px-5 py-4"
                   style={{ borderBottom:"1px solid #EBF3FF" }}>
                   <div>
-                    <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Database importeren</h3>
+                    <h3 className="font-bold text-sm" style={{ color:"#162D6E" }}>Database importeren</h3>
                     <p className="text-xs mt-0.5" style={{ color:"#9ca3af" }}>
                       {importData.label
                         ? <>{importData.label} &nbsp;·&nbsp; {importData.appCount} applicatie{importData.appCount !== 1 ? "s" : ""} in backup</>
@@ -5415,7 +5417,7 @@ ${(function(){
                   </span>
                   <button onClick={() => setImportSel(new Set(importData.apps.map(a => a.id)))}
                     className="text-xs px-2.5 py-1 font-medium"
-                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#EBF3FF" }}>
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1E3A8A", background:"#F8F9FB" }}>
                     Alles selecteren
                   </button>
                   <button onClick={() => setImportSel(new Set())}
@@ -5443,16 +5445,16 @@ ${(function(){
                           return n;
                         })}
                         className="flex items-center gap-3 rounded p-3 cursor-pointer transition-all"
-                        style={{ border:"2px solid " + (sel ? "#1A56A0" : "#e5e7eb"),
-                                 background: sel ? "#EBF3FF" : "#fff" }}>
+                        style={{ border:"2px solid " + (sel ? "#1E3A8A" : "#e5e7eb"),
+                                 background: sel ? "#EFF6FF" : "#fff" }}>
                         <div className="w-5 h-5 rounded flex items-center justify-center flex-shrink-0"
-                          style={{ background: sel ? "#1A56A0" : "#f3f4f6",
-                                   border:"2px solid " + (sel ? "#1A56A0" : "#d1d5db") }}>
+                          style={{ background: sel ? "#1E3A8A" : "#f3f4f6",
+                                   border:"2px solid " + (sel ? "#1E3A8A" : "#d1d5db") }}>
                           {sel && <span style={{ color:"white", fontSize:11, fontWeight:700 }}>✓</span>}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>{a.name}</span>
+                            <span className="font-semibold text-sm" style={{ color:"#162D6E" }}>{a.name}</span>
                             {a.supplier && <span className="text-xs" style={{ color:"#9ca3af" }}>{a.supplier}</span>}
                             {sc.autonomyScore && (
                               <span className="text-xs px-2 py-0.5 font-semibold rounded"
@@ -5597,10 +5599,10 @@ ${(function(){
       return "5 — Geen waarborgen";
     };
 
-    const typeKleur = { "Hosting & opslag":"#1A56A0", "AI-dienst":"#6d28d9", "Broncode":"#374151", "Open source software":"#15803d" };
+    const typeKleur = { "Hosting & opslag":"#1E3A8A", "AI-dienst":"#6d28d9", "Broncode":"#374151", "Open source software":"#15803d" };
 
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-4xl mx-auto">
 
           {/* Header */}
@@ -5609,10 +5611,10 @@ ${(function(){
               <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
                 <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
               </div>
-              <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+              <div className="w-px self-stretch" style={{ background:"#E91E8C", margin:"2px 0" }}/>
               <div>
                 <h1 className="font-bold" style={{ fontSize:17 }}>Transparantie over deze applicatie</h1>
-                <p style={{ fontSize:12, color:"#7DD3D0" }}>Digitale autonomie van het instrument zelf</p>
+                <p style={{ fontSize:12, color:"#F9A8D4" }}>Digitale autonomie van het instrument zelf</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
@@ -5639,10 +5641,10 @@ ${(function(){
                 <div className="px-4 py-3 flex items-center justify-between" style={{ borderBottom:"1px solid #f1f5f9" }}>
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                      style={{ background:"#0C2340", borderRadius:4 }}>{i+1}</div>
+                      style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", borderRadius:4 }}>{i+1}</div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>{s.naam}</h3>
+                        <h3 className="font-bold text-sm" style={{ color:"#162D6E" }}>{s.naam}</h3>
                         <span className="text-xs px-2 py-0.5 rounded font-medium"
                           style={{ background: typeKleur[s.type] + "18", color: typeKleur[s.type], border:`1px solid ${typeKleur[s.type]}44` }}>
                           {s.type}
@@ -5652,7 +5654,7 @@ ${(function(){
                     </div>
                   </div>
                   <a href={s.url} target="_blank" rel="noopener noreferrer"
-                    className="text-xs font-medium" style={{ color:"#1A56A0", textDecoration:"none", flexShrink:0 }}>
+                    className="text-xs font-medium" style={{ color:"#1E3A8A", textDecoration:"none", flexShrink:0 }}>
                     ↗ Meer info
                   </a>
                 </div>
@@ -5663,12 +5665,12 @@ ${(function(){
                     {/* Vestiging & jurisdictie */}
                     <div className="rounded p-3" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                       <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Vestiging & jurisdictie</p>
-                      <p className="text-xs font-semibold mb-0.5" style={{ color:"#0C2340" }}>{s.jurisdictie}</p>
+                      <p className="text-xs font-semibold mb-0.5" style={{ color:"#162D6E" }}>{s.jurisdictie}</p>
                       <p className="text-xs" style={{ color:"#6b7280" }}>{s.vestiging}</p>
                     </div>
 
                     {/* DAAF A1 */}
-                    <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                    <div className="rounded p-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                       <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A1 — Jurisdictie leverancier</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA1) }}>{s.daafA1}/5</span>
@@ -5680,7 +5682,7 @@ ${(function(){
                     </div>
 
                     {/* DAAF A3 */}
-                    <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                    <div className="rounded p-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                       <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A3 — Hosting & datalocatie</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA3) }}>{s.daafA3}/5</span>
@@ -5695,7 +5697,7 @@ ${(function(){
                   {/* Beveiliging + opmerking */}
                   <div className="grid grid-cols-2 gap-3 mt-3">
                     <div className="rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
-                      <p className="text-xs font-bold mb-1" style={{ color:"#0C2340" }}>🔒 Beveiliging</p>
+                      <p className="text-xs font-bold mb-1" style={{ color:"#162D6E" }}>🔒 Beveiliging</p>
                       <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>{s.beveiliging}</p>
                     </div>
                     <div className="rounded p-2.5" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
@@ -5710,7 +5712,7 @@ ${(function(){
 
           {/* Gegevensstroomoverzicht */}
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Gegevensstroom — wat gaat waarheen</h3>
+            <h3 className="font-bold text-sm mb-3" style={{ color:"#162D6E" }}>Gegevensstroom — wat gaat waarheen</h3>
             <div className="space-y-2">
               {[
                 { van:"Gebruiker (browser)", naar:"Netlify Blobs (AWS S3, VS)", data:"Assessment-scores, applicatienamen, motivaties", actie:"Opslaan bij elke wijziging", kleur:"#ca8a04" },
@@ -5722,10 +5724,10 @@ ${(function(){
                 <div key={i} className="flex items-start gap-3 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                   <div className="w-2 h-2 rounded-full flex-shrink-0 mt-1.5" style={{ background:r.kleur }}/>
                   <div className="flex-1 grid grid-cols-4 gap-2 text-xs">
-                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Van:</span> <span style={{ color:"#374151" }}>{r.van}</span></div>
-                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Naar:</span> <span style={{ color:"#374151" }}>{r.naar}</span></div>
-                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Data:</span> <span style={{ color:"#374151" }}>{r.data}</span></div>
-                    <div><span className="font-semibold" style={{ color:"#0C2340" }}>Wanneer:</span> <span style={{ color:"#374151" }}>{r.actie}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#162D6E" }}>Van:</span> <span style={{ color:"#374151" }}>{r.van}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#162D6E" }}>Naar:</span> <span style={{ color:"#374151" }}>{r.naar}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#162D6E" }}>Data:</span> <span style={{ color:"#374151" }}>{r.data}</span></div>
+                    <div><span className="font-semibold" style={{ color:"#162D6E" }}>Wanneer:</span> <span style={{ color:"#374151" }}>{r.actie}</span></div>
                   </div>
                 </div>
               ))}
@@ -5734,7 +5736,7 @@ ${(function(){
 
           {/* Beveiliging */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-3" style={{ color:"#0C2340" }}>Beveiliging van deze applicatie</h3>
+            <h3 className="font-bold text-sm mb-3" style={{ color:"#162D6E" }}>Beveiliging van deze applicatie</h3>
 
             {/* Versleuteling */}
             <div className="mb-3">
@@ -5763,7 +5765,7 @@ ${(function(){
               <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Toegangsbeveiliging</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { icon:"🖥️", titel:"Inlogscherm (UI)", status:"Wachtwoord", kleur:"#1A56A0", bg:"#EBF3FF",
+                  { icon:"🖥️", titel:"Inlogscherm (UI)", status:"Wachtwoord", kleur:"#1E3A8A", bg:"#EFF6FF",
                     tekst:"De applicatie toont een inlogscherm dat toegang blokkeert zonder het juiste wachtwoord. De sessie wordt opgeslagen in sessionStorage van de browser en vervalt automatisch wanneer het tabblad of venster wordt gesloten." },
                   { icon:"🔑", titel:"API-tokencheck (server)", status:"Actief v1.7+", kleur:"#15803d", bg:"#dcfce7",
                     tekst:"Vanaf versie 1.7 stuurt de browser bij elke API-aanroep een token mee als request-header (x-api-token). De Netlify Function valideert dit token server-side tegen een omgevingsvariabele (APP_API_TOKEN). Verzoeken zonder geldig token worden geweigerd met HTTP 401." },
@@ -5806,7 +5808,7 @@ ${(function(){
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { n:"1", titel:"Niveau 1 — In voorbereiding", tekst:"Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding. Na migratie draait het instrument volledig op eigen hardware onder Nederlandse jurisdictie.", kleur:"#ca8a04", bg:"#fef9c3" },
-                  { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1A56A0", bg:"#EBF3FF" },
+                  { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1E3A8A", bg:"#EFF6FF" },
                   { n:"3", titel:"Niveau 3 — Bij verdere professionalisering", tekst:"Voeg applicatieniveau-encryptie toe aan de opgeslagen data, integreer logging en audit trail, en overweeg een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#6d28d9", bg:"#faf5ff" },
                 ].map(k => (
                   <div key={k.n} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
@@ -5824,7 +5826,7 @@ ${(function(){
 
           {/* Conclusie autonomie */}
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"2px solid #E87722" }}>
-            <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Conclusie — autonomierisico van dit instrument</h3>
+            <h3 className="font-bold text-sm mb-2" style={{ color:"#162D6E" }}>Conclusie — autonomierisico van dit instrument</h3>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
               Dit instrument is een werkend prototype dat momenteel draait op Netlify (VS) met Netlify Blobs voor dataopslag (AWS S3, us-east-1).
               Dit is een bewuste tijdelijke keuze voor de prototypefase. Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding.
@@ -5833,7 +5835,7 @@ ${(function(){
             <div className="grid grid-cols-3 gap-3">
               {[
                 { titel:"Huidige situatie", tekst:"Het prototype draait op Netlify (VS). Assessment-data wordt opgeslagen in Netlify Blobs (AWS S3, VS). De CLOUD Act is van toepassing op deze data. Dit is bewust gekozen voor de snelheid van prototyping.", kleur:"#ca8a04", bg:"#fef9c3" },
-                { titel:"Ambitie", tekst:"Na migratie naar NVIDIA Spark (NHL Stenden, Leeuwarden) scoort dit instrument score 1 op alle DAAF en DICTU-dimensies. Eigen jurisdictie, eigen hardware, eigen beheer, geen afhankelijkheid van externe partijen.", kleur:"#1A56A0", bg:"#EBF3FF" },
+                { titel:"Ambitie", tekst:"Na migratie naar NVIDIA Spark (NHL Stenden, Leeuwarden) scoort dit instrument score 1 op alle DAAF en DICTU-dimensies. Eigen jurisdictie, eigen hardware, eigen beheer, geen afhankelijkheid van externe partijen.", kleur:"#1E3A8A", bg:"#EFF6FF" },
                 { titel:"Aandachtspunten", tekst:"Broncode staat nog op GitHub (VS). Overweeg bij verdere professionalisering een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#ca8a04", bg:"#fef9c3" },
               ].map(k => (
                 <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
@@ -5972,7 +5974,7 @@ ${(function(){
             De grafiek verschijnt zodra er op meerdere dagen data is vastgelegd.
             Kom morgen terug voor het eerste verloop.
           </p>
-          <p className="text-xs mt-1" style={{ color:"#D0E4F7" }}>
+          <p className="text-xs mt-1" style={{ color:"#DBEAFE" }}>
             {snaps.length === 1 ? `Eerste meting: ${snaps[0].datum}` : "Nog geen metingen"}
           </p>
         </div>
@@ -6014,8 +6016,8 @@ ${(function(){
           <svg viewBox={`0 0 ${W} ${H}`} style={{ width:"100%", height:"auto" }}>
             <defs>
               <linearGradient id="avgGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#1A56A0" stopOpacity="0.15"/>
-                <stop offset="100%" stopColor="#1A56A0" stopOpacity="0"/>
+                <stop offset="0%" stopColor="#1E3A8A" stopOpacity="0.15"/>
+                <stop offset="100%" stopColor="#1E3A8A" stopOpacity="0"/>
               </linearGradient>
             </defs>
 
@@ -6036,21 +6038,21 @@ ${(function(){
               fill="url(#avgGrad)"/>
 
             {/* DICTU lijn */}
-            {dictuPath && <path d={dictuPath} fill="none" stroke="#26B5AE" strokeWidth="1.5" strokeDasharray="5,3" opacity="0.7"/>}
+            {dictuPath && <path d={dictuPath} fill="none" stroke="#E91E8C" strokeWidth="1.5" strokeDasharray="5,3" opacity="0.7"/>}
 
             {/* AVG lijn */}
-            <path d={avgPath} fill="none" stroke="#1A56A0" strokeWidth="2.5"/>
+            <path d={avgPath} fill="none" stroke="#1E3A8A" strokeWidth="2.5"/>
 
             {/* Datapunten avg */}
             {snaps.map((s, i) => (
               <circle key={i} cx={toX(i)} cy={toY(s.avg)} r="3.5"
-                fill="#fff" stroke="#1A56A0" strokeWidth="2"/>
+                fill="#fff" stroke="#1E3A8A" strokeWidth="2"/>
             ))}
 
             {/* Laatste punt waarde label */}
             {snaps.length > 0 && (
               <text x={toX(snaps.length-1)+6} y={toY(snaps[snaps.length-1].avg)+4}
-                fontSize="10" fontWeight="bold" fill="#1A56A0">
+                fontSize="10" fontWeight="bold" fill="#1E3A8A">
                 {snaps[snaps.length-1].avg}
               </text>
             )}
@@ -6064,11 +6066,11 @@ ${(function(){
           {/* Legenda */}
           <div className="flex gap-4 justify-center mt-1">
             <div className="flex items-center gap-1.5 text-xs" style={{ color:"#6b7280" }}>
-              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#1A56A0" strokeWidth="2.5"/></svg>
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#1E3A8A" strokeWidth="2.5"/></svg>
               Gem. autonomiescore (DAAF)
             </div>
             <div className="flex items-center gap-1.5 text-xs" style={{ color:"#6b7280" }}>
-              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#26B5AE" strokeWidth="1.5" strokeDasharray="5,3"/></svg>
+              <svg width="20" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#E91E8C" strokeWidth="1.5" strokeDasharray="5,3"/></svg>
               Gem. DICTU-score (x2 voor schaal)
             </div>
           </div>
@@ -6077,7 +6079,7 @@ ${(function(){
     }
 
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-4xl mx-auto">
 
           {/* Header */}
@@ -6087,13 +6089,13 @@ ${(function(){
                 <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
                   <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
                 </div>
-                <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+                <div className="w-px self-stretch" style={{ background:"#E91E8C", margin:"2px 0" }}/>
                 <div>
                   <h1 className="font-bold" style={{ fontSize:17 }}>Portfoliostatus Digitale Autonomie</h1>
-                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Autonomie · {vandaag}</p>
+                  <p style={{ fontSize:12, color:"#F9A8D4" }}>Ambassadeurslijn Digitale Autonomie · {vandaag}</p>
                 </div>
               </div>
-              <span className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
+              <span className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ background:"rgba(255,255,255,0.15)", color:"#F9A8D4" }}>
                 {scored.length} van {apps.length} apps beoordeeld
               </span>
             </div>
@@ -6155,7 +6157,7 @@ ${(function(){
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Autonomiescore per applicatie</h3>
+                <h3 className="font-bold text-sm" style={{ color:"#162D6E" }}>Autonomiescore per applicatie</h3>
                 <p className="text-xs" style={{ color:"#9ca3af" }}>Gesorteerd van laagste naar hoogste · Gele lijn = grens acceptabel (5) · Groene lijn = grens goed (7)</p>
               </div>
             </div>
@@ -6177,7 +6179,7 @@ ${(function(){
 
           {/* ── Rij 3: Top 3 aandachtspunten met concrete acties ── */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-1" style={{ color:"#0C2340" }}>Top 3 aandachtspunten — inclusief concrete acties</h3>
+            <h3 className="font-bold text-sm mb-1" style={{ color:"#162D6E" }}>Top 3 aandachtspunten — inclusief concrete acties</h3>
             <p className="text-xs mb-4" style={{ color:"#9ca3af" }}>
               Geselecteerd op combinatie van laagste autonomiescore en hoogste strategisch belang. Per applicatie drie concrete vervolgstappen.
             </p>
@@ -6198,7 +6200,7 @@ ${(function(){
                         <div className="w-7 h-7 flex items-center justify-center flex-shrink-0 text-white font-bold rounded text-xs"
                           style={{ background:medalColors[i] }}>{i+1}</div>
                         <div className="flex-1 flex items-center gap-2 flex-wrap">
-                          <h4 className="font-bold text-sm" style={{ color:"#0C2340" }}>{displayName(a)}</h4>
+                          <h4 className="font-bold text-sm" style={{ color:"#162D6E" }}>{displayName(a)}</h4>
                           {a.supplier && <span className="text-xs" style={{ color:"#9ca3af" }}>{a.supplier}</span>}
                           <span className="text-xs px-2 py-0.5 font-semibold rounded" style={{ background:lbl.bg, color:lbl.fg }}>{lbl.text}</span>
                           <span className="text-xs font-bold" style={{ color:scoreColor(a.sc.autonomyScore) }}>Score {a.sc.autonomyScore?.toFixed(1)}/10</span>
@@ -6211,8 +6213,8 @@ ${(function(){
                           <div className="flex gap-2 flex-wrap">
                             {[
                               { lbl:"Risico",    val:a.sc.risico,    c:"#dc2626" },
-                              { lbl:"Mitigatie", val:a.sc.mitigatie, c:"#26B5AE" },
-                              { lbl:"Belang",    val:a.sc.belang,    c:"#E87722" },
+                              { lbl:"Mitigatie", val:a.sc.mitigatie, c:"#E91E8C" },
+                              { lbl:"Belang",    val:a.sc.belang,    c:"#E91E8C" },
                               { lbl:"DICTU",     val:a.sc.dictuAvg,  c:"#6d28d9" },
                             ].map(s => (
                               <div key={s.lbl} className="text-center rounded px-2 py-1" style={{ background:"#fff", border:"1px solid #e5e7eb", minWidth:54 }}>
@@ -6247,7 +6249,7 @@ ${(function(){
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <h3 className="font-bold text-sm" style={{ color:"#0C2340" }}>Verloop gemiddelde scores in de tijd</h3>
+                <h3 className="font-bold text-sm" style={{ color:"#162D6E" }}>Verloop gemiddelde scores in de tijd</h3>
                 <p className="text-xs" style={{ color:"#9ca3af" }}>
                   Één meting per dag, lokaal opgeslagen. Laat zien hoe het portfolio zich ontwikkelt naarmate meer assessments worden ingevuld of bijgewerkt.
                 </p>
@@ -6293,7 +6295,7 @@ ${(function(){
     ];
 
     return (
-      <div className="h-full overflow-y-auto" style={{ background:"#EBF3FF" }}>
+      <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-4xl mx-auto">
 
           {/* Hero — altijd zichtbaar */}
@@ -6302,10 +6304,10 @@ ${(function(){
               <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
                 <span className="font-bold leading-none" style={{ fontSize:10, letterSpacing:1 }}>NHL<br/>STENDEN</span>
               </div>
-              <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
+              <div className="w-px self-stretch" style={{ background:"#E91E8C", margin:"2px 0" }}/>
               <div>
                 <h1 className="font-bold" style={{ fontSize:17 }}>Portfolioanalyse Digitale Autonomie</h1>
-                <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Autonomie · Programma Digitale Samenhang</p>
+                <p style={{ fontSize:12, color:"#F9A8D4" }}>Ambassadeurslijn Digitale Autonomie · Programma Digitale Samenhang</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
@@ -6322,7 +6324,7 @@ ${(function(){
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-semibold transition-all"
                 style={{
                   borderRadius: 4,
-                  background: aboutTab === t.k ? "#1A56A0" : "transparent",
+                  background: aboutTab === t.k ? "#1E3A8A" : "transparent",
                   color:       aboutTab === t.k ? "#fff"    : "#6b7280",
                 }}>
                 <span>{t.icon}</span>
@@ -6347,9 +6349,9 @@ ${(function(){
                     { icon:"📊", titel:"Vergelijken", txt:"Het dashboard en de vergelijkingspagina tonen alle applicaties naast elkaar. Je ziet direct welke urgent zijn." },
                     { icon:"📥", titel:"Rapporteren", txt:"Exporteer het volledige overzicht als Excel of genereer een PDF per applicatie voor besluitvorming." },
                   ].map(k => (
-                    <div key={k.titel} className="rounded p-3 text-center" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                    <div key={k.titel} className="rounded p-3 text-center" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                       <div style={{ fontSize:24, marginBottom:6 }}>{k.icon}</div>
-                      <p className="text-xs font-bold mb-1" style={{ color:"#0C2340" }}>{k.titel}</p>
+                      <p className="text-xs font-bold mb-1" style={{ color:"#162D6E" }}>{k.titel}</p>
                       <p className="text-xs" style={{ color:"#6b7280", lineHeight:1.5 }}>{k.txt}</p>
                     </div>
                   ))}
@@ -6376,7 +6378,7 @@ ${(function(){
                 <div className="flex items-start gap-3">
                   <span style={{ fontSize:20, flexShrink:0 }}>🖥️</span>
                   <div>
-                    <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Draait op eigen NHL Stenden-infrastructuur</p>
+                    <p className="text-sm font-bold mb-1" style={{ color:"#162D6E" }}>Draait op eigen NHL Stenden-infrastructuur</p>
                     <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>
                       Het instrument draait op eigen NHL Stenden-serverinfrastructuur, beheerd door het team Infrastructuur van NHL Stenden (DLWO).
                       Het prototype draait momenteel op <strong>Netlify</strong> met Netlify Blobs voor dataopslag. Migratie naar de eigen NHL Stenden NVIDIA Spark infrastructuur in Leeuwarden is in voorbereiding. Na migratie staat de applicatie volledig binnen de ICT-omgeving van NHL Stenden — onder Nederlands recht, zonder afhankelijkheid van externe cloudpartijen.
@@ -6390,11 +6392,11 @@ ${(function(){
               </div>
 
               {/* Inspiratiebron */}
-              <div className="rounded p-4" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+              <div className="rounded p-4" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                 <div className="flex items-start gap-3">
                   <span style={{ fontSize:20, flexShrink:0 }}>💡</span>
                   <div>
-                    <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Een voorbeeld voor beleidsontwikkeling in de eigen organisatie</p>
+                    <p className="text-sm font-bold mb-1" style={{ color:"#162D6E" }}>Een voorbeeld voor beleidsontwikkeling in de eigen organisatie</p>
                     <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                       Dit instrument is meer dan een tool voor digitale autonomie. Het laat zien hoe je beleid en de toepassing daarvan
                       kunt ontwerpen, verwerken en gebruiken in een hedendaagse manier die aansluit bij de eigen organisatie.
@@ -6415,12 +6417,12 @@ ${(function(){
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1A56A0", color:"#fff", borderRadius:3 }}>DAAF</span>
-                      <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Digital Autonomy Assessment Framework</span>
+                      <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
+                      <span className="font-semibold text-sm" style={{ color:"#162D6E" }}>Digital Autonomy Assessment Framework</span>
                     </div>
                     <a href="https://utrechtuniversity.github.io/digital-autonomy-assessment-tool/" target="_blank" rel="noopener noreferrer"
                       className="text-xs font-medium px-2 py-0.5"
-                      style={{ color:"#1A56A0", border:"1px solid #D0E4F7", borderRadius:3, textDecoration:"none", whiteSpace:"nowrap" }}>
+                      style={{ color:"#1E3A8A", border:"1px solid #D0E4F7", borderRadius:3, textDecoration:"none", whiteSpace:"nowrap" }}>
                       🔗 Open DAAF-tool ↗
                     </a>
                   </div>
@@ -6432,8 +6434,8 @@ ${(function(){
                   <div className="space-y-1 mb-3">
                     {[
                       { lv:"Niveau 1 · Risico (A, B)",       txt:"Jurisdictie leverancier, hosting & datalocatie, vendor concentratie.",   c:"#dc2626" },
-                      { lv:"Niveau 2 · Mitigatie (C, D, E)", txt:"Alternatieven beschikbaar, kennis in huis, contractuele bescherming.",   c:"#26B5AE" },
-                      { lv:"Niveau 3 · Belang (F, G, H)",    txt:"Operationeel, data-gevoeligheid en academisch belang van de applicatie.", c:"#E87722" },
+                      { lv:"Niveau 2 · Mitigatie (C, D, E)", txt:"Alternatieven beschikbaar, kennis in huis, contractuele bescherming.",   c:"#E91E8C" },
+                      { lv:"Niveau 3 · Belang (F, G, H)",    txt:"Operationeel, data-gevoeligheid en academisch belang van de applicatie.", c:"#E91E8C" },
                     ].map(r => (
                       <div key={r.lv} className="flex gap-2 text-xs">
                         <span className="w-2 h-2 rounded-full mt-1 flex-shrink-0" style={{ background:r.c }}/>
@@ -6454,12 +6456,12 @@ ${(function(){
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #26B5AE44" }}>
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                      <span className="font-semibold text-sm" style={{ color:"#0C2340" }}>Toetsingsinstrument Soevereiniteit Clouddiensten</span>
+                      <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#E91E8C", color:"#fff", borderRadius:3 }}>DICTU</span>
+                      <span className="font-semibold text-sm" style={{ color:"#162D6E" }}>Toetsingsinstrument Soevereiniteit Clouddiensten</span>
                     </div>
                     <a href="https://www.dictu.nl/sites/default/files/bestanden/website/DICTU%20Toetsingsinstrument%20Soevereiniteit%20Clouddiensten%20v1.0.1.pdf" target="_blank" rel="noopener noreferrer"
                       className="text-xs font-medium px-2 py-0.5"
-                      style={{ color:"#26B5AE", border:"1px solid #26B5AE44", borderRadius:3, textDecoration:"none", whiteSpace:"nowrap" }}>
+                      style={{ color:"#E91E8C", border:"1px solid #26B5AE44", borderRadius:3, textDecoration:"none", whiteSpace:"nowrap" }}>
                       🔗 Open DICTU-framework ↗
                     </a>
                   </div>
@@ -6476,7 +6478,7 @@ ${(function(){
                       { k:"4.1", lbl:"EU-infrastructuur",      txt:"Bevindt ook de control plane zich volledig in de EU?" },
                     ].map(r => (
                       <div key={r.k} className="flex gap-2 text-xs">
-                        <span className="font-bold flex-shrink-0" style={{ color:"#26B5AE", minWidth:28 }}>{r.k}</span>
+                        <span className="font-bold flex-shrink-0" style={{ color:"#E91E8C", minWidth:28 }}>{r.k}</span>
                         <div><strong>{r.lbl}:</strong> {r.txt}</div>
                       </div>
                     ))}
@@ -6488,17 +6490,17 @@ ${(function(){
 
             <Section title="Bronnen en team">
               <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-sm font-bold mb-2" style={{ color:"#0C2340" }}>📚 Wetenschappelijke en beleidsmatige bronnen</p>
+                <p className="text-sm font-bold mb-2" style={{ color:"#162D6E" }}>📚 Wetenschappelijke en beleidsmatige bronnen</p>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
                   Dit instrument is gebouwd op twee erkende en publiek beschikbare normenkaders. Ze vormen de inhoudelijke ruggengraat
                   van alles wat je in deze tool ziet — van de score-knoppen tot de PDF-rapporten. Zonder deze frameworks zou dit instrument
                   niet hebben bestaan.
                 </p>
                 <div className="space-y-3">
-                  <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+                  <div className="rounded p-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-xs font-bold mb-1" style={{ color:"#1A56A0" }}>
+                        <p className="text-xs font-bold mb-1" style={{ color:"#1E3A8A" }}>
                           Digital Autonomy Assessment Framework (DAAF) — Universiteit Utrecht
                         </p>
                         <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
@@ -6508,7 +6510,7 @@ ${(function(){
                         </p>
                       </div>
                       <a href="https://www.uu.nl/organisatie/digitale-autonomie/tools" target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize:11, color:"#1A56A0", textDecoration:"none", border:"1px solid #D0E4F7",
+                        style={{ fontSize:11, color:"#1E3A8A", textDecoration:"none", border:"1px solid #D0E4F7",
                                  padding:"3px 8px", borderRadius:3, whiteSpace:"nowrap", flexShrink:0 }}>
                         🔗 uu.nl/daaf ↗
                       </a>
@@ -6517,7 +6519,7 @@ ${(function(){
                   <div className="rounded p-3" style={{ background:"#f0f9f9", border:"1px solid #26B5AE44" }}>
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <p className="text-xs font-bold mb-1" style={{ color:"#26B5AE" }}>
+                        <p className="text-xs font-bold mb-1" style={{ color:"#E91E8C" }}>
                           Toetsingsinstrument Soevereiniteit Clouddiensten — DICTU (Ministerie van EZK)
                         </p>
                         <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
@@ -6529,7 +6531,7 @@ ${(function(){
                       </div>
                       <a href="https://www.dictu.nl/sites/default/files/bestanden/website/DICTU%20Toetsingsinstrument%20Soevereiniteit%20Clouddiensten%20v1.0.1.pdf"
                         target="_blank" rel="noopener noreferrer"
-                        style={{ fontSize:11, color:"#26B5AE", textDecoration:"none", border:"1px solid #26B5AE44",
+                        style={{ fontSize:11, color:"#E91E8C", textDecoration:"none", border:"1px solid #26B5AE44",
                                  padding:"3px 8px", borderRadius:3, whiteSpace:"nowrap", flexShrink:0 }}>
                         🔗 DICTU-rapport ↗
                       </a>
@@ -6539,10 +6541,10 @@ ${(function(){
               </div>
 
               <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-sm font-bold mb-3" style={{ color:"#0C2340" }}>👥 Betrokken bij dit product</p>
+                <p className="text-sm font-bold mb-3" style={{ color:"#162D6E" }}>👥 Betrokken bij dit product</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-xs font-semibold mb-2" style={{ color:"#1A56A0" }}>Programma Digitale Samenhang</p>
+                    <p className="text-xs font-semibold mb-2" style={{ color:"#1E3A8A" }}>Programma Digitale Samenhang</p>
                     <div className="space-y-1.5">
                       {[
                         { naam:"E. van Gorkum",  rol:"Kwartiermaker Digitale Samenhang — initiatiefnemer en ontwikkelaar" },
@@ -6551,26 +6553,26 @@ ${(function(){
                         { naam:"J. Blom",         rol:"Ambassadeur Digitale Autonomie — initiatiefnemer en ontwikkelaar" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
-                          <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
+                          <span className="font-semibold flex-shrink-0" style={{ color:"#162D6E", minWidth:120 }}>{p.naam}</span>
                           <span style={{ color:"#6b7280" }}>{p.rol}</span>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold mb-2" style={{ color:"#26B5AE" }}>Team Infrastructuur (DLWO) — server & migratie</p>
+                    <p className="text-xs font-semibold mb-2" style={{ color:"#E91E8C" }}>Team Infrastructuur (DLWO) — server & migratie</p>
                     <div className="space-y-1.5">
                       {[
                         { naam:"Jeffrey Klein",   rol:"Infrastructuur engineer — migratie naar DGX Spark" },
                         { naam:"Dolf Keimpema",   rol:"Infrastructuur engineer — migratie naar DGX Spark" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
-                          <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
+                          <span className="font-semibold flex-shrink-0" style={{ color:"#162D6E", minWidth:120 }}>{p.naam}</span>
                           <span style={{ color:"#6b7280" }}>{p.rol}</span>
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs font-semibold mt-3 mb-1.5" style={{ color:"#1A56A0" }}>Expertisegroep Digitale Autonomie</p>
+                    <p className="text-xs font-semibold mt-3 mb-1.5" style={{ color:"#1E3A8A" }}>Expertisegroep Digitale Autonomie</p>
                     <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                       Met dank aan de ambassadeurs voor hun scherpte, betrokkenheid en de inspiratie
                       die zij dagelijks meebrengen. Jullie vragen, inzichten en richting hebben dit
@@ -6579,7 +6581,7 @@ ${(function(){
                     </p>
                     <p className="text-xs font-semibold mt-1 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
                     <div className="flex gap-2 text-xs">
-                      <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>Claude (Anthropic)</span>
+                      <span className="font-semibold flex-shrink-0" style={{ color:"#162D6E", minWidth:120 }}>Claude (Anthropic)</span>
                       <span style={{ color:"#6b7280" }}>AI-ontwikkelassistent — volledige applicatiebouw</span>
                     </div>
                   </div>
@@ -6615,11 +6617,11 @@ ${(function(){
                   <div key={s.n} className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                     <div className="flex gap-3">
                       <div className="w-9 h-9 flex items-center justify-center flex-shrink-0 text-white font-bold"
-                        style={{ background:"#1A56A0", borderRadius:4, fontSize:15 }}>{s.n}</div>
+                        style={{ background:"#1E3A8A", borderRadius:4, fontSize:15 }}>{s.n}</div>
                       <div className="flex-1">
-                        <p className="text-sm font-semibold mb-1" style={{ color:"#0C2340" }}>{s.icon} {s.title}</p>
+                        <p className="text-sm font-semibold mb-1" style={{ color:"#162D6E" }}>{s.icon} {s.title}</p>
                         <p className="text-xs leading-relaxed" style={{ color:"#6b7280" }}>{s.txt}</p>
-                        <div className="mt-2 rounded px-2 py-1.5 text-xs" style={{ background:"#EBF3FF", color:"#1A56A0" }}>
+                        <div className="mt-2 rounded px-2 py-1.5 text-xs" style={{ background:"#F8F9FB", color:"#1E3A8A" }}>
                           💡 {s.tip}
                         </div>
                       </div>
@@ -6629,28 +6631,28 @@ ${(function(){
               </div>
             </Section>
 
-            <Section title="Exporteren" accent="#26B5AE">
+            <Section title="Exporteren" accent="#E91E8C">
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                  <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>📥 Excel exporteren</p>
+                  <p className="text-sm font-semibold mb-2" style={{ color:"#162D6E" }}>📥 Excel exporteren</p>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
                     Klik op "Exporteer Excel" op het Dashboard. Het bestand bevat vijf tabbladen:
                   </p>
                   {["Overzicht — alle scores per applicatie", "DAAF scores — per indicator inclusief motivatie", "DICTU scores — per vraag inclusief motivatie", "Vragenlijst — alle vragen met normen", "Motivaties — volledig overzicht toelichtingen"].map(t => (
                     <div key={t} className="flex gap-2 text-xs mb-1">
-                      <span style={{ color:"#26B5AE", fontWeight:700 }}>→</span>
+                      <span style={{ color:"#E91E8C", fontWeight:700 }}>→</span>
                       <span style={{ color:"#374151" }}>{t}</span>
                     </div>
                   ))}
                 </div>
                 <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                  <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>📄 PDF exporteren</p>
+                  <p className="text-sm font-semibold mb-2" style={{ color:"#162D6E" }}>📄 PDF exporteren</p>
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
                     Klik op de PDF-knop op het Dashboard. Met de filterknopjes bepaal je of je een enkelvoudig rapport (één app) of een portfoliorapport (meerdere apps) wilt. De PDF bevat:
                   </p>
                   {["Voorblad met naam, datum en versie", "Inhoudsopgave", "Frameworkuitleg (DAAF + DICTU)", "Scores, kwadrantpositie en aanbevelingen per app"].map(t => (
                     <div key={t} className="flex gap-2 text-xs mb-1">
-                      <span style={{ color:"#E87722", fontWeight:700 }}>→</span>
+                      <span style={{ color:"#E91E8C", fontWeight:700 }}>→</span>
                       <span style={{ color:"#374151" }}>{t}</span>
                     </div>
                   ))}
@@ -6661,9 +6663,9 @@ ${(function(){
 
           {/* ── Tab 3: Scores & grafieken ── */}
           {aboutTab === "scores" && <>
-            <Section title="Wat betekent de autonomiescore?" accent="#E87722">
+            <Section title="Wat betekent de autonomiescore?" accent="#E91E8C">
               <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"2px solid #E87722" }}>
-                <p className="text-sm font-semibold mb-2" style={{ color:"#0C2340" }}>
+                <p className="text-sm font-semibold mb-2" style={{ color:"#162D6E" }}>
                   De score meet <em>de urgentie van het autonomieprobleem</em>, niet hoe autonoom een applicatie is.
                 </p>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
@@ -6687,15 +6689,15 @@ ${(function(){
                   </div>
                 </div>
               </div>
-              <Tip label="Waar zit de verbetermarge?" color="#1A56A0" bg="#EBF3FF">
+              <Tip label="Waar zit de verbetermarge?" color="#1E3A8A" bg="#EFF6FF">
                 Strategisch belang (Niveau 3) ligt grotendeels vast. Verbeteringen zitten in Risico verlagen
                 (bijv. migreren naar EU-aanbieder) en Mitigatie verhogen (alternatieven ontwikkelen, contracten
                 versterken, kennis opbouwen). Gebruik de drie niveauscores om te bepalen waar de grootste winst zit.
               </Tip>
             </Section>
 
-            <Section title="Hoe lees je het dimensieprofiel?" accent="#1A56A0">
-              <div className="rounded p-4 mb-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
+            <Section title="Hoe lees je het dimensieprofiel?" accent="#1E3A8A">
+              <div className="rounded p-4 mb-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
                   Het dimensieprofiel toont per as een gekleurde balk. Anders dan een spindiagram heeft elke balk
                   een eigen richting: "hoge score" betekent niet overal hetzelfde. Hover over een punt voor de exacte waarde.
@@ -6719,14 +6721,14 @@ ${(function(){
                   ))}
                 </div>
                 <div className="rounded p-3 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                  <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Kleurovergang per type as</p>
+                  <p className="text-xs font-bold mb-2" style={{ color:"#162D6E" }}>Kleurovergang per type as</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
                       { titel:"Risico-assen (A, B)", gradient:"linear-gradient(to right,#dcfce7,#fef9c3,#fca5a5,#dc2626)", tekst:"Groen links = laag risico (goed). Rood rechts = hoog risico." },
                       { titel:"Mitigatie-assen (C, D, E)", gradient:"linear-gradient(to right,#dc2626,#fca5a5,#fde68a,#86efac,#16a34a)", tekst:"Rood links = weinig weerbaarheid. Groen rechts = sterk weerbaar." },
                     ].map(g => (
                       <div key={g.titel}>
-                        <p style={{ fontSize:10, fontWeight:600, color:"#0C2340", marginBottom:4 }}>{g.titel}</p>
+                        <p style={{ fontSize:10, fontWeight:600, color:"#162D6E", marginBottom:4 }}>{g.titel}</p>
                         <div style={{ height:16, borderRadius:3, background:g.gradient, marginBottom:4 }} />
                         <p style={{ fontSize:9, color:"#6b7280" }}>{g.tekst}</p>
                       </div>
@@ -6734,7 +6736,7 @@ ${(function(){
                   </div>
                 </div>
                 <div className="rounded p-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                  <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Patronen om op te letten</p>
+                  <p className="text-xs font-bold mb-2" style={{ color:"#162D6E" }}>Patronen om op te letten</p>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       { titel:"Punten dicht bij elkaar", tekst:"Vergelijkbaar profiel op die dimensie — gemeenschappelijk risico voor meerdere applicaties." },
@@ -6743,7 +6745,7 @@ ${(function(){
                       { titel:"Belang hoog + risico zwak",    tekst:"Hoge belang-score maakt een slechte risico- of mitigatiescore urgenter." },
                     ].map(t => (
                       <div key={t.titel} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
-                        <p style={{ fontSize:10, fontWeight:700, color:"#0C2340", marginBottom:3 }}>📌 {t.titel}</p>
+                        <p style={{ fontSize:10, fontWeight:700, color:"#162D6E", marginBottom:3 }}>📌 {t.titel}</p>
                         <p style={{ fontSize:9, color:"#6b7280", lineHeight:1.5 }}>{t.tekst}</p>
                       </div>
                     ))}
@@ -6752,13 +6754,13 @@ ${(function(){
               </div>
             </Section>
 
-            <Section title="De berekening in vier stappen" accent="#26B5AE">
+            <Section title="De berekening in vier stappen" accent="#E91E8C">
               <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                 <div className="grid grid-cols-4 gap-3 mb-3">
                   {[
-                    { n:"1", lbl:"Dimensiescore", txt:"Per dimensie (A t/m H): gemiddelde van de ingevulde indicatorscores (1–5).", c:"#1A56A0" },
-                    { n:"2", lbl:"Niveauscore",   txt:"Per niveau (Risico, Mitigatie, Belang): gemiddelde van de dimensiescores.", c:"#26B5AE" },
-                    { n:"3", lbl:"Ruwe score",    txt:"Mitigatie ÷ (Risico × Belang). Bereik: 0,04 (slechtst) tot 5,0 (best).", c:"#E87722" },
+                    { n:"1", lbl:"Dimensiescore", txt:"Per dimensie (A t/m H): gemiddelde van de ingevulde indicatorscores (1–5).", c:"#1E3A8A" },
+                    { n:"2", lbl:"Niveauscore",   txt:"Per niveau (Risico, Mitigatie, Belang): gemiddelde van de dimensiescores.", c:"#E91E8C" },
+                    { n:"3", lbl:"Ruwe score",    txt:"Mitigatie ÷ (Risico × Belang). Bereik: 0,04 (slechtst) tot 5,0 (best).", c:"#E91E8C" },
                     { n:"4", lbl:"Normalisatie",  txt:"Logaritmische schaal zet de ruwe score om naar 1–10, zodat scores goed vergelijkbaar zijn.", c:"#6d28d9" },
                   ].map(s => (
                     <div key={s.n} className="text-center rounded p-3" style={{ background:"#f8fafc", border:`2px solid ${s.c}33` }}>
@@ -6769,7 +6771,7 @@ ${(function(){
                     </div>
                   ))}
                 </div>
-                <div className="rounded p-2 text-xs" style={{ background:"#EBF3FF", color:"#374151" }}>
+                <div className="rounded p-2 text-xs" style={{ background:"#F8F9FB", color:"#374151" }}>
                   <strong>Waarom logaritmisch?</strong> De formule deelt Mitigatie (max 5) door Risico×Belang (max 25).
                   Daardoor liggen de meeste ruwe scores tussen 0,1 en 0,5. Zonder correctie zou 90% van de applicaties
                   een score tussen 1 en 3 krijgen. De logaritmische schaal spreidt scores uit over het volledige bereik 1–10.
@@ -6782,16 +6784,16 @@ ${(function(){
           {aboutTab === "tips" && <>
             <Section title="Praktische tips voor het team">
               <div className="grid grid-cols-2 gap-3">
-                <Tip label="💾 Data opslaan" color="#1A56A0" bg="#EBF3FF">
+                <Tip label="💾 Data opslaan" color="#1E3A8A" bg="#EFF6FF">
                   Alle data wordt automatisch opgeslagen op de server (Netlify Blobs). Iedereen die inlogt ziet
                   dezelfde data, ongeacht browser of apparaat. Je kunt het venster sluiten en later verdergaan.
                   Exporteer regelmatig een Excel-bestand als extra back-up.
                 </Tip>
-                <Tip label="👥 Meerdere beoordelaars" color="#26B5AE" bg="#E6F7F7">
+                <Tip label="👥 Meerdere beoordelaars" color="#E91E8C" bg="#E6F7F7">
                   Laat beoordelaars het assessment onafhankelijk invullen en exporteer afzonderlijk naar Excel.
                   Bespreek grote afwijkingen in het team — die leveren vaak de meest waardevolle inzichten op.
                 </Tip>
-                <Tip label="📋 Welke vragen gebruik je?" color="#E87722" bg="#fff8e1">
+                <Tip label="📋 Welke vragen gebruik je?" color="#E91E8C" bg="#fff8e1">
                   Deze tool gebruikt een selectie: de DAAF Quick Scan (8 kernindicatoren, één per dimensie) en
                   4 relevante DICTU-vragen. Voor een volledig DAAF assessment met wegingen raadpleeg de Utrecht University tool.
                 </Tip>
@@ -6803,7 +6805,7 @@ ${(function(){
               </div>
             </Section>
 
-            <Section title="Beheeromgeving" accent="#0C2340">
+            <Section title="Beheeromgeving" accent="#162D6E">
               <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
                   Via het tabblad <strong>🔐 Beheer</strong> (pincode vereist) kun je:
@@ -6828,7 +6830,7 @@ ${(function(){
 
               {/* Import/Export sectie */}
               <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-                <p className="text-xs font-bold mb-3" style={{ color:"#0C2340" }}>📦 Database export en import</p>
+                <p className="text-xs font-bold mb-3" style={{ color:"#162D6E" }}>📦 Database export en import</p>
                 <div className="grid grid-cols-2 gap-3 mb-3">
                   <div className="rounded p-3" style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
                     <p className="text-xs font-bold mb-1" style={{ color:"#15803d" }}>⬇ Database exporteren</p>
@@ -6842,8 +6844,8 @@ ${(function(){
                       Sla dit bestand op een veilige locatie op als back-up.
                     </p>
                   </div>
-                  <div className="rounded p-3" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
-                    <p className="text-xs font-bold mb-1" style={{ color:"#1A56A0" }}>⬆ Database importeren</p>
+                  <div className="rounded p-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#1E3A8A" }}>⬆ Database importeren</p>
                     <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                       Klik op <strong>"Importeer database"</strong> en selecteer een eerder geëxporteerd
                       JSON-bestand. Er verschijnt een overzicht van alle applicaties in het bestand.
@@ -6852,7 +6854,7 @@ ${(function(){
                   </div>
                 </div>
                 <div className="rounded p-3 mb-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
-                  <p className="text-xs font-bold mb-2" style={{ color:"#0C2340" }}>Selectief importeren</p>
+                  <p className="text-xs font-bold mb-2" style={{ color:"#162D6E" }}>Selectief importeren</p>
                   <div className="space-y-1.5">
                     {[
                       { stap:"1", txt:"Open het importvenster via de knop in de beheeromgeving." },
@@ -6862,7 +6864,7 @@ ${(function(){
                     ].map(s => (
                       <div key={s.stap} className="flex gap-2 text-xs">
                         <div className="w-4 h-4 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0"
-                          style={{ background:"#1A56A0", fontSize:9 }}>{s.stap}</div>
+                          style={{ background:"#1E3A8A", fontSize:9 }}>{s.stap}</div>
                         <span style={{ color:"#374151", lineHeight:1.5 }}>{s.txt}</span>
                       </div>
                     ))}
@@ -6892,29 +6894,28 @@ ${(function(){
   // ── SHELL ──────────────────────────────────────────────────
 
   if (!ready) return (
-    <div className="flex items-center justify-center h-screen text-sm" style={{ background:"#EBF3FF", color:"#6b7280" }}>
+    <div className="flex items-center justify-center h-screen text-sm" style={{ background:"#F8F9FB", color:"#6b7280" }}>
       Laden...
     </div>
   );
 
   return (
-    <div className="flex flex-col h-screen" style={{ fontFamily:"system-ui,sans-serif", background:"#EBF3FF" }}>
+    <div className="flex flex-col h-screen" style={{ fontFamily:"Inter, system-ui, sans-serif", background:"#F8F9FB" }}>
       {/* Header — NHL Stenden huisstijl */}
       <header className="flex items-center justify-between px-5 flex-shrink-0"
-        style={{ background:"#0C2340", minHeight:56 }}>
+        style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", minHeight:56 }}>
         {/* Logo box (kenmerkend NHL Stenden) */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center px-3 py-2 border-2 border-white"
-            style={{ minWidth:72 }}>
-            <span className="text-white font-bold leading-none" style={{ fontSize:11, letterSpacing:1 }}>
-              NHL<br/>STENDEN
-            </span>
-          </div>
+          <img
+            src="/nhl-logo-transparent.png"
+            alt="NHL Stenden"
+            style={{ height:36, width:36, objectFit:"contain", display:"block" }}
+          />
           {/* Teal accent bar */}
-          <div className="w-1 self-stretch" style={{ background:"#26B5AE", margin:"8px 0" }} />
+          <div className="w-1 self-stretch" style={{ background:"#E91E8C", margin:"8px 0" }} />
           <div>
             <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Autonomie-assessment</h1>
-            <p style={{ fontSize:11, color:"#7DD3D0" }}>
+            <p style={{ fontSize:11, color:"#F9A8D4" }}>
               Prototype · Ambassadeurslijn Digitale Autonomie
             </p>
 
@@ -6923,7 +6924,7 @@ ${(function(){
         <div className="flex items-center gap-3">
           {/* App-teller + laatste opslag */}
           <div className="flex items-center gap-1.5 text-xs px-2.5 py-1 rounded"
-            style={{ background:"rgba(255,255,255,0.1)", color:"#7DD3D0", border:"1px solid rgba(255,255,255,0.1)" }}>
+            style={{ background:"rgba(255,255,255,0.1)", color:"#F9A8D4", border:"1px solid rgba(255,255,255,0.1)" }}>
             <span style={{ fontSize:12 }}>🗂</span>
             <span style={{ fontWeight:700 }}>{apps.length}</span>
             <span style={{ opacity:0.75 }}>applicatie{apps.length !== 1 ? "s" : ""}</span>
@@ -6957,7 +6958,7 @@ ${(function(){
           )}
           {!saving && !saveError && ready && (
             <span className="text-xs flex items-center gap-1.5 px-2 py-1 rounded"
-              style={{ background:"rgba(38,181,174,0.15)", color:"#7DD3D0" }}>
+              style={{ background:"rgba(38,181,174,0.15)", color:"#F9A8D4" }}>
               <span style={{ color:"#4ade80", fontSize:9 }}>●</span> Gesynchroniseerd
             </span>
           )}
@@ -6977,7 +6978,7 @@ ${(function(){
               {/* Schuifje */}
               <div style={{
                 width: 28, height: 16, borderRadius: 8, position: "relative",
-                background: useSecondaryName ? "#E87722" : "rgba(255,255,255,0.2)",
+                background: useSecondaryName ? "#E91E8C" : "rgba(255,255,255,0.2)",
                 transition: "background 0.2s", flexShrink: 0
               }}>
                 <div style={{
@@ -6998,7 +6999,7 @@ ${(function(){
       </header>
 
       {/* Sub-header nav — lichte blauwe balk (NHS Stenden stijl) */}
-      <div className="flex-shrink-0" style={{ background:"#1A56A0" }}>
+      <div className="flex-shrink-0" style={{ background:"#1E3A8A" }}>
         <nav className="px-5 flex gap-0">
           {[
             { k:"dashboard", label:"Dashboard" },
@@ -7024,7 +7025,7 @@ ${(function(){
               <button key={t.k} onClick={() => setView(t.k)}
                 className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ml-1"
                 style={view === t.k
-                  ? { borderColor:"#26B5AE", color:"#fff", background:"rgba(255,255,255,0.18)", borderRadius:"4px 4px 0 0" }
+                  ? { borderColor:"#E91E8C", color:"#fff", background:"rgba(255,255,255,0.18)", borderRadius:"4px 4px 0 0" }
                   : { borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.6)",
                       background:"rgba(255,255,255,0.07)", borderRadius:"4px 4px 0 0" }}>
                 {t.label}
@@ -7034,7 +7035,7 @@ ${(function(){
               <button key={t.k} onClick={() => setView(t.k)}
                 className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
                 style={view === t.k
-                  ? { borderColor:"#26B5AE", color:"#fff", background:"rgba(255,255,255,0.12)" }
+                  ? { borderColor:"#E91E8C", color:"#fff", background:"rgba(255,255,255,0.12)" }
                   : { borderColor:"transparent", color:"rgba(255,255,255,0.75)" }}>
                 {t.label}
               </button>
@@ -7044,7 +7045,7 @@ ${(function(){
       </div>
 
       {/* Content */}
-      <main className="flex-1 overflow-hidden" style={{ background:"#EBF3FF" }}>
+      <main className="flex-1 overflow-hidden" style={{ background:"#F8F9FB" }}>
         {view === "dashboard" && Dashboard()}
         {view === "apps"      && AppsList()}
         {view === "assess"    && Assess()}
@@ -7064,14 +7065,14 @@ ${(function(){
             style={{ borderRadius:8, boxShadow:"0 8px 32px rgba(12,35,64,0.4)", maxHeight:"80vh" }}
             onClick={e => e.stopPropagation()}>
             <div className="px-5 py-3 flex items-center justify-between"
-              style={{ background:"#0C2340", borderBottom:"3px solid #26B5AE" }}>
+              style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", borderBottom:"3px solid #26B5AE" }}>
               <div className="flex items-center gap-2">
                 <span style={{ fontSize:16 }}>📋</span>
                 <h2 className="font-bold text-white text-sm">Changelog</h2>
-                <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#26B5AE", color:"#0C2340", fontWeight:700 }}>
+                <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#E91E8C", color:"#162D6E", fontWeight:700 }}>
                   {VERSION}
                 </span>
-                <span className="text-xs" style={{ color:"#7DD3D0" }}>Overzicht van alle versies en wijzigingen</span>
+                <span className="text-xs" style={{ color:"#F9A8D4" }}>Overzicht van alle versies en wijzigingen</span>
               </div>
               <button onClick={() => setShowChangelog(false)}
                 className="text-white hover:text-gray-300" style={{ fontSize:20, lineHeight:1 }}>×</button>
@@ -7080,19 +7081,19 @@ ${(function(){
               {CHANGELOG.map((v, vi) => (
                 <div key={v.versie} style={{ borderBottom:"1px solid #D0E4F7" }}>
                   <div className="flex items-center gap-3 px-5 py-2.5"
-                    style={{ background: vi === 0 ? "#EBF3FF" : "#f8fafc" }}>
+                    style={{ background: vi === 0 ? "#EFF6FF" : "#f8fafc" }}>
                     <span className="text-sm font-bold px-2.5 py-0.5"
-                      style={{ background: vi === 0 ? "#1A56A0" : "#e5e7eb",
+                      style={{ background: vi === 0 ? "#1E3A8A" : "#e5e7eb",
                                color: vi === 0 ? "white" : "#374151", borderRadius:4 }}>
                       {v.versie}
                     </span>
                     <span className="text-xs" style={{ color:"#9ca3af" }}>{v.datum}</span>
-                    {vi === 0 ? <span className="text-xs font-semibold" style={{ color:"#26B5AE" }}>Huidige versie</span> : ""}
+                    {vi === 0 ? <span className="text-xs font-semibold" style={{ color:"#E91E8C" }}>Huidige versie</span> : ""}
                   </div>
                   <ul className="px-5 py-2 space-y-1">
                     {v.wijzigingen.map((w, wi) => (
                       <li key={wi} className="flex gap-2 text-xs" style={{ color:"#374151" }}>
-                        <span style={{ color:"#26B5AE", fontWeight:700, flexShrink:0 }}>→</span>
+                        <span style={{ color:"#E91E8C", fontWeight:700, flexShrink:0 }}>→</span>
                         <span>{w}</span>
                       </li>
                     ))}
@@ -7115,7 +7116,7 @@ ${(function(){
 
             {/* Header */}
             <div className="px-5 py-3 flex items-center justify-between"
-              style={{ background:"#0C2340", borderBottom:"3px solid #26B5AE" }}>
+              style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", borderBottom:"3px solid #26B5AE" }}>
               <div className="flex items-center gap-2">
                 <span style={{ fontSize:16 }}>⬆</span>
                 <h2 className="font-bold text-white text-sm">Database importeren</h2>
@@ -7127,8 +7128,8 @@ ${(function(){
             <div className="p-5 space-y-4">
 
               {/* Optie 1: Server backups */}
-              <div className="rounded p-4" style={{ background:"#EBF3FF", border:"1px solid #D0E4F7" }}>
-                <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>☁️ Herstel vanuit server-backup</p>
+              <div className="rounded p-4" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
+                <p className="text-sm font-bold mb-1" style={{ color:"#162D6E" }}>☁️ Herstel vanuit server-backup</p>
                 <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                   Automatische backups op de server — elke dag om 10:00, 13:00 en 18:00 aangemaakt, 7 dagen bewaard.
                 </p>
@@ -7150,9 +7151,9 @@ ${(function(){
                       const label = dateNL === todayNL ? `Vandaag ${timeStr}` : `${dateStr} ${timeStr}`;
                       return (
                         <div key={b.key} className="flex items-center justify-between rounded p-2"
-                          style={{ background: i === 0 ? "#fff" : "#f8fafc", border:`1px solid ${i === 0 ? "#D0E4F7" : "#e5e7eb"}` }}>
+                          style={{ background: i === 0 ? "#fff" : "#f8fafc", border:`1px solid ${i === 0 ? "#DBEAFE" : "#e5e7eb"}` }}>
                           <div className="flex items-center gap-2">
-                            {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:"#1A56A0", color:"white" }}>Laatste</span>}
+                            {i === 0 && <span className="text-xs px-1.5 py-0.5 rounded font-semibold" style={{ background:"#1E3A8A", color:"white" }}>Laatste</span>}
                             <span className="text-xs" style={{ color:"#374151" }}>☁️ {label}</span>
                           </div>
                           <button
@@ -7185,7 +7186,7 @@ ${(function(){
                               } catch(e) { alert("Fout: " + e.message); }
                             }}
                             className="text-xs px-2.5 py-1 font-medium"
-                            style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background:"#fff" }}>
+                            style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1E3A8A", background:"#fff" }}>
                             ↩ Selecteer
                           </button>
                         </div>
@@ -7197,7 +7198,7 @@ ${(function(){
 
               {/* Optie 2: Lokaal bestand */}
               <div className="rounded p-4" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
-                <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>💾 Importeer lokaal bestand</p>
+                <p className="text-sm font-bold mb-1" style={{ color:"#162D6E" }}>💾 Importeer lokaal bestand</p>
                 <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                   Selecteer een eerder geëxporteerd JSON-bestand van jouw computer.
                 </p>
@@ -7207,7 +7208,7 @@ ${(function(){
                     setTimeout(() => document.getElementById("db-import-input").click(), 100);
                   }}
                   className="text-xs px-3 py-2 font-medium"
-                  style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1A56A0", background:"#EBF3FF" }}>
+                  style={{ border:"1px solid #D0E4F7", borderRadius:4, color:"#1E3A8A", background:"#F8F9FB" }}>
                   📂 Kies bestand...
                 </button>
               </div>
@@ -7225,8 +7226,8 @@ ${(function(){
             {/* Modal header */}
             <div className="px-6 py-4" style={{ borderBottom:"3px solid #1A56A0" }}>
               <div className="flex items-center gap-3">
-                <div className="w-1 h-5" style={{ background:"#26B5AE", borderRadius:2 }}/>
-                <h2 className="text-base font-semibold" style={{ color:"#0C2340" }}>Applicatie toevoegen</h2>
+                <div className="w-1 h-5" style={{ background:"#E91E8C", borderRadius:2 }}/>
+                <h2 className="text-base font-semibold" style={{ color:"#162D6E" }}>Applicatie toevoegen</h2>
               </div>
             </div>
             <div className="p-6">
@@ -7239,23 +7240,23 @@ ${(function(){
                   { k:"owner",         l:"Applicatie-eigenaar",    p:"bijv. Functioneel beheerder",  hint:"" },
                 ].map(f => (
                   <div key={f.k}>
-                    <label className="text-xs font-semibold block mb-0.5" style={{ color:"#0C2340" }}>{f.l}</label>
+                    <label className="text-xs font-semibold block mb-0.5" style={{ color:"#162D6E" }}>{f.l}</label>
                     {f.hint && <p className="text-xs mb-1" style={{ color:"#9ca3af" }}>{f.hint}</p>}
                     <input value={form[f.k] || ""} onChange={e => setForm(p => ({ ...p, [f.k]: e.target.value }))}
                       placeholder={f.p}
                       className="w-full border px-3 py-2 text-sm focus:outline-none"
-                      style={{ borderColor:"#D0E4F7", borderRadius:4, background: f.bg || "white" }}
-                      onFocus={e => e.target.style.borderColor="#1A56A0"}
-                      onBlur={e => e.target.style.borderColor="#D0E4F7"}
+                      style={{ borderColor:"#DBEAFE", borderRadius:4, background: f.bg || "white" }}
+                      onFocus={e => e.target.style.borderColor="#1E3A8A"}
+                      onBlur={e => e.target.style.borderColor="#DBEAFE"}
                     />
                   </div>
                 ))}
                 <div>
-                  <label className="text-xs font-semibold block mb-1" style={{ color:"#0C2340" }}>Toelichting</label>
+                  <label className="text-xs font-semibold block mb-1" style={{ color:"#162D6E" }}>Toelichting</label>
                   <textarea value={form.appNotes} onChange={e => setForm(p => ({ ...p, appNotes: e.target.value }))}
                     rows={2} placeholder="Optionele context of notities"
                     className="w-full border px-3 py-2 text-sm focus:outline-none"
-                    style={{ borderColor:"#D0E4F7", borderRadius:4 }}/>
+                    style={{ borderColor:"#DBEAFE", borderRadius:4 }}/>
                 </div>
               </div>
               <div className="flex gap-3 mt-5">
@@ -7266,7 +7267,7 @@ ${(function(){
                 </button>
                 <button onClick={addApp} disabled={!form.name.trim()}
                   className="flex-1 text-white py-2 text-sm font-semibold"
-                  style={{ background: form.name.trim() ? "#1A56A0" : "#d1d5db", borderRadius:4 }}>
+                  style={{ background: form.name.trim() ? "#1E3A8A" : "#d1d5db", borderRadius:4 }}>
                   Toevoegen &amp; starten
                 </button>
               </div>
