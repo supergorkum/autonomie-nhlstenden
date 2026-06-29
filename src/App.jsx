@@ -6902,23 +6902,21 @@ ${(function(){
   return (
     <div className="flex flex-col h-screen" style={{ fontFamily:"Inter, system-ui, sans-serif", background:"#F8F9FB" }}>
       {/* Header — NHL Stenden huisstijl */}
-      <header className="flex items-center justify-between px-5 flex-shrink-0"
-        style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)", minHeight:56 }}>
-        {/* Logo box (kenmerkend NHL Stenden) */}
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between px-6 flex-shrink-0"
+        style={{ background:"linear-gradient(160deg, #0F1E52 0%, #162D6E 40%, #1E3A8A 70%, #2563EB 100%)", minHeight:64 }}>
+        {/* Logo + titel */}
+        <div className="flex items-center gap-3">
           <img
             src="/nhl-logo-transparent.png"
             alt="NHL Stenden"
-            style={{ height:36, width:36, objectFit:"contain", display:"block" }}
+            style={{ height:40, width:40, objectFit:"contain", display:"block", flexShrink:0 }}
           />
-          {/* Teal accent bar */}
-          <div className="w-1 self-stretch" style={{ background:"#E91E8C", margin:"8px 0" }} />
+          <div className="w-px self-stretch" style={{ background:"rgba(255,255,255,0.25)", margin:"10px 0" }} />
           <div>
-            <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Autonomie-assessment</h1>
-            <p style={{ fontSize:11, color:"#F9A8D4" }}>
+            <h1 className="font-extrabold text-white leading-tight" style={{ fontSize:14, letterSpacing:"0.01em" }}>Digitale Autonomie-assessment</h1>
+            <p style={{ fontSize:11, color:"#bfdbfe", marginTop:1 }}>
               Prototype · Ambassadeurslijn Digitale Autonomie
             </p>
-
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -6968,9 +6966,9 @@ ${(function(){
               className="flex items-center gap-2 text-xs font-medium px-3 py-1.5"
               style={{
                 borderRadius: 20,
-                border: `1px solid ${useSecondaryName ? "rgba(232,119,34,0.6)" : "rgba(255,255,255,0.2)"}`,
-                background: useSecondaryName ? "rgba(232,119,34,0.2)" : "rgba(255,255,255,0.08)",
-                color: useSecondaryName ? "#f8b87a" : "#94a3b8",
+                border: `1px solid ${useSecondaryName ? "rgba(233,30,140,0.6)" : "rgba(255,255,255,0.2)"}`,
+                background: useSecondaryName ? "rgba(233,30,140,0.15)" : "rgba(255,255,255,0.08)",
+                color: useSecondaryName ? "#F9A8D4" : "#94a3b8",
                 transition: "all 0.2s",
               }}
               title={useSecondaryName ? "Schakel naar open weergave" : "Schakel naar discrete weergave"}>
@@ -6998,9 +6996,9 @@ ${(function(){
         </div>
       </header>
 
-      {/* Sub-header nav — lichte blauwe balk (NHS Stenden stijl) */}
-      <div className="flex-shrink-0" style={{ background:"#1E3A8A" }}>
-        <nav className="px-5 flex gap-0">
+      {/* Sub-header nav */}
+      <div className="flex-shrink-0" style={{ background:"#162D6E", borderBottom:"1px solid rgba(255,255,255,0.1)" }}>
+        <nav className="px-6 flex gap-0">
           {[
             { k:"dashboard", label:"Dashboard" },
             { k:"apps",      label:"Applicaties" },
@@ -7017,17 +7015,16 @@ ${(function(){
             if (t.k === "CHANGELOG") return (
               <button key={t.k} onClick={() => setShowChangelog(true)}
                 className="px-3 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
-                style={{ borderColor:"transparent", color:"rgba(255,255,255,0.5)", fontSize:12 }}>
+                style={{ borderColor:"transparent", color:"rgba(255,255,255,0.45)", fontSize:12, letterSpacing:"0.01em" }}>
                 {t.label}
               </button>
             );
             if (t.k === "admin") return (
               <button key={t.k} onClick={() => setView(t.k)}
-                className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ml-1"
+                className="px-4 py-1.5 text-xs font-bold transition-colors whitespace-nowrap ml-2 self-center"
                 style={view === t.k
-                  ? { borderColor:"#E91E8C", color:"#fff", background:"rgba(255,255,255,0.18)", borderRadius:"4px 4px 0 0" }
-                  : { borderColor:"rgba(255,255,255,0.2)", color:"rgba(255,255,255,0.6)",
-                      background:"rgba(255,255,255,0.07)", borderRadius:"4px 4px 0 0" }}>
+                  ? { borderRadius:8, background:"#BE185D", color:"#fff" }
+                  : { borderRadius:8, background:"#E91E8C", color:"#fff" }}>
                 {t.label}
               </button>
             );
@@ -7035,8 +7032,8 @@ ${(function(){
               <button key={t.k} onClick={() => setView(t.k)}
                 className="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
                 style={view === t.k
-                  ? { borderColor:"#E91E8C", color:"#fff", background:"rgba(255,255,255,0.12)" }
-                  : { borderColor:"transparent", color:"rgba(255,255,255,0.75)" }}>
+                  ? { borderColor:"#E91E8C", color:"#fff", background:"rgba(255,255,255,0.1)", borderBottomWidth:2 }
+                  : { borderColor:"transparent", color:"rgba(255,255,255,0.6)", borderBottomWidth:2 }}>
                 {t.label}
               </button>
             );
