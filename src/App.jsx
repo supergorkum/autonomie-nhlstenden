@@ -2327,64 +2327,107 @@ function App() {
   // ── Login scherm ─────────────────────────────────────────────
   if (!loggedIn) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background:"#F8F9FB", fontFamily:"Inter, system-ui, sans-serif" }}>
-        <div className="bg-white w-full max-w-sm p-0 overflow-hidden" style={{ borderRadius:4, boxShadow:"0 8px 32px rgba(12,35,64,0.2)" }}>
-          {/* Header */}
-          <div className="px-8 py-6 text-white" style={{ background:"linear-gradient(135deg, #162D6E 0%, #1E3A8A 60%, #2563EB 100%)" }}>
-            <div className="flex items-center gap-3 mb-3">
-              <img
-                src="/nhl-logo-transparent.png"
-                alt="NHL Stenden"
-                style={{ height:32, width:32, objectFit:"contain", display:"block" }}
-              />
-              <div className="w-px self-stretch" style={{ background:"#E91E8C", margin:"2px 0" }}/>
-              <div>
-                <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Autonomie-assessment</p>
-                <p style={{ fontSize:10, color:"#F9A8D4" }}>Prototype · Ambassadeurslijn Digitale Autonomie</p>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <p style={{ fontSize:10, color:"rgba(255,255,255,0.5)" }}>
-                Ambassadeurslijn Digitale Autonomie
-              </p>
-              <span className="font-bold px-2 py-0.5" style={{ fontSize:10, color:"#162D6E", background:"#E91E8C", borderRadius:3 }}>
-                {VERSION}
-              </span>
-            </div>
-          </div>
-          {/* Form */}
-          <div className="px-8 py-6">
-            <div className="flex items-center gap-2 mb-5">
-              <div className="w-8 h-8 flex items-center justify-center text-white" style={{ background:"#1E3A8A", borderRadius:4, fontSize:16 }}>🔒</div>
-              <div>
-                <p className="font-semibold text-sm" style={{ color:"#162D6E" }}>Toegangscode vereist</p>
-                <p className="text-xs text-gray-400">Voer de code in om toegang te krijgen</p>
-              </div>
-            </div>
-            <input
-              type="password"
-              value={loginInput}
-              onChange={e => { setLoginInput(e.target.value); setLoginError(false); }}
-              onKeyDown={e => e.key === "Enter" && handleLogin()}
-              placeholder="Toegangscode"
-              autoFocus
-              className="w-full border px-3 py-2.5 text-sm focus:outline-none mb-2"
-              style={{ borderColor: loginError ? "#dc2626" : "#DBEAFE", borderRadius:4, letterSpacing:3 }}
-            />
-            {loginError && (
-              <p className="text-xs mb-3" style={{ color:"#dc2626" }}>Toegangscode onjuist. Probeer opnieuw.</p>
-            )}
-            <button
-              onClick={handleLogin}
-              className="w-full text-white py-2.5 text-sm font-semibold mt-1"
-              style={{ background:"#1E3A8A", borderRadius:4 }}>
-              Inloggen
-            </button>
-            <p className="text-xs text-center mt-4" style={{ color:"#9ca3af" }}>
-              Neem contact op met de applicatiebeheerder voor de toegangscode.
-            </p>
-          </div>
+      <div className="relative flex items-center justify-center min-h-screen overflow-hidden"
+        style={{ fontFamily:"Inter, system-ui, sans-serif", background:"linear-gradient(160deg, #0F1E52 0%, #162D6E 40%, #1E3A8A 70%, #2563EB 100%)" }}>
+
+        {/* Decoratieve cirkels zoals AI-Netwerk */}
+        <div style={{ position:"absolute", inset:0, pointerEvents:"none", overflow:"hidden" }}>
+          <div style={{ position:"absolute", top:-80, right:-80, width:400, height:400, border:"1px solid rgba(255,255,255,0.08)", borderRadius:"50%" }}/>
+          <div style={{ position:"absolute", top:40, right:0, width:240, height:240, border:"1px solid rgba(255,255,255,0.08)", borderRadius:"50%" }}/>
+          <div style={{ position:"absolute", bottom:-60, left:-80, width:360, height:360, border:"1px solid rgba(255,255,255,0.08)", borderRadius:"50%" }}/>
+          <div style={{ position:"absolute", top:"40%", left:"30%", width:140, height:140, border:"1px solid rgba(255,255,255,0.05)", borderRadius:"50%" }}/>
         </div>
+
+        {/* Login kaart */}
+        <div className="relative w-full mx-4" style={{ maxWidth:400, zIndex:10 }}>
+
+          {/* Logo boven het kaartje */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <img
+              src="/nhl-logo-transparent.png"
+              alt="NHL Stenden"
+              style={{ height:48, width:48, objectFit:"contain" }}
+            />
+            <div style={{ width:1, height:40, background:"rgba(255,255,255,0.25)" }}/>
+            <div>
+              <p className="font-extrabold text-white" style={{ fontSize:16, letterSpacing:"0.01em" }}>Digitale Autonomie-assessment</p>
+              <p style={{ fontSize:12, color:"#bfdbfe" }}>Ambassadeurslijn Digitale Autonomie</p>
+            </div>
+          </div>
+
+          {/* Wit kaartje */}
+          <div className="bg-white overflow-hidden" style={{ borderRadius:16, boxShadow:"0 20px 60px rgba(0,0,0,0.3)" }}>
+
+            {/* Roze accent balk bovenaan */}
+            <div style={{ height:4, background:"linear-gradient(90deg, #E91E8C 0%, #F472B6 100%)" }}/>
+
+            <div className="px-8 py-8">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full"
+                style={{ background:"#EFF6FF", border:"1px solid #DBEAFE" }}>
+                <span style={{ fontSize:14 }}>🔒</span>
+                <span className="text-xs font-semibold" style={{ color:"#1E3A8A" }}>Toegang vereist</span>
+                <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"#E91E8C", color:"white", fontSize:10 }}>{VERSION}</span>
+              </div>
+
+              <h2 className="font-bold mb-1" style={{ fontSize:18, color:"#162D6E" }}>Welkom</h2>
+              <p className="text-sm mb-6" style={{ color:"#64748b" }}>Voer de toegangscode in om verder te gaan.</p>
+
+              <input
+                type="password"
+                value={loginInput}
+                onChange={e => { setLoginInput(e.target.value); setLoginError(false); }}
+                onKeyDown={e => e.key === "Enter" && handleLogin()}
+                placeholder="Toegangscode"
+                autoFocus
+                className="w-full px-4 py-3 text-sm focus:outline-none mb-2"
+                style={{
+                  borderRadius:10,
+                  border: loginError ? "2px solid #dc2626" : "2px solid #DBEAFE",
+                  letterSpacing:4,
+                  background:"#F8FAFF",
+                  fontSize:14,
+                  transition:"border-color 0.2s"
+                }}
+              />
+              {loginError && (
+                <p className="text-xs mb-3 flex items-center gap-1" style={{ color:"#dc2626" }}>
+                  <span>⚠️</span> Toegangscode onjuist. Probeer opnieuw.
+                </p>
+              )}
+              <button
+                onClick={handleLogin}
+                className="w-full text-white py-3 text-sm font-bold mt-2"
+                style={{ background:"linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%)", borderRadius:10, letterSpacing:"0.02em", boxShadow:"0 4px 12px rgba(37,99,235,0.4)" }}>
+                Inloggen →
+              </button>
+
+              <p className="text-xs text-center mt-5" style={{ color:"#94a3b8" }}>
+                Neem contact op met de applicatiebeheerder voor de toegangscode.
+              </p>
+            </div>
+          </div>
+
+          {/* Golf onderaan */}
+          <div style={{ marginTop:-2 }}>
+            <svg viewBox="0 0 400 40" fill="none" preserveAspectRatio="none"
+              style={{ width:"100%", height:40, display:"block" }}>
+              <path d="M0 40L400 40L400 15C360 28 300 5 240 12C180 19 120 35 60 28C30 24 10 14 0 18L0 40Z" fill="rgba(255,255,255,0.08)"/>
+              <path d="M0 40L400 40L400 22C340 35 280 10 210 18C140 26 80 38 20 30L0 26L0 40Z" fill="rgba(255,255,255,0.05)"/>
+            </svg>
+          </div>
+
+        </div>
+
+        {/* Golf overgang onderaan heel scherm */}
+        <div style={{ position:"absolute", bottom:0, left:0, right:0 }}>
+          <svg viewBox="0 0 1440 60" fill="none" preserveAspectRatio="none"
+            style={{ width:"100%", height:60, display:"block" }}>
+            <path d="M0 60L1440 60L1440 20C1380 45 1280 5 1160 18C1040 31 920 55 800 48C680 41 560 12 440 22C320 32 200 52 80 42L0 36L0 60Z" fill="rgba(255,255,255,0.06)"/>
+            <path d="M0 60L1440 60L1440 32C1360 52 1240 18 1100 28C960 38 840 58 700 50C560 42 440 20 300 30C160 40 80 58 0 48L0 60Z" fill="rgba(255,255,255,0.04)"/>
+          </svg>
+        </div>
+
       </div>
     );
   }
