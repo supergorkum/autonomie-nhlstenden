@@ -2312,7 +2312,8 @@ function App() {
   function handleLogin() {
     if (loginInput === LOGIN_CODE) {
       sessionStorage.setItem("nhl_auth", "ok");
-      sessionStorage.setItem("nhl_api_token", loginInput); // loginInput === APP_API_TOKEN
+      const apiTokenValue = import.meta.env.VITE_API_TOKEN || loginInput;
+      sessionStorage.setItem("nhl_api_token", apiTokenValue);
       setLoggedIn(true);
       setLoginError(false);
     } else {
@@ -2322,7 +2323,7 @@ function App() {
   }
 
   // ── Login scherm ─────────────────────────────────────────────
-  if (false) {
+  if (!loggedIn) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ background:"#EBF3FF", fontFamily:"system-ui,sans-serif" }}>
         <div className="bg-white w-full max-w-sm p-0 overflow-hidden" style={{ borderRadius:4, boxShadow:"0 8px 32px rgba(12,35,64,0.2)" }}>
