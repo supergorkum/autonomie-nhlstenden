@@ -2178,6 +2178,7 @@ function App() {
   const [backupType, setBackupType] = useState(null); // "auto" of "manual"
   const [serverBackups, setServerBackups] = useState([]); // lijst van server-backups
   const [backupsLoaded, setBackupsLoaded] = useState(false);
+  const [backupBezig, setBackupBezig] = useState(false);
   const [view,       setView]      = useState("about");
   const [aboutTab,   setAboutTab]  = useState("over");
   const [snapshots,  setSnapshots] = useState(() => {
@@ -4936,11 +4937,41 @@ ${(function(){
                     Automatische backups om 12:00 en 18:00 · bewaard 7 dagen
                   </p>
                 </div>
-                {serverBackups.length > 0 && (
-                  <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#f0f9f9", color:"#0f766e", border:"1px solid #86efac" }}>
-                    {serverBackups.length} backup{serverBackups.length !== 1 ? "s" : ""} beschikbaar
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {serverBackups.length > 0 && (
+                    <span className="text-xs px-2 py-0.5 rounded" style={{ background:"#f0f9f9", color:"#0f766e", border:"1px solid #86efac" }}>
+                      {serverBackups.length} backup{serverBackups.length !== 1 ? "s" : ""} beschikbaar
+                    </span>
+                  )}
+                  <button
+                    disabled={backupBezig}
+                    onClick={async () => {
+                      setBackupBezig(true);
+                      try {
+                        const r = await fetch("/api/force-backup", {
+                          method: "POST",
+                          headers: { "x-api-token": apiToken },
+                        });
+                        const result = await r.json();
+                        if (result.ok) {
+                          alert("Backup aangemaakt: " + result.key);
+                          const r2 = await fetch("/api/list-backups", { headers: { "x-api-token": apiToken } });
+                          const backups2 = await r2.json();
+                          if (Array.isArray(backups2)) setServerBackups(backups2);
+                        } else {
+                          alert("Backup mislukt: " + (result.error || "onbekend"));
+                        }
+                      } catch (e) {
+                        alert("Fout: " + e.message);
+                      } finally {
+                        setBackupBezig(false);
+                      }
+                    }}
+                    className="text-xs px-2.5 py-1 font-medium"
+                    style={{ border:"1px solid #D0E4F7", borderRadius:3, color:"#1A56A0", background: backupBezig ? "#f3f4f6" : "#fff", cursor: backupBezig ? "not-allowed" : "pointer" }}>
+                    {backupBezig ? "Bezig..." : "☁️ Nu backup maken"}
+                  </button>
+                </div>
               </div>
               {serverBackups.length === 0 ? (
                 <p className="text-xs italic" style={{ color:"#9ca3af" }}>
