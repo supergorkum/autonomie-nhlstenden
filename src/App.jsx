@@ -52,7 +52,7 @@ const CHANGELOG = [
     wijzigingen: [
       "Migratie naar eigen NHL Stenden-serverinfrastructuur voltooid — draait nu op Ubuntu Linux in Leeuwarden",
       "Loginscherm verwijderd — applicatie direct toegankelijk binnen NHL Stenden ICT-omgeving",
-      "Transparantiepagina bijgewerkt naar productiesituatie: eigen server, eigen jurisdictie, maximale soevereiniteit",
+      "Transparantiepagina bijgewerkt naar productiesituatie: eigen server, eigen jurisdictie, maximale autonomie",
       "Versienummer verhoogd naar v2.0 als markering van livegang in eigen productie",
     ]
   },
@@ -75,6 +75,7 @@ const CHANGELOG = [
     versie: "v2.3",
     datum: "Juni 2026",
     wijzigingen: [
+      "Naamwijziging: ‘Digitale Soevereiniteit’ hernoemd naar ‘Digitale Autonomie’ conform SURF en Utrecht University terminologie — doorgevoerd in alle teksten, titels, PDF-rapporten, Excel-exports en de handleiding",
       "Automatische cloud-backups om 10:00, 13:00 en 18:00 via Netlify scheduled functions",
       "Server-backups bewaard 7 dagen, daarna automatisch verwijderd",
       "Import-modal met keuze: herstel vanuit server-backup of importeer lokaal bestand",
@@ -106,7 +107,7 @@ const CHANGELOG = [
     datum: "Juni 2026",
     wijzigingen: [
       "Prototype-status vastgelegd: applicatie is officieel een prototype — zichtbaar in header, Over de tool en Over dit product",
-      "Header: subtitel bijgewerkt naar 'Prototype · Ambassadeurslijn Digitale Soevereiniteit'",
+      "Header: subtitel bijgewerkt naar 'Prototype · Ambassadeurslijn Digitale Autonomie'",
       "Over de tool: omschrijving bijgewerkt — product draait op eigen NHL Stenden-serverinfrastructuur (Ubuntu Linux, Leeuwarden).",
       "Over de tool: inspiratiebron-paragraaf toegevoegd — instrument als voorbeeld voor beleidsontwikkeling in eigen organisatie",
       "Over dit product: volledig bijgewerkt naar productiesituatie — eigen NHL Stenden-infrastructuur, geen externe cloudpartijen.",
@@ -229,9 +230,9 @@ const CHANGELOG = [
     versie: "v1.0",
     datum: "Mei 2026",
     wijzigingen: [
-      "Eerste volledige versie live op nhl-soevereiniteitsassessment.netlify.app",
+      "Eerste volledige versie live op autonomie-nhlstenden.netlify.app",
       "DAAF Quick Scan (9 indicatoren) volledig geïmplementeerd conform Utrecht University framework",
-      "DICTU Soevereiniteitscheck (4 vragen) toegevoegd",
+      "DICTU Autonomiecheck (4 vragen) toegevoegd",
       "Autonomie-kwadrant (4 kwadranten: OPTIMAAL / BEHEERSBAAR / AANDACHTSPUNT / KRITIEK)",
       "Applicatiekaarten met snelheidsmeter, DICTU-balk en aanbevelingen",
       "Vergelijkingspagina met filter, staafdiagram en vergelijkingstabel",
@@ -492,7 +493,7 @@ function calcScores(scores) {
   const dimH = weightedDim([["H1", 2]]);
   const belang = levelAvg([dimF, dimG, dimH]);
 
-  // ── DICTU soevereiniteitsgemiddelde ─────────────────────────
+  // ── DICTU autonomiegemiddelde ─────────────────────────
   const dictuKeys = ["2.1","2.2","2.3","4.1"];
   const filledDictu = dictuKeys.filter(k => sc(k) > 0);
   const dictuAvg = filledDictu.length
@@ -575,7 +576,7 @@ function generateRecommendations(scores) {
   }
 
   if (dictuLaag && !inKritiek) {
-    strategic += ` Aanvullend: de DICTU-soevereiniteitsscore is laag (${sc.dictuAvg?.toFixed(1)}/5). Prioriteer verbetering van dataresidency en sleutelbeheer bij de volgende leveranciersevaluatie.`;
+    strategic += ` Aanvullend: de DICTU-autonomiescore is laag (${sc.dictuAvg?.toFixed(1)}/5). Prioriteer verbetering van dataresidency en sleutelbeheer bij de volgende leveranciersevaluatie.`;
   }
 
   return { quickWin, strategic };
@@ -886,7 +887,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
           </p>
         </div>
         <p style={{ fontSize:10, color:"#7DD3D0", marginTop:4 }}>
-          Aanleiding: inventarisatie digitale soevereiniteit — aansluiting bij VH en SURF digitale strategie
+          Aanleiding: inventarisatie digitale autonomie — aansluiting bij VH en SURF digitale strategie
         </p>
       </div>
 
@@ -1009,7 +1010,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
   );
 }
 
-// ── DictuRadarSVG — spindiagram voor DICTU soevereiniteitscheck ──
+// ── DictuRadarSVG — spindiagram voor DICTU autonomiecheck ──
 // Alle 4 assen hebben dezelfde richting: hoger = meer soeverein (goed)
 function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
@@ -2335,13 +2336,13 @@ function App() {
               </div>
               <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
               <div>
-                <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Soevereiniteitsassessment</p>
-                <p style={{ fontSize:10, color:"#7DD3D0" }}>Prototype · Ambassadeurslijn Digitale Soevereiniteit</p>
+                <p className="font-bold text-white" style={{ fontSize:12 }}>Digitale Autonomie-assessment</p>
+                <p style={{ fontSize:10, color:"#7DD3D0" }}>Prototype · Ambassadeurslijn Digitale Autonomie</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <p style={{ fontSize:10, color:"rgba(255,255,255,0.5)" }}>
-                Ambassadeurslijn Digitale Soevereiniteit
+                Ambassadeurslijn Digitale Autonomie
               </p>
               <span className="font-bold px-2 py-0.5" style={{ fontSize:10, color:"#0C2340", background:"#26B5AE", borderRadius:3 }}>
                 {VERSION}
@@ -2430,7 +2431,7 @@ function App() {
       + String(now.getMinutes()).padStart(2,"0");
     const payload = {
       exportedAt:  now.toISOString(),
-      exportedBy:  "NHL Stenden Portfolioanalyse Digitale Soevereiniteit",
+      exportedBy:  "NHL Stenden Portfolioanalyse Digitale Autonomie",
       version:     VERSION,
       appCount:    apps.length,
       apps:        apps,
@@ -2571,7 +2572,7 @@ function App() {
     const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
     const url  = URL.createObjectURL(blob);
     const el   = document.createElement("a");
-    el.href = url; el.download = "NHL_Stenden_Soevereiniteitsassessment.xlsx"; el.click();
+    el.href = url; el.download = "NHL_Stenden_Autonomieassessment.xlsx"; el.click();
     URL.revokeObjectURL(url);
   }
 
@@ -2610,10 +2611,10 @@ function App() {
       const besteInsol   = [...scored].sort((a,b) => (b.sc.mitigatie||0)-(a.sc.mitigatie||0))[0];
       const laagsteDictu = [...scored].filter(a=>a.sc.dictuAvg).sort((a,b)=>(a.sc.dictuAvg||5)-(b.sc.dictuAvg||5))[0];
 
-      let tekst = `<p>Dit rapport beschrijft de uitkomsten van het digitale soevereiniteitsassessment van <strong>NHL Stenden Hogeschool</strong>, 
-        uitgevoerd in het kader van de Ambassadeurslijn Digitale Soevereiniteit. 
+      let tekst = `<p>Dit rapport beschrijft de uitkomsten van het digitale autonomie-assessment van <strong>NHL Stenden Hogeschool</strong>, 
+        uitgevoerd in het kader van de Ambassadeurslijn Digitale Autonomie. 
         In deze rapportage zijn <strong>${appsArr.length} applicatie${appsArr.length!==1?"s":""}</strong> beoordeeld op basis van twee frameworks: 
-        het <strong>DAAF Framework</strong> (Utrecht University) voor digitale autonomie en het <strong>DICTU Framework</strong> (Rijksoverheid) voor technische en juridische soevereiniteit.</p>`;
+        het <strong>DAAF Framework</strong> (Utrecht University) voor digitale autonomie en het <strong>DICTU Framework</strong> (Rijksoverheid) voor technische en juridische autonomie.</p>`;
 
       tekst += `<p style="margin-top:8px;">De gemiddelde autonomiescore over alle beoordeelde applicaties bedraagt <strong>${avg.toFixed(1)} op een schaal van 1 tot 10</strong>. 
         De autonomiescore is geen maat voor hoe soeverein een applicatie is, maar voor <em>hoe urgent het autonomieprobleem is</em>: 
@@ -2630,8 +2631,8 @@ function App() {
         De sterkste mitigatie-capaciteit toont <strong>${dName(besteInsol)}</strong> 
         (mitigatiescore ${besteInsol.sc.mitigatie?.toFixed(2)}): er zijn alternatieven beschikbaar, de interne kennis is geborgd en de contractuele bescherming is op orde.</p>`;
 
-      if (laagsteDictu) tekst += `<p style="margin-top:6px;">Vanuit het DICTU-perspectief (technische en juridische soevereiniteit, schaal 1–5) verdient 
-        <strong>${dName(laagsteDictu)}</strong> extra aandacht met een soevereiniteitsscore van ${laagsteDictu.sc.dictuAvg?.toFixed(1)}. 
+      if (laagsteDictu) tekst += `<p style="margin-top:6px;">Vanuit het DICTU-perspectief (technische en juridische autonomie, schaal 1–5) verdient 
+        <strong>${dName(laagsteDictu)}</strong> extra aandacht met een autonomiescore van ${laagsteDictu.sc.dictuAvg?.toFixed(1)}. 
         Dit vraagt om nadere controle van datalocatie, sleutelbeheer en juridische beschermingsclausules.</p>`;
 
       if (appsArr.length > 1) {
@@ -2838,11 +2839,11 @@ function App() {
 
       // Data en DICTU
       if (laagDictu.length > 0) {
-        html += `<p style="margin-top:8px"><strong>Technische soevereiniteit (DICTU):</strong> 
-          ${laagDictu.length} applicatie${laagDictu.length!==1?"s scoren":"scoort"} laag op de DICTU-soevereiniteitsmaatstaf 
+        html += `<p style="margin-top:8px"><strong>Technische autonomie (DICTU):</strong> 
+          ${laagDictu.length} applicatie${laagDictu.length!==1?"s scoren":"scoort"} laag op de DICTU-autonomiemaatstaf 
           (${laagDictu.map(a=>dName(a)+" "+a.sc.dictuAvg?.toFixed(1)+"/5").join(", ")}). 
           Dit duidt op onvoldoende waarborgen voor dataresidency, sleutelbeheer of juridische bescherming. 
-          Technische soevereiniteit is een noodzakelijke randvoorwaarde: juridische bescherming alleen is onvoldoende 
+          Technische autonomie is een noodzakelijke randvoorwaarde: juridische bescherming alleen is onvoldoende 
           als de technische infrastructuur toegang voor derden niet uitsluit.</p>`;
       }
 
@@ -2928,7 +2929,7 @@ function App() {
         <h3>${aN}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
           <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
         </h3>
-        ${[...DAAF,...DICTU].some(q=>(a.notes||{})[q.key]&&(a.notes||{})[q.key].length>300)?`<p style="font-size:9px;color:#9ca3af;font-family:Arial;margin-bottom:6px;font-style:italic">Motivaties zijn samengevat. De volledige toelichting is terug te lezen in de Digitale Soevereiniteitsassessment Tool.</p>`:""}
+        ${[...DAAF,...DICTU].some(q=>(a.notes||{})[q.key]&&(a.notes||{})[q.key].length>300)?`<p style="font-size:9px;color:#9ca3af;font-family:Arial;margin-bottom:6px;font-style:italic">Motivaties zijn samengevat. De volledige toelichting is terug te lezen in de Digitale Autonomie-assessment Tool.</p>`:""}
         <table class="scores-table">
           <tr><th>Vraag</th><th>Dimensie</th><th>Indicator</th><th>Score</th><th>Label</th><th>Motivatie</th></tr>
           ${daafRows}${dictuRows}
@@ -2971,7 +2972,7 @@ function App() {
           if (dimS("C") < 2)             punten.push("Nauwelijks technische exitopties");
           if (dimS("D") < 2)             punten.push("Interne kennis onvoldoende geborgd");
           if (dimS("E") < 2)             punten.push("Exit-clausules ontbreken of zijn zwak");
-          if ((a.sc.dictuAvg||5) < 3)    punten.push("Onvoldoende technische soevereiniteit (DICTU)");
+          if ((a.sc.dictuAvg||5) < 3)    punten.push("Onvoldoende technische autonomie (DICTU)");
           if ((a.scores["A1"]||0) >= 4)  punten.push("Leverancier valt onder niet-EU jurisdictie");
           const punt = punten.length > 0 ? punten[0] : "Geen urgente aandachtspunten gevonden";
           const extra = punten.length > 1 ? `<br/><span style="color:#9ca3af;font-size:9px">+ ${punten.length-1} overig${punten.length>2?"e punten":" punt"}</span>` : "";
@@ -3073,7 +3074,7 @@ function App() {
         </div>
       </div>
       <div style="font-family:Arial;font-size:9px;color:#26B5AE">
-        NHL Stenden · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit · Aansluiting VH en SURF
+        NHL Stenden · Programma Digitale Samenhang · Ambassadeurslijn Digitale Autonomie · Aansluiting VH en SURF
       </div>
     </div>
   </div>`;
@@ -3116,7 +3117,7 @@ function App() {
       if ((a.scores||{})["E1"] <= 2)
         acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, dataportabiliteitsgarantie en opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een data return plan: wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1A56A0", bg:"#EBF3FF" });
       if (sc.dictuAvg && sc.dictuAvg < 3)
-        acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Soevereiniteit", actie:"Vraag de leverancier schriftelijk naar datalocatie, garantie geen leverancierstoegang, verzet tegen niet-EU dataverzoeken en locatie control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier.", kleur:"#6d28d9", bg:"#faf5ff" });
+        acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Autonomie", actie:"Vraag de leverancier schriftelijk naar datalocatie, garantie geen leverancierstoegang, verzet tegen niet-EU dataverzoeken en locatie control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier.", kleur:"#6d28d9", bg:"#faf5ff" });
       if (sc.belang >= 4 && sc.risico >= 3)
         acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico bewust aanvaard? Maak een korte risicoafweging en leg de beslissing vast inclusief een herzieningsdatum.", tip:"Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E87722", bg:"#fff8e1" });
       if (acties.length === 0)
@@ -3168,7 +3169,7 @@ function App() {
 <html lang="nl">
 <head>
 <meta charset="UTF-8"/>
-<title>${visible.length === 1 ? "Assessment " + dName(visible[0]) + " — Digitale Soevereiniteit NHL Stenden " + datum : "Portfolioanalyse Digitale Soevereiniteit — NHL Stenden " + datum}</title>
+<title>${visible.length === 1 ? "Assessment " + dName(visible[0]) + " — Digitale Autonomie NHL Stenden " + datum : "Portfolioanalyse Digitale Autonomie — NHL Stenden " + datum}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.7}
@@ -3282,17 +3283,17 @@ function App() {
       <div style="width:2px;background:#26B5AE;height:44px"></div>
       <div>
         <div style="font-family:Arial;font-size:12px;font-weight:700;color:white">NHL Stenden Hogeschool</div>
-        <div style="font-family:Arial;font-size:9px;color:#7DD3D0;margin-top:2px">Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit</div>
+        <div style="font-family:Arial;font-size:9px;color:#7DD3D0;margin-top:2px">Programma Digitale Samenhang · Ambassadeurslijn Digitale Autonomie</div>
       </div>
     </div>
     <div style="height:2px;background:rgba(255,255,255,0.15);margin-bottom:28px"></div>
     <div style="font-family:Arial;font-size:11px;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.05em">AUTOMATISCH GEGENEREERDE ANALYSE</div>
     ${visible.length === 1 ? `
-    <div style="font-family:Arial;font-size:13px;font-weight:400;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.02em">Assessment Digitale Soevereiniteit</div>
+    <div style="font-family:Arial;font-size:13px;font-weight:400;color:#7DD3D0;margin-bottom:8px;letter-spacing:0.02em">Assessment Digitale Autonomie</div>
     <div style="font-family:Arial;font-size:34px;font-weight:700;color:white;line-height:1.1;margin-bottom:6px">` + dName(visible[0]) + `</div>
     <div style="font-family:Arial;font-size:13px;color:#7DD3D0;margin-bottom:4px">` + (visible[0].supplier ? visible[0].supplier + " · " : "") + `NHL Stenden Hogeschool · ` + datum + `</div>
     ` : `
-    <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">Portfolioanalyse<br/>Digitale Soevereiniteit</div>
+    <div style="font-family:Arial;font-size:30px;font-weight:700;color:white;line-height:1.15;margin-bottom:8px">Portfolioanalyse<br/>Digitale Autonomie</div>
     <div style="font-family:Arial;font-size:13px;color:#7DD3D0">Applicatielandschap NHL Stenden · ` + datum + `</div>
     `}
   </div>
@@ -3308,7 +3309,7 @@ function App() {
         <div class="cover-meta-row"><span class="cover-meta-label">Ambassadeurs</span><span class="cover-meta-value">J. Haije · E. Rolf · J. Blom</span></div>
       </div>
       <div style="font-family:Arial;font-size:10px;color:#374151;line-height:1.7;margin-bottom:12px">
-        Deze analyse is automatisch gegenereerd door de <strong style="color:#0C2340">Digitale Soevereiniteitsassessment Tool</strong> 
+        Deze analyse is automatisch gegenereerd door de <strong style="color:#0C2340">Digitale Autonomie-assessment Tool</strong> 
         van NHL Stenden Hogeschool. De tool is ontwikkeld door <strong>kwartiermaker E. van Gorkum</strong> samen met de <strong>Ambassadeurs J. Haije, E. Rolf en J. Blom</strong>, 
         als antwoord op de centrale vraagstelling voor NHL Stenden: <em>"Waar zetten we onze data neer en waar 
         liggen de potentiële problemen?"</em>
@@ -3334,7 +3335,7 @@ function App() {
 <div class="page-header">
   <div class="logo">NHL<br/>STENDEN</div>
   <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
-  <div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div>
+  <div><div class="header-title">Portfolioanalyse Digitale Autonomie</div>
   <div class="header-sub">Applicatielandschap NHL Stenden · ${datum} · ${VERSION}</div></div>
   <div class="header-right">${naamModus}</div>
 </div>
@@ -3344,7 +3345,7 @@ function App() {
 
   <div class="toc-section"><span class="toc-nr">1.</span><span class="toc-lbl">Inleiding en kader</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
   <div class="toc-sub"><span class="toc-nr">1.1</span><span class="toc-lbl">Over deze analyse en de tool</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
-  <div class="toc-sub"><span class="toc-nr">1.2</span><span class="toc-lbl">Het Expertiseteam Digitale Soevereiniteit</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
+  <div class="toc-sub"><span class="toc-nr">1.2</span><span class="toc-lbl">Het Expertiseteam Digitale Autonomie</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
   <div class="toc-sub"><span class="toc-nr">1.3</span><span class="toc-lbl">Organisatorische context</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
   <div class="toc-sub"><span class="toc-nr">1.4</span><span class="toc-lbl">Toegepaste frameworks</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
   <div class="toc-sub"><span class="toc-nr">1.5</span><span class="toc-lbl">Gebruik in het hoger onderwijs</span><span class="toc-dots"></span><span class="toc-pg">3</span></div>
@@ -3373,7 +3374,7 @@ function App() {
 <div class="page-header">
   <div class="logo">NHL<br/>STENDEN</div>
   <div style="width:2px;background:#26B5AE;align-self:stretch"></div>
-  <div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div>
+  <div><div class="header-title">Portfolioanalyse Digitale Autonomie</div>
   <div class="header-sub">Applicatielandschap NHL Stenden · ${datum} · ${VERSION}</div></div>
   <div class="header-right">${naamModus}</div>
 </div>
@@ -3382,12 +3383,12 @@ function App() {
   <h2>1. Inleiding en kader</h2>
   <div class="section-intro">
     Dit hoofdstuk beschrijft de aanleiding voor het rapport, de toegepaste frameworks en de bredere context 
-    van digitale soevereiniteit in het Nederlandse hoger onderwijs.
+    van digitale autonomie in het Nederlandse hoger onderwijs.
   </div>
 
   <h3>1.1 Over deze analyse en de tool</h3>
   <div class="narrative">
-    <p>Deze portfolioanalyse is automatisch gegenereerd door de <strong>Digitale Soevereiniteitsassessment Tool</strong> 
+    <p>Deze portfolioanalyse is automatisch gegenereerd door de <strong>Digitale Autonomie-assessment Tool</strong> 
     van NHL Stenden Hogeschool (${VERSION}). De tool is een levend, realtime instrument — 
     géén statisch rapport. Assessments worden bijgehouden en bijgewerkt naarmate contracten wijzigen, 
     leveranciers hun beleid aanpassen of nieuwe inzichten beschikbaar komen. Dit rapport is een momentopname; 
@@ -3398,12 +3399,12 @@ function App() {
     uit het kern-applicatielandschap. De tool is opgezet rondom <strong>23 kernsystemen</strong>, 
     maar is nadrukkelijk open voor elk informatiesysteem dat NHL Stenden inzet. 
     Applicatie-eigenaren en beheerders kunnen de tool <strong>proactief inzetten</strong> 
-    om op elk gewenst moment de soevereiniteit van een applicatie te controleren en te documenteren.</p>
+    om op elk gewenst moment de autonomie van een applicatie te controleren en te documenteren.</p>
   </div>
 
   <h3>1.2 De Kwartiermaker, Ambassadeurs en Multidisciplinaire Expertisegroep</h3>
   <div class="narrative">
-    <p>Het traject Digitale Soevereiniteit wordt uitgevoerd door een combinatie van een 
+    <p>Het traject Digitale Autonomie wordt uitgevoerd door een combinatie van een 
     <strong>kwartiermaker</strong>, <strong>drie ambassadeurs</strong> en een 
     <strong>multidisciplinaire expertisegroep</strong>. Elk speelt een eigen en duidelijk onderscheiden rol.</p>
   </div>
@@ -3439,7 +3440,7 @@ function App() {
   </div>
   <div class="narrative">
     <p>De expertisegroep levert input en feedback op de concrete deliverables, borgt de opgebouwde kennis 
-    en waarborgt dat digitale soevereiniteit vanuit alle relevante invalshoeken wordt benaderd. 
+    en waarborgt dat digitale autonomie vanuit alle relevante invalshoeken wordt benaderd. 
     Bij applicaties met aandachtspunten adviseert de expertisegroep nadrukkelijk om ook de 
     <strong>applicatie-eigenaar, contract-eigenaar en functioneel beheerder</strong> te betrekken — 
     zij beschikken over de operationele kennis die scores kan nuanceren en aanbevelingen 
@@ -3448,8 +3449,8 @@ function App() {
 
   <h3>1.3 Organisatorische context</h3>
   <div class="narrative">
-    <p>In december 2025 heeft het kernteam Digitale Soevereiniteit een adviesopdracht aangeboden 
-    NHL Stenden heeft digitale soevereiniteit verankerd als ambassadeurslijn binnen het 
+    <p>In december 2025 heeft het kernteam Digitale Autonomie een adviesopdracht aangeboden 
+    NHL Stenden heeft digitale autonomie verankerd als ambassadeurslijn binnen het 
     Programma Digitale Samenhang — geen apart project, maar een 
     <strong>ordenend perspectief</strong> dat bestaande initiatieven verbindt en richting geeft.</p>
   </div>
@@ -3476,7 +3477,7 @@ function App() {
 
   <h3>1.4 Toegepaste frameworks</h3>
   <div class="section-intro">
-    De beoordeling is gebaseerd op twee complementaire en erkende normenkaders voor digitale soevereiniteit.
+    De beoordeling is gebaseerd op twee complementaire en erkende normenkaders voor digitale autonomie.
   </div>
   <div class="framework-grid">
     <div class="framework-card fw-daaf">
@@ -3490,10 +3491,10 @@ function App() {
       NHL Stenden past de Quick Scan variant toe met 9 kernindicatoren.</div>
     </div>
     <div class="framework-card fw-dictu">
-      <div class="fw-title">DICTU Soevereiniteitscheck</div>
-      <div class="fw-sub">Rijksoverheid / DICTU · Technische soevereiniteit</div>
-      <div class="fw-body">De DICTU Soevereiniteitscheck richt zich specifiek op de technische dimensie 
-      van soevereiniteit. Vier vragen beoordelen: <strong>data residency</strong> (opslag uitsluitend 
+      <div class="fw-title">DICTU Autonomiecheck</div>
+      <div class="fw-sub">Rijksoverheid / DICTU · Technische autonomie</div>
+      <div class="fw-body">De DICTU Autonomiecheck richt zich specifiek op de technische dimensie 
+      van autonomie. Vier vragen beoordelen: <strong>data residency</strong> (opslag uitsluitend 
       in de EU), <strong>technische toegangsbeveiliging</strong> (geen leverancierstoegang zonder 
       toestemming), <strong>juridische bescherming</strong> (leverancier bestrijdt niet-EU 
       datavorderingen) en <strong>EU-infrastructuur</strong> (control plane volledig in de EU). 
@@ -3503,16 +3504,16 @@ function App() {
 
   <h3>1.5 Gebruik in het hoger onderwijs</h3>
   <div class="narrative">
-    <p>Digitale soevereiniteit staat breed op de agenda in het Nederlandse hoger onderwijs. 
+    <p>Digitale autonomie staat breed op de agenda in het Nederlandse hoger onderwijs. 
     De <strong>Vereniging Hogescholen (VH)</strong> en <strong>SURF</strong> — de ICT-samenwerkingsorganisatie 
     van onderwijs en onderzoek — werken aan gezamenlijke kaders en richtlijnen voor instellingen 
     die hun digitale afhankelijkheden in kaart willen brengen. Daarin zijn vier pijlers leidend: 
-    juridische soevereiniteit (onder welk recht valt de leverancier?), technische soevereiniteit 
-    (is data-portabiliteit en exitbaarheid geborgd?), organisatorische soevereiniteit (is er interne 
-    kennis en zijn er exitplannen?) en geopolitieke soevereiniteit (welke risico's brengt de 
+    juridische autonomie (onder welk recht valt de leverancier?), technische autonomie 
+    (is data-portabiliteit en exitbaarheid geborgd?), organisatorische autonomie (is er interne 
+    kennis en zijn er exitplannen?) en geopolitieke autonomie (welke risico's brengt de 
     jurisdictie van de leverancier met zich mee?).</p>
     <p>NHL Stenden loopt voorop door het DAAF-framework van Utrecht University en de DICTU 
-    Soevereiniteitscheck te combineren in één geïntegreerde assessmenttool. De uitkomsten sluiten 
+    Autonomiecheck te combineren in één geïntegreerde assessmenttool. De uitkomsten sluiten 
     aan bij de digitale strategie van VH en SURF en geven het Programma Digitale Samenhang 
     concrete handvatten voor prioritering, leveranciersgesprekken en beleidsvorming.</p>
   </div>
@@ -3641,7 +3642,7 @@ function App() {
     <div class="narrative">
       <p>De scores in dit rapport zijn ingevuld op basis van beschikbare contractgegevens,
       publieke documentatie en interne kennis van het
-      <strong>Expertiseteam Digitale Soevereiniteit</strong>.
+      <strong>Expertiseteam Digitale Autonomie</strong>.
       Dit is een bewuste methodische keuze: door eerst een nulmeting te doen
       op basis van contractinformatie, ontstaat een objectief startpunt dat
       onafhankelijk is van subjectieve perceptie.</p>
@@ -3684,7 +3685,7 @@ function App() {
     </div>
     ${kwRows}
     <div class="doc-footer">
-      NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Soevereiniteit ·
+      NHL Stenden Hogeschool · Programma Digitale Samenhang · Ambassadeurslijn Digitale Autonomie ·
       ${VERSION} · ${datum} · Kwartiermaker: E. van Gorkum · Ambassadeurs: J. Haije · E. Rolf · J. Blom
     </div>
   </div>
@@ -3712,10 +3713,10 @@ ${(function(){
 
   let html2 = '';
   html2 += '<div style="page-break-before:always">';
-  html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Soevereiniteit</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
+  html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Autonomie</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
   html2 += '<div style="padding:14px 48px 20px">';
   html2 += '<h2 style="font-family:Arial;font-size:14px;color:#0C2340;padding-bottom:4px;margin:0 0 6px;font-weight:700;border-bottom:2px solid #1A56A0">Portfoliostatus — Samenvatting</h2>';
-  html2 += '<div style="font-size:10px;line-height:1.5;color:#374151;margin-bottom:10px;border-left:3px solid #D0E4F7;padding-left:10px;font-family:Arial">Overzicht portfoliostatus digitale soevereiniteit NHL Stenden per ' + datum + '.</div>';
+  html2 += '<div style="font-size:10px;line-height:1.5;color:#374151;margin-bottom:10px;border-left:3px solid #D0E4F7;padding-left:10px;font-family:Arial">Overzicht portfoliostatus digitale autonomie NHL Stenden per ' + datum + '.</div>';
 
   // Oordeel + kerngetallen
   html2 += '<div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:10px">';
@@ -3723,15 +3724,15 @@ ${(function(){
   html2 += '<div style="font-size:9px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Waar staat NHL Stenden</div>';
   html2 += '<div style="background:' + oordeel2.bg + ';border:1px solid ' + oordeel2.border + ';border-radius:3px;padding:10px 12px;margin-bottom:10px">';
   html2 += '<div style="font-size:11px;font-weight:600;color:' + oordeel2.kleur + ';line-height:1.5">' + oordeel2.tekst + '</div></div>';
-  html2 += '<div style="font-size:9.5px;color:#374151;line-height:1.5;margin-bottom:8px">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?'s':'') + ' in scope genomen voor de portfolioanalyse digitale soevereiniteit. ' + (sc2.length < visible.length ? 'Van ' + (visible.length-sc2.length) + ' applicatie' + (visible.length-sc2.length!==1?'s':'') + ' is het assessment nog niet volledig ingevuld. ' : '') + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU soevereiniteitscheck.</div>';
+  html2 += '<div style="font-size:9.5px;color:#374151;line-height:1.5;margin-bottom:8px">NHL Stenden heeft ' + visible.length + ' kernapplicatie' + (visible.length!==1?'s':'') + ' in scope genomen voor de portfolioanalyse digitale autonomie. ' + (sc2.length < visible.length ? 'Van ' + (visible.length-sc2.length) + ' applicatie' + (visible.length-sc2.length!==1?'s':'') + ' is het assessment nog niet volledig ingevuld. ' : '') + 'De beoordeling combineert het DAAF-framework (autonomiescore 1–10) en de DICTU autonomiecheck.</div>';
   html2 += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px">';
   html2 += '<div style="background:#EBF3FF;border-left:3px solid #1A56A0;padding:6px 8px;border-radius:0 3px 3px 0;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#1A56A0;margin-bottom:4px">Aanleiding</div>';
-  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Digitale soevereiniteit staat breed op de agenda in het hoger onderwijs. NHL Stenden brengt systematisch in kaart hoe afhankelijk de instelling is van externe leveranciers en welke risico\'s dat met zich meebrengt.</div>';
+  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Digitale autonomie staat breed op de agenda in het hoger onderwijs. NHL Stenden brengt systematisch in kaart hoe afhankelijk de instelling is van externe leveranciers en welke risico\'s dat met zich meebrengt.</div>';
   html2 += '</div>';
   html2 += '<div style="background:#f0f9f9;border-left:3px solid #26B5AE;padding:6px 8px;border-radius:0 3px 3px 0;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#26B5AE;margin-bottom:4px">Methodiek</div>';
-  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Twee erkende frameworks: <strong>DAAF</strong> (Utrecht University) beoordeelt autonomie op risico, mitigatie en belang. <strong>DICTU</strong> (Rijksoverheid) toetst technische soevereiniteit op vier dimensies.</div>';
+  html2 += '<div style="font-size:9px;color:#374151;line-height:1.55">Twee erkende frameworks: <strong>DAAF</strong> (Utrecht University) beoordeelt autonomie op risico, mitigatie en belang. <strong>DICTU</strong> (Rijksoverheid) toetst technische autonomie op vier dimensies.</div>';
   html2 += '</div>';
   html2 += '<div style="background:#fff8f0;border-left:3px solid #E87722;padding:6px 8px;border-radius:0 3px 3px 0;font-family:Arial">';
   html2 += '<div style="font-size:9px;font-weight:700;color:#E87722;margin-bottom:4px">Wat betekent de score?</div>';
@@ -3821,9 +3822,9 @@ ${(function(){
 })()}
 
 ${(function(){
-  const appNaam = visible.length === 1 ? dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit";
+  const appNaam = visible.length === 1 ? dName(visible[0]) : "Portfolioanalyse Digitale Autonomie";
   const appSub  = visible.length === 1 ? (visible[0].supplier ? visible[0].supplier + " - " : "") + "NHL Stenden Hogeschool" : "NHL Stenden Hogeschool";
-  const hdrTitel = visible.length === 1 ? "Assessment Digitale Soevereiniteit - " + dName(visible[0]) : "Portfolioanalyse Digitale Soevereiniteit";
+  const hdrTitel = visible.length === 1 ? "Assessment Digitale Autonomie - " + dName(visible[0]) : "Portfolioanalyse Digitale Autonomie";
   let ep = "";
   ep += '<div style="page-break-before:always">';
   ep += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">' + hdrTitel + '</div><div class="header-sub">NHL Stenden Hogeschool - ' + datum + ' - ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
@@ -3834,7 +3835,7 @@ ${(function(){
   ep += '<div style="font-size:11px;color:#6b7280;margin-bottom:6px">' + appSub + '</div>';
   ep += '<div style="font-size:10px;color:#9ca3af;margin-bottom:32px">' + datum + ' - ' + VERSION + '</div>';
   ep += '<div style="width:60px;height:4px;background:#1A56A0;border-radius:2px;margin-bottom:40px"></div>';
-  ep += '<div style="font-size:10px;color:#9ca3af;line-height:1.7;max-width:400px">Dit document is vertrouwelijk en bestemd voor intern gebruik binnen NHL Stenden Hogeschool.<br/>Programma Digitale Samenhang - Ambassadeurslijn Digitale Soevereiniteit<br/>Kwartiermaker: E. van Gorkum - Ambassadeurs: J. Haije - E. Rolf - J. Blom</div>';
+  ep += '<div style="font-size:10px;color:#9ca3af;line-height:1.7;max-width:400px">Dit document is vertrouwelijk en bestemd voor intern gebruik binnen NHL Stenden Hogeschool.<br/>Programma Digitale Samenhang - Ambassadeurslijn Digitale Autonomie<br/>Kwartiermaker: E. van Gorkum - Ambassadeurs: J. Haije - E. Rolf - J. Blom</div>';
   ep += '</div></div>';
   return ep;
 })()}
@@ -3850,7 +3851,7 @@ ${(function(){
       + String(now.getMinutes()).padStart(2,"0");
     const pdfNaam = visible.length === 1
       ? "Assessment_" + dName(visible[0]).replace(/[^a-zA-Z0-9]/g, "_").replace(/_+/g,"_") + "_" + ts
-      : "NHL_Stenden_Portfolioanalyse_Soevereiniteit_" + ts;
+      : "NHL_Stenden_Portfolioanalyse_Autonomie_" + ts;
 
     const win = window.open("", "_blank");
     win.document.write(html);
@@ -4026,7 +4027,7 @@ ${(function(){
                 <button onClick={() => setHiddenApps(new Set(apps.map(a => a.id).slice(1)))}
                   className="text-xs px-2.5 py-1.5 font-medium"
                   style={{ borderRadius:4, background:"#f9fafb", color:"#6b7280", border:"1px solid #e5e7eb" }}>
-                  ✕ Alles verbergen
+                  ✕ Alles de-selecteren
                 </button>
                 <div className="w-px self-stretch" style={{ background:"#D0E4F7", margin:"0 4px" }}/>
                 <button onClick={() => setShowModal(true)}
@@ -4161,7 +4162,7 @@ ${(function(){
                         <div className="flex justify-between items-center" style={{ fontSize:9, marginBottom:2 }}>
                           <div className="flex items-center gap-1">
                             <span style={{ fontSize:8, fontWeight:700, padding:"0 4px", background:"#26B5AE", color:"#fff", borderRadius:2 }}>DICTU</span>
-                            <span style={{ color:"#9ca3af" }}>Soevereiniteit</span>
+                            <span style={{ color:"#9ca3af" }}>Autonomie</span>
                           </div>
                           <span style={{ color: a.sc.dictuAvg ? (a.sc.dictuAvg >= 4 ? "#15803d" : a.sc.dictuAvg >= 3 ? "#a16207" : "#b91c1c") : "#9ca3af", fontWeight:600 }}>
                             {a.sc.dictuAvg ? a.sc.dictuAvg.toFixed(1)+"/5" : "–"}
@@ -4239,7 +4240,7 @@ ${(function(){
             <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#26B5AE", color:"#fff", borderRadius:3 }}>DICTU</span>
-                <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Soevereiniteitscheck — spindiagram per applicatie</h3>
+                <h3 className="font-bold" style={{ color:"#0C2340", fontSize:14 }}>Autonomiecheck — spindiagram per applicatie</h3>
               </div>
               <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                 Het spindiagram toont de vier DICTU-dimensies per applicatie op een schaal van 1 tot 5. Alle assen hebben dezelfde richting: hoe groter de gekleurde vorm, hoe soeverein de applicatie scoort.
@@ -4374,7 +4375,7 @@ ${(function(){
             <div className="flex gap-2 mb-5">
               {[
                 { i:0, label:"1 · DAAF Quick Scan",           bg:"#1A56A0" },
-                { i:1, label:"2 · DICTU Soevereiniteitscheck", bg:"#26B5AE" }
+                { i:1, label:"2 · DICTU Autonomiecheck", bg:"#26B5AE" }
               ].map(t => (
                 <button key={t.i} onClick={() => {
                   setStep(t.i);
@@ -4451,14 +4452,14 @@ ${(function(){
               }}
                 className="w-full text-white py-3 text-sm font-medium mb-4"
                 style={{ background:"#26B5AE", borderRadius:4 }}>
-                Verder: DICTU Soevereiniteitscheck →
+                Verder: DICTU Autonomiecheck →
               </button>
             </>}
 
             {step === 1 && <>
               <div className="rounded p-3 mb-4 text-xs"
                 style={{ background:"#E6F7F7", border:"1px solid #26B5AE", color:"#0C6B68" }}>
-                <strong>DICTU Soevereiniteitscheck</strong> — Geselecteerde DICTU-vragen voor digitale soevereiniteit.
+                <strong>DICTU Autonomiecheck</strong> — Geselecteerde DICTU-vragen voor digitale autonomie.
                 Score 1 = minst soeverein · Score 5 = maximaal soeverein (hoger is beter).
               </div>
               {["Data & AI","EU-Infrastructuur"].map(cat => (
@@ -4527,7 +4528,7 @@ ${(function(){
 
           {/* DICTU sovereignty */}
           <div className="rounded p-3 mb-3" style={{ border:"1px solid #26B5AE", background:"#E6F7F7" }}>
-            <p className="text-xs font-semibold mb-2" style={{ color:"#0C6B68" }}>DICTU Soevereiniteit</p>
+            <p className="text-xs font-semibold mb-2" style={{ color:"#0C6B68" }}>DICTU Autonomie</p>
             {sc.dictuAvg ? (
               <>
                 <div className="text-center mb-2">
@@ -5611,11 +5612,11 @@ ${(function(){
               <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
               <div>
                 <h1 className="font-bold" style={{ fontSize:17 }}>Transparantie over deze applicatie</h1>
-                <p style={{ fontSize:12, color:"#7DD3D0" }}>Digitale soevereiniteit van het instrument zelf</p>
+                <p style={{ fontSize:12, color:"#7DD3D0" }}>Digitale autonomie van het instrument zelf</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
-              Deze pagina beschrijft welke software en diensten ten grondslag liggen aan de Portfolioanalyse Digitale Soevereiniteit,
+              Deze pagina beschrijft welke software en diensten ten grondslag liggen aan de Portfolioanalyse Digitale Autonomie,
               waar die partijen zijn gevestigd, hoe de beveiliging is geregeld en waar de data wordt opgeslagen.
               Voor elk component zijn de DAAF-indicatoren A1 (jurisdictie) en A3 (datalocatie) beoordeeld
               op dezelfde schaal die we voor andere applicaties hanteren.
@@ -5804,7 +5805,7 @@ ${(function(){
               <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Advies bij doorontwikkeling</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { n:"1", titel:"Niveau 1 — Gerealiseerd (v2.0)", tekst:"Migratie naar eigen NHL Stenden-infrastructuur voltooid. Het instrument draait volledig op eigen hardware in Leeuwarden. Maximale soevereiniteit bereikt voor hosting en opslag.", kleur:"#15803d", bg:"#dcfce7" },
+                  { n:"1", titel:"Niveau 1 — Gerealiseerd (v2.0)", tekst:"Migratie naar eigen NHL Stenden-infrastructuur voltooid. Het instrument draait volledig op eigen hardware in Leeuwarden. Maximale autonomie bereikt voor hosting en opslag.", kleur:"#15803d", bg:"#dcfce7" },
                   { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1A56A0", bg:"#EBF3FF" },
                   { n:"3", titel:"Niveau 3 — Bij verdere professionalisering", tekst:"Voeg applicatieniveau-encryptie toe aan de opgeslagen data, integreer logging en audit trail, en overweeg een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#6d28d9", bg:"#faf5ff" },
                 ].map(k => (
@@ -5821,9 +5822,9 @@ ${(function(){
             </div>
           </div>
 
-          {/* Conclusie soevereiniteit */}
+          {/* Conclusie autonomie */}
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"2px solid #E87722" }}>
-            <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Conclusie — soevereiniteitsrisico van dit instrument</h3>
+            <h3 className="font-bold text-sm mb-2" style={{ color:"#0C2340" }}>Conclusie — autonomierisico van dit instrument</h3>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
               De applicatie draait volledig op eigen NHL Stenden-serverinfrastructuur in Leeuwarden, beheerd door het team Infrastructuur (DLWO).
               De omgeving is gebaseerd op Ubuntu Linux en staat volledig binnen de ICT-omgeving van NHL Stenden.
@@ -5832,7 +5833,7 @@ ${(function(){
             <div className="grid grid-cols-3 gap-3">
               {[
                 { titel:"Wat dit betekent", tekst:"Data over het applicatielandschap van NHL Stenden staat uitsluitend op eigen NHL Stenden-servers in Leeuwarden. Geen extraterritoriale claims van toepassing. Volledige controle door eigen organisatie.", kleur:"#15803d", bg:"#dcfce7" },
-                { titel:"Soevereiniteitsstatus", tekst:"Dit instrument scoort zelf score 1 op alle DAAF en DICTU-dimensies. Maximale soevereiniteit: eigen jurisdictie, eigen hardware, eigen beheer, geen afhankelijkheid van externe partijen.", kleur:"#1A56A0", bg:"#EBF3FF" },
+                { titel:"Autonomiestatus", tekst:"Dit instrument scoort zelf score 1 op alle DAAF en DICTU-dimensies. Maximale autonomie: eigen jurisdictie, eigen hardware, eigen beheer, geen afhankelijkheid van externe partijen.", kleur:"#1A56A0", bg:"#EBF3FF" },
                 { titel:"Aandachtspunten", tekst:"Broncode staat nog op GitHub (VS). Overweeg bij verdere professionalisering een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#ca8a04", bg:"#fef9c3" },
               ].map(k => (
                 <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
@@ -5846,7 +5847,7 @@ ${(function(){
           {/* Footer */}
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
-              NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION}
+              NHL Stenden Hogeschool · Portfolioanalyse Digitale Autonomie · {VERSION}
               <br/>v2.0 · Draait op eigen NHL Stenden-infrastructuur (Ubuntu Linux, Leeuwarden)
               <br/>Transparantiepagina samengesteld op basis van publiek beschikbare informatie · bronnen: nhlstenden.com, anthropic.com/privacy, github.com/security
             </p>
@@ -6088,8 +6089,8 @@ ${(function(){
                 </div>
                 <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
                 <div>
-                  <h1 className="font-bold" style={{ fontSize:17 }}>Portfoliostatus Digitale Soevereiniteit</h1>
-                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Soevereiniteit · {vandaag}</p>
+                  <h1 className="font-bold" style={{ fontSize:17 }}>Portfoliostatus Digitale Autonomie</h1>
+                  <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Autonomie · {vandaag}</p>
                 </div>
               </div>
               <span className="text-xs px-2 py-1 rounded flex-shrink-0" style={{ background:"rgba(255,255,255,0.15)", color:"#7DD3D0" }}>
@@ -6113,9 +6114,9 @@ ${(function(){
               </div>
               <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                 NHL Stenden heeft {apps.length} kernapp{apps.length !== 1 ? "licaties" : "licatie"} in scope genomen
-                voor de portfolioanalyse digitale soevereiniteit.
+                voor de portfolioanalyse digitale autonomie.
                 {scored.length < apps.length && ` Van ${apps.length - scored.length} ${apps.length - scored.length === 1 ? "applicatie" : "applicaties"} is het assessment nog niet volledig ingevuld.`}
-                {" "}De beoordeling combineert het DAAF-framework (autonomiescore 1-10) en de DICTU soevereiniteitscheck.
+                {" "}De beoordeling combineert het DAAF-framework (autonomiescore 1-10) en de DICTU autonomiecheck.
               </p>
             </div>
             <div className="space-y-2">
@@ -6271,7 +6272,7 @@ ${(function(){
           {/* Footer */}
           <div className="rounded p-3 text-center" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
-              NHL Stenden Hogeschool · Portfolioanalyse Digitale Soevereiniteit · {VERSION} · {vandaag}
+              NHL Stenden Hogeschool · Portfolioanalyse Digitale Autonomie · {VERSION} · {vandaag}
               
             </p>
           </div>
@@ -6303,8 +6304,8 @@ ${(function(){
               </div>
               <div className="w-px self-stretch" style={{ background:"#26B5AE", margin:"2px 0" }}/>
               <div>
-                <h1 className="font-bold" style={{ fontSize:17 }}>Portfolioanalyse Digitale Soevereiniteit</h1>
-                <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Soevereiniteit · Programma Digitale Samenhang</p>
+                <h1 className="font-bold" style={{ fontSize:17 }}>Portfolioanalyse Digitale Autonomie</h1>
+                <p style={{ fontSize:12, color:"#7DD3D0" }}>Ambassadeurslijn Digitale Autonomie · Programma Digitale Samenhang</p>
               </div>
             </div>
             <p className="text-sm leading-relaxed" style={{ color:"rgba(255,255,255,0.85)" }}>
@@ -6335,7 +6336,7 @@ ${(function(){
             <Section title="Wat doet deze tool?">
               <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                 <p className="text-sm leading-relaxed mb-3" style={{ color:"#374151" }}>
-                  De <strong>Portfolioanalyse Digitale Soevereiniteit</strong> helpt NHL Stenden om per applicatie
+                  De <strong>Portfolioanalyse Digitale Autonomie</strong> helpt NHL Stenden om per applicatie
                   te beoordelen hoe afhankelijk de instelling is van externe leveranciers, en hoe urgent het is
                   om actie te ondernemen. Geen statisch rapport, maar een realtime tool die je samen invult en
                   die direct resultaat laat zien.
@@ -6363,7 +6364,7 @@ ${(function(){
                     <p className="text-sm font-bold mb-1" style={{ color:"#92400e" }}>Status: Prototype</p>
                     <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                       Dit instrument is een <strong>werkend prototype</strong> — volledig functioneel en in gebruik, maar nog niet definitief ingericht voor productie.
-                      Het is ontwikkeld in mei–juni 2026 als onderdeel van de Ambassadeurslijn Digitale Soevereiniteit van het Programma Digitale Samenhang.
+                      Het is ontwikkeld in mei–juni 2026 als onderdeel van de Ambassadeurslijn Digitale Autonomie van het Programma Digitale Samenhang.
                       De huidige fase is gericht op het vullen van de database met applicaties en het valideren van de methodiek.
                     </p>
                   </div>
@@ -6382,7 +6383,7 @@ ${(function(){
                       ICT-omgeving van NHL Stenden in Leeuwarden — onder Nederlands recht, zonder afhankelijkheid van externe cloudpartijen.
                     </p>
                     <p className="text-xs leading-relaxed" style={{ color:"#6b7280" }}>
-                      Dit maakt het product intern consistent: een instrument dat digitale soevereiniteit meet,
+                      Dit maakt het product intern consistent: een instrument dat digitale autonomie meet,
                       draait zelf maximaal soeverein — score 1 op alle DAAF en DICTU-dimensies.
                     </p>
                   </div>
@@ -6396,7 +6397,7 @@ ${(function(){
                   <div>
                     <p className="text-sm font-bold mb-1" style={{ color:"#0C2340" }}>Een voorbeeld voor beleidsontwikkeling in de eigen organisatie</p>
                     <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
-                      Dit instrument is meer dan een tool voor digitale soevereiniteit. Het laat zien hoe je beleid en de toepassing daarvan
+                      Dit instrument is meer dan een tool voor digitale autonomie. Het laat zien hoe je beleid en de toepassing daarvan
                       kunt ontwerpen, verwerken en gebruiken in een hedendaagse manier die aansluit bij de eigen organisatie.
                       Ontwikkeld in nauwe samenwerking met een AI-assistent, in enkele weken gebouwd van nul tot werkend product,
                       en direct inzetbaar voor het team — zonder externe leverancier, zonder IT-ticket, zonder lang traject.
@@ -6481,7 +6482,7 @@ ${(function(){
                       </div>
                     ))}
                   </div>
-                  <p className="text-xs italic" style={{ color:"#9ca3af" }}>Score 1–5 per vraag. Gemiddelde = soevereiniteitsscore op de kleurenbalk (rood → groen).</p>
+                  <p className="text-xs italic" style={{ color:"#9ca3af" }}>Score 1–5 per vraag. Gemiddelde = autonomiescore op de kleurenbalk (rood → groen).</p>
                 </div>
               </div>
             </Section>
@@ -6523,7 +6524,7 @@ ${(function(){
                         <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                           Gepubliceerd door de Dienst ICT Uitvoering (DICTU) van het Ministerie van Economische Zaken en Klimaat in 2026.
                           Het instrument beoordeelt clouddiensten op vijf dimensies: juridisch, data & AI, technologie, operationeel en mens —
-                          elk met vijf oplopende soevereiniteitsniveaus. Combineert elementen uit het EuroStack-initiatief en het
+                          elk met vijf oplopende autonomieniveaus. Combineert elementen uit het EuroStack-initiatief en het
                           Cloud Sovereignty Framework van de Europese Commissie.
                         </p>
                       </div>
@@ -6546,9 +6547,9 @@ ${(function(){
                     <div className="space-y-1.5">
                       {[
                         { naam:"E. van Gorkum",  rol:"Kwartiermaker Digitale Samenhang — initiatiefnemer en ontwikkelaar" },
-                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Soevereiniteit — initiatiefnemer" },
-                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Soevereiniteit — initiatiefnemer en ontwikkelaar" },
-                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Soevereiniteit — initiatiefnemer en ontwikkelaar" },
+                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Autonomie — initiatiefnemer" },
+                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Autonomie — initiatiefnemer en ontwikkelaar" },
+                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Autonomie — initiatiefnemer en ontwikkelaar" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
                           <span className="font-semibold flex-shrink-0" style={{ color:"#0C2340", minWidth:120 }}>{p.naam}</span>
@@ -6570,12 +6571,12 @@ ${(function(){
                         </div>
                       ))}
                     </div>
-                    <p className="text-xs font-semibold mt-3 mb-1.5" style={{ color:"#1A56A0" }}>Expertisegroep Digitale Soevereiniteit</p>
+                    <p className="text-xs font-semibold mt-3 mb-1.5" style={{ color:"#1A56A0" }}>Expertisegroep Digitale Autonomie</p>
                     <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                       Met dank aan de ambassadeurs voor hun scherpte, betrokkenheid en de inspiratie
                       die zij dagelijks meebrengen. Jullie vragen, inzichten en richting hebben dit
                       instrument mede gemaakt tot wat het is — en zijn de drijvende kracht achter
-                      de stappen die NHL Stenden zet richting echte digitale soevereiniteit.
+                      de stappen die NHL Stenden zet richting echte digitale autonomie.
                     </p>
                     <p className="text-xs font-semibold mt-1 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
                     <div className="flex gap-2 text-xs">
@@ -6605,7 +6606,7 @@ ${(function(){
                   { n:"2", icon:"📋", title:"DAAF Quick Scan invullen",
                     txt:'Open de applicatie en ga naar Stap 1. Je ziet 8 vragen verdeeld over drie niveaus: Risico, Mitigatie en Belang. Klik op de score (1–5) die het best past. Per vraag staat een uitgebreide toelichting en omschrijving per score.',
                     tip:"Voeg een motivatie toe bij elke vraag — dat maakt de score veel waardevoller voor toekomstige reviews." },
-                  { n:"3", icon:"🔍", title:"DICTU Soevereiniteitscheck invullen",
+                  { n:"3", icon:"🔍", title:"DICTU Autonomiecheck invullen",
                     txt:'Ga naar Stap 2 van het assessment. Vier vragen over dataresidency, technische beveiliging, juridische bescherming en EU-infrastructuur. Scores worden direct zichtbaar in de kleurenbalk op het dashboard.',
                     tip:"Voeg per vraag een motivatietekst toe — die wordt meegenomen in de Excel en PDF export." },
                   { n:"4", icon:"📊", title:"Dashboard en vergelijking lezen",
@@ -6879,7 +6880,7 @@ ${(function(){
           {/* Footer — altijd zichtbaar */}
           <div className="rounded p-3 text-center mt-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
-              NHL Stenden Hogeschool · Project Digitale Soevereiniteit · Ambassadeurslijn Digitale Soevereiniteit
+              NHL Stenden Hogeschool · Project Digitale Autonomie · Ambassadeurslijn Digitale Autonomie
                · {VERSION}
             </p>
           </div>
@@ -6913,9 +6914,9 @@ ${(function(){
           {/* Teal accent bar */}
           <div className="w-1 self-stretch" style={{ background:"#26B5AE", margin:"8px 0" }} />
           <div>
-            <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Soevereiniteitsassessment</h1>
+            <h1 className="font-bold text-white" style={{ fontSize:13 }}>Digitale Autonomie-assessment</h1>
             <p style={{ fontSize:11, color:"#7DD3D0" }}>
-              Prototype · Ambassadeurslijn Digitale Soevereiniteit
+              Prototype · Ambassadeurslijn Digitale Autonomie
             </p>
 
           </div>
