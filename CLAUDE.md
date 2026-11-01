@@ -34,7 +34,7 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 - Hosting: Netlify. Live adres: https://autonomie-nhlstenden.netlify.app
 - Netlify: site `autonomie-nhlstenden`, site-id `6d6a1b8a-9c17-469c-9f23-c8911db814d6`, team `6a047d5b4965c04ab89fec76` (hetzelfde team als autonomie-frisius-mc), plan Pro. Beheer: https://app.netlify.com/projects/autonomie-nhlstenden. Het id in `.netlify/state.json` (c225450e...) hoort bij een andere, oude site; niet gebruiken.
 - De hele site zit achter het Netlify-wachtwoord (Password Protection, alle deploys). Wie de site opent, ziet eerst het Netlify-scherm en daarna het inlogscherm van de app. Het Netlify-wachtwoord staat niet in deze map.
-- Blobs en functions draaien in de VS (us-east-2). De transparantiepagina noemt us-east-1; dat klopt niet precies.
+- Blobs en functions draaien in de VS (us-east-2); de transparantiepagina noemt dat sinds v2.6 ook zo.
 - GitHub: https://github.com/supergorkum/autonomie-nhlstenden, productietak `main`. De repo is PUBLIEK (zie Aandachtspunten onderaan).
 - Geplande back-up: `0 8,11,16 * * *` in UTC. In de zomer is dat 10:00, 13:00 en 18:00 Nederlandse tijd, in de winter een uur eerder.
 - Plan: migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden). De tekst op de transparantiepagina en de autonomiescores van het instrument zelf gaan daarvan uit. Nog niet uitgevoerd.
@@ -43,9 +43,9 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 **Een push naar `main` publiceert de site.** Netlify is aan de GitHub-repo gekoppeld en bouwt zelf bij elke push naar `main` (vastgesteld op 1 november 2026: commit e9d5c67 stond binnen een minuut live als deploy 6ae755e7b850b9f21525f998). Mislukt die bouw, dan blijft de vorige versie live. Er is geen deploy-script en er is er ook geen nodig. GitHub krijgt van Netlify geen status of check terug; kijk dus in Netlify zelf (zie "Live controleren").
 
-**Bouwen gebeurt buiten Google Drive.** In de projectmap staat geen `node_modules`, en dat blijft zo. Alles wat node_modules nodig heeft draait in een kopie, standaard `~/Developer/autonomie-nhlstenden-build`, die `scripts/bouwmap.mjs` bijhoudt (andere plek: `ANHL_BOUWMAP`). npm gebruikt daar een eigen cache in de bouwmap. Draai nooit `npm install` of `npm ci` in de projectmap. De oude `dist/` in de projectmap is van 29 juni 2026 en staat in .gitignore; werk er niet in.
+**Bouwen gebeurt buiten Google Drive.** In de projectmap staat geen `node_modules`, en dat blijft zo. Alles wat node_modules nodig heeft draait in een kopie, standaard `~/Developer/autonomie-nhlstenden-build`, die `scripts/bouwmap.mjs` bijhoudt (andere plek: `ANHL_BOUWMAP`). npm gebruikt daar een eigen cache in de bouwmap. Draai nooit `npm install` of `npm ci` in de projectmap. De oude `dist/` uit de projectmap staat sinds 1 november 2026 in de Prullenmand (map autonomie-nhlstenden-opruimen-20261101).
 
-- `npm run controle`: versie en changelog (VERSION gelijk aan de bovenste CHANGELOG-entry, nummer niet al eerder gebruikt, geen gedachtestreepje in die entry, package.json loopt gelijk), de onderhoudsregel op het inlogscherm, geen codes uit `.sleutels/` in een ander bestand dan `src/App.jsx`, en `vite build` in de bouwmap met de controle dat de onderhoudsregel in de bundel zit. Er is geen eslint en geen test; de bouw vangt alleen syntaxfouten en kapotte imports. `--snel` slaat de bouw over.
+- `npm run controle`: versie en changelog (VERSION gelijk aan de bovenste CHANGELOG-entry, nummer niet al eerder gebruikt, package.json loopt gelijk), nergens een gedachtestreepje in een tekstbestand dat git meeneemt, de onderhoudsregel op het inlogscherm, geen codes uit `.sleutels/` in een ander bestand dan `src/App.jsx`, en `vite build` in de bouwmap met de controle dat de onderhoudsregel in de bundel zit. Er is geen eslint en geen test; de bouw vangt alleen syntaxfouten en kapotte imports. `--snel` slaat de bouw over.
 - `npm run lokaal`: de site op http://127.0.0.1:5173, ook als preview in Code (`.claude/launch.json`, naam `autonomie-nhlstenden`). Wijzigingen in de projectmap lopen vanzelf mee. `/api` gaat via een proxy naar de live site (`ANHL_LIVE_PROXY` in `vite.config.js`). Zolang het Netlify-wachtwoord erop zit, geeft dat een 401 en laadt de proef geen gegevens; het inlogscherm en de opmaak zijn wel te bekijken.
 - `npm run bouwmap`: alleen de bouwmap bijwerken.
 
@@ -67,7 +67,8 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 **Geleerd bij de overstap (1 november 2026).**
 - Het site-id in `.netlify/state.json` was verkeerd; de echte site is gevonden met `get-projects` en zoekterm "autonomie".
-- Live nakijken via `curl` en via de ingebouwde browser loopt vast op het Netlify-wachtwoord. Het wachtwoord intikken doet Claude niet.
+- Live nakijken via `curl`, de ingebouwde browser en Edgars Chrome loopt vast op het Netlify-wachtwoord (ook Chrome had geen sessie). Het wachtwoord intikken doet Claude niet.
+- autonomie.nhlstenden.com is ook vanuit Chrome op deze computer niet bereikbaar; alleen via het netwerk van NHL Stenden.
 - Versie v2.5 is bewust gekozen: v2.2 tot en met v2.4 stonden al in de changelog. Vanaf nu gewoon 0.1 per release.
 - `npm ci` meldt dat de install-scripts van esbuild en fsevents niet zijn goedgekeurd; de bouw werkt toch.
 - Voorbeeld voor deze opzet: autonomie-frisius-mc (dezelfde codebasis) en Sepupu.
@@ -99,11 +100,10 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 ## Bekende zaken om op te letten
 
-- De changelog onder v2.5 staat niet op volgorde (v2.0, v2.4, v2.3, v2.2, v2.1, v2.0, v1.9...) en v2.0 komt twee keer voor. Dat is geschiedenis en blijft zo. De v2.0-entry zegt dat het loginscherm is verwijderd; het is later teruggekomen.
-- Er staan nog circa 190 gedachtestreepjes in `src/App.jsx` (changelog, handleiding, PDF-sjablonen, ook op het inlogscherm). Haal ze weg als Edgar dat vraagt of in tekst die je toch aanraakt.
-- Het commentaar bovenin `netlify/functions/scheduled-backup.mjs` noemt nog 12:00 en 18:00; het schema is `0 8,11,16 * * *` UTC. Back-ups worden na 7 dagen verwijderd. De data staat alleen in Netlify Blobs: maak voor grote wijzigingen eerst een export of force-backup.
+- De changelog onder v2.5 staat niet op volgorde (v2.0, v2.4, v2.3, v2.2, v2.1, v2.0, v1.9...) en v2.0 komt twee keer voor. Dat is geschiedenis en blijft zo; de echte volgorde is niet meer te achterhalen. De v2.0-entry zegt dat het loginscherm is verwijderd; het is later teruggekomen.
+- Sinds v2.6 staat er geen gedachtestreepje meer in de code (199 vervangen door een komma, punt, dubbele punt of ·). De controle houdt dat zo.
+- Het back-upschema is `0 8,11,16 * * *` UTC: in de zomertijd 10:00, 13:00 en 18:00, in de wintertijd een uur eerder. Back-ups worden na 7 dagen verwijderd. De data staat alleen in Netlify Blobs: maak voor grote wijzigingen eerst een export of force-backup.
 - Open vragen uit de overstap: draait autonomie.nhlstenden.com dezelfde code, had de oude chat nog openstaande wensen, moet de interface ook Engels?
-- `src/files.zip` is een oud archief (App_met_beheer.jsx en main.jsx van 26 mei). Niet gebruiken.
 - `BACKUP 29 juni 2026/` bevat een JSON-export van de database en staat in .gitignore.
 
 ## Aandachtspunten
