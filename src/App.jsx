@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip, Legend, ScatterChart, Scatter, Cell
 } from "recharts";
+import { ONDERHOUDSREGEL } from "./onderhoudsregel.js";
 
 // ── Error Boundary — toont de echte fout in het scherm ────────
 export class ErrorBoundary extends React.Component {
@@ -33,7 +34,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE — verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.1";
+const VERSION = "v2.5";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -46,9 +47,18 @@ function dn(app, useSecondary) {
 
 const CHANGELOG = [
   {
+    versie: "v2.5",
+    datum: "1 november 2026",
+    wijzigingen: [
+      "De tool wordt vanaf nu onderhouden in Claude Code, met versiebeheer en een vaste controle voor elke publicatie",
+      "Op het inlogscherm staat in kleine letters de regel 'onderhoud: Claude Code · 2026'",
+      "Versienummer v2.5 gekozen omdat v2.2 tot en met v2.4 al eerder in de changelog voorkwamen; package.json loopt nu gelijk",
+      "Paginatitel in de browser zonder gedachtestreepje: Digitale Autonomie-assessment, NHL Stenden",
+    ]
+  },
+  {
     versie: "v2.0",
     datum: "Juni 2026",
-    label: "Huidige versie",
     wijzigingen: [
       "Prototype draait op Netlify met Netlify Blobs — migratie naar NHL Stenden NVIDIA Spark infrastructuur in voorbereiding",
       "Loginscherm verwijderd — applicatie direct toegankelijk binnen NHL Stenden ICT-omgeving",
@@ -2369,6 +2379,7 @@ function App() {
                 <span className="text-xs font-semibold" style={{ color:"#1E3A8A" }}>Toegang vereist</span>
                 <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"#E91E8C", color:"white", fontSize:10 }}>{VERSION}</span>
               </div>
+              <p style={{ fontSize:9, color:"#94a3b8", marginTop:-18, marginBottom:16, letterSpacing:"0.02em" }}>{ONDERHOUDSREGEL}</p>
 
               <h2 className="font-bold mb-1" style={{ fontSize:18, color:"#162D6E" }}>Welkom</h2>
               <p className="text-sm mb-6" style={{ color:"#64748b" }}>Voer de toegangscode in om verder te gaan.</p>

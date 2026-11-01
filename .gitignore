@@ -5,6 +5,15 @@ dist
 .env
 .env.local
 
-# Local Netlify folder
+# Netlify-CLI: per computer
 .netlify
+
+# Lokale export van de database
 BACKUP*/
+
+# Sleutels en de overdracht uit de chat: nooit de repo in
+.sleutels/
+.overstap/
+
+# Claude Code: eigen instellingen per computer
+.claude/settings.local.json

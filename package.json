@@ -1,13 +1,16 @@
 {
   "name": "nhl-soevereiniteitsassessment",
-  "version": "2.0.0",
-  "description": "Digitale Soevereiniteitsassessment — NHL Stenden Hogeschool",
+  "version": "2.5.0",
+  "description": "Digitale Autonomie-assessment, NHL Stenden Hogeschool",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "controle": "node scripts/controle.mjs",
+    "lokaal": "node scripts/lokaal.mjs",
+    "bouwmap": "node scripts/bouwmap.mjs"
   },
   "dependencies": {
     "@netlify/blobs": "^8.1.0",
