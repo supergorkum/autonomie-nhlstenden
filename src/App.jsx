@@ -34,7 +34,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE: verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.6";
+const VERSION = "v2.7";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -46,6 +46,16 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.7",
+    datum: "1 november 2026",
+    wijzigingen: [
+      "Demo zonder eigen wachtwoorden: de site staat al achter het sitewachtwoord van Netlify",
+      "Inlogscherm: blijft staan, maar Inloggen laat iedereen door, ook met een leeg veld",
+      "Beheer: geen pincode meer nodig, Toegang laat iedereen door",
+      "Transparantiepagina en handleiding beschrijven nu het sitewachtwoord in plaats van de oude codes",
+    ]
+  },
   {
     versie: "v2.6",
     datum: "1 november 2026",
@@ -2161,10 +2171,11 @@ function App() {
   // ── Login state ─────────────────────────────────────────────
   const [loggedIn,   setLoggedIn]   = useState(false);
   const [loginInput, setLoginInput] = useState("");
-  const [loginError, setLoginError] = useState(false);
-  const LOGIN_CODE = "autonomie2026";
-  // API-token: hetzelfde als het inlogwachtwoord, wordt meegestuurd als request-header
-  // zodat de Netlify Functions server-side kunnen controleren of het verzoek geldig is.
+  // Geen toegangscode meer in de browser (v2.7, besluit van Edgar, 1 november 2026):
+  // de hele site staat achter het sitewachtwoord van Netlify. Niet terugzetten
+  // tenzij Edgar erom vraagt.
+  // API-token: komt uit VITE_API_TOKEN (gezet in Netlify) en gaat als request-header
+  // mee, zodat de Netlify Functions server-side kunnen controleren of het verzoek geldig is.
   const apiToken = sessionStorage.getItem("nhl_api_token") || "";
 
   // ── App state ────────────────────────────────────────────────
@@ -2239,7 +2250,6 @@ function App() {
   const [showDeleteAll, setShowDeleteAll] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
   const [adminPin,      setAdminPin]      = useState("");
-  const [adminPinError, setAdminPinError] = useState(false);
   const [editAppId,     setEditAppId]     = useState(null);
   const [editForm,      setEditForm]      = useState({});
   const [importData,    setImportData]    = useState(null);
@@ -2249,7 +2259,6 @@ function App() {
   const [geoHoverId,    setGeoHoverId]    = useState(null);
   const [geoTooltip,    setGeoTooltip]    = useState(null);
   const [geoHidden,     setGeoHidden]     = useState(new Set()); // verborgen apps op de kaart
-  const ADMIN_PIN = "beheerautonomie2026";
 
   // Ref voor scroll-naar-boven bij stapwissel in Assess
   const assessScrollRef = useRef(null);
@@ -2332,17 +2341,13 @@ function App() {
   }, [apps, ready]);
 
   // ── Login handler ────────────────────────────────────────────
+  // Het inlogscherm blijft staan, maar laat iedereen door, ook met een leeg veld.
+  // Zie de opmerking bij de login state: bewust zo, niet "herstellen".
   function handleLogin() {
-    if (loginInput === LOGIN_CODE) {
-      sessionStorage.setItem("nhl_auth", "ok");
-      const apiTokenValue = import.meta.env.VITE_API_TOKEN || loginInput;
-      sessionStorage.setItem("nhl_api_token", apiTokenValue);
-      setLoggedIn(true);
-      setLoginError(false);
-    } else {
-      setLoginError(true);
-      setLoginInput("");
-    }
+    sessionStorage.setItem("nhl_auth", "ok");
+    const apiTokenValue = import.meta.env.VITE_API_TOKEN || loginInput;
+    sessionStorage.setItem("nhl_api_token", apiTokenValue);
+    setLoggedIn(true);
   }
 
   // ── Login scherm ─────────────────────────────────────────────
@@ -2387,36 +2392,31 @@ function App() {
               <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 rounded-full"
                 style={{ background:"#EFF6FF", border:"1px solid #DBEAFE" }}>
                 <span style={{ fontSize:14 }}>🔒</span>
-                <span className="text-xs font-semibold" style={{ color:"#1E3A8A" }}>Toegang vereist</span>
+                <span className="text-xs font-semibold" style={{ color:"#1E3A8A" }}>Demo</span>
                 <span className="text-xs px-2 py-0.5 rounded-full font-bold" style={{ background:"#E91E8C", color:"white", fontSize:10 }}>{VERSION}</span>
               </div>
               <p style={{ fontSize:9, color:"#94a3b8", marginTop:-18, marginBottom:16, letterSpacing:"0.02em" }}>{ONDERHOUDSREGEL}</p>
 
               <h2 className="font-bold mb-1" style={{ fontSize:18, color:"#162D6E" }}>Welkom</h2>
-              <p className="text-sm mb-6" style={{ color:"#64748b" }}>Voer de toegangscode in om verder te gaan.</p>
+              <p className="text-sm mb-6" style={{ color:"#64748b" }}>Klik op Inloggen om verder te gaan.</p>
 
               <input
                 type="password"
                 value={loginInput}
-                onChange={e => { setLoginInput(e.target.value); setLoginError(false); }}
+                onChange={e => setLoginInput(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && handleLogin()}
                 placeholder="Toegangscode"
                 autoFocus
                 className="w-full px-4 py-3 text-sm focus:outline-none mb-2"
                 style={{
                   borderRadius:10,
-                  border: loginError ? "2px solid #dc2626" : "2px solid #DBEAFE",
+                  border: "2px solid #DBEAFE",
                   letterSpacing:4,
                   background:"#F8FAFF",
                   fontSize:14,
                   transition:"border-color 0.2s"
                 }}
               />
-              {loginError && (
-                <p className="text-xs mb-3 flex items-center gap-1" style={{ color:"#dc2626" }}>
-                  <span>⚠️</span> Toegangscode onjuist. Probeer opnieuw.
-                </p>
-              )}
               <button
                 onClick={handleLogin}
                 className="w-full text-white py-3 text-sm font-bold mt-2"
@@ -2425,7 +2425,7 @@ function App() {
               </button>
 
               <p className="text-xs text-center mt-5" style={{ color:"#94a3b8" }}>
-                Neem contact op met de applicatiebeheerder voor de toegangscode.
+                Deze demo staat achter het sitewachtwoord. Hier hoef je niets in te vullen.
               </p>
               <div className="mt-5 pt-4" style={{ borderTop:"1px solid #f1f5f9" }}>
                 <p className="text-xs text-center leading-relaxed" style={{ color:"#cbd5e1" }}>
@@ -4904,7 +4904,8 @@ ${(function(){
   }
 
   function Admin() {
-    // PIN lock screen
+    // Toegangsscherm van Beheer: blijft staan, maar laat iedereen door (v2.7, besluit
+    // van Edgar; de site staat achter het sitewachtwoord van Netlify). Niet terugzetten.
     if (!adminUnlocked) {
       return (
         <div className="h-full flex items-center justify-center" style={{ background:"#F8F9FB" }}>
@@ -4915,32 +4916,23 @@ ${(function(){
               </div>
               <div>
                 <h2 className="font-bold" style={{ color:"#162D6E" }}>Beheeromgeving</h2>
-                <p className="text-xs text-gray-400">Voer de beheerpincode in</p>
+                <p className="text-xs text-gray-400">Klik op Toegang om verder te gaan</p>
               </div>
             </div>
             <input
               type="password"
               value={adminPin}
-              onChange={e => { setAdminPin(e.target.value); setAdminPinError(false); }}
+              onChange={e => setAdminPin(e.target.value)}
               onKeyDown={e => {
-                if (e.key === "Enter") {
-                  if (adminPin === ADMIN_PIN) { setAdminUnlocked(true); setAdminPin(""); }
-                  else { setAdminPinError(true); setAdminPin(""); }
-                }
+                if (e.key === "Enter") { setAdminUnlocked(true); setAdminPin(""); }
               }}
               placeholder="Pincode"
               className="w-full border px-3 py-2.5 text-sm focus:outline-none mb-2"
-              style={{ borderColor: adminPinError ? "#dc2626" : "#DBEAFE", borderRadius:4, letterSpacing:4 }}
+              style={{ borderColor: "#DBEAFE", borderRadius:4, letterSpacing:4 }}
               autoFocus
             />
-            {adminPinError && (
-              <p className="text-xs mb-3" style={{ color:"#dc2626" }}>Pincode onjuist. Probeer opnieuw.</p>
-            )}
             <button
-              onClick={() => {
-                if (adminPin === ADMIN_PIN) { setAdminUnlocked(true); setAdminPin(""); }
-                else { setAdminPinError(true); setAdminPin(""); }
-              }}
+              onClick={() => { setAdminUnlocked(true); setAdminPin(""); }}
               className="w-full text-white py-2.5 text-sm font-semibold"
               style={{ background:"#1E3A8A", borderRadius:4 }}>
               Toegang
@@ -5836,12 +5828,12 @@ ${(function(){
               <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Toegangsbeveiliging</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { icon:"🖥️", titel:"Inlogscherm (UI)", status:"Wachtwoord", kleur:"#1E3A8A", bg:"#EFF6FF",
-                    tekst:"De applicatie toont een inlogscherm dat toegang blokkeert zonder het juiste wachtwoord. De sessie wordt opgeslagen in sessionStorage van de browser en vervalt automatisch wanneer het tabblad of venster wordt gesloten." },
+                  { icon:"🖥️", titel:"Sitewachtwoord (Netlify)", status:"Actief", kleur:"#1E3A8A", bg:"#EFF6FF",
+                    tekst:"De hele site staat achter één sitewachtwoord van Netlify. Zonder dat wachtwoord krijg je geen enkele pagina te zien. Het inlogscherm binnen de site laat in deze demo iedereen door." },
                   { icon:"🔑", titel:"API-tokencheck (server)", status:"Actief v1.7+", kleur:"#15803d", bg:"#dcfce7",
                     tekst:"Vanaf versie 1.7 stuurt de browser bij elke API-aanroep een token mee als request-header (x-api-token). De Netlify Function valideert dit token server-side tegen een omgevingsvariabele (APP_API_TOKEN). Verzoeken zonder geldig token worden geweigerd met HTTP 401." },
-                  { icon:"🔐", titel:"Beheerpincode", status:"Afzonderlijk", kleur:"#6d28d9", bg:"#faf5ff",
-                    tekst:"Naast het inlogwachtwoord is er een aparte beheerpincode voor de beheerfuncties (aanpassen, verwijderen). Dit beperkt de impact als het algemene wachtwoord breed wordt gedeeld." },
+                  { icon:"🔐", titel:"Beheeromgeving", status:"Open in demo", kleur:"#6d28d9", bg:"#faf5ff",
+                    tekst:"In deze demo vraagt Beheer geen pincode meer. Wie langs het sitewachtwoord komt, kan applicaties aanpassen en verwijderen. Back-ups maken een fout ongedaan." },
                 ].map(k => (
                   <div key={k.titel} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -5860,7 +5852,7 @@ ${(function(){
               <p className="text-xs font-bold mb-2" style={{ color:"#92400e" }}>⚠️ Bekende beperkingen: transparant benoemd</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
-                  { tekst:"Het inlogwachtwoord staat als platte tekst in de JavaScript-broncode die naar de browser wordt gestuurd. Iedereen die de browser-devtools opent kan het wachtwoord inzien. De server-side tokencheck (v1.7+) beperkt de schade, maar vervangt geen echte authenticatie." },
+                  { tekst:"Er zijn geen persoonlijke accounts. Iedereen met het sitewachtwoord heeft dezelfde rechten, ook in Beheer. Het API-token staat in de JavaScript die naar de browser gaat; de server-side tokencheck vervangt geen echte authenticatie." },
                   { tekst:"Er is geen rate limiting of lockout na foutieve inlogpogingen. Geautomatiseerde aanvallen op het inlogscherm zijn technisch mogelijk." },
                   { tekst:"Er is geen logging van wie wanneer heeft ingelogd of data heeft gewijzigd. Bij een incident is er geen audit trail." },
                   { tekst:"Broncode staat nog op GitHub (VS). Bij verdere professionalisering is een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur aan te bevelen." },
@@ -5879,7 +5871,7 @@ ${(function(){
               <div className="grid grid-cols-3 gap-3">
                 {[
                   { n:"1", titel:"Niveau 1: In voorbereiding", tekst:"Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding. Na migratie draait het instrument volledig op eigen hardware onder Nederlandse jurisdictie.", kleur:"#ca8a04", bg:"#fef9c3" },
-                  { n:"2", titel:"Niveau 2: Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1E3A8A", bg:"#EFF6FF" },
+                  { n:"2", titel:"Niveau 2: Aanbevolen", tekst:"Vervang het gedeelde sitewachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, aparte rechten voor beheer, en sessie-beheer aan de serverkant.", kleur:"#1E3A8A", bg:"#EFF6FF" },
                   { n:"3", titel:"Niveau 3: Bij verdere professionalisering", tekst:"Voeg applicatieniveau-encryptie toe aan de opgeslagen data, integreer logging en audit trail, en overweeg een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#6d28d9", bg:"#faf5ff" },
                 ].map(k => (
                   <div key={k.n} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
@@ -6879,7 +6871,7 @@ ${(function(){
             <Section title="Beheeromgeving" accent="#162D6E">
               <div className="rounded p-4 mb-3" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-                  Via het tabblad <strong>🔐 Beheer</strong> (pincode vereist) kun je:
+                  Via het tabblad <strong>🔐 Beheer</strong> (in deze demo zonder pincode) kun je:
                 </p>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   {[

@@ -11,9 +11,10 @@
 //    op het inlogscherm;
 // 2. bij een push: raakt de push src/, netlify/, public/ of index.html, dan
 //    hoort VERSION in src/App.jsx mee te veranderen;
-// 3. geen codes uit .sleutels/ in een bestand dat git meeneemt, behalve
-//    src/App.jsx, waar de app ze nu eenmaal nodig heeft, en nergens een
-//    gedachtestreepje (U+2014), afspraak van Edgar;
+// 3. geen codes uit .sleutels/ in een bestand dat git meeneemt, ook niet in
+//    src/App.jsx (sinds v2.7 heeft de app geen eigen codes meer; de site staat
+//    achter het sitewachtwoord van Netlify), en nergens een gedachtestreepje
+//    (U+2014), afspraak van Edgar;
 // 4. de bouwmap buiten Google Drive wordt bijgewerkt (scripts/bouwmap.mjs);
 // 5. vite build slaagt, en de onderhoudsregel staat in de bundel.
 //
@@ -98,7 +99,6 @@ function sleutels() {
       const regel = tekst.slice(0, tekst.indexOf("\u2014")).split("\n").length;
       fouten.push(rel + ":" + regel + " bevat een gedachtestreepje. Gebruik een komma, punt of dubbele punt.");
     }
-    if (rel === "src/App.jsx") continue;
     if (waarden.some((w) => tekst.includes(w))) {
       fouten.push(rel + " bevat een code uit .sleutels/. Haal hem eruit voor de commit.");
       gevonden++;
