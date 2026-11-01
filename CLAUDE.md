@@ -108,4 +108,4 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 ## Aandachtspunten
 
-- De GitHub-repo is publiek, terwijl inlogcode en beheerpincode in `src/App.jsx` staan. Iedereen kan ze lezen, ook in de git-geschiedenis. Edgar beslist: repo privé maken (Netlify blijft dan bouwen als de koppeling via de Netlify GitHub-app loopt) en/of de codes vervangen en naar omgevingsvariabelen verhuizen.
+- De GitHub-repo is publiek, terwijl inlogcode en beheerpincode in `src/App.jsx` staan. Iedereen kan ze lezen, ook in de git-geschiedenis. Besluit van Edgar op 1 november 2026: zo laten. Breng het pas opnieuw in als er gevoelige data in de tool komt.
