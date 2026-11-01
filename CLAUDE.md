@@ -84,7 +84,7 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 ## Vaste afspraken
 
 - Alle tekst in het Nederlands, in gewone taal, korte zinnen.
-- Geen streepjes, gedachtestreepjes of em-dashes als stijlmiddel in Nederlandse tekst of in tekst in de app. Geen "A – B" of "kan - voor". Gebruik komma's of punten. Controleer dit bij elke oplevering; het teken — mag in geen enkel document voorkomen. Let op: de bestaande changelog bevat er nog veel (zie overdracht).
+- Geen streepjes, gedachtestreepjes of em-dashes als stijlmiddel in Nederlandse tekst of in tekst in de app. Geen "A – B" of "kan - voor". Gebruik komma's of punten. Controleer dit bij elke oplevering; het teken U+2014 (em-dash) mag in geen enkel document voorkomen. Let op: de bestaande changelog bevat er nog veel (zie overdracht).
 - Het thema heet Digitale Autonomie, niet Digitale Soevereiniteit. Geen "DNA" in publieke schermen.
 - Methodische regels: B1 meet het aantal producten van één leverancier (geen exclusiviteit). De DICTU-schalen zijn omgekeerd (hoger is beter). Een leverancier met een moederbedrijf buiten de EU heeft jurisdictierisico, ook als de uitvoerende entiteit Nederlands of Europees is.
 - In externe stukken DAAF en DICTU niet uitvoerig als eigen prestatie beschrijven: NHL Stenden volgt de Universiteit Utrecht.
