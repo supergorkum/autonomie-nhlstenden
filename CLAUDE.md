@@ -79,7 +79,7 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 - `VITE_API_TOKEN`: staat in Netlify (alle scopes, nagekeken op 1 november 2026, alleen de naam). De build zet hem in de bundel en de app stuurt hem mee. Zonder deze variabele valt de app terug op wat er op het inlogscherm is ingetikt; in de lokale proef is dat zo.
 - **Geen eigen codes meer in de site (v2.7, 1 november 2026).** Het inlogscherm en het toegangsscherm van Beheer blijven staan, maar laten iedereen door, ook met een leeg veld. Reden: de site is een demo en staat in zijn geheel achter het sitewachtwoord van Netlify (`requiresPassword: true`). Besluit van Edgar. Niet terugzetten tenzij Edgar erom vraagt; in `src/App.jsx` staat bij beide plekken een opmerking. De oude codes waren constanten in de code, niet in de opslag; er staat dus niets ouds in Netlify Blobs.
 - De oude codes staan nog in `.sleutels/autonomie-nhlstenden.env` (`NHL_TOEGANGSCODE`, `NHL_BEHEERPIN`) en in de git-geschiedenis. `npm run controle` houdt sinds v2.7 tegen dat ze in welk bestand dan ook terugkomen, ook in `src/App.jsx`.
-- De servercontrole blijft: de functions eisen nog steeds `x-api-token` gelijk aan `APP_API_TOKEN`. Wat daarmee moet, beslist Edgar.
+- De servercontrole blijft: de functions eisen nog steeds `x-api-token` gelijk aan `APP_API_TOKEN`. Besluit van Edgar op 1 november 2026: laten staan. Niet weghalen tenzij Edgar erom vraagt.
 - Het Netlify-sitewachtwoord staat nergens in deze map.
 - Geen sleutels in git: `.env`, `.env.local`, `.netlify`, `.sleutels/` en `.overstap/` staan in .gitignore.
 
