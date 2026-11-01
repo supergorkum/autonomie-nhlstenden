@@ -67,7 +67,7 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 **Geleerd bij de overstap (1 november 2026).**
 - Het site-id in `.netlify/state.json` was verkeerd; de echte site is gevonden met `get-projects` en zoekterm "autonomie".
-- Live nakijken via `curl`, de ingebouwde browser en Edgars Chrome loopt vast op het Netlify-wachtwoord (ook Chrome had geen sessie). Het wachtwoord intikken doet Claude niet.
+- Live nakijken via `curl` en de ingebouwde browser loopt vast op het Netlify-wachtwoord. Het wachtwoord intikken doet Claude niet. Edgars Chrome (Claude in Chrome) is aangemeld op Netlify en, sinds de avond van 1 november 2026, ook op de site. Live nakijken: open de site in Chrome en lees versie en onderhoudsregel op het inlogscherm (`get_page_text`). Klik daar NIET op Inloggen: na het inloggen slaat de app de lijst automatisch op. Op die manier is v2.7 live gezien.
 - autonomie.nhlstenden.com is ook vanuit Chrome op deze computer niet bereikbaar; alleen via het netwerk van NHL Stenden.
 - Versie v2.5 is bewust gekozen: v2.2 tot en met v2.4 stonden al in de changelog. Vanaf nu gewoon 0.1 per release.
 - `npm ci` meldt dat de install-scripts van esbuild en fsevents niet zijn goedgekeurd; de bouw werkt toch.
@@ -76,9 +76,10 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 ## Sleutels en wachtwoorden (alleen de plek)
 
 - `APP_API_TOKEN`: omgevingsvariabele in Netlify. Alle functions controleren die tegen de header `x-api-token`. Zonder de variabele geven ze een 500.
-- `VITE_API_TOKEN`: optionele omgevingsvariabele bij de build; de app valt anders terug op wat de gebruiker op het loginscherm intikt.
-- De inlogcode van het loginscherm staat hard in `src/App.jsx` (zoek op `LOGIN_CODE`, rond regel 2145) en dus in de bundel en in de publieke repository. De pincode voor de beheerstand staat ook in de code (zoek op `ADMIN_PIN`, rond regel 2232). Verplaats dit naar omgevingsvariabelen voordat er gevoelige data in komt.
-- Sinds 1 november 2026 staan beide waarden ook in `.sleutels/autonomie-nhlstenden.env` (`NHL_TOEGANGSCODE`, `NHL_BEHEERPIN`), in .gitignore. Gebruiken, nooit tonen. `npm run controle` houdt tegen dat ze in een ander bestand dan `src/App.jsx` in git komen.
+- `VITE_API_TOKEN`: staat in Netlify (alle scopes, nagekeken op 1 november 2026, alleen de naam). De build zet hem in de bundel en de app stuurt hem mee. Zonder deze variabele valt de app terug op wat er op het inlogscherm is ingetikt; in de lokale proef is dat zo.
+- **Geen eigen codes meer in de site (v2.7, 1 november 2026).** Het inlogscherm en het toegangsscherm van Beheer blijven staan, maar laten iedereen door, ook met een leeg veld. Reden: de site is een demo en staat in zijn geheel achter het sitewachtwoord van Netlify (`requiresPassword: true`). Besluit van Edgar. Niet terugzetten tenzij Edgar erom vraagt; in `src/App.jsx` staat bij beide plekken een opmerking. De oude codes waren constanten in de code, niet in de opslag; er staat dus niets ouds in Netlify Blobs.
+- De oude codes staan nog in `.sleutels/autonomie-nhlstenden.env` (`NHL_TOEGANGSCODE`, `NHL_BEHEERPIN`) en in de git-geschiedenis. `npm run controle` houdt sinds v2.7 tegen dat ze in welk bestand dan ook terugkomen, ook in `src/App.jsx`.
+- De servercontrole blijft: de functions eisen nog steeds `x-api-token` gelijk aan `APP_API_TOKEN`. Wat daarmee moet, beslist Edgar.
 - Het Netlify-sitewachtwoord staat nergens in deze map.
 - Geen sleutels in git: `.env`, `.env.local`, `.netlify`, `.sleutels/` en `.overstap/` staan in .gitignore.
 
@@ -108,4 +109,6 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 ## Aandachtspunten
 
-- De GitHub-repo is publiek, terwijl inlogcode en beheerpincode in `src/App.jsx` staan. Iedereen kan ze lezen, ook in de git-geschiedenis. Besluit van Edgar op 1 november 2026: zo laten. Breng het pas opnieuw in als er gevoelige data in de tool komt.
+- De GitHub-repo is publiek. De oude inlogcode en beheerpincode staan sinds v2.7 niet meer in de code, maar nog wel in de git-geschiedenis. Besluit van Edgar op 1 november 2026: zo laten. Breng het pas opnieuw in als er gevoelige data in de tool komt.
+- Het API-token zit via `VITE_API_TOKEN` in de JavaScript van de site. Wie langs het sitewachtwoord komt, kan het lezen. De servercontrole beschermt dus vooral tegen aanroepen van buiten die het sitewachtwoord niet hebben.
+- De site heeft geen AI-hulp (geen aanroep naar api.anthropic.com).
