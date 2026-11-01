@@ -1,7 +1,7 @@
 # CLAUDE.md, Autonomie NHL Stenden
 
 Geheugen van dit project. Lees dit eerst, daarna pas aan het werk.
-Aangemaakt op 1 november 2026 bij de overstap van de chat naar Claude Code. Opgesteld op basis van de projectmap, de git-historie en Edgars geheugen, niet op basis van de oude chat zelf (zie OVERDRACHT-UIT-CHAT.md).
+Aangemaakt op 1 november 2026 bij de overstap van de chat naar Claude Code. Opgesteld op basis van de projectmap, de git-historie en Edgars geheugen, niet op basis van de oude chat zelf. De overdracht staat in `.overstap/OVERDRACHT-UIT-CHAT.md` (niet in git); wat daarvan blijvend geldt, staat hier.
 
 ## Eerste handeling van elke sessie
 
@@ -11,9 +11,11 @@ git pull
 grep -n 'const VERSION' src/App.jsx
 git log --oneline | head -5
 git status
+git config core.hooksPath                 # hoort scripts/git-hooks te zijn
+ls -l scripts/git-hooks/pre-push          # hoort uitvoerbaar te zijn (-rwx)
 ```
 
-Staat er geen node_modules (na de verhuizing naar Google Drive zijn die niet meegekomen), draai dan eerst `npm install`.
+Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar, zet het terug met `chmod +x scripts/git-hooks/pre-push`; anders slaat git de controle stil over. Draai nooit `npm install` in de projectmap; zie "Werken in Claude Code".
 
 ## Wat de site is
 
@@ -28,30 +30,56 @@ Staat er geen node_modules (na de verhuizing naar Google Drive zijn die niet mee
 - React 18 met Vite 5, Tailwind 3, Recharts, d3 en xlsx. Vrijwel alle code staat in één bestand: `src/App.jsx` (circa 7300 regels). Daarnaast `src/main.jsx` en `src/index.css`.
 - Opslag: Netlify Blobs, store `nhl-assessment`, sleutel `apps` (hele lijst als JSON). Back-ups staan in dezelfde store onder `backup:<tijdstempel>`.
 - Netlify Functions in `netlify/functions/` (.mjs): load-data, save-data, list-backups, restore-backup, force-backup, scheduled-backup, load-export-timestamp, save-export-timestamp. `/api/*` wordt doorgestuurd naar `/.netlify/functions/*`.
-- Bouwen: `npm run build` (publish-map `dist`). Lokaal: `npm run dev`. Zie netlify.toml.
+- Bouwen: Netlify draait `npm run build` (publish-map `dist`). Zelf bouwen en bekijken gaat via `npm run controle` en `npm run lokaal` in de bouwmap; zie "Werken in Claude Code".
 - Hosting: Netlify. Live adres: https://autonomie-nhlstenden.netlify.app
-- Netlify site-id (uit .netlify/state.json): c225450e-a935-48e4-981a-187e8ffdd8e6. De sitenaam en het team in Netlify zijn niet bevestigd: een opvraging via de Netlify-koppeling gaf een 404, waarschijnlijk zit de site in een ander account dan die koppeling.
-- GitHub: https://github.com/supergorkum/autonomie-nhlstenden, productietak `main`. Op 1 november 2026 is de werkmap schoon en gelijk aan origin/main (laatste commit 392dea6).
+- Netlify: site `autonomie-nhlstenden`, site-id `6d6a1b8a-9c17-469c-9f23-c8911db814d6`, team `6a047d5b4965c04ab89fec76` (hetzelfde team als autonomie-frisius-mc), plan Pro. Beheer: https://app.netlify.com/projects/autonomie-nhlstenden. Het id in `.netlify/state.json` (c225450e...) hoort bij een andere, oude site; niet gebruiken.
+- De hele site zit achter het Netlify-wachtwoord (Password Protection, alle deploys). Wie de site opent, ziet eerst het Netlify-scherm en daarna het inlogscherm van de app. Het Netlify-wachtwoord staat niet in deze map.
+- Blobs en functions draaien in de VS (us-east-2). De transparantiepagina noemt us-east-1; dat klopt niet precies.
+- GitHub: https://github.com/supergorkum/autonomie-nhlstenden, productietak `main`. De repo is PUBLIEK (zie Aandachtspunten onderaan).
 - Geplande back-up: `0 8,11,16 * * *` in UTC. In de zomer is dat 10:00, 13:00 en 18:00 Nederlandse tijd, in de winter een uur eerder.
 - Plan: migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden). De tekst op de transparantiepagina en de autonomiescores van het instrument zelf gaan daarvan uit. Nog niet uitgevoerd.
 
-## Hoe een wijziging live ging
+## Werken in Claude Code (sinds 1 november 2026)
 
-In de map staan geen patchscripts, geen deploy-script en geen .command-bestand. De git-historie bestaat uit korte Nederlandse commitberichten zonder prefix. Hoe de laatste releases daadwerkelijk live gingen (push naar `main` met automatische Netlify-build, of `netlify deploy` via de CLI) is niet vastgelegd. Zie OVERDRACHT-UIT-CHAT.md. Controleer dit in de eerste sessie en schrijf het hier op.
+**Een push naar `main` publiceert de site.** Netlify is aan de GitHub-repo gekoppeld en bouwt zelf bij elke push naar `main` (vastgesteld op 1 november 2026: commit e9d5c67 stond binnen een minuut live als deploy 6ae755e7b850b9f21525f998). Mislukt die bouw, dan blijft de vorige versie live. Er is geen deploy-script en er is er ook geen nodig. GitHub krijgt van Netlify geen status of check terug; kijk dus in Netlify zelf (zie "Live controleren").
 
-Stappen die bij een release horen:
-1. Wijzig de code, bij voorkeur gericht en met behoud van de bestaande structuur.
-2. Verhoog `VERSION` in `src/App.jsx` met 0.1 en voeg een blok toe aan `CHANGELOG`.
-3. `npm run build` en controleer lokaal.
-4. Commit met een korte Nederlandse boodschap en push naar `main`.
-5. Controleer de live site.
+**Bouwen gebeurt buiten Google Drive.** In de projectmap staat geen `node_modules`, en dat blijft zo. Alles wat node_modules nodig heeft draait in een kopie, standaard `~/Developer/autonomie-nhlstenden-build`, die `scripts/bouwmap.mjs` bijhoudt (andere plek: `ANHL_BOUWMAP`). npm gebruikt daar een eigen cache in de bouwmap. Draai nooit `npm install` of `npm ci` in de projectmap. De oude `dist/` in de projectmap is van 29 juni 2026 en staat in .gitignore; werk er niet in.
+
+- `npm run controle`: versie en changelog (VERSION gelijk aan de bovenste CHANGELOG-entry, nummer niet al eerder gebruikt, geen gedachtestreepje in die entry, package.json loopt gelijk), de onderhoudsregel op het inlogscherm, geen codes uit `.sleutels/` in een ander bestand dan `src/App.jsx`, en `vite build` in de bouwmap met de controle dat de onderhoudsregel in de bundel zit. Er is geen eslint en geen test; de bouw vangt alleen syntaxfouten en kapotte imports. `--snel` slaat de bouw over.
+- `npm run lokaal`: de site op http://127.0.0.1:5173, ook als preview in Code (`.claude/launch.json`, naam `autonomie-nhlstenden`). Wijzigingen in de projectmap lopen vanzelf mee. `/api` gaat via een proxy naar de live site (`ANHL_LIVE_PROXY` in `vite.config.js`). Zolang het Netlify-wachtwoord erop zit, geeft dat een 401 en laadt de proef geen gegevens; het inlogscherm en de opmaak zijn wel te bekijken.
+- `npm run bouwmap`: alleen de bouwmap bijwerken.
+
+**Elke push gaat eerst door de controle.** `scripts/git-hooks/pre-push` draait `node scripts/controle.mjs --push`, met een extra stap: raakt de push `src/`, `netlify/`, `public/` of `index.html`, dan moet `VERSION` in `src/App.jsx` anders zijn dan op `origin/main`. Ingesteld met `git config core.hooksPath scripts/git-hooks` (staat in `.git/config`). `--no-verify` alleen als Edgar daar zelf om vraagt.
+
+**Een wijziging** gaat zo:
+
+1. Bestanden rechtstreeks aanpassen in de projectmap. `src/App.jsx` is groot: zoek met grep, wijzig gericht.
+2. `const VERSION` met 0.1 ophogen en een nieuwe bovenste entry in `CHANGELOG` (beide bovenin `src/App.jsx`), datum voluit ("1 november 2026"). `version` in package.json mee laten lopen (v2.6 wordt 2.6.0). Het label "Huidige versie" zet de app zelf bij de bovenste entry.
+3. `npm run controle`, en bij iets zichtbaars de proef bekijken met `npm run lokaal`.
+4. Commit met een bericht in de vorm `v2.6: wat de bezoeker merkt`, dan `git push`.
+5. Ongeveer een minuut later de deploy nakijken en Edgar melden wat er live staat.
+
+**Live controleren.** Met `curl` lukt het niet: de site en de bundel geven een 401 door het Netlify-wachtwoord. Gebruik de Netlify-koppeling in Code: `get-project` met site-id `6d6a1b8a-9c17-469c-9f23-c8911db814d6` geeft de huidige deploy-id, en `get-deploy-for-site` geeft daarvan `commit_ref` en `state`. Is `commit_ref` jouw commit en `state` ready, dan staat hij live. De onderhoudsregel en het versienummer zelf zie je alleen met het wachtwoord, dus in Edgars browser.
+
+**Niet tegelijk op twee computers.** Git draait in een Google Drive-map; werk niet tegelijk op de MacBook en de HUB in deze map. Bij wisselen eerst `git pull`.
+
+**Bestanden die alleen online staan.** Google Drive geeft soms een bestand met de juiste omvang en alleen nullen. `scripts/bouwmap.mjs` stopt dan met een melding. Lees zo'n bestand nooit als leeg en schrijf er niets overheen.
+
+**Geleerd bij de overstap (1 november 2026).**
+- Het site-id in `.netlify/state.json` was verkeerd; de echte site is gevonden met `get-projects` en zoekterm "autonomie".
+- Live nakijken via `curl` en via de ingebouwde browser loopt vast op het Netlify-wachtwoord. Het wachtwoord intikken doet Claude niet.
+- Versie v2.5 is bewust gekozen: v2.2 tot en met v2.4 stonden al in de changelog. Vanaf nu gewoon 0.1 per release.
+- `npm ci` meldt dat de install-scripts van esbuild en fsevents niet zijn goedgekeurd; de bouw werkt toch.
+- Voorbeeld voor deze opzet: autonomie-frisius-mc (dezelfde codebasis) en Sepupu.
 
 ## Sleutels en wachtwoorden (alleen de plek)
 
 - `APP_API_TOKEN`: omgevingsvariabele in Netlify. Alle functions controleren die tegen de header `x-api-token`. Zonder de variabele geven ze een 500.
 - `VITE_API_TOKEN`: optionele omgevingsvariabele bij de build; de app valt anders terug op wat de gebruiker op het loginscherm intikt.
-- De inlogcode van het loginscherm staat hard in `src/App.jsx` (zoek op `LOGIN_CODE`, rond regel 2144) en dus in de publieke bundel en in de repository. De pincode voor de beheerstand staat ook in de code (zoek op `ADMIN_PIN`, rond regel 2231). Verplaats dit naar omgevingsvariabelen voordat er gevoelige data in komt.
-- Geen sleutels in git: `.env`, `.env.local` en `.netlify` staan in .gitignore.
+- De inlogcode van het loginscherm staat hard in `src/App.jsx` (zoek op `LOGIN_CODE`, rond regel 2145) en dus in de bundel en in de publieke repository. De pincode voor de beheerstand staat ook in de code (zoek op `ADMIN_PIN`, rond regel 2232). Verplaats dit naar omgevingsvariabelen voordat er gevoelige data in komt.
+- Sinds 1 november 2026 staan beide waarden ook in `.sleutels/autonomie-nhlstenden.env` (`NHL_TOEGANGSCODE`, `NHL_BEHEERPIN`), in .gitignore. Gebruiken, nooit tonen. `npm run controle` houdt tegen dat ze in een ander bestand dan `src/App.jsx` in git komen.
+- Het Netlify-sitewachtwoord staat nergens in deze map.
+- Geen sleutels in git: `.env`, `.env.local`, `.netlify`, `.sleutels/` en `.overstap/` staan in .gitignore.
 
 ## Vaste afspraken
 
@@ -62,7 +90,8 @@ Stappen die bij een release horen:
 - In externe stukken DAAF en DICTU niet uitvoerig als eigen prestatie beschrijven: NHL Stenden volgt de Universiteit Utrecht.
 - De tool is een prototype ("ter inspiratie en visualisatie"). Dat moet zichtbaar blijven (header, loginscherm, Over de tool, transparantiepagina).
 - Huisstijl gelijk aan het AI-Netwerk: diepblauw verloop, NHL Stenden-logo, lettertype Inter, roze accenten (#E91E8C), golf onder de navigatie.
-- Versienummer: bij elke release 0.1 omhoog in `VERSION` en een regel in `CHANGELOG`.
+- Versienummer: bij elke release 0.1 omhoog in `VERSION` en een entry in `CHANGELOG`; package.json loopt mee.
+- Onderhoudsregel "onderhoud: Claude Code · 2026" uit `src/onderhoudsregel.js`, in kleine letters onder de versiebadge op het inlogscherm (afspraak van 1 november 2026, voor al Edgars sites). Niet weghalen; de controle let erop.
 - Wijzigingen gericht en met behoud van de bestaande structuur; geen grote herschrijving van App.jsx zonder overleg.
 - Git-commits eindigen met de attributieregels die de omgeving voorschrijft.
 - Edgar verwacht showcasekwaliteit, werkt het liefst autonoom, en wil een werkdag afsluiten zonder losse eindjes.
@@ -70,6 +99,13 @@ Stappen die bij een release horen:
 
 ## Bekende zaken om op te letten
 
-- Versienummers kloppen niet onderling: `VERSION` is v2.1, package.json zegt 2.0.0, en de changelog staat niet op volgorde (bovenaan v2.0 met "Huidige versie", daaronder v2.4, v2.3, v2.2, v2.1). Zie overdracht.
+- De changelog onder v2.5 staat niet op volgorde (v2.0, v2.4, v2.3, v2.2, v2.1, v2.0, v1.9...) en v2.0 komt twee keer voor. Dat is geschiedenis en blijft zo. De v2.0-entry zegt dat het loginscherm is verwijderd; het is later teruggekomen.
+- Er staan nog circa 190 gedachtestreepjes in `src/App.jsx` (changelog, handleiding, PDF-sjablonen, ook op het inlogscherm). Haal ze weg als Edgar dat vraagt of in tekst die je toch aanraakt.
+- Het commentaar bovenin `netlify/functions/scheduled-backup.mjs` noemt nog 12:00 en 18:00; het schema is `0 8,11,16 * * *` UTC. Back-ups worden na 7 dagen verwijderd. De data staat alleen in Netlify Blobs: maak voor grote wijzigingen eerst een export of force-backup.
+- Open vragen uit de overstap: draait autonomie.nhlstenden.com dezelfde code, had de oude chat nog openstaande wensen, moet de interface ook Engels?
 - `src/files.zip` is een oud archief (App_met_beheer.jsx en main.jsx van 26 mei). Niet gebruiken.
 - `BACKUP 29 juni 2026/` bevat een JSON-export van de database en staat in .gitignore.
+
+## Aandachtspunten
+
+- De GitHub-repo is publiek, terwijl inlogcode en beheerpincode in `src/App.jsx` staan. Iedereen kan ze lezen, ook in de git-geschiedenis. Edgar beslist: repo privé maken (Netlify blijft dan bouwen als de koppeling via de Netlify GitHub-app loopt) en/of de codes vervangen en naar omgevingsvariabelen verhuizen.
