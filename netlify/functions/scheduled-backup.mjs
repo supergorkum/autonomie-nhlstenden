@@ -1,5 +1,6 @@
 // netlify/functions/scheduled-backup.mjs
-// Automatische backup om 12:00 en 18:00 elke dag (UTC+2 = 10:00 en 16:00 UTC)
+// Automatische backup drie keer per dag om 08:00, 11:00 en 16:00 UTC: in de
+// zomertijd 10:00, 13:00 en 18:00, in de wintertijd 09:00, 12:00 en 17:00.
 import { getStore } from "@netlify/blobs";
 
 export default async () => {
@@ -48,7 +49,7 @@ export default async () => {
   }
 };
 
-// Elke dag om 08:00, 11:00 en 16:00 UTC = 10:00, 13:00 en 18:00 NL zomertijd
+// Elke dag om 08:00, 11:00 en 16:00 UTC (zie bovenaan)
 export const config = {
   schedule: "0 8,11,16 * * *",
 };

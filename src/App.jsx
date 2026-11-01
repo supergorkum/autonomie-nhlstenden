@@ -8,7 +8,7 @@ import {
 } from "recharts";
 import { ONDERHOUDSREGEL } from "./onderhoudsregel.js";
 
-// ── Error Boundary — toont de echte fout in het scherm ────────
+// ── Error Boundary: toont de echte fout in het scherm ────────
 export class ErrorBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(err) { return { error: err }; }
@@ -32,13 +32,13 @@ export class ErrorBoundary extends React.Component {
 }
 
 // ──────────────────────────────────────────────────────────────
-// VERSIE — verhoog met 0.1 bij elke release
+// VERSIE: verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.5";
+const VERSION = "v2.6";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
-// Module-level naam helper — wordt aangeroepen met useSecondaryName als parameter
+// Module-level naam helper: wordt aangeroepen met useSecondaryName als parameter
 function dn(app, useSecondary) {
   if (!app) return "";
   if (useSecondary && app.nameSecondary && app.nameSecondary.trim()) return app.nameSecondary.trim();
@@ -46,6 +46,17 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.6",
+    datum: "1 november 2026",
+    wijzigingen: [
+      "Alle gedachtestreepjes uit de teksten gehaald, ook in de handleiding en de PDF-rapporten; nu komma's, punten of dubbele punten",
+      "Transparantiepagina: de opslagregio is us-east-2 (VS), niet us-east-1",
+      "Back-uptijden: bij Beheer staat nu dat de automatische back-ups in de wintertijd een uur eerder draaien",
+      "Changelog: dubbele versienummers geven geen fout meer in de lijst",
+      "Opgeruimd: oud archief src/files.zip verwijderd",
+    ]
+  },
   {
     versie: "v2.5",
     datum: "1 november 2026",
@@ -60,8 +71,8 @@ const CHANGELOG = [
     versie: "v2.0",
     datum: "Juni 2026",
     wijzigingen: [
-      "Prototype draait op Netlify met Netlify Blobs — migratie naar NHL Stenden NVIDIA Spark infrastructuur in voorbereiding",
-      "Loginscherm verwijderd — applicatie direct toegankelijk binnen NHL Stenden ICT-omgeving",
+      "Prototype draait op Netlify met Netlify Blobs, migratie naar NHL Stenden NVIDIA Spark infrastructuur in voorbereiding",
+      "Loginscherm verwijderd: applicatie direct toegankelijk binnen NHL Stenden ICT-omgeving",
       "Transparantiepagina bijgewerkt naar prototypesituatie: Netlify hosting, Netlify Blobs opslag, migratie naar eigen infrastructuur in voorbereiding",
       "Versienummer verhoogd naar v2.0 als markering van livegang in eigen productie",
     ]
@@ -70,9 +81,9 @@ const CHANGELOG = [
     versie: "v2.4",
     datum: "Juni 2026",
     wijzigingen: [
-      "Portfolio kaart volledig responsief — volle breedte, schaalt automatisch mee",
+      "Portfolio kaart volledig responsief: volle breedte, schaalt automatisch mee",
       "Hover tooltip op kaart-stippen: naam en regio zichtbaar bij mouseover",
-      "App-selectie in geo kaart via chips en legenda — dubbele lijst verwijderd",
+      "App-selectie in geo kaart via chips en legenda, dubbele lijst verwijderd",
       "Dashboard grafiek-selectie: label en knoppen in nette grid over volle breedte",
       "Vergelijking: auto-selectie laatste 5 apps bij openen",
       "Beheer snelnavigatie: klik op app-naam springt direct naar de kaart",
@@ -85,8 +96,8 @@ const CHANGELOG = [
     versie: "v2.3",
     datum: "Juni 2026",
     wijzigingen: [
-      "v2.1: Redesign huisstijl gelijkgetrokken met AI-Netwerk — diep blauw gradient, NHL Stenden logo, Inter font, roze accenten, golf overgang, pagina titel gecorrigeerd naar Digitale Autonomie-assessment",
-      "Naamwijziging: ‘Digitale Soevereiniteit’ hernoemd naar ‘Digitale Autonomie’ conform SURF en Utrecht University terminologie — doorgevoerd in alle teksten, titels, PDF-rapporten, Excel-exports en de handleiding",
+      "v2.1: Redesign huisstijl gelijkgetrokken met AI-Netwerk, diep blauw gradient, NHL Stenden logo, Inter font, roze accenten, golf overgang, pagina titel gecorrigeerd naar Digitale Autonomie-assessment",
+      "Naamwijziging: ‘Digitale Soevereiniteit’ hernoemd naar ‘Digitale Autonomie’ conform SURF en Utrecht University terminologie, doorgevoerd in alle teksten, titels, PDF-rapporten, Excel-exports en de handleiding",
       "Automatische cloud-backups om 10:00, 13:00 en 18:00 via Netlify scheduled functions",
       "Server-backups bewaard 7 dagen, daarna automatisch verwijderd",
       "Import-modal met keuze: herstel vanuit server-backup of importeer lokaal bestand",
@@ -117,16 +128,16 @@ const CHANGELOG = [
     versie: "v2.1",
     datum: "Juni 2026",
     wijzigingen: [
-      "Prototype-status vastgelegd: applicatie is officieel een prototype — zichtbaar in header, Over de tool en Over dit product",
+      "Prototype-status vastgelegd: applicatie is officieel een prototype, zichtbaar in header, Over de tool en Over dit product",
       "Header: subtitel bijgewerkt naar 'Prototype · Ambassadeurslijn Digitale Autonomie'",
-      "Over de tool: omschrijving bijgewerkt — prototype draait op Netlify, migratie naar NVIDIA Spark in voorbereiding.",
-      "Over de tool: inspiratiebron-paragraaf toegevoegd — instrument als voorbeeld voor beleidsontwikkeling in eigen organisatie",
-      "Over dit product: volledig bijgewerkt naar productiesituatie — eigen NHL Stenden-infrastructuur, geen externe cloudpartijen.",
+      "Over de tool: omschrijving bijgewerkt, prototype draait op Netlify, migratie naar NVIDIA Spark in voorbereiding.",
+      "Over de tool: inspiratiebron-paragraaf toegevoegd, instrument als voorbeeld voor beleidsontwikkeling in eigen organisatie",
+      "Over dit product: volledig bijgewerkt naar productiesituatie, eigen NHL Stenden-infrastructuur, geen externe cloudpartijen.",
       "Aan de slag stap 2: verwijzing naar 'live sidebar' verwijderd (niet meer aanwezig in huidige versie)",
       "Aan de slag stap 4: verwijzing naar 'autonomiekwadrant' verwijderd (niet meer aanwezig in huidige versie)",
       "Excel-exportknop verplaatst van header naar Dashboard (was al zo maar tekst klopte niet)",
       "Assessment: alleen-lezen voor gewone gebruikers, bewerken alleen via Beheer met pincode",
-      "Geopolitiek tabblad verwijderd — geopolitieke kaart verplaatst naar Portfolio-pagina als compact overzicht",
+      "Geopolitiek tabblad verwijderd: geopolitieke kaart verplaatst naar Portfolio-pagina als compact overzicht",
       "Consistentiecheck gehele applicatie: beschrijvingen, labels en uitleg actueel gemaakt voor v2.3",
     ]
   },
@@ -188,8 +199,8 @@ const CHANGELOG = [
     versie: "v1.5",
     datum: "Juni 2026",
     wijzigingen: [
-      "Secundaire applicatienaam toegevoegd — elke app kan naast een primaire naam ook een alternatieve weergavenaam krijgen",
-      "Zichtbaarheidsschakelaar in de header — wissel met één klik tussen primaire en secundaire namen (overal tegelijk: dashboard, grafieken, PDF, Excel)",
+      "Secundaire applicatienaam toegevoegd: elke app kan naast een primaire naam ook een alternatieve weergavenaam krijgen",
+      "Zichtbaarheidsschakelaar in de header: wissel met één klik tussen primaire en secundaire namen (overal tegelijk: dashboard, grafieken, PDF, Excel)",
       "Beheeromgeving: 'Dummie namen toewijzen' knop voor het automatisch toewijzen van tijdelijke namen aan bestaande apps",
       "Beheeromgeving: beide namen zichtbaar in de app-kaart (primair + geel secundair label)",
       "Add-app formulier en bewerk-scherm uitgebreid met veld voor secundaire naam",
@@ -199,7 +210,7 @@ const CHANGELOG = [
     versie: "v1.4",
     datum: "Juni 2026",
     wijzigingen: [
-      "Motivatieveld toegevoegd bij elke vraag in het assessment — optionele toelichting op de score",
+      "Motivatieveld toegevoegd bij elke vraag in het assessment, optionele toelichting op de score",
       "Motivaties zichtbaar in de beheeromgeving per applicatie (groen icoontje 💬 als er een motivatie is)",
       "Motivaties opgenomen in de PDF-export als extra kolom in de scoretabel",
       "Excel-export uitgebreid: motivatiekolommen in DAAF en DICTU tabbladen, plus nieuw tabblad 'Motivaties'",
@@ -209,7 +220,7 @@ const CHANGELOG = [
     versie: "v1.3",
     datum: "Juni 2026",
     wijzigingen: [
-      "Changelog toegevoegd in beheeromgeving — overzicht van alle versies en wijzigingen",
+      "Changelog toegevoegd in beheeromgeving: overzicht van alle versies en wijzigingen",
       "Versienummer wordt voortaan bijgewerkt bij elke nieuwe release",
     ]
   },
@@ -217,7 +228,7 @@ const CHANGELOG = [
     versie: "v1.2",
     datum: "Juni 2026",
     wijzigingen: [
-      "DICTU spindiagram toegevoegd aan dashboard — alle 4 assen met hover-tooltip",
+      "DICTU spindiagram toegevoegd aan dashboard, alle 4 assen met hover-tooltip",
       "Tooltip DICTU spindiagram gefixed via onMouseMove proximiteit (werkt nu voor alle applicaties)",
       "Toevoegen van applicaties hersteld voor gewone gebruikers; verwijderen/bewerken alleen voor beheerder",
       "Versienummer bijgewerkt en changelog toegevoegd",
@@ -227,13 +238,13 @@ const CHANGELOG = [
     versie: "v1.1",
     datum: "Mei 2026",
     wijzigingen: [
-      "Spindiagram vervangen door DivergingChart voor DAAF — semantisch correcte assen (richting heeft betekenis)",
+      "Spindiagram vervangen door DivergingChart voor DAAF, semantisch correcte assen (richting heeft betekenis)",
       "Opdrachtskaart toegevoegd bovenaan dashboard met centrale vraagstelling NHL Stenden",
       "Heatmap verwijderd (onleesbaar bij veel applicaties)",
-      "Tekst afbreking Quick win en Strategische aanbeveling opgelost — volledige tekst zichtbaar",
+      "Tekst afbreking Quick win en Strategische aanbeveling opgelost, volledige tekst zichtbaar",
       "Label 'Strategisch' hernoemd naar 'Strategische aanbeveling'",
       "Term 'bestuurlijk' en 'CvB' vervangen door NHL Stenden organisatienaamgeving",
-      "PDF typografie verbeterd — lopende tekst met koppen en alinea's",
+      "PDF typografie verbeterd: lopende tekst met koppen en alinea's",
       "PDF dimensieprofiel: spindiagram vervangen door horizontale balkengrafiek",
     ]
   },
@@ -482,7 +493,7 @@ function calcScores(scores) {
   // ── Niveau 1: Risico-exposure ───────────────────────────────
   // Dimensie A: Geopolitiek risico  (A1 gewicht=3, A3 gewicht=2)
   const dimA = weightedDim([["A1", 3], ["A3", 2]]);
-  // Dimensie B: Leveranciersafhankelijkheid  (B1 gewicht=3 — enige indicator)
+  // Dimensie B: Leveranciersafhankelijkheid  (B1 gewicht=3, enige indicator)
   const dimB = weightedDim([["B1", 3]]);
   const risico = levelAvg([dimA, dimB]);
 
@@ -534,7 +545,7 @@ function calcScores(scores) {
 }
 
 // ──────────────────────────────────────────────────────────────
-// AANBEVELINGEN — automatisch gegenereerd op basis van scores
+// AANBEVELINGEN: automatisch gegenereerd op basis van scores
 // ──────────────────────────────────────────────────────────────
 function generateRecommendations(scores) {
   const sc  = calcScores(scores);
@@ -579,7 +590,7 @@ function generateRecommendations(scores) {
   } else if (inBeheersbaar) {
     strategic = "Deze applicatie staat in het kwadrant BEHEERSBAAR: hoog risico maar goede weerbaarheid. De risico's zijn geaccepteerd met een solide fallback-positie. Strategisch advies: bewaken dat de weerbaarheid op peil blijft, met name als er leverancierswijzigingen plaatsvinden. Neem clausules op die NHL Stenden informeren bij overname of beleidswijzigingen van de leverancier.";
   } else if (inAandacht) {
-    strategic = "Deze applicatie staat in het kwadrant AANDACHTSPUNT: beperkt risico maar ook beperkte weerbaarheid. Er is ruimte voor verbetering zonder hoge urgentie. Strategisch advies: gebruik de relatief lage druk als momentum om weerbaarheid structureel op te bouwen — begin met kennisborging en contractuele exit-clausules.";
+    strategic = "Deze applicatie staat in het kwadrant AANDACHTSPUNT: beperkt risico maar ook beperkte weerbaarheid. Er is ruimte voor verbetering zonder hoge urgentie. Strategisch advies: gebruik de relatief lage druk als momentum om weerbaarheid structureel op te bouwen, begin met kennisborging en contractuele exit-clausules.";
   } else if (inOptimaal) {
     strategic = "Deze applicatie staat in het kwadrant OPTIMAAL: beperkt risico en goede weerbaarheid. Behoud de huidige positie. Strategisch advies: zorg voor periodieke hercontrole (jaarlijks of bij contractverlenging) en houd de weerbaarheidsmaatregelen actueel. Deel de aanpak als voorbeeld voor andere applicaties.";
   } else {
@@ -595,7 +606,7 @@ function generateRecommendations(scores) {
 
 
 
-// About sub-components — module level om React re-mount te voorkomen
+// About sub-components: module level om React re-mount te voorkomen
 function Section({ title, children, accent="#1E3A8A" }) {
   return (
     <div className="mb-6">
@@ -617,7 +628,7 @@ function Tip({ label, children, color="#1E3A8A", bg="#EFF6FF" }) {
   );
 }
 
-// Kwadrant SVG — module level, ontvangt data als props
+// Kwadrant SVG: module level, ontvangt data als props
 function KwadrantSVG({ kwData, onAppClick }) {
   const W = 700, H = 420;
   const pad = { top:32, right:24, bottom:52, left:52 };
@@ -696,7 +707,7 @@ function KwadrantSVG({ kwData, onAppClick }) {
   );
 }
 
-// ── DivergingChart — vervangt het spindiagram ────────────────
+// ── DivergingChart: vervangt het spindiagram ────────────────
 // Semantisch correcte weergave: richting van de as heeft betekenis
 // Links/rood = risico (laag is beter), rechts/groen = weerbaarheid (hoog is beter)
 function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
@@ -717,8 +728,8 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
 
   const groups = [
     {
-      id:"risico", title:"Niveau 1 — Risico-exposure",
-      note:"Lagere score is beter — minder blootstelling",
+      id:"risico", title:"Niveau 1: Risico-exposure",
+      note:"Lagere score is beter, minder blootstelling",
       tc:"#991b1b", bg:"#fff1f2", border:"#fecaca",
       gradient:"linear-gradient(to right, #dcfce7 0%, #fef9c3 40%, #fca5a5 75%, #dc2626 100%)",
       dims:[
@@ -727,8 +738,8 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
       ]
     },
     {
-      id:"mitigatie", title:"Niveau 2 — Mitigatie-capaciteit",
-      note:"Hogere score is beter — meer weerbaarheid",
+      id:"mitigatie", title:"Niveau 2: Mitigatie-capaciteit",
+      note:"Hogere score is beter, meer weerbaarheid",
       tc:"#166534", bg:"#f0fdf4", border:"#bbf7d0",
       gradient:"linear-gradient(to right, #dc2626 0%, #fca5a5 25%, #fde68a 55%, #86efac 80%, #16a34a 100%)",
       dims:[
@@ -738,8 +749,8 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
       ]
     },
     {
-      id:"belang", title:"Niveau 3 — Strategisch belang",
-      note:"Hogere score = meer urgentie — vraagt extra aandacht",
+      id:"belang", title:"Niveau 3: Strategisch belang",
+      note:"Hogere score = meer urgentie, vraagt extra aandacht",
       tc:"#92400e", bg:"#fff7ed", border:"#fed7aa",
       gradient:"linear-gradient(to right, #fffbeb 0%, #fde68a 40%, #f59e0b 70%, #b45309 100%)",
       dims:[
@@ -757,7 +768,7 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
 
   return (
     <div style={{ fontFamily:"Inter, system-ui, sans-serif", position:"relative" }}>
-      {/* Legenda — scrollbaar bij veel apps */}
+      {/* Legenda: scrollbaar bij veel apps */}
       <div style={{ display:"flex", flexWrap:"wrap", gap:"4px 12px", marginBottom:10,
                     maxHeight: apps.length > 15 ? 72 : "none", overflowY: apps.length > 15 ? "auto" : "visible",
                     padding: apps.length > 15 ? "4px 0" : 0 }}>
@@ -873,7 +884,7 @@ function DivergingChart({ apps, compact = false, useSecondaryName = false }) {
   );
 }
 
-// ── OpdrachtKaart — centrale vraagstelling visueel ───────────
+// ── OpdrachtKaart: centrale vraagstelling visueel ───────────
 function OpdrachtKaart({ apps, useSecondaryName = false }) {
   const scored = apps.map(a => ({ ...a, sc: calcScores(a.scores) })).filter(a => a.sc.autonomyScore);
   if (apps.length === 0) return null;
@@ -898,7 +909,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
           </p>
         </div>
         <p style={{ fontSize:10, color:"#F9A8D4", marginTop:4 }}>
-          Aanleiding: inventarisatie digitale autonomie — aansluiting bij VH en SURF digitale strategie
+          Aanleiding: inventarisatie digitale autonomie: aansluiting bij VH en SURF digitale strategie
         </p>
       </div>
 
@@ -1021,7 +1032,7 @@ function OpdrachtKaart({ apps, useSecondaryName = false }) {
   );
 }
 
-// ── DictuRadarSVG — spindiagram voor DICTU autonomiecheck ──
+// ── DictuRadarSVG: spindiagram voor DICTU autonomiecheck ──
 // Alle 4 assen hebben dezelfde richting: hoger = meer soeverein (goed)
 function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
   const [tip, setTip] = React.useState(null);
@@ -1090,7 +1101,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
     setTip(closest || null);
   };
 
-  // Tooltip positie — altijd binnen SVG
+  // Tooltip positie: altijd binnen SVG
   const TW = 192, TH = 60;
   const tipX = tip ? Math.min(Math.max(tip.sx - TW / 2, 6), W - TW - 6) : 0;
   const tipY = tip ? Math.max(tip.sy - TH - 18, 6) : 0;
@@ -1101,7 +1112,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setTip(null)}>
 
-      {/* Grid — subtiel, strak */}
+      {/* Grid: subtiel, strak */}
       <polygon points={dims.map((_, i) => pt(i, 5).join(",")).join(" ")}
         fill="rgba(241,245,249,0.6)" stroke="none" />
       {LEVELS.map(lv => (
@@ -1126,7 +1137,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         return <text key={lv} x={x + 5} y={y + 3} fill="#bbb" fontSize={8} fontFamily="system-ui">{lv}</text>;
       })}
 
-      {/* Polygonen — strak, dun, licht gevuld */}
+      {/* Polygonen: strak, dun, licht gevuld */}
       {visibleAppsRadar.map((app, ai) => {
         const origIdx = apps.indexOf(app);
         const color = appColor(origIdx);
@@ -1141,7 +1152,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         );
       })}
 
-      {/* Stippen — klein, strak, jitter bij overlap */}
+      {/* Stippen: klein, strak, jitter bij overlap */}
       {visibleAppsRadar.map((app, ai) => {
         const origIdx = apps.indexOf(app);
         const color = appColor(origIdx);
@@ -1191,7 +1202,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
         );
       })}
 
-      {/* Legenda rechts in SVG als foreignObject — scrollbaar, met toggle per app */}
+      {/* Legenda rechts in SVG als foreignObject, scrollbaar, met toggle per app */}
       <foreignObject x={chartW + 10} y={4} width={LEGEND_W} height={H - 8}>
         <div xmlns="http://www.w3.org/1999/xhtml"
           style={{ height:"100%", overflowY:"auto", display:"flex", flexDirection:"column", gap:3, paddingRight:2 }}>
@@ -1249,11 +1260,11 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
       {apps.some(app => dims.map(d => app.scores[d.key] || 0).every(v => v === 0)) && (
         <text x={cx} y={H - 0} textAnchor="middle" fontSize={9} fill="#9ca3af" fontFamily="system-ui"
           fontStyle="italic">
-          * DICTU-vragen nog niet ingevuld — niet zichtbaar in diagram
+          * DICTU-vragen nog niet ingevuld, niet zichtbaar in diagram
         </text>
       )}
 
-      {/* Tooltip — puur SVG, altijd bovenop */}
+      {/* Tooltip: puur SVG, altijd bovenop */}
       {tip && (
         <g style={{ pointerEvents:"none" }}>
           <rect x={tipX + 2} y={tipY + 2} width={TW} height={TH} rx={5} fill="rgba(0,0,0,0.12)" />
@@ -1267,7 +1278,7 @@ function DictuRadarSVG({ apps, W = 480, H = 380, useSecondaryName = false }) {
           </text>
           <text x={tipX + 10} y={tipY + 35}
             fill="#374151" fontSize={9} fontFamily="system-ui">
-            {tip.dimKey} — {tip.dimLabel}
+            {tip.dimKey}: {tip.dimLabel}
           </text>
           <text x={tipX + 10} y={tipY + 52}
             fill={tip.color} fontSize={14} fontWeight={700} fontFamily="system-ui">
@@ -1345,7 +1356,7 @@ function ScoreBtn({ s, selected, label, desc, dir, onClick, readOnly = false }) 
   return (
     <button
       onClick={readOnly ? undefined : onClick}
-      title={readOnly ? "Alleen-lezen — open via Beheer om te wijzigen" : desc}
+      title={readOnly ? "Alleen-lezen: open via Beheer om te wijzigen" : desc}
       disabled={readOnly}
       className="flex-1 py-2 px-1 rounded-lg border-2 text-center transition-all"
       style={selected
@@ -1423,7 +1434,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
           value={displayedNote || ""}
           onChange={e => {
             if (!onNoteChange || readOnly) return;
-            // Sla altijd op met de primaire naam — zet secundaire terug als die actief is
+            // Sla altijd op met de primaire naam, zet secundaire terug als die actief is
             let tekst = e.target.value;
             if (useSecondaryName && appNameSecondary && appName && appName !== appNameSecondary) {
               tekst = tekst.replace(new RegExp(appNameSecondary.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), appName);
@@ -1455,7 +1466,7 @@ function QuestionCard({ q, value, onChange, dir, note, onNoteChange, useSecondar
 // APP
 // ──────────────────────────────────────────────────────────────
 
-// ── MiniGeoKaart — compacte wereldkaart voor Portfolio-pagina ────────────────
+// ── MiniGeoKaart: compacte wereldkaart voor Portfolio-pagina ────────────────
 function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, displayName }) {
   const [tooltip, setTooltip] = React.useState(null); // {x, y, text}
   const [worldData, setWorldData] = React.useState(null);
@@ -1558,7 +1569,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
     <svg viewBox={viewBox} style={{ width:"100%", height:"auto", display:"block", borderRadius:4, background:"#bfdbfe" }}>
       {/* Achtergrond oceaan */}
       <path d={pathGen(sphere)} fill="#bfdbfe"/>
-      {/* Landen — alleen kleur, geen rand */}
+      {/* Landen: alleen kleur, geen rand */}
       {countries.map(function(c) {
         return <path key={c.id} d={pathGen(c)}
           fill={c.isEU ? "#dbeafe" : "#f0f4f8"}
@@ -1583,7 +1594,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cy = pt[1] + Math.sin(angle) * spread - 2;
           return (
             <g key={a.id+"_j"} style={{cursor:"default"}}
-              onMouseEnter={e => setTooltip({x:cx, y:cy-10, text:displayName(a)+" — "+a.jRegio})}
+              onMouseEnter={e => setTooltip({x:cx, y:cy-10, text:displayName(a)+": "+a.jRegio})}
               onMouseLeave={() => setTooltip(null)}>
               <circle cx={cx} cy={cy} r="7" fill="transparent"/>
               <circle cx={cx} cy={cy} r="3.5" fill={a.appKleur} stroke="white" strokeWidth="1"/>
@@ -1606,7 +1617,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
           const cy = pt[1] + Math.sin(angle) * spread + 4;
           return (
             <g key={a.id+"_d"} style={{cursor:"default"}}
-              onMouseEnter={e => setTooltip({x:cx, y:cy-10, text:displayName(a)+" — "+a.dRegio})}
+              onMouseEnter={e => setTooltip({x:cx, y:cy-10, text:displayName(a)+": "+a.dRegio})}
               onMouseLeave={() => setTooltip(null)}>
               <circle cx={cx} cy={cy} r="7" fill="transparent"/>
               <circle cx={cx} cy={cy} r="3.5" fill="white" fillOpacity="0.9" stroke={a.appKleur} strokeWidth="1.8"/>
@@ -1637,7 +1648,7 @@ function MiniGeoKaart({ geoApps, proj, W, H, REGIO_LON_LAT, REGIO_KLEUR, display
   );
 }
 
-// ── WorldMapD3 — echte wereldkaart via D3 Natural Earth projectie ─────────────
+// ── WorldMapD3: echte wereldkaart via D3 Natural Earth projectie ─────────────
 function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId,
                       geoTooltip, setGeoTooltip, risicoKleur, displayName, REGIO_COORDS }) {
   const safeJuris = jurisGroups || {};
@@ -1879,7 +1890,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
             );
           })()}
 
-          {/* EU label in Europa — geprojecteerde positie voor lon=10, lat=54 */}
+          {/* EU label in Europa: geprojecteerde positie voor lon=10, lat=54 */}
           {(() => {
             const euPt = projection([10, 54]);
             if (!euPt) return null;
@@ -1889,7 +1900,7 @@ function WorldMapD3({ scored, jurisGroups, dataGroups, geoHoverId, setGeoHoverId
           })()}
 
           </g>{/* einde zoom-g */}
-          {/* Kaart legenda — buiten zoom */}
+          {/* Kaart legenda: buiten zoom */}
           <g transform={`translate(${W-270}, ${H-72})`}>
             <rect width="262" height="66" rx="4" fill="white" opacity="0.93" stroke="#e2e8f0" strokeWidth="1"/>
             <text x="10" y="15" fontSize="9" fontWeight="700" fill="#162D6E">Legenda</text>
@@ -1921,7 +1932,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
   if (!apps || apps.length === 0) return null;
 
 
-  // Vaste app-kleuren palette — elke app krijgt eigen kleur
+  // Vaste app-kleuren palette: elke app krijgt eigen kleur
   const APP_PALETTE = [
     "#6d28d9","#0891b2","#be185d","#15803d","#b45309",
     "#1d4ed8","#dc2626","#7c3aed","#0f766e","#c2410c",
@@ -2009,7 +2020,7 @@ function GeoKaartCompact({ apps, useSecondaryName, calcScores, appColor, d3 }) {
       {/* ── Header ── */}
       <div style={{ padding:"14px 16px 10px", display:"flex", alignItems:"flex-start", justifyContent:"space-between", gap:8, flexWrap:"wrap" }}>
         <div>
-          <h3 style={{ fontSize:14, fontWeight:700, color:"#162D6E", margin:0 }}>Geopolitieke positie — applicatielandschap</h3>
+          <h3 style={{ fontSize:14, fontWeight:700, color:"#162D6E", margin:0 }}>Geopolitieke positie: applicatielandschap</h3>
           <p style={{ fontSize:11, color:"#9ca3af", margin:"3px 0 0" }}>Jurisdictie leverancier en datalocatie per regio · klik op een app-naam om te filteren</p>
         </div>
         <div style={{ display:"flex", alignItems:"center", gap:6 }}>
@@ -2152,7 +2163,7 @@ function App() {
   const [loginInput, setLoginInput] = useState("");
   const [loginError, setLoginError] = useState(false);
   const LOGIN_CODE = "autonomie2026";
-  // API-token: hetzelfde als het inlogwachtwoord — wordt meegestuurd als request-header
+  // API-token: hetzelfde als het inlogwachtwoord, wordt meegestuurd als request-header
   // zodat de Netlify Functions server-side kunnen controleren of het verzoek geldig is.
   const apiToken = sessionStorage.getItem("nhl_api_token") || "";
 
@@ -2418,7 +2429,7 @@ function App() {
               </p>
               <div className="mt-5 pt-4" style={{ borderTop:"1px solid #f1f5f9" }}>
                 <p className="text-xs text-center leading-relaxed" style={{ color:"#cbd5e1" }}>
-                  🚧 <em>Werkend prototype</em> — ontwikkeld ter inspiratie en visualisatie van wat digitaal mogelijk is. Gebruik de inzichten als vertrekpunt, niet als definitieve conclusie.
+                  🚧 <em>Werkend prototype</em>, ontwikkeld ter inspiratie en visualisatie van wat digitaal mogelijk is. Gebruik de inzichten als vertrekpunt, niet als definitieve conclusie.
                 </p>
               </div>
             </div>
@@ -2625,8 +2636,8 @@ function App() {
 
     const ws4 = XLSX.utils.aoa_to_sheet([
       ["Vraag","Beschrijving","Norm (min. vereiste score)"],
-      ...DAAF.map(d  => [d.key,  d.name + " — " + d.question, ""]),
-      ...DICTU.map(q => [q.key,  q.name + " — " + q.question, q.norm])
+      ...DAAF.map(d  => [d.key,  d.name + ": " + d.question, ""]),
+      ...DICTU.map(q => [q.key,  q.name + ": " + q.question, q.norm])
     ]);
     XLSX.utils.book_append_sheet(wb, ws4, "Framework vragen");
 
@@ -2710,13 +2721,13 @@ function App() {
     // ── Dimensieprofiel als SVG (horizontale balken) ─────────────
     function generateSpinSVG(appsArr) {
       const groups = [
-        { title:"Niveau 1 — Risico-exposure (laag is beter)",   tc:"#991b1b", bg:"#fff1f2",
+        { title:"Niveau 1: Risico-exposure (laag is beter)",   tc:"#991b1b", bg:"#fff1f2",
           grad:"#dcfce7,#fef9c3,#fca5a5,#dc2626",
           dims:[{l:"A",n:"Geopolitiek risico"},{l:"B",n:"Leveranciersafh."}] },
-        { title:"Niveau 2 — Mitigatie-capaciteit (hoog is beter)", tc:"#166534", bg:"#f0fdf4",
+        { title:"Niveau 2: Mitigatie-capaciteit (hoog is beter)", tc:"#166534", bg:"#f0fdf4",
           grad:"#dc2626,#fca5a5,#fde68a,#86efac,#16a34a",
           dims:[{l:"C",n:"Technische weerbaarheid"},{l:"D",n:"Organisatorische wb."},{l:"E",n:"Contractuele wb."}] },
-        { title:"Niveau 3 — Strategisch belang (hoog = meer urgentie)", tc:"#92400e", bg:"#fff7ed",
+        { title:"Niveau 3: Strategisch belang (hoog = meer urgentie)", tc:"#92400e", bg:"#fff7ed",
           grad:"#fffbeb,#fde68a,#f59e0b,#b45309",
           dims:[{l:"F",n:"Organisatorisch belang"},{l:"G",n:"Data-gevoeligheid"},{l:"H",n:"Academische impact"}] },
       ];
@@ -2932,7 +2943,7 @@ function App() {
       }
       if (laagKennis.length > 0) {
         html += `Start een kennisborgingsprogramma voor applicaties waar de afhankelijkheid van individuele personen 
-          hoog is — dit is een quick win met direct effect op de weerbaarheid. `;
+          hoog is, dit is een quick win met direct effect op de weerbaarheid. `;
       }
       html += `Bespreek de uitkomsten van dit assessment in het Transitieteam Digitalisering en leg de 
         prioritering vast.</p>`;
@@ -2988,7 +2999,7 @@ function App() {
       const lbl=scoreLabel(s.autonomyScore);
       const heeftMotivaties = [...DAAF,...DICTU].some(q => (a.notes||{})[q.key]);
       return `<div class="app-section">
-        <h3>${aN}${a.supplier?` <span class="sub">— ${a.supplier}</span>`:""} 
+        <h3>${aN}${a.supplier?` <span class="sub">· ${a.supplier}</span>`:""} 
           <span style="font-size:11px;font-weight:600;color:${lbl.fg};padding:2px 8px;background:${lbl.bg};border-radius:3px;margin-left:8px">${lbl.text} ${s.autonomyScore?s.autonomyScore.toFixed(1):""}</span>
         </h3>
         ${[...DAAF,...DICTU].some(q=>(a.notes||{})[q.key]&&(a.notes||{})[q.key].length>300)?`<p style="font-size:9px;color:#9ca3af;font-family:Arial;margin-bottom:6px;font-style:italic">Motivaties zijn samengevat. De volledige toelichting is terug te lezen in de Digitale Autonomie-assessment Tool.</p>`:""}
@@ -3030,7 +3041,7 @@ function App() {
             return vs.length ? vs.reduce((s,v)=>s+v,0)/vs.length : 0;
           };
           if ((a.sc.risico||0) > 3.5)   punten.push("Hoog geopolitiek of leveranciersrisico");
-          if ((a.sc.mitigatie||0) < 2.5) punten.push("Lage weerbaarheid — weinig alternatieven of zwakke contractbescherming");
+          if ((a.sc.mitigatie||0) < 2.5) punten.push("Lage weerbaarheid: weinig alternatieven of zwakke contractbescherming");
           if (dimS("C") < 2)             punten.push("Nauwelijks technische exitopties");
           if (dimS("D") < 2)             punten.push("Interne kennis onvoldoende geborgd");
           if (dimS("E") < 2)             punten.push("Exit-clausules ontbreken of zijn zwak");
@@ -3091,7 +3102,7 @@ function App() {
       ${slotAandacht}
     </table>
 
-    <h3>Quick wins — direct uitvoerbaar</h3>
+    <h3>Quick wins: direct uitvoerbaar</h3>
     <p style="font-family:Arial;font-size:10px;color:#6b7280;margin-bottom:10px">
       Onderstaande acties zijn per direct uitvoerbaar zonder grote organisatorische of financiële investering.
     </p>
@@ -3113,25 +3124,25 @@ function App() {
         <strong style="color:white">E. van Gorkum</strong> is verantwoordelijk voor de tool, 
         het beheer en het onderhoud. <strong style="color:white">J. Blom en E. Rolf</strong> 
         richten zich op de methodiek en de inhoudelijke begeleiding van het assessmentproces. 
-        Dit is de taakverdeling voor de huidige projectfase — voorlopig, totdat er een 
+        Dit is de taakverdeling voor de huidige projectfase, voorlopig, totdat er een 
         officiële inbedding in de organisatie is gerealiseerd als vervolg op dit traject.
       </div>
       <div style="font-family:Arial;font-size:10px;color:white;font-weight:700;margin-bottom:6px">Voor applicatie-eigenaren:</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
         <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
-          <div style="color:white;font-weight:700;margin-bottom:3px">① Stap 1 — Bekijk je applicatie</div>
+          <div style="color:white;font-weight:700;margin-bottom:3px">① Stap 1: Bekijk je applicatie</div>
           Lees de score en de aandachtspunten van jouw applicatie(s) in dit rapport. Identificeer de quick win die direct uitvoerbaar is.
         </div>
         <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
-          <div style="color:white;font-weight:700;margin-bottom:3px">② Stap 2 — Vorm een mini-team</div>
+          <div style="color:white;font-weight:700;margin-bottom:3px">② Stap 2: Vorm een mini-team</div>
           Betrek je contract-eigenaar en functioneel beheerder. Samen hebben jullie de kennis en mandaat om aanbevelingen uit te voeren.
         </div>
         <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
-          <div style="color:white;font-weight:700;margin-bottom:3px">③ Stap 3 — Neem contact op</div>
+          <div style="color:white;font-weight:700;margin-bottom:3px">③ Stap 3: Neem contact op</div>
           Neem contact op met het Expertiseteam. Zij begeleiden jullie mini-project: van analyse naar concreet actieplan met eigenaar, maatregel en deadline.
         </div>
         <div style="background:rgba(255,255,255,0.08);border-radius:3px;padding:8px 10px;font-family:Arial;font-size:9px;color:#7DD3D0;line-height:1.5">
-          <div style="color:white;font-weight:700;margin-bottom:3px">④ Stap 4 — Herbeoordeel</div>
+          <div style="color:white;font-weight:700;margin-bottom:3px">④ Stap 4: Herbeoordeel</div>
           Na uitvoering van de aanbevelingen wordt de applicatie opnieuw beoordeeld. Het Expertiseteam verzorgt de herbeoordeling en rapportage.
         </div>
       </div>
@@ -3167,31 +3178,31 @@ function App() {
 
       const acties = [];
       if (sc.risico > 3.5)
-        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A — Geopolitiek", actie:"Inventariseer Europese alternatieven voor deze leverancier. Vraag offertes op bij minimaal twee EU-gevestigde aanbieders.", tip:"Begin met een marktverkenning van 1-2 dagdelen. SURF publiceert regelmatig overzichten van EU-conforme alternatieven per categorie.", kleur:"#b91c1c", bg:"#fee2e2" });
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A: Geopolitiek", actie:"Inventariseer Europese alternatieven voor deze leverancier. Vraag offertes op bij minimaal twee EU-gevestigde aanbieders.", tip:"Begin met een marktverkenning van 1-2 dagdelen. SURF publiceert regelmatig overzichten van EU-conforme alternatieven per categorie.", kleur:"#b91c1c", bg:"#fee2e2" });
       if ((a.scores||{})["A3"] >= 4)
-        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A3 — Datalocatie", actie:"Verzoek de leverancier schriftelijk te bevestigen in welke regio data wordt opgeslagen (incl. back-ups en metadata). Leg dit vast in het contract.", tip:"Vraag ook naar de locatie van de control plane — het beheerpaneel van de dienst.", kleur:"#b91c1c", bg:"#fee2e2" });
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"A3: Datalocatie", actie:"Verzoek de leverancier schriftelijk te bevestigen in welke regio data wordt opgeslagen (incl. back-ups en metadata). Leg dit vast in het contract.", tip:"Vraag ook naar de locatie van de control plane, het beheerpaneel van de dienst.", kleur:"#b91c1c", bg:"#fee2e2" });
       if ((a.scores||{})["B1"] >= 4)
-        acties.push({ niveau:"Risico", prio:"Hoog", dim:"B — Leverancier", actie:"Breng de concentratie in kaart: hoeveel kritieke processen zijn afhankelijk van deze leverancier? Stel een maximum vast.", tip:"Gebruik de tool om vergelijkbare applicaties van dezelfde leverancier bij elkaar te zoeken.", kleur:"#ea580c", bg:"#ffedd5" });
+        acties.push({ niveau:"Risico", prio:"Hoog", dim:"B: Leverancier", actie:"Breng de concentratie in kaart: hoeveel kritieke processen zijn afhankelijk van deze leverancier? Stel een maximum vast.", tip:"Gebruik de tool om vergelijkbare applicaties van dezelfde leverancier bij elkaar te zoeken.", kleur:"#ea580c", bg:"#ffedd5" });
       if ((a.scores||{})["C1"] <= 2)
-        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C — Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen voor de eerste 4 uur is al waardevol.", kleur:"#1E3A8A", bg:"#EFF6FF" });
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"C: Technisch", actie:"Documenteer en test een noodprocedure voor het geval deze applicatie uitvalt.", tip:"Een noodprocedure hoeft niet perfect te zijn. Zelfs een A4 met de stappen voor de eerste 4 uur is al waardevol.", kleur:"#1E3A8A", bg:"#EFF6FF" });
       if ((a.scores||{})["D1"] <= 2)
-        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D — Organisatorisch", actie:"Leg de kennis over configuratie en beheer vast bij minimaal twee medewerkers.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint.", kleur:"#1E3A8A", bg:"#EFF6FF" });
+        acties.push({ niveau:"Mitigatie", prio:"Middel", dim:"D: Organisatorisch", actie:"Leg de kennis over configuratie en beheer vast bij minimaal twee medewerkers.", tip:"Plan een kennisoverdracht-sessie van een halve dag. Documenteer in een wiki of SharePoint.", kleur:"#1E3A8A", bg:"#EFF6FF" });
       if ((a.scores||{})["E1"] <= 2)
-        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E — Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, dataportabiliteitsgarantie en opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een data return plan: wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1E3A8A", bg:"#EFF6FF" });
+        acties.push({ niveau:"Mitigatie", prio:"Hoog", dim:"E: Contractueel", actie:"Voeg bij de eerstvolgende contractverlenging toe: een exit-clausule, dataportabiliteitsgarantie en opzegtermijn van maximaal 3 maanden.", tip:"Vraag de leverancier ook om een data return plan: wat krijg je terug als je stopt, en in welk formaat?", kleur:"#1E3A8A", bg:"#EFF6FF" });
       if (sc.dictuAvg && sc.dictuAvg < 3)
         acties.push({ niveau:"DICTU", prio:"Hoog", dim:"2.1–4.1 Autonomie", actie:"Vraag de leverancier schriftelijk naar datalocatie, garantie geen leverancierstoegang, verzet tegen niet-EU dataverzoeken en locatie control plane.", tip:"Gebruik de DICTU-vragenlijst als template voor het gesprek met de leverancier.", kleur:"#6d28d9", bg:"#faf5ff" });
       if (sc.belang >= 4 && sc.risico >= 3)
-        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H — Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico bewust aanvaard? Maak een korte risicoafweging en leg de beslissing vast inclusief een herzieningsdatum.", tip:"Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E91E8C", bg:"#fff8e1" });
+        acties.push({ niveau:"Belang", prio:"Middel", dim:"F/G/H: Strategisch", actie:"Formeel vastleggen bij NHL Stenden: is het risico bewust aanvaard? Maak een korte risicoafweging en leg de beslissing vast inclusief een herzieningsdatum.", tip:"Een korte notitie met het besluit, de afweging en een jaarlijkse reviewafspraak is voldoende.", kleur:"#E91E8C", bg:"#fff8e1" });
       if (acties.length === 0)
         acties.push({ niveau:"Onderhoud", prio:"Laag", dim:"Algemeen", actie:"Alle scores zijn acceptabel of goed. Plan een hercontrole bij de eerstvolgende contractverlenging.", tip:"Stel een terugkerende herinnering in op de einddatum van het contract.", kleur:"#15803d", bg:"#dcfce7" });
 
-      const supplierStr = a.supplier ? " — " + a.supplier : "";
+      const supplierStr = a.supplier ? " · " + a.supplier : "";
       const naam = dName(a);
 
       let html = "";
       html += '<div style="background:' + scoreBg + ';border:1px solid ' + kleur + '44;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:Arial;font-size:10px;page-break-inside:avoid">';
       html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">';
-      html += '<div style="font-weight:700;color:#0C2340;font-size:12px">' + naam + (a.supplier ? ' <span style="font-weight:400;color:#9ca3af;font-size:10px">— ' + a.supplier + "</span>" : "") + "</div>";
+      html += '<div style="font-weight:700;color:#0C2340;font-size:12px">' + naam + (a.supplier ? ' <span style="font-weight:400;color:#9ca3af;font-size:10px">· ' + a.supplier + "</span>" : "") + "</div>";
       html += '<span style="background:' + kleur + ';color:white;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700">' + lbl + "</span>";
       if (sc.autonomyScore) html += '<span style="font-size:10px;font-weight:700;color:' + kleur + '">Score: ' + sc.autonomyScore.toFixed(1) + "/10</span>";
       html += "</div>";
@@ -3221,7 +3232,7 @@ function App() {
 
       html += '<div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;font-family:Arial;font-size:9.5px">';
       html += '<div style="font-weight:700;color:#0C2340;margin-bottom:6px">Aanbevolen aanpak</div>';
-      html += '<div style="color:#374151;line-height:1.7">Bespreek deze actielijst met de applicatie-eigenaar, contract-eigenaar en functioneel beheerder. Zij beschikken over de operationele kennis die nodig is om de acties te prioriteren en uit te voeren. Leg de gemaakte afspraken vast — ook bewuste keuzes om een actie niet op te pakken zijn waardevolle informatie voor de strategische besluitvorming van NHL Stenden.</div>';
+      html += '<div style="color:#374151;line-height:1.7">Bespreek deze actielijst met de applicatie-eigenaar, contract-eigenaar en functioneel beheerder. Zij beschikken over de operationele kennis die nodig is om de acties te prioriteren en uit te voeren. Leg de gemaakte afspraken vast, ook bewuste keuzes om een actie niet op te pakken zijn waardevolle informatie voor de strategische besluitvorming van NHL Stenden.</div>';
       html += "</div>";
       return html;
     }
@@ -3231,7 +3242,7 @@ function App() {
 <html lang="nl">
 <head>
 <meta charset="UTF-8"/>
-<title>${visible.length === 1 ? "Assessment " + dName(visible[0]) + " — Digitale Autonomie NHL Stenden " + datum : "Portfolioanalyse Digitale Autonomie — NHL Stenden " + datum}</title>
+<title>${visible.length === 1 ? "Assessment " + dName(visible[0]) + ": Digitale Autonomie NHL Stenden " + datum : "Portfolioanalyse Digitale Autonomie, NHL Stenden " + datum}</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:Georgia,'Times New Roman',serif;font-size:11px;color:#1a1a1a;line-height:1.7}
@@ -3416,17 +3427,17 @@ function App() {
 
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">3.</span><span class="toc-lbl">Risico-analyse en aanbevelingen</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
 
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">4.</span><span class="toc-lbl">Scoreoverzicht — alle applicaties</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">4.</span><span class="toc-lbl">Scoreoverzicht: alle applicaties</span><span class="toc-dots"></span><span class="toc-pg">4</span></div>
 
   <div class="toc-section" style="margin-top:8px"><span class="toc-nr">5.</span><span class="toc-lbl">Visuele analyse</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
   <div class="toc-sub"><span class="toc-nr">5.1</span><span class="toc-lbl">Autonomie-kwadrant (DAAF)</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
   <div class="toc-sub"><span class="toc-nr">5.2</span><span class="toc-lbl">Dimensieprofiel per applicatie</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
   <div class="toc-sub"><span class="toc-nr">5.3</span><span class="toc-lbl">Dimensiescores tabel</span><span class="toc-dots"></span><span class="toc-pg">5</span></div>
 
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Slotbevindingen — aandachtspunten, quick wins en advies</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
-  ${visible.length === 1 ? `<div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Verbeteracties — ${dName(visible[0])}</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>` : `<div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Vervolgstappen — Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>`}
-  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">8.</span><span class="toc-lbl">Bijlage — Detailscores per applicatie</span><span class="toc-dots"></span><span class="toc-pg">8+</span></div>
-  ${visible.map((a,i) => `<div class="toc-sub"><span class="toc-nr">${i+1}.</span><span class="toc-lbl">${dName(a)}${a.supplier?` <span style="color:#9ca3af;font-weight:400">— ${a.supplier}</span>`:""}</span><span class="toc-dots"></span><span class="toc-pg">${6+i}</span></div>`).join("")}
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">6.</span><span class="toc-lbl">Slotbevindingen: aandachtspunten, quick wins en advies</span><span class="toc-dots"></span><span class="toc-pg">6+</span></div>
+  ${visible.length === 1 ? `<div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Verbeteracties: ${dName(visible[0])}</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>` : `<div class="toc-section" style="margin-top:8px"><span class="toc-nr">7.</span><span class="toc-lbl">Vervolgstappen: Review door applicatie-eigenaren</span><span class="toc-dots"></span><span class="toc-pg">7+</span></div>`}
+  <div class="toc-section" style="margin-top:8px"><span class="toc-nr">8.</span><span class="toc-lbl">Bijlage: Detailscores per applicatie</span><span class="toc-dots"></span><span class="toc-pg">8+</span></div>
+  ${visible.map((a,i) => `<div class="toc-sub"><span class="toc-nr">${i+1}.</span><span class="toc-lbl">${dName(a)}${a.supplier?` <span style="color:#9ca3af;font-weight:400">· ${a.supplier}</span>`:""}</span><span class="toc-dots"></span><span class="toc-pg">${6+i}</span></div>`).join("")}
 
 </div>
 
@@ -3451,7 +3462,7 @@ function App() {
   <h3>1.1 Over deze analyse en de tool</h3>
   <div class="narrative">
     <p>Deze portfolioanalyse is automatisch gegenereerd door de <strong>Digitale Autonomie-assessment Tool</strong> 
-    van NHL Stenden Hogeschool (${VERSION}). De tool is een levend, realtime instrument — 
+    van NHL Stenden Hogeschool (${VERSION}). De tool is een levend, realtime instrument, 
     géén statisch rapport. Assessments worden bijgehouden en bijgewerkt naarmate contracten wijzigen, 
     leveranciers hun beleid aanpassen of nieuwe inzichten beschikbaar komen. Dit rapport is een momentopname; 
     de tool zelf biedt altijd de meest actuele stand.</p>
@@ -3504,7 +3515,7 @@ function App() {
     <p>De expertisegroep levert input en feedback op de concrete deliverables, borgt de opgebouwde kennis 
     en waarborgt dat digitale autonomie vanuit alle relevante invalshoeken wordt benaderd. 
     Bij applicaties met aandachtspunten adviseert de expertisegroep nadrukkelijk om ook de 
-    <strong>applicatie-eigenaar, contract-eigenaar en functioneel beheerder</strong> te betrekken — 
+    <strong>applicatie-eigenaar, contract-eigenaar en functioneel beheerder</strong> te betrekken: 
     zij beschikken over de operationele kennis die scores kan nuanceren en aanbevelingen 
     uitvoerbaar maakt (zie hoofdstuk 7 en 8).</p>
   </div>
@@ -3513,11 +3524,11 @@ function App() {
   <div class="narrative">
     <p>In december 2025 heeft het kernteam Digitale Autonomie een adviesopdracht aangeboden 
     NHL Stenden heeft digitale autonomie verankerd als ambassadeurslijn binnen het 
-    Programma Digitale Samenhang — geen apart project, maar een 
+    Programma Digitale Samenhang, geen apart project, maar een 
     <strong>ordenend perspectief</strong> dat bestaande initiatieven verbindt en richting geeft.</p>
   </div>
   <div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;margin:10px 0 14px;font-family:Arial;font-size:10px;page-break-inside:avoid">
-    <div style="font-weight:700;color:#0C2340;margin-bottom:8px">Roadmap 2026 — drie fasen</div>
+    <div style="font-weight:700;color:#0C2340;margin-bottom:8px">Roadmap 2026: drie fasen</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
       <div style="background:white;border-left:3px solid #1A56A0;padding:8px 10px;border-radius:0 3px 3px 0">
         <div style="font-weight:700;color:#1A56A0;font-size:9px">FASE 1 · Feb–Mrt</div>
@@ -3543,7 +3554,7 @@ function App() {
   </div>
   <div class="framework-grid">
     <div class="framework-card fw-daaf">
-      <div class="fw-title">DAAF — Digital Autonomy Assessment Framework</div>
+      <div class="fw-title">DAAF: Digital Autonomy Assessment Framework</div>
       <div class="fw-sub">Utrecht University · Open source · github.com/utrechtuniversity</div>
       <div class="fw-body">Het DAAF-framework beoordeelt applicaties op drie niveaus: 
       <strong>Risico-exposure</strong> (geopolitieke en leveranciersrisico's), 
@@ -3567,8 +3578,8 @@ function App() {
   <h3>1.5 Gebruik in het hoger onderwijs</h3>
   <div class="narrative">
     <p>Digitale autonomie staat breed op de agenda in het Nederlandse hoger onderwijs. 
-    De <strong>Vereniging Hogescholen (VH)</strong> en <strong>SURF</strong> — de ICT-samenwerkingsorganisatie 
-    van onderwijs en onderzoek — werken aan gezamenlijke kaders en richtlijnen voor instellingen 
+    De <strong>Vereniging Hogescholen (VH)</strong> en <strong>SURF</strong>, de ICT-samenwerkingsorganisatie 
+    van onderwijs en onderzoek, werken aan gezamenlijke kaders en richtlijnen voor instellingen 
     die hun digitale afhankelijkheden in kaart willen brengen. Daarin zijn vier pijlers leidend: 
     juridische autonomie (onder welk recht valt de leverancier?), technische autonomie 
     (is data-portabiliteit en exitbaarheid geborgd?), organisatorische autonomie (is er interne 
@@ -3590,12 +3601,12 @@ function App() {
     <div style="background:#EBF3FF;border:1px solid #D0E4F7;border-radius:4px;padding:12px 16px;margin-top:14px;font-family:Arial;font-size:10px;page-break-inside:avoid">
       <div style="font-weight:700;color:#0C2340;margin-bottom:8px">Opbouw van dit rapport</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H3</span><span style="color:#374151">Risico-analyse en aanbevelingen — de grootste risico's en concrete aanbevelingen</span></div>
-        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H4</span><span style="color:#374151">Scoreoverzicht — kerncijfers van alle applicaties op één pagina</span></div>
-        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H5</span><span style="color:#374151">Visuele analyse — kwadrant, dimensieprofiel en scoretabel</span></div>
-        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#26B5AE;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H6</span><span style="color:#374151">Slotbevindingen — aandachtspunten, quick wins en strategisch advies</span></div>
-        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#26B5AE;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H7</span><span style="color:#374151">Vervolgacties Fase 2 — review door applicatie-eigenaren en concrete acties</span></div>
-        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#6b7280;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H8</span><span style="color:#6b7280">Bijlage — detailscores per applicatie (voor geïnteresseerden en eigenaren)</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H3</span><span style="color:#374151">Risico-analyse en aanbevelingen: de grootste risico's en concrete aanbevelingen</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H4</span><span style="color:#374151">Scoreoverzicht: kerncijfers van alle applicaties op één pagina</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#1A56A0;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H5</span><span style="color:#374151">Visuele analyse: kwadrant, dimensieprofiel en scoretabel</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#26B5AE;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H6</span><span style="color:#374151">Slotbevindingen: aandachtspunten, quick wins en strategisch advies</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#26B5AE;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H7</span><span style="color:#374151">Vervolgacties Fase 2: review door applicatie-eigenaren en concrete acties</span></div>
+        <div style="display:flex;gap:8px;align-items:flex-start"><span style="background:#6b7280;color:white;font-weight:700;padding:1px 6px;border-radius:2px;font-size:9px;flex-shrink:0">H8</span><span style="color:#6b7280">Bijlage: detailscores per applicatie (voor geïnteresseerden en eigenaren)</span></div>
       </div>
     </div>
 
@@ -3609,7 +3620,7 @@ function App() {
 
   <!-- Scoreoverzicht -->
   <div class="page-break">
-    <h2>4. Scoreoverzicht — alle applicaties</h2>
+    <h2>4. Scoreoverzicht: alle applicaties</h2>
     <div class="section-intro">
       Onderstaande tabel geeft een overzicht van alle beoordeelde applicaties met de 
       kerncijfers per applicatie. De autonomiescore (1–10) is de centrale uitkomst: 
@@ -3637,15 +3648,15 @@ function App() {
       <p style="font-size:10px;color:#374151;margin-bottom:8px;font-family:Arial;line-height:1.6">
         Dit kwadrant plaatst elke applicatie op twee assen en maakt in één oogopslag zichtbaar 
         welke applicaties de meeste aandacht verdienen.<br/>
-        <strong>Horizontale as</strong> — Risico × Belang: hoe verder naar rechts, hoe urgenter 
+        <strong>Horizontale as</strong>: Risico × Belang: hoe verder naar rechts, hoe urgenter 
         (combinatie van geopolitiek risico, leveranciersafhankelijkheid en strategisch belang).<br/>
-        <strong>Verticale as</strong> — Mitigatie: hoe hoger, hoe beter de organisatie is beschermd 
+        <strong>Verticale as</strong>: Mitigatie: hoe hoger, hoe beter de organisatie is beschermd 
         (technische exitopties, interne kennis, contractuele weerbaarheid).<br/>
         <strong>Vier kwadranten:</strong> 
         OPTIMAAL (linksboven: laag risico, goede bescherming) · 
         BEHEERSBAAR (rechtsboven: hoog risico maar goede bescherming) · 
         AANDACHTSPUNT (linksonder: laag risico maar weinig bescherming) · 
-        KRITIEK (rechtsonder: hoog risico én weinig bescherming — vraagt directe actie).
+        KRITIEK (rechtsonder: hoog risico én weinig bescherming, vraagt directe actie).
       </p>
     </div>
     <div class="chart-wrap">${generateKwadrantSVG(visible)}</div>
@@ -3657,11 +3668,11 @@ function App() {
         Dit profiel toont per DAAF-dimensie hoe alle applicaties scoren op een schaal van 1 tot 5. 
         Elke gekleurde stip op de balk is één applicatie. De kleurovergang laat zien wat 
         goed of slecht is voor die specifieke dimensie:<br/>
-        <strong>Risico-assen (A, B)</strong> — groen aan de linkerkant (lage score = weinig risico = goed). 
+        <strong>Risico-assen (A, B)</strong>: groen aan de linkerkant (lage score = weinig risico = goed). 
         Rood aan de rechterkant betekent hoog risico.<br/>
-        <strong>Mitigatie-assen (C, D, E)</strong> — groen aan de rechterkant (hoge score = sterke weerbaarheid = goed). 
+        <strong>Mitigatie-assen (C, D, E)</strong>: groen aan de rechterkant (hoge score = sterke weerbaarheid = goed). 
         Rood aan de linkerkant betekent weinig bescherming.<br/>
-        <strong>Belang-assen (F, G, H)</strong> — hoge score betekent hoog strategisch belang. 
+        <strong>Belang-assen (F, G, H)</strong>: hoge score betekent hoog strategisch belang. 
         Op zichzelf niet goed of slecht, maar in combinatie met laag risico geeft het prioriteit.<br/>
         Stippen die ver van het groene uiteinde liggen, zijn aandachtspunten.
       </p>
@@ -3685,7 +3696,7 @@ function App() {
        Bij meerdere: vervolgstappen eigenaren (zonder kernapplicatietabel) -->
   <div class="page-break">
     ${visible.length === 1 ? `
-    <h2>7. Verbeteracties — ${dName(visible[0])}</h2>
+    <h2>7. Verbeteracties: ${dName(visible[0])}</h2>
     <div class="section-intro">
       Dit hoofdstuk vertaalt de assessmentscores van <strong>${dName(visible[0])}</strong> naar concrete,
       uitvoerbare verbeteracties. De acties zijn ingedeeld per DAAF-niveau en gesorteerd op urgentie.
@@ -3694,7 +3705,7 @@ function App() {
     </div>
     ${verbeteractiesHTML}
     ` : `
-    <h2>7. Vervolgstappen — Review door applicatie-eigenaren</h2>
+    <h2>7. Vervolgstappen: Review door applicatie-eigenaren</h2>
     <div class="section-intro">
       Dit hoofdstuk beschrijft de aanbevolen vervolgstappen voor de review van assessmentscores
       met applicatie-eigenaren en geeft concrete acties voor het verdere traject.
@@ -3710,7 +3721,7 @@ function App() {
       onafhankelijk is van subjectieve perceptie.</p>
       <p><strong>Applicatie-eigenaren, contract-eigenaren en functioneel beheerders</strong>
       beschikken over praktijkkennis die de scores kan nuanceren, verbeteren of
-      corrigeren. Scores kunnen daardoor nog wijzigen — en dat is nadrukkelijk de bedoeling.
+      corrigeren. Scores kunnen daardoor nog wijzigen, en dat is nadrukkelijk de bedoeling.
       De tool is een levend instrument, geen statisch rapport.</p>
     </div>
 
@@ -3738,9 +3749,9 @@ function App() {
 
     <!-- PAGINA 4+: Detail per applicatie -->
   <div class="page-break">
-    <h2>8. Detailscores en aanbevelingen per applicatie — Bijlage</h2>
+    <h2>8. Detailscores en aanbevelingen per applicatie: bijlage</h2>
     <div class="section-intro">
-      Dit hoofdstuk bevat de volledige detailscores per applicatie — inclusief alle ingevulde scores, 
+      Dit hoofdstuk bevat de volledige detailscores per applicatie, inclusief alle ingevulde scores, 
       motivaties en automatisch gegenereerde aanbevelingen. Het is bedoeld als <strong>naslagwerk</strong> 
       voor geïnteresseerden en applicatie-eigenaren die de volledige onderbouwing willen inzien. 
       De kern van de analyse en de aanbevelingen staan in de voorgaande hoofdstukken.
@@ -3777,7 +3788,7 @@ ${(function(){
   html2 += '<div style="page-break-before:always">';
   html2 += '<div class="page-header"><div class="logo">NHL<br/>STENDEN</div><div style="width:2px;background:#26B5AE;align-self:stretch"></div><div><div class="header-title">Portfolioanalyse Digitale Autonomie</div><div class="header-sub">Applicatielandschap NHL Stenden · ' + datum + ' · ' + VERSION + '</div></div><div class="header-right">' + naamModus + '</div></div>';
   html2 += '<div style="padding:14px 48px 20px">';
-  html2 += '<h2 style="font-family:Arial;font-size:14px;color:#0C2340;padding-bottom:4px;margin:0 0 6px;font-weight:700;border-bottom:2px solid #1A56A0">Portfoliostatus — Samenvatting</h2>';
+  html2 += '<h2 style="font-family:Arial;font-size:14px;color:#0C2340;padding-bottom:4px;margin:0 0 6px;font-weight:700;border-bottom:2px solid #1A56A0">Portfoliostatus: Samenvatting</h2>';
   html2 += '<div style="font-size:10px;line-height:1.5;color:#374151;margin-bottom:10px;border-left:3px solid #D0E4F7;padding-left:10px;font-family:Arial">Overzicht portfoliostatus digitale autonomie NHL Stenden per ' + datum + '.</div>';
 
   // Oordeel + kerngetallen
@@ -4025,7 +4036,7 @@ ${(function(){
             ))}
           </div>
 
-          {/* ── Filter strip — alleen tonen als er >2 apps zijn ── */}
+          {/* ── Filter strip: alleen tonen als er >2 apps zijn ── */}
           {apps.length > 2 && (
             <div className="rounded p-3 mb-4"
               style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
@@ -4039,7 +4050,7 @@ ${(function(){
                       disabled={(!hidden && visibleApps.length <= 1)}
                       title={
                         !hidden && visibleApps.length <= 1 ? "Minimaal 1 applicatie moet zichtbaar blijven" :
-                        hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt — verberg eerst een andere` :
+                        hidden && visibleApps.length >= MAX_VISIBLE ? `Maximum van ${MAX_VISIBLE} applicaties bereikt, verberg eerst een andere` :
                         hidden ? "Klik om toe te voegen aan selectie" : "Klik om uit selectie te verwijderen"
                       }
                       className="flex items-center gap-1.5 text-xs px-2 py-1 font-medium transition-all"
@@ -4065,7 +4076,7 @@ ${(function(){
               <div className="flex items-center gap-2 mt-2 pt-2 flex-wrap" style={{ borderTop:"1px solid #EBF3FF" }}>
                 <span className="text-xs font-semibold mr-auto" style={{ color:"#9ca3af" }}>
                   Grafiek-selectie · {visibleApps.length} van {apps.length} zichtbaar
-                  {visibleApps.length > MAX_VISIBLE && <span style={{color:"#dc2626"}}> · meer dan max {MAX_VISIBLE} — grafieken tonen eerste {MAX_VISIBLE}</span>}
+                  {visibleApps.length > MAX_VISIBLE && <span style={{color:"#dc2626"}}> · meer dan max {MAX_VISIBLE}, grafieken tonen eerste {MAX_VISIBLE}</span>}
                 </span>
                 {apps.length > MAX_VISIBLE && (
                   <button onClick={selectLaatste10}
@@ -4124,13 +4135,13 @@ ${(function(){
             </div>
           ) : (<>
 
-          {/* ── Opdrachtskaart — centrale vraagstelling ── */}
+          {/* ── Opdrachtskaart: centrale vraagstelling ── */}
           <OpdrachtKaart apps={apps} useSecondaryName={useSecondaryName} />
 
           {/* ── Rij 1: Kwadrant volledig breed ── */}
           <div className="grid gap-4 mb-4" style={{ gridTemplateColumns:"1fr" }}>
 
-            {/* Autonomie-kwadrant — volledig breed */}
+            {/* Autonomie-kwadrant: volledig breed */}
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
                 <div className="flex items-center gap-2">
@@ -4195,7 +4206,7 @@ ${(function(){
               </h3>
               {scored.length > 20 && (
                 <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>
-                  {scored.length} applicaties — scroll voor het volledige overzicht
+                  {scored.length} applicaties, scroll voor het volledige overzicht
                 </p>
               )}
               <div className="grid gap-3" style={{ gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))" }}>
@@ -4244,7 +4255,7 @@ ${(function(){
                           </div>
                         ))}
                       </div>
-                      {/* Aanbevelingen — toon alleen als app volledig genoeg is */}
+                      {/* Aanbevelingen: toon alleen als app volledig genoeg is */}
                       {a.sc.autonomyScore && (() => {
                         const rec = generateRecommendations(a.scores);
                         return (
@@ -4270,7 +4281,7 @@ ${(function(){
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
-              <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Dimensieprofiel — per applicatie vergelijken</h3>
+              <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Dimensieprofiel: per applicatie vergelijken</h3>
             </div>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#6b7280" }}>
               Elke balk toont de gewogen score (1–5) op één DAAF-dimensie. De kleurovergang geeft direct de kwaliteit aan:
@@ -4287,7 +4298,7 @@ ${(function(){
               {[
                 { label:"Punt op de balk", text:"Elk gekleurde punt = één applicatie. De positie op de balk (1–5) is de gewogen dimensiescore. Hover voor applicatienaam en exacte waarde." },
                 { label:"Kleurovergang", text:"De achtergrondkleur van de balk geeft direct de richting aan: groen = gewenste kant. Risico-assen: groen links (laag risico). Mitigatie-assen: groen rechts (hoog = meer weerbaarheid)." },
-                { label:"Belang-assen (F, G, H)", text:"Hoge belang-scores (oranje/bruin) betekenen meer strategische urgentie. Dit is niet per se slecht — maar vraagt dat de risico- en mitigatiescores voor die applicatie goed op orde zijn." },
+                { label:"Belang-assen (F, G, H)", text:"Hoge belang-scores (oranje/bruin) betekenen meer strategische urgentie. Dit is niet per se slecht, maar vraagt dat de risico- en mitigatiescores voor die applicatie goed op orde zijn." },
               ].map(t => (
                 <div key={t.label} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
                   <p style={{ fontSize:9, fontWeight:700, color:"#162D6E", marginBottom:2 }}>{t.label}</p>
@@ -4302,7 +4313,7 @@ ${(function(){
             <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#E91E8C", color:"#fff", borderRadius:3 }}>DICTU</span>
-                <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Autonomiecheck — spindiagram per applicatie</h3>
+                <h3 className="font-bold" style={{ color:"#162D6E", fontSize:14 }}>Autonomiecheck: spindiagram per applicatie</h3>
               </div>
               <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                 Het spindiagram toont de vier DICTU-dimensies per applicatie op een schaal van 1 tot 5. Alle assen hebben dezelfde richting: hoe groter de gekleurde vorm, hoe soeverein de applicatie scoort.
@@ -4321,7 +4332,7 @@ ${(function(){
                   { key:"4.1", label:"EU-infrastructuur", uitleg:"Bevinden infrastructuur en control plane zich volledig in de EU?" },
                 ].map(d => (
                   <div key={d.key} className="rounded p-2" style={{ background:"#E6F7F7", border:"1px solid #26B5AE44" }}>
-                    <p style={{ fontSize:9, fontWeight:700, color:"#0C6B68", marginBottom:2 }}>{d.key} — {d.label}</p>
+                    <p style={{ fontSize:9, fontWeight:700, color:"#0C6B68", marginBottom:2 }}>{d.key}: {d.label}</p>
                     <p style={{ fontSize:9, color:"#374151", lineHeight:1.4 }}>{d.uitleg}</p>
                   </div>
                 ))}
@@ -4422,7 +4433,7 @@ ${(function(){
                 <div className="flex items-center gap-2">
                   <span style={{ fontSize:16 }}>🔒</span>
                   <span className="text-xs font-semibold" style={{ color:"#92400e" }}>
-                    Alleen-lezen — scores wijzigen kan via Beheer
+                    Alleen-lezen: scores wijzigen kan via Beheer
                   </span>
                 </div>
                 <button onClick={() => setView("admin")}
@@ -4456,7 +4467,7 @@ ${(function(){
             {step === 0 && <>
               <div className="rounded p-3 mb-4 text-xs"
                 style={{ background:"#F8F9FB", border:"1px solid #D0E4F7", color:"#1E3A8A" }}>
-                <strong>DAAF Framework — Quick Scan</strong> — Niveau 1 (Risico): score 1 = weinig risico, score 5 = hoog risico.
+                <strong>DAAF Framework: Quick Scan</strong>. Niveau 1 (Risico): score 1 = weinig risico, score 5 = hoog risico.
                 Niveau 2 (Mitigatie): score 1 = slechte mitigatie, score 5 = sterke mitigatie (goed).
                 Niveau 3 (Belang): score 1 = laag belang, score 5 = hoog belang (urgent).
               </div>
@@ -4473,7 +4484,7 @@ ${(function(){
                 const uniqueDims = [...new Set(dims.map(d => d.dimName))];
                 return (
                   <div key={lv} className="mb-5">
-                    {/* Niveau header — stijl conform framework */}
+                    {/* Niveau header: stijl conform framework */}
                     <div className="rounded px-3 py-2 mb-3 flex items-center justify-between"
                       style={{ background: bgColors[lv] }}>
                       <span className="text-white font-semibold text-sm">Niveau {lv === "Risico" ? "1" : lv === "Mitigatie" ? "2" : "3"}: {lv === "Risico" ? "Risico-exposure" : lv === "Mitigatie" ? "Mitigatie-capaciteit" : "Strategisch belang"}</span>
@@ -4521,7 +4532,7 @@ ${(function(){
             {step === 1 && <>
               <div className="rounded p-3 mb-4 text-xs"
                 style={{ background:"#E6F7F7", border:"1px solid #26B5AE", color:"#0C6B68" }}>
-                <strong>DICTU Autonomiecheck</strong> — Geselecteerde DICTU-vragen voor digitale autonomie.
+                <strong>DICTU Autonomiecheck</strong>: Geselecteerde DICTU-vragen voor digitale autonomie.
                 Score 1 = minst soeverein · Score 5 = maximaal soeverein (hoger is beter).
               </div>
               {["Data & AI","EU-Infrastructuur"].map(cat => (
@@ -4830,14 +4841,14 @@ ${(function(){
             <div className="rounded p-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-bold px-2 py-0.5" style={{ background:"#1E3A8A", color:"#fff", borderRadius:3 }}>DAAF</span>
-                <p className="text-sm font-semibold" style={{ color:"#162D6E" }}>Dimensieprofiel — vergelijking</p>
+                <p className="text-sm font-semibold" style={{ color:"#162D6E" }}>Dimensieprofiel: vergelijking</p>
               </div>
               <p className="text-xs mb-2" style={{ color:"#9ca3af" }}>Gewogen scores 1–5 per dimensie. Kleurovergang toont de richting: groen = gewenste kant. Hover voor details.</p>
               <DivergingChart apps={visibleCompare} compact={true} useSecondaryName={useSecondaryName} />
               <div className="grid grid-cols-1 gap-1 mt-2">
                 {[
-                  "Risico-assen (A, B): groen links — punt dicht bij 1 is goed.",
-                  "Mitigatie-assen (C, D, E): groen rechts — punt dicht bij 5 is goed.",
+                  "Risico-assen (A, B): groen links, punt dicht bij 1 is goed.",
+                  "Mitigatie-assen (C, D, E): groen rechts, punt dicht bij 5 is goed.",
                   "Belang-assen (F, G, H): hoge score = meer urgentie, maar vraagt ook sterkere mitigatie.",
                 ].map((t,i) => <p key={i} style={{ fontSize:9, color:"#9ca3af" }}>• {t}</p>)}
               </div>
@@ -5269,7 +5280,7 @@ ${(function(){
                           {allQ.filter(q => (a.notes || {})[q.key]).map(q => (
                             <div key={q.key} className="rounded px-3 py-2"
                               style={{ background:"#f0fdf4", border:"1px solid #86efac" }}>
-                              <span className="text-xs font-semibold" style={{ color:"#162D6E" }}>{q.key} — {q.name}: </span>
+                              <span className="text-xs font-semibold" style={{ color:"#162D6E" }}>{q.key} · {q.name}: </span>
                               <span className="text-xs" style={{ color:"#374151" }}>{adaptNote((a.notes || {})[q.key], a)}</span>
                             </div>
                           ))}
@@ -5283,7 +5294,7 @@ ${(function(){
             </>
           )}
 
-          {/* Danger zone verwijderd — data wissen niet beschikbaar via de interface */}
+          {/* Danger zone verwijderd: data wissen niet beschikbaar via de interface */}
 
           {/* Bevestigingsmodal alles wissen */}
           {showDeleteAll && (
@@ -5332,7 +5343,7 @@ ${(function(){
                     />
                     {deleteConfirmText.length > 0 && deleteConfirmText !== "VERWIJDER ALLES" && (
                       <p style={{ fontSize:10, color:"#dc2626", marginTop:4 }}>
-                        Tekst klopt niet — typ exact: VERWIJDER ALLES
+                        Tekst klopt niet, typ exact: VERWIJDER ALLES
                       </p>
                     )}
                     {deleteConfirmText === "VERWIJDER ALLES" && (
@@ -5590,11 +5601,11 @@ ${(function(){
         rol: "Hosting van de webapplicatie en opslag van assessment-data via Netlify Blobs",
         type: "Hosting & opslag",
         jurisdictie: "Verenigde Staten",
-        vestiging: "San Francisco, CA — VS (dochter van Netlify Inc.)",
+        vestiging: "San Francisco, CA, VS (dochter van Netlify Inc.)",
         daafA1: 4,
         daafA1toe: "Netlify is een Amerikaans bedrijf. De CLOUD Act is van toepassing. Netlify valt onder US-jurisdictie. Standaard contractuele clausules (SCCs) zijn van toepassing voor EU-gebruikers.",
         daafA3: 3,
-        daafA3toe: "Applicatie wordt gehost op Netlify CDN-infrastructuur. Netlify Blobs (opslag van assessment-data) staat op AWS S3 in de regio us-east-1 (VS). Data verlaat de EU. Dit is een bewuste tijdelijke keuze voor het prototype.",
+        daafA3toe: "Applicatie wordt gehost op Netlify CDN-infrastructuur. Netlify Blobs (opslag van assessment-data) staat op AWS S3 in de regio us-east-2 (VS). Data verlaat de EU. Dit is een bewuste tijdelijke keuze voor het prototype.",
         beveiliging: "HTTPS via Netlify CDN. API-functies beveiligd met token-authenticatie. Data in Netlify Blobs is versleuteld at rest. Toegang uitsluitend via token.",
         opmerking: "Dit is de huidige situatie voor het prototype. Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding. Na migratie verbetert de autonomiescore naar 1/5 op beide dimensies.",
         url: "https://www.netlify.com/gdpr-ccpa-compliance/",
@@ -5604,7 +5615,7 @@ ${(function(){
         rol: "AI-model voor tekstverwerking (niet actief in deze app)",
         type: "AI-dienst",
         jurisdictie: "Verenigde Staten",
-        vestiging: "San Francisco, CA — VS",
+        vestiging: "San Francisco, CA, VS",
         daafA1: 4,
         daafA1toe: "Anthropic is een Amerikaans bedrijf (PBC). Geen EU-adequaatheidsbesluit specifiek voor de API. Standaard contractuele clausules (SCCs) van toepassing. CLOUD Act is van toepassing op data verwerkt via de API.",
         daafA3: 4,
@@ -5618,7 +5629,7 @@ ${(function(){
         rol: "Versiebeheer en broncode-opslag",
         type: "Broncode",
         jurisdictie: "Verenigde Staten",
-        vestiging: "San Francisco, CA — VS (dochter van Microsoft)",
+        vestiging: "San Francisco, CA, VS (dochter van Microsoft)",
         daafA1: 3,
         daafA1toe: "GitHub is een dochteronderneming van Microsoft (VS). EU-VS Data Privacy Framework van toepassing. CLOUD Act-risico aanwezig maar beperkt: de broncode bevat geen persoonsgegevens van gebruikers.",
         daafA3: 3,
@@ -5631,8 +5642,8 @@ ${(function(){
         naam: "React / Vite (open source)",
         rol: "Frontend-framework en buildsysteem",
         type: "Open source software",
-        jurisdictie: "Geen jurisdictie — open source licentie",
-        vestiging: "React: Meta Platforms (VS) — open source onder MIT-licentie. Vite: community open source (MIT).",
+        jurisdictie: "Geen jurisdictie: open source licentie",
+        vestiging: "React: Meta Platforms (VS), open source onder MIT-licentie. Vite: community open source (MIT).",
         daafA1: 1,
         daafA1toe: "Open source software zonder leveranciersrelatie. Geen data-uitwisseling met de ontwikkelende organisatie. Code is publiek verifieerbaar.",
         daafA3: 1,
@@ -5652,11 +5663,11 @@ ${(function(){
     };
     const daafLabel = (s) => {
       if (!s) return "–";
-      if (s <= 1) return "1 — EU/EER volledig";
-      if (s <= 2) return "2 — EU/EER beperkt";
-      if (s === 3) return "3 — Adequaat + risico";
-      if (s === 4) return "4 — SCCs, geen adequaat";
-      return "5 — Geen waarborgen";
+      if (s <= 1) return "1: EU/EER volledig";
+      if (s <= 2) return "2: EU/EER beperkt";
+      if (s === 3) return "3: Adequaat + risico";
+      if (s === 4) return "4: SCCs, geen adequaat";
+      return "5: Geen waarborgen";
     };
 
     const typeKleur = { "Hosting & opslag":"#1E3A8A", "AI-dienst":"#6d28d9", "Broncode":"#374151", "Open source software":"#15803d" };
@@ -5731,7 +5742,7 @@ ${(function(){
 
                     {/* DAAF A1 */}
                     <div className="rounded p-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
-                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A1 — Jurisdictie leverancier</p>
+                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A1: Jurisdictie leverancier</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA1) }}>{s.daafA1}/5</span>
                         <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: daafKleur(s.daafA1) + "18", color: daafKleur(s.daafA1) }}>
@@ -5743,7 +5754,7 @@ ${(function(){
 
                     {/* DAAF A3 */}
                     <div className="rounded p-3" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
-                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A3 — Hosting & datalocatie</p>
+                      <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color:"#9ca3af" }}>DAAF A3: Hosting & datalocatie</p>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-sm font-bold" style={{ color: daafKleur(s.daafA3) }}>{s.daafA3}/5</span>
                         <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ background: daafKleur(s.daafA3) + "18", color: daafKleur(s.daafA3) }}>
@@ -5772,13 +5783,13 @@ ${(function(){
 
           {/* Gegevensstroomoverzicht */}
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-3" style={{ color:"#162D6E" }}>Gegevensstroom — wat gaat waarheen</h3>
+            <h3 className="font-bold text-sm mb-3" style={{ color:"#162D6E" }}>Gegevensstroom: wat gaat waarheen</h3>
             <div className="space-y-2">
               {[
                 { van:"Gebruiker (browser)", naar:"Netlify Blobs (AWS S3, VS)", data:"Assessment-scores, applicatienamen, motivaties", actie:"Opslaan bij elke wijziging", kleur:"#ca8a04" },
                 { van:"Netlify Blobs (AWS S3, VS)", naar:"Gebruiker (browser)", data:"Dezelfde data terug bij laden van de pagina", actie:"Laden bij paginabezoek", kleur:"#ca8a04" },
                 { van:"Gebruiker (browser)", naar:"Lokale download", data:"Excel-exportbestand, PDF-rapport", actie:"Op verzoek van gebruiker", kleur:"#16a34a" },
-                { van:"Broncode (GitHub, VS)", naar:"Netlify CDN (VS)", data:"Applicatiecode — geen gebruikersdata", actie:"Bij elke git push (deploy)", kleur:"#ca8a04" },
+                { van:"Broncode (GitHub, VS)", naar:"Netlify CDN (VS)", data:"Applicatiecode: geen gebruikersdata", actie:"Bij elke git push (deploy)", kleur:"#ca8a04" },
                 { van:"Claude API (Anthropic, VS)", naar:"–", data:"Niet actief tijdens gebruik", actie:"Alleen gebruikt bij ontwikkeling", kleur:"#9ca3af" },
               ].map((r, i) => (
                 <div key={i} className="flex items-start gap-3 rounded p-2.5" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
@@ -5846,7 +5857,7 @@ ${(function(){
 
             {/* Bekende beperkingen */}
             <div className="rounded p-3 mb-3" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
-              <p className="text-xs font-bold mb-2" style={{ color:"#92400e" }}>⚠️ Bekende beperkingen — transparant benoemd</p>
+              <p className="text-xs font-bold mb-2" style={{ color:"#92400e" }}>⚠️ Bekende beperkingen: transparant benoemd</p>
               <div className="grid grid-cols-2 gap-2">
                 {[
                   { tekst:"Het inlogwachtwoord staat als platte tekst in de JavaScript-broncode die naar de browser wordt gestuurd. Iedereen die de browser-devtools opent kan het wachtwoord inzien. De server-side tokencheck (v1.7+) beperkt de schade, maar vervangt geen echte authenticatie." },
@@ -5867,9 +5878,9 @@ ${(function(){
               <p className="text-xs font-bold mb-2 uppercase tracking-wide" style={{ color:"#9ca3af" }}>Advies bij doorontwikkeling</p>
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { n:"1", titel:"Niveau 1 — In voorbereiding", tekst:"Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding. Na migratie draait het instrument volledig op eigen hardware onder Nederlandse jurisdictie.", kleur:"#ca8a04", bg:"#fef9c3" },
-                  { n:"2", titel:"Niveau 2 — Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1E3A8A", bg:"#EFF6FF" },
-                  { n:"3", titel:"Niveau 3 — Bij verdere professionalisering", tekst:"Voeg applicatieniveau-encryptie toe aan de opgeslagen data, integreer logging en audit trail, en overweeg een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#6d28d9", bg:"#faf5ff" },
+                  { n:"1", titel:"Niveau 1: In voorbereiding", tekst:"Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding. Na migratie draait het instrument volledig op eigen hardware onder Nederlandse jurisdictie.", kleur:"#ca8a04", bg:"#fef9c3" },
+                  { n:"2", titel:"Niveau 2: Aanbevolen", tekst:"Vervang het plaintext-wachtwoord door SURFconext SSO. Dan is er echte authenticatie met gebruikersaccounts, geen wachtwoord in de broncode, en sessie-beheer aan de serverkant.", kleur:"#1E3A8A", bg:"#EFF6FF" },
+                  { n:"3", titel:"Niveau 3: Bij verdere professionalisering", tekst:"Voeg applicatieniveau-encryptie toe aan de opgeslagen data, integreer logging en audit trail, en overweeg een eigen Git-omgeving binnen de NHL Stenden ICT-infrastructuur.", kleur:"#6d28d9", bg:"#faf5ff" },
                 ].map(k => (
                   <div key={k.n} className="rounded p-3" style={{ background:k.bg, border:`1px solid ${k.kleur}44` }}>
                     <div className="flex items-center gap-2 mb-1.5">
@@ -5886,9 +5897,9 @@ ${(function(){
 
           {/* Conclusie autonomie */}
           <div className="rounded p-4 mb-5" style={{ background:"#fff", border:"2px solid #E87722" }}>
-            <h3 className="font-bold text-sm mb-2" style={{ color:"#162D6E" }}>Conclusie — autonomierisico van dit instrument</h3>
+            <h3 className="font-bold text-sm mb-2" style={{ color:"#162D6E" }}>Conclusie: autonomierisico van dit instrument</h3>
             <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
-              Dit instrument is een werkend prototype dat momenteel draait op Netlify (VS) met Netlify Blobs voor dataopslag (AWS S3, us-east-1).
+              Dit instrument is een werkend prototype dat momenteel draait op Netlify (VS) met Netlify Blobs voor dataopslag (AWS S3, us-east-2).
               Dit is een bewuste tijdelijke keuze voor de prototypefase. Migratie naar eigen NHL Stenden-infrastructuur (NVIDIA Spark, Leeuwarden) is in voorbereiding.
               Na migratie valt de applicatie volledig onder Nederlandse jurisdictie zonder afhankelijkheid van externe cloudpartijen.
             </p>
@@ -6239,7 +6250,7 @@ ${(function(){
 
           {/* ── Rij 3: Top 3 aandachtspunten met concrete acties ── */}
           <div className="rounded p-4 mb-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
-            <h3 className="font-bold text-sm mb-1" style={{ color:"#162D6E" }}>Top 3 aandachtspunten — inclusief concrete acties</h3>
+            <h3 className="font-bold text-sm mb-1" style={{ color:"#162D6E" }}>Top 3 aandachtspunten: inclusief concrete acties</h3>
             <p className="text-xs mb-4" style={{ color:"#9ca3af" }}>
               Geselecteerd op combinatie van laagste autonomiescore en hoogste strategisch belang. Per applicatie drie concrete vervolgstappen.
             </p>
@@ -6358,7 +6369,7 @@ ${(function(){
       <div className="h-full overflow-y-auto" style={{ background:"#F8F9FB" }}>
         <div className="p-5 max-w-4xl mx-auto">
 
-          {/* Hero — altijd zichtbaar */}
+          {/* Hero: altijd zichtbaar */}
           <div className="rounded p-5 mb-4 text-white" style={{ background:"linear-gradient(135deg, #0C2340 0%, #1A56A0 100%)" }}>
             <div className="flex items-center gap-3 mb-3">
               <div className="px-3 py-2 border-2 border-white" style={{ borderRadius:2 }}>
@@ -6425,7 +6436,7 @@ ${(function(){
                   <div>
                     <p className="text-sm font-bold mb-1" style={{ color:"#92400e" }}>Status: Prototype</p>
                     <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
-                      Dit instrument is een <strong>werkend prototype</strong> — volledig functioneel en in gebruik, maar nog niet definitief ingericht voor productie.
+                      Dit instrument is een <strong>werkend prototype</strong>, volledig functioneel en in gebruik, maar nog niet definitief ingericht voor productie.
                       Het is ontwikkeld in mei–juni 2026 als onderdeel van de Ambassadeurslijn Digitale Autonomie van het Programma Digitale Samenhang.
                       De huidige fase is gericht op het vullen van de database met applicaties en het valideren van de methodiek.
                     </p>
@@ -6441,11 +6452,11 @@ ${(function(){
                     <p className="text-sm font-bold mb-1" style={{ color:"#162D6E" }}>Draait op eigen NHL Stenden-infrastructuur</p>
                     <p className="text-xs leading-relaxed mb-2" style={{ color:"#374151" }}>
                       Het instrument draait op eigen NHL Stenden-serverinfrastructuur, beheerd door het team Infrastructuur van NHL Stenden (DLWO).
-                      Het prototype draait momenteel op <strong>Netlify</strong> met Netlify Blobs voor dataopslag. Migratie naar de eigen NHL Stenden NVIDIA Spark infrastructuur in Leeuwarden is in voorbereiding. Na migratie staat de applicatie volledig binnen de ICT-omgeving van NHL Stenden — onder Nederlands recht, zonder afhankelijkheid van externe cloudpartijen.
+                      Het prototype draait momenteel op <strong>Netlify</strong> met Netlify Blobs voor dataopslag. Migratie naar de eigen NHL Stenden NVIDIA Spark infrastructuur in Leeuwarden is in voorbereiding. Na migratie staat de applicatie volledig binnen de ICT-omgeving van NHL Stenden, onder Nederlands recht, zonder afhankelijkheid van externe cloudpartijen.
                     </p>
                     <p className="text-xs leading-relaxed" style={{ color:"#6b7280" }}>
                       Dit maakt het product intern consistent: een instrument dat digitale autonomie meet,
-                      draait zelf maximaal soeverein — score 1 op alle DAAF en DICTU-dimensies.
+                      draait zelf maximaal soeverein: score 1 op alle DAAF en DICTU-dimensies.
                     </p>
                   </div>
                 </div>
@@ -6461,7 +6472,7 @@ ${(function(){
                       Dit instrument is meer dan een tool voor digitale autonomie. Het laat zien hoe je beleid en de toepassing daarvan
                       kunt ontwerpen, verwerken en gebruiken in een hedendaagse manier die aansluit bij de eigen organisatie.
                       Ontwikkeld in nauwe samenwerking met een AI-assistent, in enkele weken gebouwd van nul tot werkend product,
-                      en direct inzetbaar voor het team — zonder externe leverancier, zonder IT-ticket, zonder lang traject.
+                      en direct inzetbaar voor het team, zonder externe leverancier, zonder IT-ticket, zonder lang traject.
                     </p>
                     <p className="text-xs leading-relaxed mt-2" style={{ color:"#6b7280" }}>
                       Dit is de praktijk van digitale geletterdheid: technologie begrijpen, zelf regie voeren, en instrumenten bouwen
@@ -6506,7 +6517,7 @@ ${(function(){
                   <div className="rounded p-2 mb-2" style={{ background:"#fffbeb", border:"1px solid #fde68a" }}>
                     <p className="text-xs font-semibold mb-0.5" style={{ color:"#92400e" }}>🧪 Quickscan vs. volledige scan</p>
                     <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
-                      Dit prototype gebruikt de <strong>DAAF Quickscan</strong> — 8 kernindicatoren (één per dimensie) voor een snelle indicatie.
+                      Dit prototype gebruikt de <strong>DAAF Quickscan</strong>: 8 kernindicatoren (één per dimensie) voor een snelle indicatie.
                       De volledige DAAF-scan beoordeelt <strong>22 indicatoren</strong> voor een diepgaandere analyse.
                       In een vervolg op dit prototype wordt de uitgebreide scan geïmplementeerd voor een completer en robuuster beeld.
                     </p>
@@ -6553,7 +6564,7 @@ ${(function(){
                 <p className="text-sm font-bold mb-2" style={{ color:"#162D6E" }}>📚 Wetenschappelijke en beleidsmatige bronnen</p>
                 <p className="text-xs leading-relaxed mb-3" style={{ color:"#374151" }}>
                   Dit instrument is gebouwd op twee erkende en publiek beschikbare normenkaders. Ze vormen de inhoudelijke ruggengraat
-                  van alles wat je in deze tool ziet — van de score-knoppen tot de PDF-rapporten. Zonder deze frameworks zou dit instrument
+                  van alles wat je in deze tool ziet, van de score-knoppen tot de PDF-rapporten. Zonder deze frameworks zou dit instrument
                   niet hebben bestaan.
                 </p>
                 <div className="space-y-3">
@@ -6561,12 +6572,12 @@ ${(function(){
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="text-xs font-bold mb-1" style={{ color:"#1E3A8A" }}>
-                          Digital Autonomy Assessment Framework (DAAF) — Universiteit Utrecht
+                          Digital Autonomy Assessment Framework (DAAF): Universiteit Utrecht
                         </p>
                         <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                           Ontwikkeld door Tim van Neerbos (lead enterprise architect) en prof. Albert Meijer (Bestuurskunde) aan de Universiteit Utrecht.
                           Het framework meet 22 indicatoren verdeeld over 8 dimensies en 3 niveaus, en is gratis beschikbaar voor alle organisaties.
-                          Dit prototype gebruikt de quickscan-variant — de volledige scan wordt in een vervolgfase geïmplementeerd.
+                          Dit prototype gebruikt de quickscan-variant, de volledige scan wordt in een vervolgfase geïmplementeerd.
                         </p>
                       </div>
                       <a href="https://www.uu.nl/organisatie/digitale-autonomie/tools" target="_blank" rel="noopener noreferrer"
@@ -6580,11 +6591,11 @@ ${(function(){
                     <div className="flex items-start justify-between gap-2">
                       <div>
                         <p className="text-xs font-bold mb-1" style={{ color:"#E91E8C" }}>
-                          Toetsingsinstrument Soevereiniteit Clouddiensten — DICTU (Ministerie van EZK)
+                          Toetsingsinstrument Soevereiniteit Clouddiensten: DICTU (Ministerie van EZK)
                         </p>
                         <p className="text-xs leading-relaxed" style={{ color:"#374151" }}>
                           Gepubliceerd door de Dienst ICT Uitvoering (DICTU) van het Ministerie van Economische Zaken en Klimaat in 2026.
-                          Het instrument beoordeelt clouddiensten op vijf dimensies: juridisch, data & AI, technologie, operationeel en mens —
+                          Het instrument beoordeelt clouddiensten op vijf dimensies: juridisch, data & AI, technologie, operationeel en mens,
                           elk met vijf oplopende autonomieniveaus. Combineert elementen uit het EuroStack-initiatief en het
                           Cloud Sovereignty Framework van de Europese Commissie.
                         </p>
@@ -6607,10 +6618,10 @@ ${(function(){
                     <p className="text-xs font-semibold mb-2" style={{ color:"#1E3A8A" }}>Programma Digitale Samenhang</p>
                     <div className="space-y-1.5">
                       {[
-                        { naam:"E. van Gorkum",  rol:"Kwartiermaker Digitale Samenhang — initiatiefnemer en ontwikkelaar" },
-                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Autonomie — initiatiefnemer" },
-                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Autonomie — initiatiefnemer en ontwikkelaar" },
-                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Autonomie — initiatiefnemer en ontwikkelaar" },
+                        { naam:"E. van Gorkum",  rol:"Kwartiermaker Digitale Samenhang: initiatiefnemer en ontwikkelaar" },
+                        { naam:"J. Haije",        rol:"Ambassadeur Digitale Autonomie: initiatiefnemer" },
+                        { naam:"E. Rolf",         rol:"Ambassadeur Digitale Autonomie: initiatiefnemer en ontwikkelaar" },
+                        { naam:"J. Blom",         rol:"Ambassadeur Digitale Autonomie: initiatiefnemer en ontwikkelaar" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
                           <span className="font-semibold flex-shrink-0" style={{ color:"#162D6E", minWidth:120 }}>{p.naam}</span>
@@ -6620,11 +6631,11 @@ ${(function(){
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold mb-2" style={{ color:"#E91E8C" }}>Team Infrastructuur (DLWO) — server & migratie</p>
+                    <p className="text-xs font-semibold mb-2" style={{ color:"#E91E8C" }}>Team Infrastructuur (DLWO): server & migratie</p>
                     <div className="space-y-1.5">
                       {[
-                        { naam:"Jeffrey Klein",   rol:"Infrastructuur engineer — migratie naar DGX Spark" },
-                        { naam:"Dolf Keimpema",   rol:"Infrastructuur engineer — migratie naar DGX Spark" },
+                        { naam:"Jeffrey Klein",   rol:"Infrastructuur engineer: migratie naar DGX Spark" },
+                        { naam:"Dolf Keimpema",   rol:"Infrastructuur engineer: migratie naar DGX Spark" },
                       ].map(p => (
                         <div key={p.naam} className="flex gap-2 text-xs">
                           <span className="font-semibold flex-shrink-0" style={{ color:"#162D6E", minWidth:120 }}>{p.naam}</span>
@@ -6636,13 +6647,13 @@ ${(function(){
                     <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
                       Met dank aan de ambassadeurs voor hun scherpte, betrokkenheid en de inspiratie
                       die zij dagelijks meebrengen. Jullie vragen, inzichten en richting hebben dit
-                      instrument mede gemaakt tot wat het is — en zijn de drijvende kracht achter
+                      instrument mede gemaakt tot wat het is, en zijn de drijvende kracht achter
                       de stappen die NHL Stenden zet richting echte digitale autonomie.
                     </p>
                     <p className="text-xs font-semibold mt-1 mb-2" style={{ color:"#6b7280" }}>Ontwikkeling</p>
                     <div className="flex gap-2 text-xs">
                       <span className="font-semibold flex-shrink-0" style={{ color:"#162D6E", minWidth:120 }}>Claude (Anthropic)</span>
-                      <span style={{ color:"#6b7280" }}>AI-ontwikkelassistent — volledige applicatiebouw</span>
+                      <span style={{ color:"#6b7280" }}>AI-ontwikkelassistent: volledige applicatiebouw</span>
                     </div>
                   </div>
                 </div>
@@ -6663,13 +6674,13 @@ ${(function(){
                 {[
                   { n:"1", icon:"➕", title:"Applicatie toevoegen",
                     txt:'Klik op "+ Applicatie toevoegen" in het dashboard of het tabblad Applicaties. Vul naam, leverancier, categorie en eigenaar in. De applicatie wordt direct opgeslagen en verschijnt in het overzicht.',
-                    tip:"Begin met de applicaties die je het meest kritisch acht — je kunt er altijd meer toevoegen." },
+                    tip:"Begin met de applicaties die je het meest kritisch acht. Je kunt er altijd meer toevoegen." },
                   { n:"2", icon:"📋", title:"DAAF Quick Scan invullen",
                     txt:'Open de applicatie en ga naar Stap 1. Je ziet 8 vragen verdeeld over drie niveaus: Risico, Mitigatie en Belang. Klik op de score (1–5) die het best past. Per vraag staat een uitgebreide toelichting en omschrijving per score.',
-                    tip:"Voeg een motivatie toe bij elke vraag — dat maakt de score veel waardevoller voor toekomstige reviews." },
+                    tip:"Voeg een motivatie toe bij elke vraag. Dat maakt de score veel waardevoller voor toekomstige reviews." },
                   { n:"3", icon:"🔍", title:"DICTU Autonomiecheck invullen",
                     txt:'Ga naar Stap 2 van het assessment. Vier vragen over dataresidency, technische beveiliging, juridische bescherming en EU-infrastructuur. Scores worden direct zichtbaar in de kleurenbalk op het dashboard.',
-                    tip:"Voeg per vraag een motivatietekst toe — die wordt meegenomen in de Excel en PDF export." },
+                    tip:"Voeg per vraag een motivatietekst toe, die wordt meegenomen in de Excel en PDF export." },
                   { n:"4", icon:"📊", title:"Dashboard en vergelijking lezen",
                     txt:'Na het invullen van meerdere applicaties toont het dashboard het volledige portfolio. Het autonomiekwadrant laat zien welke applicaties urgente aandacht vragen. Het tabblad Vergelijking plaatst alle applicaties naast elkaar.',
                     tip:"Gebruik de filterknopjes op het Dashboard om applicaties te verbergen en zo de vergelijking scherper te maken." },
@@ -6698,7 +6709,7 @@ ${(function(){
                   <p className="text-xs leading-relaxed mb-2" style={{ color:"#6b7280" }}>
                     Klik op "Exporteer Excel" op het Dashboard. Het bestand bevat vijf tabbladen:
                   </p>
-                  {["Overzicht — alle scores per applicatie", "DAAF scores — per indicator inclusief motivatie", "DICTU scores — per vraag inclusief motivatie", "Vragenlijst — alle vragen met normen", "Motivaties — volledig overzicht toelichtingen"].map(t => (
+                  {["Overzicht: alle scores per applicatie", "DAAF scores: per indicator inclusief motivatie", "DICTU scores: per vraag inclusief motivatie", "Vragenlijst: alle vragen met normen", "Motivaties: volledig overzicht toelichtingen"].map(t => (
                     <div key={t} className="flex gap-2 text-xs mb-1">
                       <span style={{ color:"#E91E8C", fontWeight:700 }}>→</span>
                       <span style={{ color:"#374151" }}>{t}</span>
@@ -6734,14 +6745,14 @@ ${(function(){
                 </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded p-3" style={{ background:"#dcfce7", border:"1px solid #86efac" }}>
-                    <p className="text-xs font-bold mb-1" style={{ color:"#15803d" }}>✓ Hoge score (7+) — geen acute actie</p>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#15803d" }}>✓ Hoge score (7+): geen acute actie</p>
                     <p className="text-xs" style={{ color:"#166534" }}>
                       Risico's zijn goed gemitigeerd (alternatieven beschikbaar, sterke contracten, kennis aanwezig),
                       óf de applicatie heeft weinig strategisch belang. Monitor periodiek.
                     </p>
                   </div>
                   <div className="rounded p-3" style={{ background:"#fee2e2", border:"1px solid #fca5a5" }}>
-                    <p className="text-xs font-bold mb-1" style={{ color:"#b91c1c" }}>✗ Lage score (&lt;5) — actie vereist</p>
+                    <p className="text-xs font-bold mb-1" style={{ color:"#b91c1c" }}>✗ Lage score (&lt;5): actie vereist</p>
                     <p className="text-xs" style={{ color:"#7f1d1d" }}>
                       Combinatie van hoog risico, zwakke mitigatie en/of hoog belang.
                       Kies: <strong>migreren</strong>, <strong>mitigeren</strong> of <strong>bewust accepteren</strong> met besluitvorming.
@@ -6799,9 +6810,9 @@ ${(function(){
                   <p className="text-xs font-bold mb-2" style={{ color:"#162D6E" }}>Patronen om op te letten</p>
                   <div className="grid grid-cols-2 gap-2">
                     {[
-                      { titel:"Punten dicht bij elkaar", tekst:"Vergelijkbaar profiel op die dimensie — gemeenschappelijk risico voor meerdere applicaties." },
-                      { titel:"Punten ver uit elkaar",   tekst:"Fundamenteel verschil tussen applicaties — prioriteer de applicatie met het slechtste punt." },
-                      { titel:"Risico hoog + mitigatie laag", tekst:"Hoog risico gecombineerd met lage weerbaarheid — dit vraagt directe actie." },
+                      { titel:"Punten dicht bij elkaar", tekst:"Vergelijkbaar profiel op die dimensie, gemeenschappelijk risico voor meerdere applicaties." },
+                      { titel:"Punten ver uit elkaar",   tekst:"Fundamenteel verschil tussen applicaties: prioriteer de applicatie met het slechtste punt." },
+                      { titel:"Risico hoog + mitigatie laag", tekst:"Hoog risico gecombineerd met lage weerbaarheid. Dit vraagt directe actie." },
                       { titel:"Belang hoog + risico zwak",    tekst:"Hoge belang-score maakt een slechte risico- of mitigatiescore urgenter." },
                     ].map(t => (
                       <div key={t.titel} className="rounded p-2" style={{ background:"#f8fafc", border:"1px solid #e5e7eb" }}>
@@ -6851,7 +6862,7 @@ ${(function(){
                 </Tip>
                 <Tip label="👥 Meerdere beoordelaars" color="#E91E8C" bg="#E6F7F7">
                   Laat beoordelaars het assessment onafhankelijk invullen en exporteer afzonderlijk naar Excel.
-                  Bespreek grote afwijkingen in het team — die leveren vaak de meest waardevolle inzichten op.
+                  Bespreek grote afwijkingen in het team, die leveren vaak de meest waardevolle inzichten op.
                 </Tip>
                 <Tip label="📋 Welke vragen gebruik je?" color="#E91E8C" bg="#fff8e1">
                   Deze tool gebruikt een selectie: de DAAF Quick Scan (8 kernindicatoren, één per dimensie) en
@@ -6938,7 +6949,7 @@ ${(function(){
             </Section>
           </>}
 
-          {/* Footer — altijd zichtbaar */}
+          {/* Footer: altijd zichtbaar */}
           <div className="rounded p-3 text-center mt-4" style={{ background:"#fff", border:"1px solid #D0E4F7" }}>
             <p className="text-xs" style={{ color:"#9ca3af" }}>
               NHL Stenden Hogeschool · Project Digitale Autonomie · Ambassadeurslijn Digitale Autonomie
@@ -6961,7 +6972,7 @@ ${(function(){
 
   return (
     <div className="flex flex-col h-screen" style={{ fontFamily:"Inter, system-ui, sans-serif", background:"#F8F9FB" }}>
-      {/* Header — NHL Stenden huisstijl */}
+      {/* Header: NHL Stenden huisstijl */}
       <header className="flex items-center justify-between px-6 flex-shrink-0"
         style={{ background:"linear-gradient(160deg, #0F1E52 0%, #162D6E 40%, #1E3A8A 70%, #2563EB 100%)", minHeight:64 }}>
         {/* Logo + titel */}
@@ -7102,7 +7113,7 @@ ${(function(){
       </div>
 
       {/* Content */}
-      {/* Golf overgang — zelfde als AI-Netwerk */}
+      {/* Golf overgang: zelfde als AI-Netwerk */}
       <div className="flex-shrink-0" style={{ background:"#162D6E", marginBottom:-2 }}>
         <svg viewBox="0 0 1440 40" fill="none" preserveAspectRatio="none"
           style={{ width:"100%", height:40, display:"block" }}>
@@ -7122,7 +7133,7 @@ ${(function(){
         {view === "admin"     && Admin()}
       </main>
 
-      {/* ── Changelog modal — root level zodat hij altijd beschikbaar is ── */}
+      {/* ── Changelog modal: root level zodat hij altijd beschikbaar is ── */}
       {showChangelog && (
         <div className="fixed inset-0 flex items-center justify-center z-50"
           style={{ background:"rgba(12,35,64,0.6)" }}
@@ -7145,7 +7156,7 @@ ${(function(){
             </div>
             <div className="overflow-y-auto" style={{ maxHeight:"calc(80vh - 52px)" }}>
               {CHANGELOG.map((v, vi) => (
-                <div key={v.versie} style={{ borderBottom:"1px solid #D0E4F7" }}>
+                <div key={v.versie + "-" + vi} style={{ borderBottom:"1px solid #D0E4F7" }}>
                   <div className="flex items-center gap-3 px-5 py-2.5"
                     style={{ background: vi === 0 ? "#EFF6FF" : "#f8fafc" }}>
                     <span className="text-sm font-bold px-2.5 py-0.5"
@@ -7197,13 +7208,13 @@ ${(function(){
               <div className="rounded p-4" style={{ background:"#F8F9FB", border:"1px solid #D0E4F7" }}>
                 <p className="text-sm font-bold mb-1" style={{ color:"#162D6E" }}>☁️ Herstel vanuit server-backup</p>
                 <p className="text-xs mb-3" style={{ color:"#6b7280" }}>
-                  Automatische backups op de server — elke dag om 10:00, 13:00 en 18:00 aangemaakt, 7 dagen bewaard.
+                  Automatische backups op de server, elke dag om 10:00, 13:00 en 18:00 aangemaakt (in de wintertijd een uur eerder), 7 dagen bewaard.
                 </p>
                 {!backupsLoaded ? (
                   <p className="text-xs italic" style={{ color:"#9ca3af" }}>Backups laden...</p>
                 ) : serverBackups.length === 0 ? (
                   <p className="text-xs italic" style={{ color:"#9ca3af" }}>
-                    Nog geen automatische backups beschikbaar. De eerste wordt aangemaakt om 10:00 of 13:00.
+                    Nog geen automatische backups beschikbaar. De eerste wordt aangemaakt om 10:00 of 13:00 (in de wintertijd 09:00 of 12:00).
                   </p>
                 ) : (
                   <div className="space-y-1.5 max-h-48 overflow-y-auto">

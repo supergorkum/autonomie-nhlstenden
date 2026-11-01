@@ -7,12 +7,13 @@
 //
 // Wat het nakijkt, in deze volgorde:
 // 1. VERSION en de bovenste CHANGELOG-entry in src/App.jsx horen bij elkaar,
-//    het versienummer in package.json loopt mee, de bovenste entry heeft geen
-//    gedachtestreepje, en de onderhoudsregel staat op het inlogscherm;
+//    het versienummer in package.json loopt mee, en de onderhoudsregel staat
+//    op het inlogscherm;
 // 2. bij een push: raakt de push src/, netlify/, public/ of index.html, dan
 //    hoort VERSION in src/App.jsx mee te veranderen;
 // 3. geen codes uit .sleutels/ in een bestand dat git meeneemt, behalve
-//    src/App.jsx, waar de app ze nu eenmaal nodig heeft;
+//    src/App.jsx, waar de app ze nu eenmaal nodig heeft, en nergens een
+//    gedachtestreepje (U+2014), afspraak van Edgar;
 // 4. de bouwmap buiten Google Drive wordt bijgewerkt (scripts/bouwmap.mjs);
 // 5. vite build slaagt, en de onderhoudsregel staat in de bundel.
 //
@@ -46,8 +47,6 @@ function inhoud() {
   // Alleen de nieuwste entry: v2.0 staat er van vroeger twee keer in. Dat is
   // geschiedenis en blijft zo.
   if (entries.slice(1).some((e) => e[1] === entries[0][1])) fouten.push("versie " + entries[0][1] + " staat al eerder in CHANGELOG");
-  const eersteBlok = blok.slice(blok.indexOf("{"), blok.indexOf("\n  },"));
-  if (eersteBlok.includes("—")) fouten.push("de bovenste CHANGELOG-entry bevat een gedachtestreepje; gebruik een komma of een punt");
   const pkg = JSON.parse(lees("package.json")).version;
   if (pkg !== versie + ".0") fouten.push("package.json zegt versie " + pkg + ", hoort " + versie + ".0 te zijn");
   if (!fs.existsSync(path.join(REPO, "src/onderhoudsregel.js"))) fouten.push("src/onderhoudsregel.js ontbreekt");
@@ -77,10 +76,10 @@ function pushInhoud(versie) {
 }
 
 function sleutels() {
-  console.log("3. Geen codes uit .sleutels/ in wat git meeneemt");
+  console.log("3. Geen codes uit .sleutels/ en geen gedachtestreepjes in wat git meeneemt");
   const bestand = path.join(REPO, ".sleutels/autonomie-nhlstenden.env");
-  if (!fs.existsSync(bestand)) return meld(".sleutels/autonomie-nhlstenden.env ontbreekt op deze computer, stap overgeslagen");
-  const waarden = fs.readFileSync(bestand, "utf8").split("\n")
+  if (!fs.existsSync(bestand)) meld(".sleutels/autonomie-nhlstenden.env ontbreekt op deze computer, codes niet nagekeken");
+  const waarden = (fs.existsSync(bestand) ? fs.readFileSync(bestand, "utf8") : "").split("\n")
     .map((r) => r.match(/^[A-Z_]+=(.+)$/))
     .filter(Boolean)
     .map((m) => m[1].trim())
@@ -88,13 +87,18 @@ function sleutels() {
   const bestanden = git("ls-files", "-co", "--exclude-standard", "-z").split("\0").filter(Boolean);
   let gevonden = 0;
   for (const rel of bestanden) {
-    if (rel === "src/App.jsx") continue;
+    if (!/\.(m?jsx?|json|css|html|md|toml|txt|svg)$/i.test(rel) && !rel.includes("git-hooks/")) continue;
     let tekst;
     try {
       tekst = fs.readFileSync(path.join(REPO, rel), "utf8");
     } catch {
       continue;
     }
+    if (tekst.includes("\u2014")) {
+      const regel = tekst.slice(0, tekst.indexOf("\u2014")).split("\n").length;
+      fouten.push(rel + ":" + regel + " bevat een gedachtestreepje. Gebruik een komma, punt of dubbele punt.");
+    }
+    if (rel === "src/App.jsx") continue;
     if (waarden.some((w) => tekst.includes(w))) {
       fouten.push(rel + " bevat een code uit .sleutels/. Haal hem eruit voor de commit.");
       gevonden++;
