@@ -34,7 +34,7 @@ export class ErrorBoundary extends React.Component {
 // ──────────────────────────────────────────────────────────────
 // VERSIE: verhoog met 0.1 bij elke release
 // ──────────────────────────────────────────────────────────────
-const VERSION = "v2.7";
+const VERSION = "v2.8";
 const MAX_VISIBLE = 10; // maximaal zichtbare applicaties in grafieken
 const appColor = (i) => `hsl(${Math.round((i * 137.508) % 360)}, 65%, 42%)`; // unieke kleur per app-index
 
@@ -46,6 +46,13 @@ function dn(app, useSecondary) {
 }
 
 const CHANGELOG = [
+  {
+    versie: "v2.8",
+    datum: "2 november 2026",
+    wijzigingen: [
+      "Toegang loopt nu via de portfolio van A.I. 2 Business. Wie daar is ingelogd en op deze demo klikt, komt direct binnen, zonder apart wachtwoord. Een losse link stuurt eerst naar het inlogscherm van de portfolio",
+    ],
+  },
   {
     versie: "v2.7",
     datum: "1 november 2026",

@@ -75,6 +75,16 @@ Google Drive bewaart het uitvoerbit niet altijd. Is `pre-push` niet uitvoerbaar,
 
 ## Sleutels en wachtwoorden (alleen de plek)
 
+- **Toegang via A.I. 2 Business (sinds v2.8, 2 november 2026).** Het
+  Netlify-sitewachtwoord staat uit. `netlify/edge-functions/a2b-poort.js`
+  bewaakt nu de hele site, ook de serverfuncties onder `/.netlify/functions/`
+  (nagekeken: zonder pas 401). Binnen kom je alleen met een doorgangspas van de
+  portfolio (https://edgar-van-gorkum.netlify.app, ingelogd); anders stuurt het
+  slot naar het inlogscherm van de portfolio. Functies die de eigen site
+  aanroepen, moeten het koekje van de bezoeker meesturen (het koekje heet nu
+  `a2b`). Bron: `portfolio-ai2business/demo-slot/a2b-poort.js` en
+  `ontwerp-doorgang-demos.md`.
+
 - `APP_API_TOKEN`: omgevingsvariabele in Netlify. Alle functions controleren die tegen de header `x-api-token`. Zonder de variabele geven ze een 500.
 - `VITE_API_TOKEN`: staat in Netlify (alle scopes, nagekeken op 1 november 2026, alleen de naam). De build zet hem in de bundel en de app stuurt hem mee. Zonder deze variabele valt de app terug op wat er op het inlogscherm is ingetikt; in de lokale proef is dat zo.
 - **Geen eigen codes meer in de site (v2.7, 1 november 2026).** Het inlogscherm en het toegangsscherm van Beheer blijven staan, maar laten iedereen door, ook met een leeg veld. Reden: de site is een demo en staat in zijn geheel achter het sitewachtwoord van Netlify (`requiresPassword: true`). Besluit van Edgar. Niet terugzetten tenzij Edgar erom vraagt; in `src/App.jsx` staat bij beide plekken een opmerking. De oude codes waren constanten in de code, niet in de opslag; er staat dus niets ouds in Netlify Blobs.

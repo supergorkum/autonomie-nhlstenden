@@ -1,6 +1,6 @@
 {
   "name": "nhl-soevereiniteitsassessment",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Digitale Autonomie-assessment, NHL Stenden Hogeschool",
   "private": true,
   "type": "module",
